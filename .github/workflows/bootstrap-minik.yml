@@ -3,7 +3,7 @@ name: Bootstrap MINIK Beta 66
 on:
   push:
     paths:
-      - '.bootstrap/READY'
+      - 'MINIK_BETA66_FULL.zip'
 
 permissions:
   contents: write
@@ -16,11 +16,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reassemble and unpack project
+      - name: Unpack full MINIK project
         run: |
-          test -f .bootstrap/READY
-          cat .bootstrap/part_*.b64 | base64 -d > /tmp/minik-beta66.tar.gz
-          tar -xzf /tmp/minik-beta66.tar.gz -C .
+          test -f MINIK_BETA66_FULL.zip
+          unzip -oq MINIK_BETA66_FULL.zip -d .
+          rm -f MINIK_BETA66_FULL.zip
           rm -rf .bootstrap
           rm -f .github/workflows/bootstrap-minik.yml
       - name: Commit full project
