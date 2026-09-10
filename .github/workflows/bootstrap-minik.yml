@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'MINIK_BETA66_FULL.zip'
+      - '.bootstrap/RETRY'
 
 permissions:
   contents: write
@@ -22,7 +23,7 @@ jobs:
           unzip -oq MINIK_BETA66_FULL.zip -d .
           rm -f MINIK_BETA66_FULL.zip
           rm -rf .bootstrap
-          rm -f .github/workflows/bootstrap-minik.yml
+          rm -f .github/workflows/deploy.yml
       - name: Commit full project
         run: |
           git config user.name "github-actions[bot]"
