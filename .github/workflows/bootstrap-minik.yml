@@ -1,0 +1,31 @@
+name: Bootstrap MINIK Beta 66
+
+on:
+  push:
+    paths:
+      - '.bootstrap/minik-beta66.tar.gz'
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Unpack project
+        run: |
+          test -f .bootstrap/minik-beta66.tar.gz
+          tar -xzf .bootstrap/minik-beta66.tar.gz -C .
+          rm -rf .bootstrap
+          rm -f .github/workflows/bootstrap-minik.yml
+      - name: Commit full project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Bootstrap MINIK 1.65.0 Beta 66 full project"
+          git push origin HEAD:main
