@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#4b9fe1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="MINIK" />
+  <title>MINIK – Lernen & Spielen</title>
+  <style>
+:root{
+  --bg:#f7fbff;--card:#fff;--ink:#16324b;--muted:#6f8798;--line:#dcecf6;
+  --primary:#4b9fe1;--primary2:#2f7fca;--accent:#ffbf46;--good:#36b37e;--bad:#ee6b6e;
+  --shadow:0 12px 28px rgba(29,91,136,.12);--radius:24px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:linear-gradient(#eef9ff,#f9fcff 30%,#f7fbff);font-family:Inter,ui-rounded,"SF Pro Rounded",system-ui,-apple-system,sans-serif;color:var(--ink)}
+body{padding:env(safe-area-inset-top) 0 calc(82px + env(safe-area-inset-bottom));overflow-x:hidden}
+button,input,select{font:inherit}
+button{border:0;cursor:pointer}
+img{max-width:100%;display:block}
+#shell{min-height:100vh}
+.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;position:sticky;top:0;z-index:40;background:rgba(247,251,255,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(220,236,246,.75)}
+.brand{display:flex;align-items:center;gap:8px;background:none;color:var(--ink);font-weight:900;font-size:20px;letter-spacing:.5px}.brand img{width:45px;height:38px;object-fit:contain}.top-actions{display:flex;gap:8px;align-items:center}
+.pill,.icon-button{min-height:42px;border-radius:999px;background:white;box-shadow:0 4px 14px rgba(29,91,136,.09);padding:0 13px;color:var(--ink);font-weight:800}.icon-button{width:42px;padding:0}.star-pill{display:flex;align-items:center;gap:5px}
+#app{max-width:1120px;margin:0 auto;padding:18px 16px 40px;outline:none}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:50;height:calc(72px + env(safe-area-inset-bottom));padding:6px 14px env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,255,255,.96);backdrop-filter:blur(15px);border-top:1px solid var(--line)}
+.bottom-nav button{background:none;border-radius:18px;color:var(--muted);display:grid;place-items:center;align-content:center;gap:1px;font-weight:700}.bottom-nav button span{font-size:24px}.bottom-nav button small{font-size:11px}.bottom-nav button.active{background:#eaf6ff;color:var(--primary2)}
+.hero{background:linear-gradient(135deg,#dff5ff,#f4fbff 52%,#fff7da);border:1px solid #d9eef8;border-radius:32px;padding:22px;display:grid;grid-template-columns:1.15fr .85fr;align-items:center;min-height:250px;box-shadow:var(--shadow);overflow:hidden;position:relative}.hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.55);right:-60px;top:-80px}.hero h1{font-size:clamp(29px,6vw,52px);line-height:1.02;margin:0 0 9px}.hero p{font-size:17px;color:var(--muted);max-width:560px;margin:0 0 18px}.hero-fish{width:min(100%,310px);justify-self:center;filter:drop-shadow(0 15px 18px rgba(39,125,181,.2));animation:float 3s ease-in-out infinite}.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+@keyframes float{50%{transform:translateY(-9px) rotate(-1deg)}}
+.btn{border-radius:16px;padding:13px 18px;background:var(--primary);color:white;font-weight:850;box-shadow:0 6px 14px rgba(75,159,225,.22)}.btn.secondary{background:white;color:var(--primary2);border:1px solid #cce8f8;box-shadow:none}.btn.good{background:var(--good)}.btn.warn{background:var(--accent);color:#664900}.btn.danger{background:var(--bad)}.btn:active{transform:translateY(1px)}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:25px 2px 12px}.section-head h2{margin:0;font-size:24px}.section-head p{margin:3px 0 0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.world-card,.game-card,.reward-card,.stat-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:16px;box-shadow:0 7px 19px rgba(29,91,136,.08)}
+.world-card,.game-card{text-align:left;min-height:154px;color:var(--ink);position:relative;overflow:hidden}.world-card .emoji,.game-card .emoji{font-size:43px;display:block;margin-bottom:12px}.world-card h3,.game-card h3{margin:0 0 4px;font-size:17px}.world-card p,.game-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}.world-card .progress{margin-top:13px;height:7px;background:#edf5f9;border-radius:99px;overflow:hidden}.world-card .progress i{display:block;height:100%;background:linear-gradient(90deg,#4b9fe1,#5ed6bd);border-radius:99px}.tag{display:inline-flex;align-items:center;border-radius:999px;background:#eef8ff;padding:4px 8px;font-size:11px;font-weight:800;color:var(--primary2);margin-top:8px}
+.quick-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:15px}.stat-card{text-align:center}.stat-card b{font-size:24px;display:block}.stat-card span{font-size:12px;color:var(--muted)}
+.panel{background:white;border:1px solid var(--line);border-radius:28px;padding:18px;box-shadow:var(--shadow)}
+.game-shell{max-width:800px;margin:0 auto}.game-top{display:flex;align-items:center;gap:10px;margin-bottom:15px}.game-top .grow{flex:1}.game-progress{height:10px;background:#eaf2f7;border-radius:999px;overflow:hidden}.game-progress i{display:block;height:100%;background:linear-gradient(90deg,#61caa2,#4b9fe1)}
+.prompt{text-align:center;padding:14px 8px 6px}.prompt .prompt-icon{font-size:62px;margin:5px 0}.prompt h2{margin:4px 0;font-size:28px}.prompt p{margin:6px auto 0;color:var(--muted);max-width:520px}.listen-btn{width:60px;height:60px;border-radius:50%;background:#e9f6ff;font-size:27px;margin:10px auto;display:grid;place-items:center}
+.answer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:15px}.answer-card{min-height:150px;background:white;border:2px solid var(--line);border-radius:23px;padding:13px;color:var(--ink);font-weight:850;display:grid;place-items:center;text-align:center;overflow:hidden}.answer-card .big{font-size:64px}.answer-card img{width:100%;height:125px;object-fit:cover;border-radius:16px;margin-bottom:8px}.answer-card.correct{border-color:#55c493;background:#eefbf5;animation:pop .35s}.answer-card.wrong{border-color:#ef8d8f;background:#fff0f0;animation:shake .35s}.answer-card.hint{box-shadow:0 0 0 5px rgba(255,191,70,.28);border-color:var(--accent)}
+@keyframes pop{50%{transform:scale(1.04)}}@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.mentor-fab{position:fixed;right:17px;bottom:calc(88px + env(safe-area-inset-bottom));width:72px;height:72px;background:white;border-radius:50%;box-shadow:0 10px 25px rgba(28,80,119,.2);z-index:35;padding:6px}.mentor-fab img{width:100%;height:100%;object-fit:contain}.mentor-fab.pulse{animation:pulse 1.4s infinite}@keyframes pulse{50%{transform:scale(1.06);box-shadow:0 10px 30px rgba(255,191,70,.4)}}
+.mentor-dialog{border:0;border-radius:28px;padding:0;max-width:520px;width:calc(100% - 28px);box-shadow:0 24px 65px rgba(19,58,88,.26)}.mentor-dialog::backdrop{background:rgba(18,45,65,.28);backdrop-filter:blur(4px)}.mentor-card{display:grid;grid-template-columns:125px 1fr;gap:12px;align-items:center;padding:20px}.mentor-big{width:125px}.mentor-card h3{margin:0 0 5px;font-size:22px}.mentor-card p{margin:0 0 11px;line-height:1.45;color:var(--muted)}#mentor-actions{display:flex;gap:8px;flex-wrap:wrap}
+#toast{position:fixed;left:50%;bottom:calc(98px + env(safe-area-inset-bottom));transform:translate(-50%,15px);background:#16324b;color:white;padding:11px 15px;border-radius:16px;font-weight:800;opacity:0;pointer-events:none;transition:.2s;z-index:90;max-width:85%;text-align:center}#toast.show{opacity:1;transform:translate(-50%,0)}
+#celebration{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}.confetti{position:absolute;font-size:25px;animation:fall 1.1s ease-out forwards}@keyframes fall{0%{opacity:1;transform:translateY(-20px) rotate(0)}100%{opacity:0;transform:translateY(60vh) rotate(280deg)}}
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.memory-card{aspect-ratio:1;background:#dff3ff;border-radius:18px;font-size:0;display:grid;place-items:center;border:2px solid #cceafa;transition:.18s;overflow:hidden}.memory-card.open,.memory-card.matched{background:white;font-size:40px;border-color:#7fc7ef}.memory-card.matched{opacity:.55}.memory-card img{width:100%;height:100%;object-fit:cover}
+.count-stage{text-align:center}.count-items{min-height:180px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-content:center;padding:18px}.count-items span{font-size:48px}.number-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.number-btn{padding:14px 5px;border-radius:16px;background:#edf7fd;color:var(--ink);font-size:22px;font-weight:900}
+.sort-zones{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sort-zone{min-height:160px;border:2px dashed #bcdbea;border-radius:22px;padding:12px;text-align:center;background:#f8fcff}.sort-zone h3{margin:0 0 8px}.sort-items{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;padding:16px}.sort-item{border:2px solid var(--line);border-radius:18px;background:white;padding:12px;font-size:38px;min-width:70px}.sort-item.selected{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,191,70,.22)}
+.trace-wrap{text-align:center}.trace-canvas{width:min(100%,430px);height:auto;aspect-ratio:1;background:white;border:2px dashed #b7d7e7;border-radius:28px;touch-action:none}.trace-letter{font-size:70px;font-weight:950;color:#9bcdea}.trace-actions{display:flex;justify-content:center;gap:8px;margin-top:10px}
+.story-card{max-width:650px;margin:0 auto}.story-scene{text-align:center;font-size:86px;padding:10px}.story-text{font-size:20px;line-height:1.55;background:#f7fbff;border-radius:20px;padding:16px}.story-q{margin-top:16px;font-weight:850;font-size:19px}
+.rhythm-stage{text-align:center}.rhythm-fish{width:180px;margin:12px auto}.beat-row{display:flex;justify-content:center;gap:9px;margin:15px 0}.beat{width:22px;height:22px;border-radius:50%;background:#dbeaf2}.beat.on{background:var(--accent);transform:scale(1.2)}.tap-pad{width:min(100%,360px);height:150px;border-radius:28px;background:linear-gradient(145deg,#5cc3ee,#4b85e0);color:white;font-size:30px;font-weight:900;box-shadow:0 12px 25px rgba(61,133,206,.22)}
+.aquarium{min-height:420px;border-radius:32px;background:linear-gradient(#b8ebff 0 45%,#74cdeb 45% 67%,#f4db8b 67%);position:relative;overflow:hidden;border:1px solid #a8ddef}.aquarium:after{content:"";position:absolute;left:0;right:0;bottom:0;height:18%;background:radial-gradient(circle at 10px 8px,#e6c774 0 5px,transparent 6px) 0 0/24px 19px}.aqua-fish{position:absolute;width:180px;left:50%;top:45%;transform:translate(-50%,-50%);z-index:3;animation:swim 4s ease-in-out infinite}@keyframes swim{50%{transform:translate(-47%,-56%) rotate(2deg)}}.bubble{position:absolute;border:2px solid rgba(255,255,255,.6);border-radius:50%;animation:bubble 7s linear infinite}.bubble:nth-child(2){left:13%;bottom:20%;width:22px;height:22px}.bubble:nth-child(3){left:75%;bottom:25%;width:14px;height:14px;animation-delay:2s}.bubble:nth-child(4){left:45%;bottom:18%;width:18px;height:18px;animation-delay:4s}@keyframes bubble{to{transform:translateY(-340px);opacity:0}}.reward-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.reward-card{text-align:center;min-height:130px}.reward-card .emoji{font-size:38px}.reward-card.locked{filter:grayscale(1);opacity:.5}.reward-card b{display:block;font-size:13px}.reward-card small{color:var(--muted)}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.setting{background:#f8fcff;border:1px solid var(--line);border-radius:20px;padding:14px}.setting label{display:block;font-weight:850;margin-bottom:7px}.setting small{display:block;color:var(--muted);margin-top:6px;line-height:1.35}.setting select,.setting input[type=text],.setting input[type=password]{width:100%;border:1px solid #cfe3ed;border-radius:12px;background:white;padding:11px}.setting input[type=range]{width:100%}.toggle-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.stats-table{width:100%;border-collapse:collapse}.stats-table th,.stats-table td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line);font-size:13px}.stats-table th{color:var(--muted)}
+.photo-badge{position:absolute;right:9px;top:9px;background:rgba(22,50,75,.78);color:#fff;border-radius:999px;padding:4px 7px;font-size:10px;font-weight:800}.answer-card{position:relative}
+.empty{padding:35px;text-align:center;color:var(--muted)}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,1fr)}.hero{grid-template-columns:1fr;text-align:center}.hero-fish{width:180px;grid-row:1}.hero p{margin-left:auto;margin-right:auto}.hero-actions{justify-content:center}.settings-grid{grid-template-columns:1fr}.reward-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){#app{padding-left:12px;padding-right:12px}.topbar{padding-left:12px;padding-right:12px}.hero{padding:17px;border-radius:25px}.hero h1{font-size:32px}.grid{gap:9px}.world-card,.game-card{min-height:140px;padding:13px;border-radius:20px}.world-card .emoji,.game-card .emoji{font-size:37px}.answer-card{min-height:130px}.answer-card .big{font-size:56px}.answer-card img{height:105px}.memory-grid{grid-template-columns:repeat(3,1fr)}.number-row{grid-template-columns:repeat(5,1fr)}.mentor-card{grid-template-columns:90px 1fr}.mentor-big{width:90px}.sort-zones{grid-template-columns:1fr}.quick-stats{gap:8px}.stat-card{padding:11px}.stat-card b{font-size:20px}}
+
+</style>
+</head>
+<body>
+  <div id="shell">
+    <header class="topbar">
+      <button class="brand" data-route="home" aria-label="Startseite">
+        <img src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A" alt="Mino" />
+        <span>MINIK</span>
+      </button>
+      <div class="top-actions">
+        <button class="pill star-pill" data-route="aquarium" aria-label="Sterne"><span>⭐</span><b id="star-count">0</b></button>
+        <button class="pill" id="lang-toggle" aria-label="Sprache wechseln">DE</button>
+        <button class="icon-button" data-route="parents" aria-label="Elternbereich">⚙️</button>
+      </div>
+    </header>
+
+    <main id="app" tabindex="-1"></main>
+
+    <nav class="bottom-nav" aria-label="Navigation">
+      <button data-route="home"><span>🏠</span><small data-i18n="navHome">Start</small></button>
+      <button data-route="learn"><span>🧠</span><small data-i18n="navLearn">Lernen</small></button>
+      <button data-route="games"><span>🎮</span><small data-i18n="navGames">Spiele</small></button>
+      <button data-route="aquarium"><span>🐠</span><small data-i18n="navAquarium">Aquarium</small></button>
+    </nav>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="celebration" aria-hidden="true"></div>
+
+  <dialog id="mentor-dialog" class="mentor-dialog">
+    <div class="mentor-card">
+      <img class="mentor-big" src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A" alt="Mino" />
+      <div>
+        <h3 id="mentor-title">Mino</h3>
+        <p id="mentor-text"></p>
+        <div id="mentor-actions"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+
+// ---- js/core/store.js ----
+const KEY='minik_state_v2';
+const defaults={
+  stars:0,totalAnswers:0,totalCorrect:0,streak:0,bestStreak:0,lastPlayDate:null,dailyCorrect:0,
+  settings:{lang:'de',difficulty:4,adaptive:true,voiceRate:.92,autoHint:true,photoMix:true,cloudTtsEndpoint:'',parentPin:''},
+  stats:{},unlocked:['reef'],badges:[],history:[]
+};
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function getState(){
+  try{const x=JSON.parse(localStorage.getItem(KEY)||'null');return x?merge(defaults,x):clone(defaults)}catch{return clone(defaults)}
+}
+function merge(a,b){
+  const out={...clone(a),...b};out.settings={...a.settings,...(b.settings||{})};out.stats={...(b.stats||{})};return out;
+}
+function saveState(s){localStorage.setItem(KEY,JSON.stringify(s));window.dispatchEvent(new CustomEvent('minik-state',{detail:s}))}
+function updateState(mutator){const s=getState();mutator(s);saveState(s);return s}
+function setSetting(k,v){return updateState(s=>{s.settings[k]=v})}
+function recordAnswer(categoryId,correct,meta={}){
+  return updateState(s=>{
+    const today=new Date().toISOString().slice(0,10);
+    if(s.lastPlayDate!==today){s.dailyCorrect=0;s.lastPlayDate=today}
+    s.totalAnswers++;
+    s.stats[categoryId] ||= {answers:0,correct:0,stars:0};
+    s.stats[categoryId].answers++;
+    if(correct){
+      s.totalCorrect++;s.streak++;s.bestStreak=Math.max(s.bestStreak,s.streak);s.dailyCorrect++;
+      const bonus=s.streak>0&&s.streak%5===0?2:1;s.stars+=bonus;s.stats[categoryId].correct++;s.stats[categoryId].stars+=bonus;
+    } else s.streak=0;
+    s.history.unshift({t:Date.now(),categoryId,correct,...meta});s.history=s.history.slice(0,150);
+    unlockRewards(s);
+  })
+}
+function unlockRewards(s){
+  const rewards=[[10,'coral'],[25,'hat'],[50,'castle'],[100,'friend'],[175,'rainbow'],[300,'crown'],[500,'ocean-master']];
+  for(const [n,id] of rewards)if(s.stars>=n&&!s.unlocked.includes(id))s.unlocked.push(id);
+  if(s.bestStreak>=10&&!s.badges.includes('streak10'))s.badges.push('streak10');
+  if(s.totalCorrect>=100&&!s.badges.includes('answers100'))s.badges.push('answers100');
+}
+function resetProgress(){const s=getState();const settings=s.settings;localStorage.setItem(KEY,JSON.stringify({...clone(defaults),settings}));window.dispatchEvent(new Event('minik-state'))}
+function accuracy(s=getState()){return s.totalAnswers?Math.round(s.totalCorrect/s.totalAnswers*100):0}
+function categoryAccuracy(id,s=getState()){const x=s.stats[id];return x?.answers?Math.round(x.correct/x.answers*100):0}
+
+
+// ---- js/core/tts.js ----
+
+let currentAudio=null;
+function scoreVoice(v,lang){
+  const name=(v.name||'').toLowerCase();let s=0;
+  if((v.lang||'').toLowerCase().startsWith(lang.slice(0,2)))s+=40;
+  if((v.lang||'').toLowerCase()===lang.toLowerCase())s+=30;
+  for(const word of ['premium','enhanced','natural','neural','google','microsoft','siri'])if(name.includes(word))s+=8;
+  if(v.localService)s+=3;return s;
+}
+function listVoices(lang){return speechSynthesis.getVoices().filter(v=>v.lang?.toLowerCase().startsWith(lang.slice(0,2))).sort((a,b)=>scoreVoice(b,lang)-scoreVoice(a,lang))}
+async function speak(text,langOverride=null){
+  if(!text)return;
+  const s=getState(), lang=langOverride||(s.settings.lang==='tr'?'tr-TR':'de-DE');
+  if(s.settings.cloudTtsEndpoint){
+    try{return await speakCloud(text,lang,s.settings.cloudTtsEndpoint)}catch(e){console.warn('Cloud TTS fallback',e)}
+  }
+  speechSynthesis.cancel();
+  return new Promise(resolve=>{
+    const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=Number(s.settings.voiceRate)||.92;u.pitch=1.03;
+    const voices=listVoices(lang);if(voices[0])u.voice=voices[0];u.onend=resolve;u.onerror=resolve;speechSynthesis.speak(u);
+  });
+}
+async function speakCloud(text,lang,endpoint){
+  if(currentAudio){currentAudio.pause();currentAudio=null}
+  const res=await fetch(endpoint,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,lang})});
+  if(!res.ok)throw new Error('TTS '+res.status);
+  const ct=res.headers.get('content-type')||'';let src;
+  if(ct.includes('application/json')){const j=await res.json();src=j.url}else{src=URL.createObjectURL(await res.blob())}
+  currentAudio=new Audio(src);await currentAudio.play();await new Promise(r=>{currentAudio.onended=r;currentAudio.onerror=r})
+}
+function stopSpeech(){speechSynthesis.cancel();if(currentAudio)currentAudio.pause()}
+
+
+// ---- js/core/ui.js ----
+const $=(q,root=document)=>root.querySelector(q);
+const $$=(q,root=document)=>[...root.querySelectorAll(q)];
+function h(tag,attrs={},children=[]){const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs||{})){if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else if(k.startsWith('on')&&typeof v==='function')e.addEventListener(k.slice(2).toLowerCase(),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?'':v)};for(const c of [].concat(children||[]))e.append(c?.nodeType?c:document.createTextNode(String(c)));return e}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function sample(a,n){return shuffle(a).slice(0,n)}
+function t(de,tr){return getState().settings.lang==='tr'?tr:de}
+let toastTimer;
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),1700)}
+function celebrate(){const root=$('#celebration');const icons=['⭐','✨','💫','🌟'];for(let i=0;i<18;i++){const e=h('span',{class:'confetti'},icons[i%icons.length]);e.style.left=Math.random()*100+'%';e.style.top='0';e.style.animationDelay=Math.random()*.25+'s';root.append(e);setTimeout(()=>e.remove(),1500)}}
+function openMentor(text,actions=[]){const d=$('#mentor-dialog');$('#mentor-text').textContent=text;const a=$('#mentor-actions');a.innerHTML='';for(const x of actions){a.append(h('button',{class:'btn '+(x.secondary?'secondary':''),onclick:()=>{d.close();x.onClick?.()}},x.label))}if(!actions.length)a.append(h('button',{class:'btn',onclick:()=>d.close()},t('Okay','Tamam')));d.showModal()}
+function renderMentorFab(container,onHelp){const b=h('button',{class:'mentor-fab',title:t('Mino hilft','Mino yardım eder'),onclick:onHelp},h('img',{src:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A',alt:'Mino'}));document.body.append(b);return()=>b.remove()}
+function gameHeader(title,index,total,onExit){const wrap=h('div',{class:'game-top'});wrap.append(h('button',{class:'icon-button',onclick:onExit},'←'));wrap.append(h('div',{class:'grow'},[h('b',{},title),h('div',{class:'game-progress'},h('i',{style:`width:${Math.min(100,(index/total)*100)}%`}))]));wrap.append(h('span',{class:'tag'},`${index}/${total}`));return wrap}
+function itemVisual(item,{photo=true}={}){if(photo&&item.image){const w=h('div',{});w.append(h('img',{src:item.image,alt:item.de,loading:'lazy'}));w.append(h('span',{class:'photo-badge'},'FOTO'));return w}return h('span',{class:'big'},item.emoji||'🧩')}
+
+
+// ---- js/data/content.js ----
+const categories=[
+{id:'animals',icon:'🐾',de:'Tiere',tr:'Hayvanlar',items:[
+['dog','Hund','Köpek','🐶'],['cat','Katze','Kedi','🐱'],['cow','Kuh','İnek','🐮'],['horse','Pferd','At','🐴'],['sheep','Schaf','Koyun','🐑'],['lion','Löwe','Aslan','🦁'],['tiger','Tiger','Kaplan','🐯'],['monkey','Affe','Maymun','🐵'],['rabbit','Hase','Tavşan','🐰'],['bear','Bär','Ayı','🐻'],['elephant','Elefant','Fil','🐘'],['giraffe','Giraffe','Zürafa','🦒'],['penguin','Pinguin','Penguen','🐧'],['frog','Frosch','Kurbağa','🐸'],['fish','Fisch','Balık','🐟'],['bird','Vogel','Kuş','🐦']]},
+{id:'colors',icon:'🎨',de:'Farben',tr:'Renkler',items:[
+['red','Rot','Kırmızı','🔴'],['blue','Blau','Mavi','🔵'],['green','Grün','Yeşil','🟢'],['yellow','Gelb','Sarı','🟡'],['orange','Orange','Turuncu','🟠'],['purple','Lila','Mor','🟣'],['black','Schwarz','Siyah','⚫'],['white','Weiß','Beyaz','⚪'],['brown','Braun','Kahverengi','🟤'],['pink','Rosa','Pembe','🌸']]},
+{id:'food',icon:'🍎',de:'Essen',tr:'Yiyecekler',items:[
+['apple','Apfel','Elma','🍎'],['banana','Banane','Muz','🍌'],['pear','Birne','Armut','🍐'],['orangefruit','Orange','Portakal','🍊'],['strawberry','Erdbeere','Çilek','🍓'],['grapes','Trauben','Üzüm','🍇'],['watermelon','Wassermelone','Karpuz','🍉'],['carrot','Karotte','Havuç','🥕'],['tomato','Tomate','Domates','🍅'],['bread','Brot','Ekmek','🍞'],['cheese','Käse','Peynir','🧀'],['egg','Ei','Yumurta','🥚'],['milk','Milch','Süt','🥛'],['rice','Reis','Pirinç','🍚'],['soup','Suppe','Çorba','🥣']]},
+{id:'body',icon:'🧍',de:'Körper',tr:'Vücut',items:[
+['head','Kopf','Baş','🙂'],['eye','Auge','Göz','👁️'],['ear','Ohr','Kulak','👂'],['nose','Nase','Burun','👃'],['mouth','Mund','Ağız','👄'],['hand','Hand','El','✋'],['foot','Fuß','Ayak','🦶'],['arm','Arm','Kol','💪'],['leg','Bein','Bacak','🦵'],['tooth','Zahn','Diş','🦷'],['hair','Haare','Saç','💇'],['heart','Herz','Kalp','❤️']]},
+{id:'clothes',icon:'👕',de:'Kleidung',tr:'Kıyafetler',items:[
+['shirt','T-Shirt','Tişört','👕'],['pants','Hose','Pantolon','👖'],['dress','Kleid','Elbise','👗'],['shoe','Schuh','Ayakkabı','👟'],['sock','Socke','Çorap','🧦'],['hat','Mütze','Şapka','🧢'],['coat','Jacke','Ceket','🧥'],['gloves','Handschuhe','Eldiven','🧤'],['scarf','Schal','Atkı','🧣'],['glasses','Brille','Gözlük','👓']]},
+{id:'vehicles',icon:'🚗',de:'Fahrzeuge',tr:'Araçlar',items:[
+['car','Auto','Araba','🚗'],['bus','Bus','Otobüs','🚌'],['train','Zug','Tren','🚆'],['bike','Fahrrad','Bisiklet','🚲'],['truck','LKW','Kamyon','🚚'],['tractor','Traktor','Traktör','🚜'],['plane','Flugzeug','Uçak','✈️'],['ship','Schiff','Gemi','🚢'],['boat','Boot','Tekne','🛶'],['scooter','Roller','Scooter','🛴'],['ambulance','Krankenwagen','Ambulans','🚑'],['firetruck','Feuerwehr','İtfaiye','🚒']]},
+{id:'home',icon:'🏠',de:'Zuhause',tr:'Ev',items:[
+['bed','Bett','Yatak','🛏️'],['chair','Stuhl','Sandalye','🪑'],['table','Tisch','Masa','🟫'],['lamp','Lampe','Lamba','💡'],['door','Tür','Kapı','🚪'],['window','Fenster','Pencere','🪟'],['bath','Badewanne','Küvet','🛁'],['toilet','Toilette','Tuvalet','🚽'],['key','Schlüssel','Anahtar','🔑'],['clock','Uhr','Saat','🕒'],['tv','Fernseher','Televizyon','📺'],['phone','Telefon','Telefon','📱']]},
+{id:'nature',icon:'🌿',de:'Natur',tr:'Doğa',items:[
+['sun','Sonne','Güneş','☀️'],['moon','Mond','Ay','🌙'],['star','Stern','Yıldız','⭐'],['cloud','Wolke','Bulut','☁️'],['rain','Regen','Yağmur','🌧️'],['snow','Schnee','Kar','❄️'],['tree','Baum','Ağaç','🌳'],['flower','Blume','Çiçek','🌼'],['mountain','Berg','Dağ','⛰️'],['sea','Meer','Deniz','🌊'],['fire','Feuer','Ateş','🔥'],['leaf','Blatt','Yaprak','🍃']]},
+{id:'shapes',icon:'🔷',de:'Formen',tr:'Şekiller',items:[
+['circle','Kreis','Daire','⚪'],['square','Quadrat','Kare','◼️'],['triangle','Dreieck','Üçgen','🔺'],['rectangle','Rechteck','Dikdörtgen','▰'],['starshape','Stern','Yıldız','⭐'],['heartshape','Herz','Kalp','❤️'],['diamond','Raute','Eşkenar dörtgen','🔷'],['oval','Oval','Oval','🥚']]},
+{id:'actions',icon:'🏃',de:'Aktionen',tr:'Hareketler',items:[
+['run','Laufen','Koşmak','🏃'],['walk','Gehen','Yürümek','🚶'],['sleep','Schlafen','Uyumak','😴'],['eat','Essen','Yemek','🍽️'],['drink','Trinken','İçmek','🥤'],['read','Lesen','Okumak','📖'],['write','Schreiben','Yazmak','✍️'],['sing','Singen','Şarkı söylemek','🎤'],['dance','Tanzen','Dans etmek','💃'],['wash','Waschen','Yıkamak','🧼'],['clap','Klatschen','Alkışlamak','👏'],['jump','Springen','Zıplamak','🤸']]},
+{id:'numbers',icon:'🔢',de:'Zahlen',tr:'Sayılar',items:[
+['1','Eins','Bir','1️⃣'],['2','Zwei','İki','2️⃣'],['3','Drei','Üç','3️⃣'],['4','Vier','Dört','4️⃣'],['5','Fünf','Beş','5️⃣'],['6','Sechs','Altı','6️⃣'],['7','Sieben','Yedi','7️⃣'],['8','Acht','Sekiz','8️⃣'],['9','Neun','Dokuz','9️⃣'],['10','Zehn','On','🔟']]},
+{id:'letters',icon:'🔤',de:'Buchstaben',tr:'Harfler',items:[
+['A','A','A','🅰️'],['B','B','B','🅱️'],['C','C','C','©️'],['D','D','D','🇩'],['E','E','E','📧'],['F','F','F','🎏'],['G','G','G','🇬'],['H','H','H','♓'],['K','K','K','🎋'],['M','M','M','Ⓜ️'],['S','S','S','💲'],['T','T','T','✝️']]},
+{id:'people',icon:'👨‍👩‍👧',de:'Menschen',tr:'İnsanlar',photo:true,items:[
+['man','Mann','Erkek','👨','https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['woman','Frau','Kadın','👩','https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['boy','Junge','Erkek çocuk','👦','https://images.pexels.com/photos/1681010/pexels-photo-1681010.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['girl','Mädchen','Kız çocuk','👧','https://images.pexels.com/photos/3662667/pexels-photo-3662667.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['grandpa','Opa','Dede','👴','https://images.pexels.com/photos/834863/pexels-photo-834863.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['grandma','Oma','Nine','👵','https://images.pexels.com/photos/2050994/pexels-photo-2050994.jpeg?auto=compress&cs=tinysrgb&w=600'] ]},
+{id:'emotions',icon:'😊',de:'Gefühle',tr:'Duygular',photo:true,items:[
+['happy','Fröhlich','Mutlu','😊','https://images.pexels.com/photos/3768126/pexels-photo-3768126.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['sad','Traurig','Üzgün','😢','https://images.pexels.com/photos/3772618/pexels-photo-3772618.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['angry','Wütend','Kızgın','😠','https://images.pexels.com/photos/3812743/pexels-photo-3812743.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['surprised','Überrascht','Şaşkın','😮','https://images.pexels.com/photos/3768904/pexels-photo-3768904.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['tired','Müde','Yorgun','🥱','https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg?auto=compress&cs=tinysrgb&w=600'],
+['afraid','Ängstlich','Korkmuş','😨','https://images.pexels.com/photos/3812749/pexels-photo-3812749.jpeg?auto=compress&cs=tinysrgb&w=600']]},
+{id:'professions',icon:'🧑‍🔧',de:'Berufe',tr:'Meslekler',items:[
+['doctor','Arzt','Doktor','🧑‍⚕️'],['cook','Koch','Aşçı','🧑‍🍳'],['teacher','Lehrer','Öğretmen','🧑‍🏫'],['police','Polizist','Polis','👮'],['firefighter','Feuerwehrmann','İtfaiyeci','🧑‍🚒'],['builder','Bauarbeiter','İnşaatçı','👷'],['farmer','Bauer','Çiftçi','🧑‍🌾'],['mechanic','Mechaniker','Tamirci','🧑‍🔧'],['artist','Künstler','Sanatçı','🧑‍🎨'],['pilot','Pilot','Pilot','🧑‍✈️']]},
+{id:'opposites',icon:'↔️',de:'Gegensätze',tr:'Zıtlıklar',items:[
+['big','Groß','Büyük','🐘'],['small','Klein','Küçük','🐭'],['hot','Heiß','Sıcak','🔥'],['cold','Kalt','Soğuk','🧊'],['fast','Schnell','Hızlı','🏎️'],['slow','Langsam','Yavaş','🐌'],['day','Tag','Gündüz','☀️'],['night','Nacht','Gece','🌙'],['up','Oben','Yukarı','⬆️'],['down','Unten','Aşağı','⬇️'],['full','Voll','Dolu','🥛'],['empty','Leer','Boş','🥛']]}
+,
+{id:'toys',icon:'🧸',de:'Spielzeug',tr:'Oyuncaklar',items:[
+['teddy','Teddybär','Oyuncak ayı','🧸'],['ball','Ball','Top','⚽'],['blocks','Bausteine','Bloklar','🧱'],['doll','Puppe','Bebek','🪆'],['kite','Drachen','Uçurtma','🪁'],['yo-yo','Jo-Jo','Yoyo','🪀'],['puzzletoy','Puzzle','Yapboz','🧩'],['robot','Roboter','Robot','🤖'],['trainToy','Spielzeugzug','Oyuncak tren','🚂'],['carToy','Spielzeugauto','Oyuncak araba','🏎️'],['balloon','Luftballon','Balon','🎈'],['game','Spiel','Oyun','🎲']]},
+{id:'sports',icon:'⚽',de:'Sport',tr:'Spor',items:[
+['football','Fußball','Futbol','⚽'],['basketball','Basketball','Basketbol','🏀'],['tennis','Tennis','Tenis','🎾'],['swim','Schwimmen','Yüzme','🏊'],['runSport','Laufen','Koşu','🏃'],['bikeSport','Radfahren','Bisiklet','🚴'],['ski','Skifahren','Kayak','⛷️'],['boxing','Boxen','Boks','🥊'],['volleyball','Volleyball','Voleybol','🏐'],['tabletennis','Tischtennis','Masa tenisi','🏓'],['medal','Medaille','Madalya','🏅'],['goal','Tor','Gol','🥅']]},
+{id:'family',icon:'👪',de:'Familie',tr:'Aile',items:[
+['mother','Mutter','Anne','👩'],['father','Vater','Baba','👨'],['sister','Schwester','Kız kardeş','👧'],['brother','Bruder','Erkek kardeş','👦'],['baby','Baby','Bebek','👶'],['grandmother','Großmutter','Büyükanne','👵'],['grandfather','Großvater','Büyükbaba','👴'],['familyall','Familie','Aile','👪'],['aunt','Tante','Teyze / Hala','👩‍🦱'],['uncle','Onkel','Dayı / Amca','👨‍🦱']]},
+{id:'places',icon:'🏙️',de:'Orte',tr:'Yerler',items:[
+['schoolplace','Schule','Okul','🏫'],['hospital','Krankenhaus','Hastane','🏥'],['park','Park','Park','🏞️'],['store','Geschäft','Mağaza','🏬'],['homeplace','Haus','Ev','🏠'],['station','Bahnhof','İstasyon','🚉'],['airport','Flughafen','Havaalanı','🛫'],['library','Bibliothek','Kütüphane','📚'],['restaurant','Restaurant','Restoran','🍽️'],['beach','Strand','Plaj','🏖️'],['farm','Bauernhof','Çiftlik','🚜'],['zoo','Zoo','Hayvanat bahçesi','🦒']]},
+{id:'kitchen',icon:'🍳',de:'Küche',tr:'Mutfak',items:[
+['plate','Teller','Tabak','🍽️'],['cup','Tasse','Fincan','☕'],['glass','Glas','Bardak','🥛'],['fork','Gabel','Çatal','🍴'],['spoon','Löffel','Kaşık','🥄'],['knife','Messer','Bıçak','🔪'],['pot','Topf','Tencere','🍲'],['pan','Pfanne','Tava','🍳'],['fridge','Kühlschrank','Buzdolabı','🧊'],['oven','Ofen','Fırın','♨️'],['bottle','Flasche','Şişe','🍼'],['napkin','Serviette','Peçete','🧻']]},
+{id:'bathroom',icon:'🛁',de:'Badezimmer',tr:'Banyo',items:[
+['soap','Seife','Sabun','🧼'],['toothbrush','Zahnbürste','Diş fırçası','🪥'],['toothpaste','Zahnpasta','Diş macunu','🦷'],['towel','Handtuch','Havlu','🧻'],['shower','Dusche','Duş','🚿'],['bathroomBath','Badewanne','Küvet','🛁'],['sink','Waschbecken','Lavabo','🚰'],['comb','Kamm','Tarak','🪮'],['mirror','Spiegel','Ayna','🪞'],['toiletpaper','Toilettenpapier','Tuvalet kağıdı','🧻']]},
+{id:'school',icon:'🎒',de:'Schule',tr:'Okul',items:[
+['book','Buch','Kitap','📘'],['pencil','Bleistift','Kurşun kalem','✏️'],['pen','Stift','Kalem','🖊️'],['eraser','Radiergummi','Silgi','🧽'],['ruler','Lineal','Cetvel','📏'],['bag','Schulranzen','Okul çantası','🎒'],['scissors','Schere','Makas','✂️'],['glue','Kleber','Yapıştırıcı','🧴'],['notebook','Heft','Defter','📓'],['paint','Farbe','Boya','🖍️'],['desk','Schreibtisch','Sıra','🪑'],['teacher2','Lehrerin / Lehrer','Öğretmen','🧑‍🏫']]},
+{id:'sea',icon:'🌊',de:'Meerestiere',tr:'Deniz Hayvanları',items:[
+['dolphin','Delfin','Yunus','🐬'],['whale','Wal','Balina','🐋'],['shark','Hai','Köpekbalığı','🦈'],['octopus','Oktopus','Ahtapot','🐙'],['crab','Krabbe','Yengeç','🦀'],['lobster','Hummer','Istakoz','🦞'],['shrimp','Garnele','Karides','🦐'],['seal','Robbe','Fok','🦭'],['shell','Muschel','Deniz kabuğu','🐚'],['coral2','Koralle','Mercan','🪸']]},
+{id:'insects',icon:'🐞',de:'Kleine Tiere',tr:'Küçük Hayvanlar',items:[
+['bee','Biene','Arı','🐝'],['butterfly','Schmetterling','Kelebek','🦋'],['ladybug','Marienkäfer','Uğur böceği','🐞'],['ant','Ameise','Karınca','🐜'],['snail','Schnecke','Salyangoz','🐌'],['spider','Spinne','Örümcek','🕷️'],['mosquito','Mücke','Sivrisinek','🦟'],['worm','Wurm','Solucan','🪱'],['beetle','Käfer','Böcek','🪲'],['cricket','Grille','Cırcır böceği','🦗']]},
+{id:'music',icon:'🎵',de:'Musik',tr:'Müzik',items:[
+['drum','Trommel','Davul','🥁'],['guitar','Gitarre','Gitar','🎸'],['piano','Klavier','Piyano','🎹'],['violin','Geige','Keman','🎻'],['trumpet','Trompete','Trompet','🎺'],['sax','Saxofon','Saksafon','🎷'],['flute','Flöte','Flüt','🪈'],['microphone','Mikrofon','Mikrofon','🎤'],['musicnote','Note','Nota','🎵'],['headphones','Kopfhörer','Kulaklık','🎧']]},
+{id:'weather',icon:'🌦️',de:'Wetter',tr:'Hava Durumu',items:[
+['sunny','Sonnig','Güneşli','☀️'],['rainy','Regnerisch','Yağmurlu','🌧️'],['cloudy','Bewölkt','Bulutlu','☁️'],['snowy','Schneebedeckt','Karlı','🌨️'],['windy','Windig','Rüzgârlı','🌬️'],['storm','Gewitter','Fırtına','⛈️'],['fog','Nebel','Sis','🌫️'],['rainbowWeather','Regenbogen','Gökkuşağı','🌈'],['hotWeather','Heiß','Sıcak','🥵'],['coldWeather','Kalt','Soğuk','🥶']]}
+
+].map(c=>({...c,items:c.items.map(x=>({id:x[0],de:x[1],tr:x[2],emoji:x[3],image:x[4]||null}))}));
+const stories=[
+{id:'park',emoji:'🛝🐶',de:{title:'Mia im Park',text:'Mia geht mit ihrem Hund in den Park. Der Hund sieht einen roten Ball und läuft schnell dorthin.',q:'Welche Farbe hat der Ball?',answers:['Rot','Blau','Grün'],correct:0},tr:{title:'Mia parkta',text:'Mia köpeğiyle parka gider. Köpek kırmızı bir top görür ve hızla ona doğru koşar.',q:'Top hangi renk?',answers:['Kırmızı','Mavi','Yeşil'],correct:0}},
+{id:'breakfast',emoji:'🥛🍌',de:{title:'Frühstück',text:'Ali frühstückt am Morgen. Er trinkt Milch und isst eine Banane.',q:'Was trinkt Ali?',answers:['Milch','Saft','Wasser'],correct:0},tr:{title:'Kahvaltı',text:'Ali sabah kahvaltı yapar. Süt içer ve muz yer.',q:'Ali ne içiyor?',answers:['Süt','Meyve suyu','Su'],correct:0}},
+{id:'rain',emoji:'🌧️☂️',de:{title:'Es regnet',text:'Draußen regnet es. Lina nimmt einen gelben Regenschirm und zieht ihre Stiefel an.',q:'Was nimmt Lina?',answers:['Regenschirm','Ball','Buch'],correct:0},tr:{title:'Yağmur yağıyor',text:'Dışarıda yağmur yağıyor. Lina sarı şemsiyesini alır ve çizmelerini giyer.',q:'Lina ne alıyor?',answers:['Şemsiye','Top','Kitap'],correct:0}},
+{id:'zoo',emoji:'🦒🐘',de:{title:'Im Zoo',text:'Emir sieht im Zoo eine große Giraffe und einen Elefanten. Die Giraffe hat einen langen Hals.',q:'Wer hat einen langen Hals?',answers:['Giraffe','Elefant','Frosch'],correct:0},tr:{title:'Hayvanat bahçesinde',text:'Emir hayvanat bahçesinde büyük bir zürafa ve fil görür. Zürafanın uzun bir boynu vardır.',q:'Kimin boynu uzun?',answers:['Zürafa','Fil','Kurbağa'],correct:0}},
+{id:'bedtime',emoji:'🌙📖',de:{title:'Schlafenszeit',text:'Vor dem Schlafen liest Papa ein Buch vor. Danach macht er das Licht aus.',q:'Was macht Papa zuerst?',answers:['Er liest','Er kocht','Er fährt Auto'],correct:0},tr:{title:'Uyku zamanı',text:'Uyumadan önce baba bir kitap okur. Sonra ışığı kapatır.',q:'Baba önce ne yapıyor?',answers:['Kitap okuyor','Yemek yapıyor','Araba sürüyor'],correct:0}},
+{id:'garden',emoji:'🌱🥕',de:{title:'Im Garten',text:'Sara pflanzt Karotten im Garten. Sie gießt die Pflanzen jeden Tag mit Wasser.',q:'Was pflanzt Sara?',answers:['Karotten','Äpfel','Brot'],correct:0},tr:{title:'Bahçede',text:'Sara bahçeye havuç eker. Bitkileri her gün suyla sular.',q:'Sara ne ekiyor?',answers:['Havuç','Elma','Ekmek'],correct:0}}
+];
+const gameTypes=[
+{id:'speak',icon:'🎙️',de:'Nachsprechen',tr:'Tekrar Söyle',descDe:'Sprich Wörter nach und trainiere Aussprache.',descTr:'Kelimeleri tekrar söyle ve konuşmayı geliştir.'},
+{id:'listen',icon:'👂',de:'Hören & Zeigen',tr:'Dinle ve Göster',descDe:'Höre Mino zu und tippe auf das richtige Bild.',descTr:'Mino’yu dinle ve doğru resme dokun.'},
+{id:'picture',icon:'👀',de:'Bild erkennen',tr:'Resmi Tanı',descDe:'Sieh das Bild und finde das richtige Wort.',descTr:'Resme bak ve doğru kelimeyi bul.'},
+{id:'memory',icon:'🧠',de:'Memory',tr:'Hafıza',descDe:'Finde die passenden Bildpaare.',descTr:'Eşleşen çiftleri bul.'},
+{id:'count',icon:'🔢',de:'Zählen',tr:'Sayma',descDe:'Zähle Gegenstände von 1 bis 10.',descTr:'1’den 10’a kadar nesneleri say.'},
+{id:'sort',icon:'🧺',de:'Sortieren',tr:'Sınıflandır',descDe:'Ordne Dinge in die richtigen Gruppen.',descTr:'Nesneleri doğru gruplara ayır.'},
+{id:'trace',icon:'✍️',de:'Nachfahren',tr:'Üzerinden Geç',descDe:'Fahre Zahlen und Buchstaben mit dem Finger nach.',descTr:'Sayı ve harflerin üzerinden parmağınla geç.'},
+{id:'story',icon:'📚',de:'Geschichten',tr:'Hikâyeler',descDe:'Kurze Geschichten mit Fragen.',descTr:'Sorulu kısa hikâyeler.'},
+{id:'rhythm',icon:'🥁',de:'Rhythmus',tr:'Ritim',descDe:'Höre ein Muster und klopfe es nach.',descTr:'Ritmi dinle ve tekrar et.'},
+{id:'puzzle',icon:'🧩',de:'Foto-Puzzle',tr:'Fotoğraf Yapbozu',descDe:'Setze ein echtes Foto aus vier Teilen zusammen.',descTr:'Gerçek bir fotoğrafı dört parçadan birleştir.'},
+{id:'sequence',icon:'🔁',de:'Muster ergänzen',tr:'Örüntüyü Tamamla',descDe:'Erkenne Reihenfolgen und ergänze das Muster.',descTr:'Sırayı fark et ve örüntüyü tamamla.'},
+{id:'oddone',icon:'🕵️',de:'Was passt nicht?',tr:'Hangisi Farklı?',descDe:'Finde das Bild, das nicht zur Gruppe gehört.',descTr:'Gruba ait olmayan resmi bul.'}
+];
+const rewards=[
+{id:'reef',stars:0,emoji:'🪸',de:'Kleines Riff',tr:'Küçük Resif'},
+{id:'coral',stars:10,emoji:'🪸',de:'Bunte Koralle',tr:'Renkli Mercan'},
+{id:'hat',stars:25,emoji:'🎩',de:'Minos Hut',tr:'Mino’nun Şapkası'},
+{id:'castle',stars:50,emoji:'🏰',de:'Sandburg',tr:'Kum Kalesi'},
+{id:'friend',stars:100,emoji:'🐡',de:'Neuer Freund',tr:'Yeni Arkadaş'},
+{id:'rainbow',stars:175,emoji:'🌈',de:'Regenbogen',tr:'Gökkuşağı'},
+{id:'crown',stars:300,emoji:'👑',de:'Mino-Krone',tr:'Mino Tacı'},
+{id:'ocean-master',stars:500,emoji:'🏆',de:'Ozean-Meister',tr:'Okyanus Ustası'}
+];
+function category(id){return categories.find(c=>c.id===id)}
+function localized(obj,lang,key=''){return lang==='tr'?(obj.tr?.[key]??obj.tr??obj.de?.[key]??obj.de):(obj.de?.[key]??obj.de??obj.tr?.[key]??obj.tr)}
+
+
+// ---- js/games/choice.js ----
+function renderChoice(root,{mode='listen',categoryId='animals',onExit}){
+  let round=1,total=10,cleanup=()=>{},hintTimer=null,locked=false;
+  const cat=category(categoryId)||categories[0];
+  function next(){locked=false;clearTimeout(hintTimer);renderRound()}
+  function renderRound(){
+    cleanup();root.innerHTML='';const state=getState();let n=Math.max(2,Math.min(6,Number(state.settings.difficulty)||4));if(state.settings.adaptive){const acc=categoryAccuracy(cat.id,state);const seen=state.stats[cat.id]?.answers||0;if(seen>=8)n=acc>=85?6:acc>=65?4:2;}
+    const target=cat.items[Math.floor(Math.random()*cat.items.length)];
+    const options=shuffle([target,...sample(cat.items.filter(x=>x.id!==target.id),n-1)]);
+    root.append(gameHeader(mode==='listen'?t('Hören & Zeigen','Dinle ve Göster'):t('Bild erkennen','Resmi Tanı'),round,total,onExit));
+    const shell=h('section',{class:'panel'}),prompt=h('div',{class:'prompt'});
+    if(mode==='listen'){
+      prompt.append(h('div',{class:'prompt-icon'},'👂'),h('h2',{},t('Hör gut zu!','İyi dinle!')),h('p',{},t('Tippe auf das richtige Bild.','Doğru resme dokun.')));
+      const listen=h('button',{class:'listen-btn',onclick:()=>speak(target[state.settings.lang])},'🔊');prompt.append(listen);setTimeout(()=>speak(target[state.settings.lang]),250);
+    }else{
+      prompt.append(itemVisual(target,{photo:state.settings.photoMix}),h('h2',{},t('Wie heißt das?','Bunun adı ne?')),h('button',{class:'listen-btn',onclick:()=>speak(target[state.settings.lang])},'🔊'));
+    }
+    shell.append(prompt);const grid=h('div',{class:'answer-grid'});shell.append(grid);root.append(shell);
+    for(const item of options){
+      const card=h('button',{class:'answer-card'});
+      if(mode==='listen'){card.append(itemVisual(item,{photo:state.settings.photoMix}));card.append(h('span',{},item[state.settings.lang]));}
+      else {card.append(h('span',{},item[state.settings.lang]));}
+      card.onclick=()=>answer(card,item===target,target);grid.append(card);
+    }
+    cleanup=renderMentorFab(root,()=>help(target,grid));
+    if(state.settings.autoHint)hintTimer=setTimeout(()=>{const btn=[...grid.children].find((b,i)=>options[i]===target);btn?.classList.add('hint');},8000);
+  }
+  function help(target,grid){const state=getState();const cards=[...grid.children];const correct=cards.find(c=>c.textContent.includes(target[state.settings.lang]));correct?.classList.add('hint');speak(t(`Schau genau. ${target.de}.`,`Dikkatlice bak. ${target.tr}.`));}
+  function answer(card,ok,target){if(locked)return;locked=true;recordAnswer(cat.id,ok,{game:mode});
+    if(ok){card.classList.add('correct');speak(t('Super! Richtig!','Aferin! Doğru!'));celebrate();toast(t('+1 Stern ⭐','+1 yıldız ⭐'));setTimeout(()=>{if(round++>=total){finish()}else next()},900)}
+    else{card.classList.add('wrong');speak(t('Noch einmal schauen.','Bir daha bakalım.'));setTimeout(()=>{card.classList.remove('wrong');locked=false;help(target,card.parentElement)},650)}
+  }
+  function finish(){cleanup();root.innerHTML='';root.append(h('section',{class:'panel prompt'},[h('div',{class:'prompt-icon'},'🏆'),h('h2',{},t('Geschafft!','Tamamlandı!')),h('p',{},t('Mino ist stolz auf dich. Möchtest du noch einmal spielen?','Mino seninle gurur duyuyor. Tekrar oynamak ister misin?')),h('div',{class:'hero-actions'},[h('button',{class:'btn',onclick:()=>{round=1;next()}},t('Nochmal','Tekrar')),h('button',{class:'btn secondary',onclick:onExit},t('Zurück','Geri'))])]))}
+  renderRound();return()=>{cleanup();clearTimeout(hintTimer)};
+}
+
+
+// ---- js/games/memory.js ----
+function renderMemory(root,{categoryId='animals',onExit}){
+  const cat=category(categoryId);const state=getState();const pairCount=state.settings.difficulty<=2?4:6;const chosen=sample(cat.items,pairCount);
+  let cards=shuffle(chosen.flatMap(x=>[{id:x.id+'-v',pair:x.id,kind:'visual',item:x},{id:x.id+'-w',pair:x.id,kind:'word',item:x}]));let open=[],matched=new Set(),lock=false;
+  root.innerHTML='';root.append(gameHeader(t('Memory','Hafıza'),0,pairCount,onExit));const panel=h('section',{class:'panel'});panel.append(h('div',{class:'prompt'},[h('h2',{},t('Finde die Paare','Çiftleri bul')),h('p',{},t('Verbinde Bild und Wort.','Resim ile kelimeyi eşleştir.'))]));const grid=h('div',{class:'memory-grid'});panel.append(grid);root.append(panel);
+  const cleanup=renderMentorFab(root,()=>speak(t('Merke dir gut, wo jedes Bild liegt.','Her resmin nerede olduğunu iyi hatırla.')));
+  function render(){grid.innerHTML='';for(const c of cards){const b=h('button',{class:'memory-card'+(matched.has(c.pair)?' matched':'')+(open.includes(c.id)?' open':'')});if(open.includes(c.id)||matched.has(c.pair)){if(c.kind==='visual')b.append(itemVisual(c.item,{photo:state.settings.photoMix}));else b.append(h('b',{},c.item[state.settings.lang]));}else b.textContent='🐚';b.onclick=()=>flip(c);grid.append(b)}}
+  function flip(c){if(lock||matched.has(c.pair)||open.includes(c.id))return;open.push(c.id);render();if(open.length===2){lock=true;const a=cards.find(x=>x.id===open[0]),b=cards.find(x=>x.id===open[1]);if(a.pair===b.pair){setTimeout(()=>{matched.add(a.pair);open=[];lock=false;recordAnswer(cat.id,true,{game:'memory'});speak(a.item[state.settings.lang]);celebrate();render();if(matched.size===pairCount)finish()},500)}else setTimeout(()=>{open=[];lock=false;render()},800)}}
+  function finish(){setTimeout(()=>{cleanup();root.innerHTML='';root.append(h('section',{class:'panel prompt'},[h('div',{class:'prompt-icon'},'⭐'),h('h2',{},t('Tolles Gedächtnis!','Harika hafıza!')),h('button',{class:'btn',onclick:onExit},t('Weiter','Devam'))]))},500)}
+  render();return cleanup;
+}
+
+
+// ---- js/games/count.js ----
+
+
+
+const icons=['🍎','🐟','⭐','🚗','🌼','🍓','🐰'];
+function renderCount(root,{onExit}){let round=1,total=8;function draw(){root.innerHTML='';root.append(gameHeader(t('Zählen','Sayma'),round,total,onExit));const n=1+Math.floor(Math.random()*10),icon=sample(icons,1)[0];const panel=h('section',{class:'panel count-stage'});panel.append(h('div',{class:'prompt'},[h('h2',{},t('Wie viele sind es?','Kaç tane var?')),h('p',{},t('Zähle langsam und tippe auf die Zahl.','Yavaşça say ve sayıya dokun.'))]));const items=h('div',{class:'count-items'});for(let i=0;i<n;i++)items.append(h('span',{},icon));panel.append(items);const row=h('div',{class:'number-row'});for(let i=1;i<=10;i++){const b=h('button',{class:'number-btn',onclick:()=>answer(i,n,b)},i);row.append(b)}panel.append(row);root.append(panel)}function answer(v,n,b){const ok=v===n;recordAnswer('numbers',ok,{game:'count'});if(ok){b.classList.add('correct');speak(getState().settings.lang==='tr'?String(n):String(n));celebrate();setTimeout(()=>{if(round++>=total)finish();else draw()},700)}else{b.classList.add('wrong');speak(t('Noch einmal zählen.','Bir daha say.'));setTimeout(()=>b.classList.remove('wrong'),500)}}function finish(){root.innerHTML='';root.append(h('section',{class:'panel prompt'},[h('div',{class:'prompt-icon'},'🔟'),h('h2',{},t('Super gezählt!','Harika saydın!')),h('button',{class:'btn',onclick:onExit},t('Fertig','Bitti'))]))}draw()}
+
+
+// ---- js/games/sort.js ----
+
+
+
+
+const pairs=[['animals','food'],['vehicles','animals'],['clothes','food'],['nature','home']];
+function renderSort(root,{onExit}){const ids=sample(pairs,1)[0],a=category(ids[0]),b=category(ids[1]),lang=getState().settings.lang;let remaining=shuffle([...sample(a.items,4).map(x=>({...x,cat:a.id})),...sample(b.items,4).map(x=>({...x,cat:b.id}))]);let selected=null;root.innerHTML='';root.append(gameHeader(t('Sortieren','Sınıflandır'),0,remaining.length,onExit));const panel=h('section',{class:'panel'});panel.append(h('div',{class:'prompt'},[h('h2',{},t('Was gehört wohin?','Hangisi nereye ait?')),h('p',{},t('Tippe erst auf ein Bild und dann auf die richtige Gruppe.','Önce resme, sonra doğru gruba dokun.'))]));const items=h('div',{class:'sort-items'}),zones=h('div',{class:'sort-zones'});panel.append(items,zones);root.append(panel);
+  function draw(){items.innerHTML='';for(const x of remaining){const btn=h('button',{class:'sort-item'+(selected===x?' selected':''),onclick:()=>{selected=x;draw()}},x.emoji);btn.title=x[lang];items.append(btn)}zones.innerHTML='';for(const c of [a,b]){zones.append(h('button',{class:'sort-zone',onclick:()=>drop(c.id)},[h('div',{class:'prompt-icon'},c.icon),h('h3',{},c[lang])]))}if(!remaining.length)finish()}
+  function drop(catId){if(!selected){speak(t('Wähle zuerst ein Bild.','Önce bir resim seç.'));return}const ok=selected.cat===catId;recordAnswer('sort',ok,{game:'sort'});if(ok){speak(t('Richtig!','Doğru!'));remaining=remaining.filter(x=>x!==selected);selected=null;draw()}else{speak(t('Das gehört in die andere Gruppe.','Bu diğer gruba ait.'))}}
+  function finish(){setTimeout(()=>{root.innerHTML='';root.append(h('section',{class:'panel prompt'},[h('div',{class:'prompt-icon'},'🧺'),h('h2',{},t('Alles richtig sortiert!','Hepsini doğru ayırdın!')),h('button',{class:'btn',onclick:onExit},t('Weiter','Devam'))]))},300)}draw()}
+
+
+// ---- js/games/trace.js ----
+function renderTrace(root,{onExit}){let symbol=getState().settings.lang==='tr'?['A','B','C','D','E','1','2','3','4','5'][Math.floor(Math.random()*10)]:['A','B','C','D','E','1','2','3','4','5'][Math.floor(Math.random()*10)];root.innerHTML='';root.append(gameHeader(t('Nachfahren','Üzerinden Geç'),0,1,onExit));const panel=h('section',{class:'panel trace-wrap'});panel.append(h('div',{class:'prompt'},[h('h2',{},t('Fahre mit dem Finger nach','Parmağınla üzerinden geç')),h('div',{class:'trace-letter'},symbol)]));const c=h('canvas',{class:'trace-canvas',width:'700',height:'700'});panel.append(c);const actions=h('div',{class:'trace-actions'},[h('button',{class:'btn secondary',onclick:clear},t('Neu','Temizle')),h('button',{class:'btn',onclick:done},t('Fertig','Bitti'))]);panel.append(actions);root.append(panel);const ctx=c.getContext('2d');let drawing=false,last=null,distance=0;drawGuide();function pos(e){const r=c.getBoundingClientRect(),p=e.touches?.[0]||e;return{x:(p.clientX-r.left)*c.width/r.width,y:(p.clientY-r.top)*c.height/r.height}}c.addEventListener('pointerdown',e=>{drawing=true;last=pos(e);c.setPointerCapture(e.pointerId)});c.addEventListener('pointermove',e=>{if(!drawing)return;const p=pos(e);ctx.strokeStyle='#318ee2';ctx.lineWidth=32;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();distance+=Math.hypot(p.x-last.x,p.y-last.y);last=p});c.addEventListener('pointerup',()=>drawing=false);function drawGuide(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.globalAlpha=.20;ctx.font='bold 520px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#4b9fe1';ctx.fillText(symbol,350,380);ctx.restore()}function clear(){distance=0;drawGuide()}function done(){if(distance<350){speak(t('Fahre noch ein bisschen weiter nach.','Biraz daha üzerinden geç.'));return}recordAnswer('trace',true,{game:'trace'});celebrate();speak(t('Sehr schön geschrieben!','Çok güzel yazdın!'));setTimeout(onExit,900)}}
+
+
+// ---- js/games/story.js ----
+function renderStory(root,{onExit}){const lang=getState().settings.lang,story=stories[Math.floor(Math.random()*stories.length)],s=story[lang];root.innerHTML='';root.append(gameHeader(t('Geschichte','Hikâye'),0,1,onExit));const panel=h('section',{class:'panel story-card'});panel.append(h('div',{class:'story-scene'},story.emoji),h('h2',{},s.title),h('div',{class:'story-text'},s.text));panel.append(h('button',{class:'listen-btn',onclick:()=>speak(s.text)},'🔊'));panel.append(h('div',{class:'story-q'},s.q));const grid=h('div',{class:'answer-grid'});const correct=s.answers[s.correct];for(const ans of shuffle(s.answers)){const b=h('button',{class:'answer-card',onclick:()=>answer(ans,correct,b)},ans);grid.append(b)}panel.append(grid);root.append(panel);setTimeout(()=>speak(s.text),300);function answer(ans,correct,b){const ok=ans===correct;recordAnswer('stories',ok,{game:'story'});if(ok){b.classList.add('correct');celebrate();speak(t('Genau! Sehr gut zugehört.','Aynen! Çok iyi dinledin.'));setTimeout(onExit,1000)}else{b.classList.add('wrong');speak(t('Hör noch einmal genau zu.','Bir daha dikkatlice dinle.'));setTimeout(()=>b.classList.remove('wrong'),600)}}}
+
+
+// ---- js/games/rhythm.js ----
+function renderRhythm(root,{onExit}){let level=1,seq=[],input=[],playing=false;root.innerHTML='';root.append(gameHeader(t('Rhythmus','Ritim'),level,5,onExit));const panel=h('section',{class:'panel rhythm-stage'});panel.append(h('img',{class:'rhythm-fish',src:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A',alt:'Mino'}),h('h2',{},t('Höre und wiederhole','Dinle ve tekrar et')),h('p',{},t('Blau klingt tief, Gelb klingt hoch.','Mavi ince değil, kalın; sarı daha ince ses çıkarır.')));const beatRow=h('div',{class:'beat-row'});panel.append(beatRow);const pads=h('div',{class:'hero-actions',style:'justify-content:center'},[h('button',{class:'btn',onclick:()=>tap(0)},'🔵 '+t('Tief','Kalın')),h('button',{class:'btn warn',onclick:()=>tap(1)},'🟡 '+t('Hoch','İnce'))]);panel.append(pads,h('button',{class:'btn secondary',style:'margin-top:14px',onclick:play},'▶️ '+t('Noch einmal hören','Tekrar dinle')));root.append(panel);newSeq();function tone(high){try{const ac=new (window.AudioContext||window.webkitAudioContext)(),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=high?660:360;g.gain.value=.08;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.23)}catch{}}function newSeq(){seq=Array.from({length:Math.min(6,2+level)},()=>Math.random()>.5?1:0);input=[];beatRow.innerHTML='';seq.forEach(()=>beatRow.append(h('span',{class:'beat'})));setTimeout(play,350)}async function play(){if(playing)return;playing=true;input=[];const dots=[...beatRow.children];for(let i=0;i<seq.length;i++){dots.forEach(x=>x.classList.remove('on'));dots[i].classList.add('on');tone(seq[i]);await new Promise(r=>setTimeout(r,520))}dots.forEach(x=>x.classList.remove('on'));playing=false}function tap(v){if(playing)return;tone(v);input.push(v);const i=input.length-1;if(v!==seq[i]){recordAnswer('rhythm',false,{game:'rhythm'});speak(t('Fast. Hör noch einmal.','Az kaldı. Tekrar dinle.'));input=[];setTimeout(play,450);return}if(input.length===seq.length){recordAnswer('rhythm',true,{game:'rhythm'});celebrate();if(level++>=5){speak(t('Du bist ein Rhythmus-Star!','Sen bir ritim yıldızısın!'));setTimeout(onExit,1000)}else{setTimeout(newSeq,650)}}}}
+
+
+// ---- js/games/oddone.js ----
+function renderOddOne(root,{onExit}){let round=1,total=8;function draw(){const [a,b]=sample(categories.filter(c=>c.items.length>=4),2),odd=sample(b.items,1)[0],normal=sample(a.items,3),options=shuffle([...normal,odd]),state=getState();root.innerHTML='';root.append(gameHeader(t('Was passt nicht?','Hangisi Farklı?'),round,total,onExit));const panel=h('section',{class:'panel'});panel.append(h('div',{class:'prompt'},[h('h2',{},t('Welches Bild passt nicht dazu?','Hangi resim gruba ait değil?')),h('p',{},t(`Drei Bilder gehören zu „${a.de}“.`,`Üç resim “${a.tr}” grubuna ait.`))]));const grid=h('div',{class:'answer-grid'});for(const x of options){const c=h('button',{class:'answer-card',onclick:()=>answer(x===odd,c)});c.append(itemVisual(x,{photo:state.settings.photoMix}),h('span',{},x[state.settings.lang]));grid.append(c)}panel.append(grid);root.append(panel)}function answer(ok,c){recordAnswer('logic',ok,{game:'oddone'});if(ok){c.classList.add('correct');celebrate();speak(t('Richtig entdeckt!','Doğru buldun!'));setTimeout(()=>{if(round++>=total)onExit();else draw()},700)}else{c.classList.add('wrong');speak(t('Das gehört zur Gruppe.','Bu gruba ait.'));setTimeout(()=>c.classList.remove('wrong'),500)}}draw()}
+
+
+// ---- js/games/speak.js ----
+
+
+
+
+function norm(x){return (x||'').toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zçğıöşü0-9 ]/gi,'').trim()}
+function renderSpeak(root,{categoryId='animals',onExit}){const cat=category(categoryId);let round=1,total=8;function draw(){const state=getState(),item=cat.items[Math.floor(Math.random()*cat.items.length)],word=item[state.settings.lang];root.innerHTML='';root.append(gameHeader(t('Nachsprechen','Tekrar Söyle'),round,total,onExit));const panel=h('section',{class:'panel prompt'});panel.append(itemVisual(item,{photo:state.settings.photoMix}),h('h2',{},word),h('p',{},t('Höre das Wort und sprich es nach.','Kelimeyi dinle ve tekrar söyle.')),h('button',{class:'listen-btn',onclick:()=>speak(word)},'🔊'));const mic=h('button',{class:'btn',onclick:()=>listen(item,word,mic)},'🎙️ '+t('Jetzt sprechen','Şimdi söyle'));panel.append(mic);root.append(panel);setTimeout(()=>speak(word),250)}function listen(item,word,button){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){speak(t('Dein Browser unterstützt die automatische Spracherkennung hier nicht. Sprich das Wort trotzdem laut nach.','Tarayıcın burada otomatik konuşma tanımayı desteklemiyor. Yine de kelimeyi yüksek sesle tekrar et.'));button.textContent='✅ '+t('Gesagt','Söyledim');button.onclick=()=>success();return}const r=new SR();r.lang=getState().settings.lang==='tr'?'tr-TR':'de-DE';r.interimResults=false;r.maxAlternatives=3;button.textContent='🎧 '+t('Ich höre...','Dinliyorum...');r.onresult=e=>{const texts=[...e.results[0]].map(x=>x.transcript);const ok=texts.some(x=>norm(x).includes(norm(word))||norm(word).includes(norm(x)));recordAnswer(cat.id,ok,{game:'speak'});if(ok){celebrate();speak(t('Sehr schön gesprochen!','Çok güzel söyledin!'));setTimeout(success,850)}else{speak(t(`Ich habe dich noch nicht verstanden. Sag noch einmal: ${word}.`,`Seni tam anlayamadım. Bir daha söyle: ${word}.`));button.textContent='🎙️ '+t('Nochmal','Tekrar');}};r.onerror=()=>{button.textContent='🎙️ '+t('Nochmal','Tekrar')};r.start()}function success(){recordAnswer(cat.id,true,{game:'speak-manual'});if(round++>=total)onExit();else draw()}draw()}
+
+
+// ---- js/games/sequence.js ----
+
+
+
+const sets=[['🔴','🔵'],['⭐','🌙'],['🍎','🍌'],['🐟','🐠'],['🟢','🟡','🔵']];
+function renderSequence(root,{onExit}){let round=1,total=8;function draw(){const base=sets[Math.floor(Math.random()*sets.length)],len=base.length===2?5:6,seq=Array.from({length:len},(_,i)=>base[i%base.length]),correct=base[len%base.length],options=shuffle([...new Set([correct,...base,...sets.flat()])]).slice(0,4);if(!options.includes(correct))options[0]=correct;root.innerHTML='';root.append(gameHeader(t('Muster ergänzen','Örüntüyü Tamamla'),round,total,onExit));const panel=h('section',{class:'panel'});panel.append(h('div',{class:'prompt'},[h('h2',{},t('Was kommt als Nächstes?','Sırada ne var?')),h('p',{},t('Schau dir das Muster genau an.','Örüntüye dikkatlice bak.'))]));const row=h('div',{style:'display:flex;gap:8px;justify-content:center;flex-wrap:wrap;font-size:48px;padding:18px'});seq.forEach(x=>row.append(h('span',{},x)));row.append(h('span',{},'❓'));panel.append(row);const grid=h('div',{class:'answer-grid'});for(const x of shuffle(options)){const b=h('button',{class:'answer-card',onclick:()=>answer(x===correct,b)},h('span',{class:'big'},x));grid.append(b)}panel.append(grid);root.append(panel)}function answer(ok,b){recordAnswer('logic',ok,{game:'sequence'});if(ok){b.classList.add('correct');celebrate();speak(t('Genau! Du hast das Muster erkannt.','Doğru! Örüntüyü fark ettin.'));setTimeout(()=>{if(round++>=total)onExit();else draw()},700)}else{b.classList.add('wrong');speak(t('Schau dir die Reihenfolge noch einmal an.','Sıraya bir daha bak.'));setTimeout(()=>b.classList.remove('wrong'),500)}}draw()}
+
+
+// ---- js/games/puzzle.js ----
+function renderPuzzle(root,{onExit}){
+  const pool=[...category('people').items,...category('emotions').items].filter(x=>x.image);
+  const item=pool[Math.floor(Math.random()*pool.length)];let order=shuffle([0,1,2,3]);while(order.every((x,i)=>x===i))order=shuffle(order);let first=null;
+  root.innerHTML='';root.append(gameHeader(t('Foto-Puzzle','Fotoğraf Yapbozu'),0,1,onExit));const panel=h('section',{class:'panel prompt'});panel.append(h('h2',{},t('Setze das Foto zusammen','Fotoğrafı birleştir')),h('p',{},t('Tippe zwei Teile an, um sie zu tauschen.','İki parçaya dokunarak yerlerini değiştir.')));const board=h('div',{style:'display:grid;grid-template-columns:1fr 1fr;gap:4px;max-width:430px;margin:16px auto;aspect-ratio:1'});panel.append(board);root.append(panel);
+  function draw(){board.innerHTML='';order.forEach((piece,index)=>{const x=piece%2,y=Math.floor(piece/2),b=h('button',{style:`border-radius:16px;border:${first===index?'5px solid #ffbf46':'2px solid white'};background-image:url('${item.image}');background-size:200% 200%;background-position:${x*100}% ${y*100}%;min-height:120px;box-shadow:0 5px 14px rgba(0,0,0,.08)`,onclick:()=>pick(index)});board.append(b)})}
+  function pick(i){if(first===null){first=i;draw();return}if(first===i){first=null;draw();return}[order[first],order[i]]=[order[i],order[first]];first=null;draw();if(order.every((x,j)=>x===j)){recordAnswer('puzzle',true,{game:'puzzle'});celebrate();speak(t('Puzzle geschafft! Großartig!','Yapbozu tamamladın! Harika!'));setTimeout(onExit,1100)}}draw()
+}
+
+
+// ---- js/app.js ----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const app=$('#app');let cleanupCurrent=()=>{};
+const dict={de:{navHome:'Start',navLearn:'Lernen',navGames:'Spiele',navAquarium:'Aquarium'},tr:{navHome:'Ana Sayfa',navLearn:'Öğren',navGames:'Oyunlar',navAquarium:'Akvaryum'}};
+function state(){return getState()}
+function L(obj){const lang=state().settings.lang;return obj[lang]||obj.de||obj.tr}
+function setHash(x){location.hash=x.startsWith('#')?x:'#'+x}
+function parseHash(){const raw=(location.hash||'#home').slice(1);const [route,...parts]=raw.split('/');return{route,parts}}
+function routeButton(route){setHash(route)}
+
+$$('[data-route]').forEach(b=>b.addEventListener('click',()=>routeButton(b.dataset.route)));
+$('#lang-toggle').addEventListener('click',()=>{setSetting('lang',state().settings.lang==='de'?'tr':'de');refreshChrome();renderRoute()});
+window.addEventListener('hashchange',renderRoute);window.addEventListener('minik-state',refreshChrome);
+
+function refreshChrome(){const s=state();$('#star-count').textContent=s.stars;$('#lang-toggle').textContent=s.settings.lang.toUpperCase();$$('[data-i18n]').forEach(el=>el.textContent=dict[s.settings.lang][el.dataset.i18n]);const {route}=parseHash();$$('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.route===route));}
+function clear(){cleanupCurrent?.();cleanupCurrent=()=>{};app.innerHTML='';window.scrollTo({top:0,behavior:'instant'})}
+function renderRoute(){clear();refreshChrome();const {route,parts}=parseHash();if(route==='home')return renderHome();if(route==='learn')return renderLearn();if(route==='games')return renderGames();if(route==='aquarium')return renderAquarium();if(route==='parents')return renderParents();if(route==='category')return renderCategory(parts[0]);if(route==='play')return renderPlay(parts[0],parts[1]);setHash('home')}
+
+function renderHome(){const s=state(),acc=accuracy(s),daily=Math.min(10,s.dailyCorrect||0);const hero=h('section',{class:'hero'});hero.append(h('div',{},[h('h1',{},t('Lernen wird zum Abenteuer.','Öğrenmek bir maceraya dönüşsün.')),h('p',{},t('Mino begleitet dich durch Wörter, Denken, Geschichten, Zahlen, Musik und viele kleine Lernspiele.','Mino; kelimeler, düşünme, hikâyeler, sayılar, müzik ve birçok küçük öğrenme oyununda sana eşlik eder.')),h('div',{class:'hero-actions'},[h('button',{class:'btn',onclick:()=>setHash('learn')},'▶️ '+t('Lernen starten','Öğrenmeye başla')),h('button',{class:'btn secondary',onclick:()=>setHash('games')},'🎮 '+t('Alle Spiele','Tüm oyunlar'))])]),h('img',{class:'hero-fish',src:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A',alt:'Mino'}));app.append(hero);
+  const stats=h('div',{class:'quick-stats'},[stat('⭐',s.stars,t('Sterne','Yıldız')),stat('🔥',s.bestStreak,t('Beste Serie','En iyi seri')),stat('🎯',acc+'%',t('Trefferquote','Doğruluk'))]);app.append(stats);
+  app.append(sectionHead(t('Tagesziel','Günlük hedef'),t(`${daily} von 10 richtigen Antworten`,`10 doğru cevaptan ${daily}`)));const dailyPanel=h('section',{class:'panel'});dailyPanel.append(h('div',{class:'game-progress'},h('i',{style:`width:${daily*10}%`})),h('p',{style:'margin:10px 0 0;color:var(--muted)'},daily>=10?t('Tagesziel geschafft! Mino hat eine Überraschung im Aquarium.','Günlük hedef tamamlandı! Mino’nun akvaryumda bir sürprizi var.'):t('Noch ein paar richtige Antworten bis zum Tagesziel.','Günlük hedef için birkaç doğru cevap daha.')));app.append(dailyPanel);
+  app.append(sectionHead(t('Beliebte Lernwelten','Popüler öğrenme dünyaları'),t('Wähle eine Welt und starte.','Bir dünya seç ve başla.')));const grid=h('div',{class:'grid'});categories.slice(0,8).forEach(c=>grid.append(worldCard(c)));app.append(grid);
+  app.append(sectionHead(t('Minos Tipp','Mino’nun önerisi'),''));const tip=h('section',{class:'panel',style:'display:flex;gap:14px;align-items:center'});tip.append(h('img',{src:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A',style:'width:95px',alt:'Mino'}),h('div',{},[h('b',{},t('Kurz und oft ist besser als lang und selten.','Kısa ve sık çalışmak, uzun ve seyrek çalışmaktan daha iyidir.')),h('p',{style:'color:var(--muted);margin:5px 0 0'},t('5–10 Minuten pro Runde reichen. MINIK passt die Schwierigkeit automatisch an den Lernfortschritt an.','Her tur için 5–10 dakika yeterlidir. MINIK zorluğu öğrenme ilerlemesine göre otomatik ayarlar.'))]));app.append(tip)}
+function stat(icon,val,label){return h('div',{class:'stat-card'},[h('span',{style:'font-size:20px'},icon),h('b',{},val),h('span',{},label)])}
+function sectionHead(title,sub){return h('div',{class:'section-head'},h('div',{},[h('h2',{},title),sub?h('p',{},sub):'']))}
+function worldCard(c){const p=categoryAccuracy(c.id),el=h('button',{class:'world-card',onclick:()=>setHash('category/'+c.id)});el.append(h('span',{class:'emoji'},c.icon),h('h3',{},L(c)),h('p',{},t(`${c.items.length} Begriffe • mehrere Übungen`,`${c.items.length} kavram • farklı alıştırmalar`)),h('span',{class:'tag'},p?`${p}% ${t('richtig','doğru')}`:t('Neu','Yeni')),h('div',{class:'progress'},h('i',{style:`width:${p}%`})));return el}
+
+function renderLearn(){app.append(sectionHead(t('Lernwelten','Öğrenme dünyaları'),t('Wörter, Fotos, Alltag, Denken und Sprache.','Kelimeler, fotoğraflar, günlük yaşam, düşünme ve dil.')));const grid=h('div',{class:'grid'});categories.forEach(c=>grid.append(worldCard(c)));app.append(grid)}
+
+function renderCategory(id){const c=category(id);if(!c)return setHash('learn');const hero=h('section',{class:'hero',style:'min-height:210px'});hero.append(h('div',{},[h('div',{style:'font-size:50px'},c.icon),h('h1',{},L(c)),h('p',{},t(`${c.items.length} Begriffe. Lernen, hören, sprechen und spielen.`,`${c.items.length} kavram. Öğren, dinle, konuş ve oyna.`)),h('div',{class:'hero-actions'},[h('button',{class:'btn',onclick:()=>setHash(`play/listen/${id}`)},'👂 '+t('Hören & Zeigen','Dinle ve Göster')),h('button',{class:'btn secondary',onclick:()=>setHash(`play/speak/${id}`)},'🎙️ '+t('Nachsprechen','Tekrar Söyle'))])]),h('img',{class:'hero-fish',src:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A',alt:'Mino'}));app.append(hero);
+  app.append(sectionHead(t('Übungen','Alıştırmalar'),''));const modes=[['picture','👀',t('Bild erkennen','Resmi Tanı')],['memory','🧠',t('Memory','Hafıza')],['listen','👂',t('Hören & Zeigen','Dinle ve Göster')],['speak','🎙️',t('Nachsprechen','Tekrar Söyle')]];const mg=h('div',{class:'grid'});modes.forEach(([m,i,n])=>mg.append(h('button',{class:'game-card',onclick:()=>setHash(`play/${m}/${id}`)},[h('span',{class:'emoji'},i),h('h3',{},n),h('p',{},t('Kurze spielerische Runde mit Mino.','Mino ile kısa ve eğlenceli tur.'))])));app.append(mg);
+  app.append(sectionHead(t('Wörter entdecken','Kelimeleri keşfet'),c.photo?t('Hier sind auch echte Menschen auf Fotos dabei.','Burada gerçek insan fotoğrafları da var.'):t('Tippe auf eine Karte, um das Wort zu hören.','Kelimeyi duymak için karta dokun.')));const items=h('div',{class:'grid'});const s=state();c.items.forEach(x=>{const b=h('button',{class:'world-card',onclick:()=>speak(x[s.settings.lang])});b.append(itemVisual(x,{photo:s.settings.photoMix}),h('h3',{},x[s.settings.lang]),h('span',{class:'tag'},'🔊'));items.append(b)});app.append(items)}
+
+function renderGames(){app.append(sectionHead(t('Spielplatz','Oyun alanı'),t('Viele unterschiedliche Fähigkeiten statt immer derselben Quizart.','Hep aynı soru tipi yerine farklı beceriler.')));const grid=h('div',{class:'grid'});gameTypes.forEach(g=>{const card=h('button',{class:'game-card',onclick:()=>launchGameMenu(g.id)});card.append(h('span',{class:'emoji'},g.icon),h('h3',{},L(g)),h('p',{},state().settings.lang==='tr'?g.descTr:g.descDe));grid.append(card)});app.append(grid)}
+function launchGameMenu(type){if(['listen','picture','memory','speak'].includes(type)){app.innerHTML='';app.append(sectionHead(t('Lernwelt wählen','Öğrenme dünyası seç'),t('Welche Wörter möchtest du üben?','Hangi kelimeleri çalışmak istiyorsun?')));const grid=h('div',{class:'grid'});categories.filter(c=>c.items.length>=6).forEach(c=>grid.append(h('button',{class:'world-card',onclick:()=>setHash(`play/${type}/${c.id}`)},[h('span',{class:'emoji'},c.icon),h('h3',{},L(c))])));app.append(grid,h('button',{class:'btn secondary',style:'margin-top:16px',onclick:()=>renderGames()},t('Zurück','Geri')))}else setHash(`play/${type}`)}
+
+function renderPlay(type,catId){const exit=()=>setHash(catId?'category/'+catId:'games');const opts={categoryId:catId||'animals',onExit:exit};if(type==='listen')cleanupCurrent=renderChoice(app,{...opts,mode:'listen'})||(()=>{});else if(type==='picture')cleanupCurrent=renderChoice(app,{...opts,mode:'picture'})||(()=>{});else if(type==='memory')cleanupCurrent=renderMemory(app,opts)||(()=>{});else if(type==='count')renderCount(app,opts);else if(type==='sort')renderSort(app,opts);else if(type==='trace')renderTrace(app,opts);else if(type==='story')renderStory(app,opts);else if(type==='rhythm')renderRhythm(app,opts);else if(type==='oddone')renderOddOne(app,opts);else if(type==='speak')renderSpeak(app,opts);else if(type==='sequence')renderSequence(app,opts);else if(type==='puzzle')renderPuzzle(app,opts);else setHash('games')}
+
+function renderAquarium(){const s=state();app.append(sectionHead(t('Minos Aquarium','Mino’nun akvaryumu'),t('Sammle Sterne und schalte neue Dinge frei.','Yıldız topla ve yeni şeylerin kilidini aç.')));const aq=h('section',{class:'aquarium'});aq.append(h('img',{class:'aqua-fish',src:'data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20220%20160%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22b%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%2339b8ff%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%232476d2%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22f%22%20x1%3D%220%22%20x2%3D%221%22%3E%3Cstop%20stop-color%3D%22%23ffd15b%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff9d2e%22%2F%3E%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Cpath%20d%3D%22M60%2080C28%2045%2012%2040%2010%2080c2%2040%2018%2035%2050%200z%22%20fill%3D%22url%28%23f%29%22%2F%3E%0A%20%20%3Cellipse%20cx%3D%22122%22%20cy%3D%2280%22%20rx%3D%2272%22%20ry%3D%2253%22%20fill%3D%22url%28%23b%29%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M110%2029c8-20%2028-22%2034%203-11-4-21-4-34-3z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M112%20131c10%2020%2029%2022%2035-3-11%204-21%204-35%203z%22%20fill%3D%22%2342d29a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22153%22%20cy%3D%2265%22%20r%3D%2214%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22158%22%20cy%3D%2266%22%20r%3D%226%22%20fill%3D%22%2318304f%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%2263%22%20r%3D%222%22%20fill%3D%22%23fff%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M160%2091c-11%2011-27%2011-38%201%22%20fill%3D%22none%22%20stroke%3D%22%2318304f%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22172%22%20cy%3D%2284%22%20r%3D%227%22%20fill%3D%22%23ff8fa0%22%20opacity%3D%22.65%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M198%2080l17-12v24z%22%20fill%3D%22%23ffd15b%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22102%22%20cy%3D%2253%22%20r%3D%225%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2286%22%20cy%3D%2272%22%20r%3D%224%22%20fill%3D%22%238ddcff%22%20opacity%3D%22.7%22%2F%3E%0A%3C%2Fsvg%3E%0A',alt:'Mino'}),h('i',{class:'bubble'}),h('i',{class:'bubble'}),h('i',{class:'bubble'}));if(s.unlocked.includes('castle'))aq.append(h('div',{style:'position:absolute;bottom:16%;right:9%;font-size:80px;z-index:2'},'🏰'));if(s.unlocked.includes('coral'))aq.append(h('div',{style:'position:absolute;bottom:12%;left:8%;font-size:70px;z-index:2'},'🪸'));if(s.unlocked.includes('friend'))aq.append(h('div',{style:'position:absolute;top:35%;left:12%;font-size:56px;z-index:2'},'🐡'));if(s.unlocked.includes('rainbow'))aq.append(h('div',{style:'position:absolute;top:4%;left:9%;font-size:90px;z-index:1'},'🌈'));if(s.unlocked.includes('crown'))aq.append(h('div',{style:'position:absolute;top:30%;left:52%;font-size:38px;z-index:4;transform:translateX(-50%)'},'👑'));app.append(aq);app.append(sectionHead(t('Belohnungen','Ödüller'),`${s.stars} ⭐`));const strip=h('div',{class:'reward-strip'});rewards.forEach(r=>{const unlocked=s.unlocked.includes(r.id),c=h('div',{class:'reward-card'+(unlocked?'':' locked')},[h('div',{class:'emoji'},r.emoji),h('b',{},L(r)),h('small',{},unlocked?t('Freigeschaltet','Açıldı'):`${r.stars} ⭐`)]);strip.append(c)});app.append(strip)}
+
+function renderParents(){const s=state();if(s.settings.parentPin&&!sessionStorage.getItem('minik-parent-ok'))return renderPinGate();app.append(sectionHead(t('Elternbereich','Ebeveyn alanı'),t('Fortschritt, Schwierigkeit, Sprache und Stimme einstellen.','İlerleme, zorluk, dil ve ses ayarları.')));app.append(h('div',{class:'quick-stats'},[stat('✅',s.totalCorrect,t('Richtig','Doğru')),stat('🎯',accuracy(s)+'%',t('Trefferquote','Doğruluk')),stat('⭐',s.stars,t('Sterne','Yıldız'))]));
+  app.append(sectionHead(t('Lerneinstellungen','Öğrenme ayarları'),''));const grid=h('div',{class:'settings-grid'});
+  grid.append(settingSelect(t('Sprache','Dil'),'lang',[['de','Deutsch'],['tr','Türkçe']],s.settings.lang,v=>{setSetting('lang',v);refreshChrome();renderParents()}));
+  grid.append(settingSelect(t('Antwortmöglichkeiten','Cevap seçenekleri'),'difficulty',[[2,'2'],[4,'4'],[6,'6']],s.settings.difficulty,v=>setSetting('difficulty',Number(v)),t('Bei adaptiver Schwierigkeit wird dieser Wert automatisch angepasst.','Uyarlanabilir zorluk açıkken bu değer otomatik ayarlanır.')));
+  grid.append(settingToggle(t('Adaptive Schwierigkeit','Uyarlanabilir zorluk'),t('MINIK reduziert oder erhöht die Auswahl anhand der bisherigen Trefferquote.','MINIK önceki doğruluk oranına göre seçenek sayısını azaltır veya artırır.'),s.settings.adaptive,v=>setSetting('adaptive',v)));
+  grid.append(settingToggle(t('Automatische Hilfe','Otomatik yardım'),t('Mino markiert nach einigen Sekunden einen Hinweis.','Mino birkaç saniye sonra ipucu gösterir.'),s.settings.autoHint,v=>setSetting('autoHint',v)));
+  grid.append(settingToggle(t('Echte Fotos verwenden','Gerçek fotoğrafları kullan'),t('Menschen und Gefühle werden – wenn vorhanden – als echte Fotos gezeigt.','İnsanlar ve duygular mümkün olduğunda gerçek fotoğraflarla gösterilir.'),s.settings.photoMix,v=>setSetting('photoMix',v)));
+  const rate=h('div',{class:'setting'},[h('label',{},t('Sprechgeschwindigkeit','Konuşma hızı')),h('input',{type:'range',min:'.7',max:'1.15',step:'.05',value:s.settings.voiceRate,oninput:e=>setSetting('voiceRate',Number(e.target.value))}),h('button',{class:'btn secondary',style:'margin-top:8px',onclick:()=>speak(t('Hallo, ich bin Mino. Lernen wir zusammen!','Merhaba, ben Mino. Birlikte öğrenelim!'))},'🔊 '+t('Stimme testen','Sesi dene'))]);grid.append(rate);
+  const cloud=h('div',{class:'setting'},[h('label',{},t('Sehr natürliche Cloud-Stimme','Çok doğal bulut sesi')),h('input',{type:'text',placeholder:'https://dein-tts-endpunkt.example/tts',value:s.settings.cloudTtsEndpoint||'',onchange:e=>setSetting('cloudTtsEndpoint',e.target.value.trim())}),h('small',{},t('Optional. Hier kommt nur die URL eines sicheren TTS-Servers hinein – niemals ein OpenAI- oder ElevenLabs-API-Key direkt in GitHub.','İsteğe bağlı. Buraya yalnızca güvenli bir TTS sunucusunun adresi girilir; OpenAI veya ElevenLabs API anahtarı GitHub’a doğrudan yazılmaz.'))]);grid.append(cloud);
+  const pin=h('div',{class:'setting'},[h('label',{},t('Eltern-PIN','Ebeveyn PIN’i')),h('input',{type:'password',inputmode:'numeric',maxlength:'6',placeholder:t('leer = kein PIN','boş = PIN yok'),value:s.settings.parentPin||'',onchange:e=>setSetting('parentPin',e.target.value.replace(/\D/g,'').slice(0,6))}),h('small',{},t('Optionaler Schutz für diesen Bereich.','Bu alan için isteğe bağlı koruma.'))]);grid.append(pin);app.append(grid);
+  app.append(sectionHead(t('Fortschritt nach Lernwelt','Öğrenme dünyasına göre ilerleme'),''));const table=h('table',{class:'stats-table'});table.append(h('thead',{},h('tr',{},[h('th',{},t('Bereich','Alan')),h('th',{},t('Antworten','Cevap')),h('th',{},t('Richtig','Doğru')),h('th',{},'⭐')])));const body=h('tbody');categories.forEach(c=>{const x=s.stats[c.id]||{answers:0,correct:0,stars:0};body.append(h('tr',{},[h('td',{},c.icon+' '+L(c)),h('td',{},x.answers),h('td',{},x.answers?Math.round(x.correct/x.answers*100)+'%':'–'),h('td',{},x.stars||0)]))});table.append(body);app.append(h('section',{class:'panel',style:'overflow:auto'},table));
+  app.append(sectionHead(t('Daten','Veriler'),''));app.append(h('section',{class:'panel'},[h('p',{style:'color:var(--muted)'},t('Der Lernfortschritt wird nur auf diesem Gerät im Browser gespeichert.','Öğrenme ilerlemesi yalnızca bu cihazın tarayıcısında saklanır.')),h('button',{class:'btn danger',onclick:()=>openMentor(t('Wirklich alle Sterne und Statistiken löschen?','Tüm yıldızlar ve istatistikler silinsin mi?'),[{label:t('Abbrechen','İptal'),secondary:true},{label:t('Löschen','Sil'),onClick:()=>{resetProgress();renderRoute()}}])},t('Fortschritt zurücksetzen','İlerlemeyi sıfırla'))]))}
+function renderPinGate(){app.append(h('section',{class:'panel prompt'},[h('div',{class:'prompt-icon'},'🔒'),h('h2',{},t('Eltern-PIN','Ebeveyn PIN’i')),h('p',{},t('Bitte PIN eingeben.','Lütfen PIN’i girin.'))]));const input=h('input',{type:'password',inputmode:'numeric',maxlength:'6',style:'display:block;margin:10px auto;padding:13px;border:1px solid var(--line);border-radius:14px;font-size:22px;text-align:center;width:180px'});const btn=h('button',{class:'btn',onclick:()=>{if(input.value===state().settings.parentPin){sessionStorage.setItem('minik-parent-ok','1');renderRoute()}else toast(t('PIN stimmt nicht','PIN yanlış'))}},t('Öffnen','Aç'));app.lastChild.append(input,btn)}
+function settingSelect(label,key,options,value,onChange,help=''){const sel=h('select',{onchange:e=>onChange(e.target.value)});options.forEach(([v,n])=>sel.append(h('option',{value:v,selected:String(v)===String(value)},n)));return h('div',{class:'setting'},[h('label',{},label),sel,help?h('small',{},help):''])}
+function settingToggle(label,help,value,onChange){const input=h('input',{type:'checkbox'});input.checked=!!value;input.onchange=()=>onChange(input.checked);return h('div',{class:'setting'},[h('div',{class:'toggle-row'},[h('label',{style:'margin:0'},label),input]),h('small',{},help)])}
+
+
+if(!location.hash)location.hash='#home';refreshChrome();renderRoute();
+setTimeout(()=>{if(!state().history.length)openMentor(t('Hallo! Ich bin Mino. Ich helfe dir, wenn du nicht weiterweißt. Sammle Sterne und gestalte mein Aquarium!','Merhaba! Ben Mino. Takıldığında sana yardım ederim. Yıldız topla ve akvaryumumu geliştir!'))},500);
+
+</script>
+</body>
+</html>

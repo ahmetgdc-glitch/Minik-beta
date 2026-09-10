@@ -1,0 +1,661 @@
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import {
+  ArrowLeft,
+  Pause,
+  Play,
+  Volume2,
+  Home,
+  RotateCcw,
+  Star,
+  ArrowRight,
+} from "lucide-react";
+import { useProgress, dispatch } from "../progress/store.js";
+import { difficultyFor } from "../progress/model.js";
+import { gameById } from "./registry.js";
+import { worldById, uniqueVisuals } from "../data/content.js";
+import { speak, stopSpeech } from "../audio/voice.js";
+import { playSound, stopSounds, unlockAudio } from "../audio/sounds.js";
+import FishGuide from "../components/FishGuide.jsx";
+import { Mino, Art } from "../components/Visual.jsx";
+import { recommendedActivities } from "../learning/recommendations.js";
+import { maxOptionsForAge } from "../learning/age.js";
+import { shouldAcceptWrongTap, shouldBlockGameInteraction } from "./inputGuard.js";
+import { loadCheckpoint, saveCheckpoint, clearCheckpoint, checkpointMatchesProfile, checkpointForGame, checkpointDifficulty } from "./sessionCheckpoint.js";
+import ListenGame from "./ListenGame.jsx";
+import MemoryGame from "./MemoryGame.jsx";
+import MatchGame from "./MatchGame.jsx";
+import SortGame from "./SortGame.jsx";
+import CountGame from "./CountGame.jsx";
+import SoundsGame from "./SoundsGame.jsx";
+import PuzzleGame from "./PuzzleGame.jsx";
+import ShadowGame from "./ShadowGame.jsx";
+import MissingGame from "./MissingGame.jsx";
+import PatternGame from "./PatternGame.jsx";
+import TraceGame from "./TraceGame.jsx";
+import RhythmGame from "./RhythmGame.jsx";
+import DrawGame from "./DrawGame.jsx";
+import ExploreGame from "./ExploreGame.jsx";
+import ReviewGame from "./ReviewGame.jsx";
+import StoryGame from "./StoryGame.jsx";
+import InitialLetterGame from "./InitialLetterGame.jsx";
+import OppositesGame from "./OppositesGame.jsx";
+import DailyOrderGame from "./DailyOrderGame.jsx";
+import DifferentGame from "./DifferentGame.jsx";
+import SocialStepsGame from "./SocialStepsGame.jsx";
+import SpeakGame from "./SpeakGame.jsx";
+import { useModalSafety } from "../app/useModalSafety.js";
+const components = {
+  speak: SpeakGame,
+  socialsteps: SocialStepsGame,
+  different: DifferentGame,
+  dailyorder: DailyOrderGame,
+  opposites: OppositesGame,
+  initialletter: InitialLetterGame,
+  story: StoryGame,
+  review: ReviewGame,
+  explore: ExploreGame,
+  draw: DrawGame,
+  listen: ListenGame,
+  memory: MemoryGame,
+  match: MatchGame,
+  sort: SortGame,
+  count: CountGame,
+  sounds: SoundsGame,
+  puzzle: PuzzleGame,
+  shadow: ShadowGame,
+  missing: MissingGame,
+  pattern: PatternGame,
+  trace: TraceGame,
+  lettertrace: TraceGame,
+  rhythm: RhythmGame,
+};
+const praise = {
+  de: [
+    "Wunderbar!",
+    "Das hast du toll gemacht!",
+    "Gefunden!",
+    "Super, weiter so!",
+    "Richtig gut!",
+  ],
+  tr: ["Harika!", "Çok güzel yaptın!", "Buldun!", "Aferin sana!", "Çok iyi!"],
+};
+export default function GameSession({ gameId, worldId, onNavigate }) {
+  const progress = useProgress(),
+    settings = progress.settings,
+    lang = settings.lang,
+    spec = gameById[gameId],
+    world = worldById[worldId],
+    totalRounds = Math.max(1, Number(spec?.rounds) || 1);
+  const checkpoint = useMemo(() => {
+      try {
+        const saved = loadCheckpoint(window.localStorage, progress.activeProfileId, gameId, worldId);
+        const matching = checkpointMatchesProfile(saved, progress.settings.lang, progress.activeProfile?.ageGroup) ? saved : null;
+        return checkpointForGame(matching, totalRounds);
+      } catch {
+        return null;
+      }
+    }, [progress.activeProfileId, progress.activeProfile?.ageGroup, progress.settings.lang, gameId, worldId, totalRounds]);
+  const [difficulty] = useState(() =>
+      checkpointDifficulty(
+        checkpoint,
+        difficultyFor(progress, worldId),
+        maxOptionsForAge(progress.activeProfile?.ageGroup),
+      ),
+    ),
+    [round, setRound] = useState(() => Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1))),
+    [phase, setPhase] = useState(() => checkpoint?.phase || "active"),
+    [paused, setPaused] = useState(false),
+    [hint, setHint] = useState(() => checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0)),
+    [lesson, setLesson] = useState({ text: "", ids: [] }),
+    [message, setMessage] = useState(""),
+    [activity, setActivity] = useState(0),
+    [earned, setEarned] = useState(() => checkpoint?.earned || 0);
+  const manualPauseRef = useRef(false);
+  const lifecyclePauseRef = useRef(false);
+  // Block child input synchronously during lifecycle transitions. React may not
+  // commit `paused` before iOS Safari dispatches a queued tap/pointer event.
+  const pausedRef = useRef(false);
+  // Keep lifecycle-critical state in refs as well as React state. Safari can
+  // fire pagehide/visibilitychange in the tiny window after setPhase/setRound
+  // but before React commits the render. Checkpoints must reflect the decision
+  // that already happened, not the previous render.
+  const phaseRef = useRef(checkpoint?.phase || "active");
+  const roundRef = useRef(Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)));
+  useModalSafety(paused, () => {
+    manualPauseRef.current = false;
+    lifecyclePauseRef.current = false;
+    pausedRef.current = false;
+    setPaused(false);
+    unlockAudio();
+  });
+  const locked = useRef(checkpoint?.phase === "success" || checkpoint?.phase === "demo"),
+    mistakes = useRef(checkpoint?.mistakes || 0),
+    attempt = useRef(checkpoint?.attempts || 0),
+    earnedRef = useRef(checkpoint?.earned || 0),
+    playedRef = useRef(checkpoint?.played || 0),
+    saved = useRef(false),
+    hintRef = useRef(checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0)),
+    activeSeconds = useRef(checkpoint?.activeSeconds || 0),
+    lastWrongTap = useRef(null);
+  const interactionBlocked = useCallback(() => shouldBlockGameInteraction({
+    locked: locked.current,
+    paused: pausedRef.current || paused,
+    manualPaused: manualPauseRef.current,
+    lifecyclePaused: lifecyclePauseRef.current,
+    phase: phaseRef.current,
+    hidden: typeof document !== "undefined" && document.hidden,
+  }), [paused]);
+  const [sessionId] = useState(
+      () => checkpoint?.sessionId || `minik-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    ),
+    started = useRef(checkpoint?.started || Date.now());
+  const items = useMemo(() => uniqueVisuals(world?.items || []), [world]);
+  const Component = components[gameId];
+  const nextActivity = useMemo(() => {
+    const choices = recommendedActivities(progress, lang, 3);
+    return choices.find(({ world: w, game: g }) => w.id !== worldId || g.id !== gameId) || choices[0] || null;
+  }, [progress, lang, worldId, gameId]);
+  const saveSession = useCallback(
+    (completed) => {
+      if (saved.current || !playedRef.current) return;
+      saved.current = true;
+      dispatch({
+        type: "session",
+        session: {
+          id: sessionId,
+          worldId,
+          gameId,
+          lang,
+          started: started.current,
+          ended: Date.now(),
+          seconds: activeSeconds.current,
+          rounds: earnedRef.current,
+          attempts: playedRef.current,
+          completed,
+        },
+      });
+    },
+    [sessionId, worldId, gameId, lang],
+  );
+  const persistCheckpoint = useCallback(() => {
+    // Do not create a resumable game before the child has actually interacted.
+    // This avoids ghost “continue” sessions when Safari backgrounds immediately
+    // after opening a game. Use refs here because lifecycle events can arrive
+    // before React has committed the most recent phase/round state update.
+    if (phaseRef.current === "done" || playedRef.current < 1) return;
+    try {
+      saveCheckpoint(window.localStorage, progress.activeProfileId, {
+        gameId,
+        worldId,
+        sessionId,
+        round: roundRef.current,
+        earned: earnedRef.current,
+        attempts: attempt.current,
+        mistakes: mistakes.current,
+        hint: hintRef.current,
+        played: playedRef.current,
+        phase: phaseRef.current,
+        activeSeconds: activeSeconds.current,
+        started: started.current,
+        lang,
+        ageGroup: progress.activeProfile?.ageGroup,
+        difficulty,
+      });
+    } catch {}
+  }, [progress.activeProfileId, progress.activeProfile?.ageGroup, gameId, worldId, sessionId, lang, difficulty]);
+  const removeCheckpoint = useCallback(() => {
+    try { clearCheckpoint(window.localStorage, progress.activeProfileId); } catch {}
+  }, [progress.activeProfileId]);
+  useEffect(
+    () => () => {
+      stopSpeech();
+      stopSounds();
+    },
+    [],
+  );
+  useEffect(() => {
+    // A parent can change this setting from another open MINIK tab. Stop an
+    // utterance that is already running immediately instead of waiting for the
+    // next lesson/replay action to notice that voice output was disabled.
+    if (!settings.audio) stopSpeech();
+  }, [settings.audio]);
+  useEffect(() => {
+    // Safari uses pagehide both for real exits and for the back/forward cache.
+    // A persisted page must not be finalized, otherwise returning from BFCache
+    // would leave a live game permanently marked as an incomplete session.
+    const onPageHide = (event) => {
+      if (!manualPauseRef.current) lifecyclePauseRef.current = true;
+      pausedRef.current = true;
+      setPaused(true);
+      stopSpeech();
+      stopSounds();
+      persistCheckpoint();
+      // A real page exit may terminate Safari before React unmount cleanup runs.
+      // Persist the incomplete session synchronously through the progress store,
+      // but never finalize a BFCache navigation because that page can return.
+      if (!event.persisted) saveSession(false);
+    };
+    const onPageShow = (event) => {
+      if (!event.persisted || manualPauseRef.current || !lifecyclePauseRef.current) return;
+      lifecyclePauseRef.current = false;
+      pausedRef.current = false;
+      setPaused(false);
+      unlockAudio();
+    };
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [persistCheckpoint, saveSession]);
+  useEffect(() => {
+    // Hash routing does not trigger pagehide. A Safari back-swipe, browser Back
+    // button, or an externally changed hash can therefore unmount the game
+    // without running the normal pause/exit controls. Finalize that deliberate
+    // route leave as an incomplete session and discard its resume checkpoint.
+    // Explicit MINIK exits are idempotent here because saveSession() is guarded
+    // by saved.current and clearCheckpoint() is safe to call more than once.
+    const onRouteLeave = () => {
+      if (phaseRef.current === "done") return;
+      saveSession(false);
+      removeCheckpoint();
+    };
+    window.addEventListener("hashchange", onRouteLeave);
+    return () => window.removeEventListener("hashchange", onRouteLeave);
+  }, [saveSession, removeCheckpoint]);
+  useEffect(() => {
+    const visibility = () => {
+      if (document.hidden) {
+        if (!manualPauseRef.current) lifecyclePauseRef.current = true;
+        pausedRef.current = true;
+        setPaused(true);
+        stopSpeech();
+        stopSounds();
+        persistCheckpoint();
+        return;
+      }
+      if (lifecyclePauseRef.current && !manualPauseRef.current) {
+        lifecyclePauseRef.current = false;
+        pausedRef.current = false;
+        setPaused(false);
+        unlockAudio();
+      }
+    };
+    document.addEventListener("visibilitychange", visibility);
+    return () => document.removeEventListener("visibilitychange", visibility);
+  }, [persistCheckpoint]);
+  useEffect(() => {
+    if (paused || phase === "done") {
+      stopSpeech();
+      stopSounds();
+      return;
+    }
+    const t = setInterval(() => activeSeconds.current++, 1000);
+    return () => clearInterval(t);
+  }, [paused, phase]);
+  useEffect(() => {
+    if (phase === "done") return;
+    persistCheckpoint();
+    const t = setInterval(persistCheckpoint, 5000);
+    return () => clearInterval(t);
+  }, [persistCheckpoint, phase]);
+  useEffect(() => {
+    hintRef.current = hint;
+  }, [hint]);
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+  useEffect(() => {
+    roundRef.current = round;
+  }, [round]);
+  const ready = useCallback((info) => {
+    setLesson(info);
+  }, []);
+  useEffect(() => {
+    if (!lesson.text || paused || phase !== "active" || !settings.audio) return;
+    const t = setTimeout(() => {
+      // React may not have committed the phase/pause render yet when a child
+      // answers inside this 200 ms window. The lifecycle refs are updated
+      // synchronously, so a stale instruction can never speak over praise or
+      // restart audio after Safari/background pause.
+      if (
+        phaseRef.current !== "active" ||
+        manualPauseRef.current ||
+        lifecyclePauseRef.current ||
+        (typeof document !== "undefined" && document.hidden)
+      ) return;
+      lesson.repeat?.();
+    }, 200);
+    return () => clearTimeout(t);
+  }, [lesson, paused, phase, settings.audio]);
+  useEffect(() => {
+    if (paused || phase !== "active" || !settings.autoHelp) return;
+    const stillInteractive = () =>
+      phaseRef.current === "active" &&
+      !manualPauseRef.current &&
+      !lifecyclePauseRef.current &&
+      !(typeof document !== "undefined" && document.hidden);
+    const move = setTimeout(() => {
+      if (!stillInteractive()) return;
+      setHint((h) => Math.max(h, 1));
+    }, 6000);
+    const help = setTimeout(() => {
+      if (!stillInteractive()) return;
+      setMessage(
+        lang === "tr"
+          ? "Yardım ister misin? Bana dokun."
+          : "Möchtest du Hilfe? Tippe auf mich.",
+      );
+      if (settings.audio)
+        speak(
+          lang === "tr" ? "Sana yardım edeyim mi?" : "Soll ich dir helfen?",
+          lang,
+          settings,
+        );
+    }, 11000);
+    return () => {
+      clearTimeout(move);
+      clearTimeout(help);
+    };
+  }, [round, activity, paused, phase, settings.autoHelp, settings.audio, lang]);
+  function record(correct, ids, meta = {}) {
+    const id = `${sessionId}:${round}:${++attempt.current}`;
+    playedRef.current++;
+    dispatch({
+      type: "answer",
+      eventId: id,
+      worldId,
+      gameId,
+      lang,
+      itemIds: ids,
+      correct,
+      assisted: Boolean(meta.assisted) || hintRef.current >= 2,
+      hadErrors: mistakes.current > 0,
+      at: Date.now(),
+    });
+  }
+  const wrong = useCallback(
+    (ids) => {
+      if (interactionBlocked()) return;
+      const signature = [...(ids || [])].map(String).sort().join("|");
+      const gate = shouldAcceptWrongTap(
+        lastWrongTap.current,
+        signature,
+        typeof performance !== "undefined" ? performance.now() : Date.now(),
+      );
+      if (!gate.accept) return;
+      lastWrongTap.current = gate.next;
+      mistakes.current++;
+      record(false, ids);
+      setActivity((a) => a + 1);
+      const text = lang === "tr" ? "Bir daha bak." : "Schau noch einmal.";
+      setMessage(text);
+      speak(text, lang, settings);
+      if (mistakes.current >= 2) {
+        setHint(2);
+        hintRef.current = 2;
+      }
+      if (mistakes.current >= 3) {
+        locked.current = true;
+        setHint(3);
+        hintRef.current = 3;
+        phaseRef.current = "demo";
+        setPhase("demo");
+        setMessage(
+          lang === "tr"
+            ? "Bak, birlikte yapıyoruz."
+            : "Schau, wir machen es zusammen.",
+        );
+        speak(lesson.help || lesson.text, lang, settings);
+      }
+    },
+    [round, paused, lesson, lang, settings],
+  );
+  const solve = useCallback(
+    (ids, meta = {}) => {
+      if (interactionBlocked()) return;
+      locked.current = true;
+      record(true, ids, meta);
+      earnedRef.current++;
+      setEarned(earnedRef.current);
+      phaseRef.current = "success";
+      setPhase("success");
+      const text = praise[lang][round % praise[lang].length];
+      setMessage(text);
+      playSound("success", settings);
+      speak(text, lang, settings);
+    },
+    [round, paused, lang, settings],
+  );
+  useEffect(() => {
+    if (paused || !["success", "demo"].includes(phase)) return;
+    const t = setTimeout(
+      () => {
+        if (round + 1 >= totalRounds) {
+          saveSession(true);
+          removeCheckpoint();
+          phaseRef.current = "done";
+          setPhase("done");
+          stopSounds();
+          stopSpeech();
+        } else {
+          locked.current = false;
+          mistakes.current = 0;
+          lastWrongTap.current = null;
+          hintRef.current = 0;
+          setHint(0);
+          setMessage("");
+          setLesson({ text: "", ids: [] });
+          const nextRound = Math.min(totalRounds - 1, roundRef.current + 1);
+          roundRef.current = nextRound;
+          phaseRef.current = "active";
+          setRound(nextRound);
+          setPhase("active");
+        }
+      },
+      phase === "demo" ? 3800 : 1300,
+    );
+    return () => clearTimeout(t);
+  }, [phase, paused, round, totalRounds, saveSession, removeCheckpoint]);
+  function help() {
+    if (interactionBlocked()) return;
+    setHint(2);
+    hintRef.current = 2;
+    setActivity((a) => a + 1);
+    setMessage(lesson.help || lesson.text);
+    speak(lesson.help || lesson.text, lang, settings);
+  }
+  const pauseManually = useCallback(() => {
+    manualPauseRef.current = true;
+    lifecyclePauseRef.current = false;
+    pausedRef.current = true;
+    stopSpeech();
+    stopSounds();
+    persistCheckpoint();
+    setPaused(true);
+  }, [persistCheckpoint]);
+  function exit() {
+    saveSession(false);
+    removeCheckpoint();
+    onNavigate(`/world/${worldId}`);
+  }
+  if (!world || !spec || !Component) return null;
+  if (phase === "done")
+    return (
+      <section className="session-finish">
+        <div className="finish-stars">
+          <Art name="star" />
+          <Art name="glowing-star" />
+          <Art name="star" />
+        </div>
+        <Mino />
+        <h1>{lang === "tr" ? "Birlikte başardık!" : "Zusammen geschafft!"}</h1>
+        <p>
+          {lang === "tr"
+            ? "Mino ile harika çalıştın."
+            : "Du hast mit Mino fleißig geübt."}
+        </p>
+        <div className="earned">
+          <Star fill="currentColor" />
+          {earned} {lang === "tr" ? "yeni yıldız" : "neue Sterne"}
+        </div>
+        {nextActivity && (
+          <button
+            className="primary next-adventure-button"
+            onClick={() => {
+              unlockAudio();
+              onNavigate(`/play/${nextActivity.game.id}/${nextActivity.world.id}`);
+            }}
+          >
+            <Play size={21} fill="currentColor" />
+            <span>
+              <small>{lang === "tr" ? "Mino’nun sıradaki önerisi" : "Minos nächster Tipp"}</small>
+              {nextActivity.world.labels[lang]} · {nextActivity.game[lang]}
+            </span>
+            <ArrowRight size={20} />
+          </button>
+        )}
+        <div className="finish-actions">
+          <button className="secondary" onClick={() => onNavigate("/aquarium")}>
+            <Art name="wrapped-gift" />
+            {lang === "tr" ? "Ödüllerim" : "Meine Schätze"}
+          </button>
+          <button
+            className="secondary"
+            onClick={() => onNavigate(`/replay/${gameId}/${worldId}`)}
+          >
+            <RotateCcw size={20} />
+            {lang === "tr" ? "Tekrar oyna" : "Noch einmal"}
+          </button>
+          <button className="secondary" onClick={exit}>
+            <Home size={20} />
+            {lang === "tr" ? "Dünyama dön" : "Zur Lernwelt"}
+          </button>
+        </div>
+      </section>
+    );
+  return (
+    <section className={`game-session game-${gameId} phase-${phase}`}>
+      <header className="game-header" inert={paused ? true : undefined}>
+        <button
+          className="icon-button"
+          onClick={pauseManually}
+          aria-label={
+            lang === "tr"
+              ? "Oyunu duraklat ve çık"
+              : "Spiel pausieren und verlassen"
+          }
+        >
+          <ArrowLeft />
+        </button>
+        <div className="session-track">
+          <span>
+            {spec[lang]}{" "}
+            <small>
+              {round + 1} / {totalRounds}
+            </small>
+          </span>
+          <div className="round-track">
+            {Array.from({ length: totalRounds }, (_, i) => (
+              <i
+                key={i}
+                className={
+                  i < round ? "complete" : i === round ? "current" : ""
+                }
+              />
+            ))}
+          </div>
+        </div>
+        <button
+          className="icon-button"
+          onClick={pauseManually}
+          aria-label={lang === "tr" ? "Duraklat" : "Pause"}
+        >
+          <Pause />
+        </button>
+      </header>
+      <div className="game-heading" inert={paused || phase !== "active" ? true : undefined}>
+        <span className="eyebrow">{world.labels[lang]}</span>
+        <h1>{lesson.text}</h1>
+        <button
+          className="replay-audio"
+          onClick={() => {
+            if (interactionBlocked()) return;
+            setActivity((a) => a + 1);
+            unlockAudio();
+            lesson.repeat?.();
+          }}
+          disabled={paused || phase !== "active"}
+          aria-label={lang === "tr" ? "Tekrar dinle" : "Noch einmal hören"}
+        >
+          <Volume2 size={23} />
+        </button>
+      </div>
+      <div
+        className="game-area"
+        inert={paused || phase !== "active" ? true : undefined}
+        onPointerDown={() => setActivity((a) => a + 1)}
+      >
+        <Component
+          key={`${round}-${gameId}`}
+          {...{ items, world, progress, lang, settings, difficulty, round, hint, paused }}
+          onReady={ready}
+          onWrong={wrong}
+          onSolve={solve}
+        />
+      </div>
+      <div inert={paused || phase !== "active" ? true : undefined}>
+        <FishGuide lang={lang} message={message} stage={hint} onHelp={help} />
+      </div>
+      {phase === "success" && (
+        <div className="star-burst" aria-live="polite">
+          <Art name="glowing-star" />
+          <b>+1</b>
+        </div>
+      )}
+      {paused && (
+        <div className="modal-scrim">
+          <div
+            className="pause-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pause-title"
+          >
+            <Mino />
+            <h2 id="pause-title">
+              {lang === "tr" ? "Küçük bir mola" : "Eine kleine Pause"}
+            </h2>
+            <p>
+              {lang === "tr" ? "Mino seni bekliyor." : "Mino wartet auf dich."}
+            </p>
+            <button
+              className="primary"
+              autoFocus
+              onClick={() => {
+                manualPauseRef.current = false;
+                lifecyclePauseRef.current = false;
+                pausedRef.current = false;
+                setPaused(false);
+                unlockAudio();
+              }}
+            >
+              <Play size={22} />
+              {lang === "tr" ? "Devam et" : "Weiterspielen"}
+            </button>
+            <button className="secondary" onClick={exit}>
+              <Home size={20} />
+              {lang === "tr" ? "Dünyama dön" : "Zur Lernwelt"}
+            </button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}

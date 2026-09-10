@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+  <meta charset="utf-8" /><title>MINIK responsive QA</title
+  ><style>
+    body {
+      margin: 0;
+      background: #d4dce5;
+      font: 14px system-ui;
+    }
+    header {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 18px;
+    }
+    select {
+      padding: 5px;
+    }
+    iframe {
+      display: block;
+      border: 0;
+      background: white;
+      box-shadow: 0 0 25px #0002;
+      margin: 0 auto;
+    }
+    button {
+      padding: 5px 12px;
+    }
+  </style>
+  <header>
+    <label
+      >Viewport
+      <select id="size">
+        <option value="393,852">iPhone · 393 × 852</option>
+        <option value="320,740">Small phone · 320 × 740</option>
+        <option value="768,1024">iPad · 768 × 1024</option>
+        <option value="1024,768">Tablet landscape · 1024 × 768</option>
+      </select></label
+    ><span>Chromium CSS layout QA</span>
+  </header>
+  <iframe
+    title="MINIK viewport"
+    id="app"
+    width="393"
+    height="852"
+    src="../dist/index.html"
+  ></iframe>
+  <script>
+    document.querySelector("#size").onchange = (e) => {
+      const [w, h] = e.target.value.split(",");
+      const frame = document.querySelector("#app");
+      frame.width = w;
+      frame.height = h;
+    };
+  </script>
+</html>

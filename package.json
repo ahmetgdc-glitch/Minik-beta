@@ -1,0 +1,32 @@
+{
+  "name": "minik-learning-world",
+  "private": true,
+  "version": "1.65.0-beta.66",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/validate-content.mjs && vite build && node scripts/build-sw.mjs",
+    "preview": "vite preview",
+    "assets": "node scripts/build-assets.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "preflight": "node scripts/release-preflight.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
+    "format": "prettier --write src scripts tests *.js *.json *.html"
+  },
+  "dependencies": {
+    "@fontsource/nunito": "5.3.0",
+    "@iconify-json/noto": "1.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "lucide-react": "1.43.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

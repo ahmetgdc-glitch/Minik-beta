@@ -1,0 +1,15 @@
+MINIK 0.3.0 — third-party assets
+
+Illustrations: Google Noto Emoji
+Copyright 2013 Google, Inc. All Rights Reserved.
+Licensed under Apache License 2.0. Full license: Apache-2.0.txt.
+Source: https://github.com/googlefonts/noto-emoji
+Distributed through the pinned @iconify-json/noto package. MINIK extracts SVG bodies into standalone SVG containers. No external asset requests are required.
+
+Fonts: Nunito, Copyright the Nunito Project Authors.
+SIL Open Font License 1.1. Full text: Nunito-OFL.txt.
+
+Icons: Lucide, ISC license. See Lucide-ISC.txt.
+React: MIT license. See React-MIT.txt.
+
+Mino mascot and six adult emotion images: generated for MINIK using OpenAI ImageGen on 2026-09-09. Synthetic characters/adults, no source photographs, no references to real people. Resized/cropped and encoded as WebP for delivery. The portraits are not photographs of real people and are identified as generated photo assets in content metadata and in the parent area.
