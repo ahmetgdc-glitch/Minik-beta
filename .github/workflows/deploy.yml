@@ -1,0 +1,51 @@
+name: Build, test and publish MINIK
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: minik-pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run preflight
+      - run: npm run build
+      - run: npm run verify:build
+      - name: Keep production build for download
+        uses: actions/upload-artifact@v4
+        with:
+          name: minik-production-build
+          path: dist
+          retention-days: 14
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
