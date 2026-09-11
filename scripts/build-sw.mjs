@@ -25,7 +25,15 @@ for (const file of files.sort()) {
 }
 const safeVersion = String(pkg.version || "dev").replace(/[^a-zA-Z0-9._-]/g, "-");
 const cache = `minik-${safeVersion}-${revision.digest("hex").slice(0, 12)}`;
-// The current compact core is fully cached; future optional packs remain on demand.
+
+// Keep first install deliberately small. iOS Safari can terminate a tab when a
+// service worker opens hundreds of image/audio requests while React and WebAudio
+// start at the same time. Rich assets and voices are cached on demand below.
+const firstScenes = new Set([
+  "assets/scenes/archipelago.webp",
+  "assets/scenes/meadow.webp",
+  "assets/scenes/playroom.webp",
+]);
 const initial = files.filter(
   (p) =>
     p === "index.html" ||
@@ -33,10 +41,7 @@ const initial = files.filter(
     p.startsWith("icon-") ||
     p.startsWith("assets/mascot/") ||
     /assets\/.*\.(js|css|woff2)$/.test(p) ||
-    p.startsWith("assets/illustrations/") ||
-    p.startsWith("assets/photos/") ||
-    p.startsWith("assets/scenes/") ||
-    p.startsWith("assets/voice/") ||
+    firstScenes.has(p) ||
     p === "assets/content-manifest.json",
 );
 
@@ -44,12 +49,14 @@ const code = `const PREFIX='minik:'+self.registration.scope+':';
 const CACHE=PREFIX+${JSON.stringify(cache)};
 const CORE=${JSON.stringify(initial.map((p) => "./" + p))};
 const NAV_TIMEOUT_MS=3500;
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE))) });
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('fetch',event=>{
  if(event.request.method!=='GET')return;
  const url=new URL(event.request.url);if(url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;
+ // Recovery must always reach the network and must never be replaced with the SPA shell.
+ if(url.pathname.endsWith('/reset.html'))return;
  if(event.request.mode==='navigate'){
   event.respondWith((async()=>{
    const cache=await caches.open(CACHE);
@@ -70,5 +77,5 @@ self.addEventListener('fetch',event=>{
 `;
 await fs.writeFile(path.join(root, "sw.js"), code);
 console.log(
-  `PWA: ${initial.length} initial files; versioned cache ${cache}; other assets cached when viewed`,
+  `PWA: ${initial.length} lightweight boot files; versioned cache ${cache}; rich assets cached on demand`,
 );
