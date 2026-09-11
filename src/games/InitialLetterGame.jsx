@@ -51,6 +51,7 @@ export default function InitialLetterGame({
     [target.id],
     targetLetter,
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   function blocked() {
     return paused || interactionBlocked();
@@ -77,13 +78,13 @@ export default function InitialLetterGame({
     : `${target.labels.de} noch einmal anhören`;
 
   return (
-    <div className="initial-letter-game" aria-disabled={paused || undefined}>
+    <div className="initial-letter-game" aria-disabled={controlsDisabled || undefined}>
       <div
         className="initial-letter-target"
         role="button"
-        tabIndex={paused ? -1 : 0}
+        tabIndex={controlsDisabled ? -1 : 0}
         aria-label={replayLabel}
-        aria-disabled={paused || undefined}
+        aria-disabled={controlsDisabled || undefined}
         onClick={hearTarget}
         onKeyDown={handleTargetKeyDown}
       >
@@ -96,7 +97,7 @@ export default function InitialLetterGame({
             key={letter}
             className={`letter-choice ${hint >= 2 && letter === targetLetter ? "hint-target" : ""}`}
             onClick={() => pick(letter)}
-            disabled={paused}
+            disabled={controlsDisabled}
             aria-label={letter}
           >
             {letter}
