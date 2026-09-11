@@ -21,11 +21,23 @@
   color:var(--world-accent);
   border:2px solid #ffffffb8;
   box-shadow:0 5px 0 #173b4d20,0 14px 30px #173b4d14;
+  transition:transform .18s ease,box-shadow .18s ease;
 }
 .discovery-stage .discovery-position,.discovery-stage .discovery-progress{
   border:1px solid #ffffffb8;
   backdrop-filter:blur(10px);
 }
+.discovery-stage .discovery-object.speaking>.item-visual{
+  animation:discovery-speaking .7s ease-in-out infinite alternate;
+  filter:drop-shadow(0 18px 7px #263c4536) drop-shadow(0 0 22px #fffbd2);
+}
+.discovery-stage .discovery-object.speaking .discovery-word{
+  transform:scale(1.045);
+  box-shadow:0 5px 0 #173b4d20,0 0 0 6px #ffffff78,0 18px 34px #173b4d22;
+}
+.discovery-stage .discovery-object.speaking .discovery-word svg{animation:discovery-speaker .48s ease-in-out infinite alternate}
+@keyframes discovery-speaking{to{transform:translateY(-7px) scale(1.035)}}
+@keyframes discovery-speaker{to{transform:scale(1.18)}}
 
 /* Meadow family: each topic gets a recognisable outdoor mood. */
 .world-animals{--world-accent:#276d47;--world-overlay:radial-gradient(circle at 12% 18%,#fff9a955 0 8%,transparent 9%),linear-gradient(180deg,#a9eeff18,#76c86e20)}
@@ -102,5 +114,9 @@
 }
 
 @media(prefers-reduced-motion:reduce){
-  .discovery-stage .discovery-object.discovered>.item-visual{animation:none}
+  .discovery-stage .discovery-object.discovered>.item-visual,
+  .discovery-stage .discovery-object.speaking>.item-visual,
+  .discovery-stage .discovery-object.speaking .discovery-word svg{animation:none}
+  .discovery-stage .discovery-object.speaking>.item-visual{transform:scale(1.03)}
+  .discovery-stage .discovery-word{transition:none}
 }
