@@ -47,9 +47,10 @@ export default function CountGame({
 
   const countProgress = `${counted.length} / ${n}`;
   const allCounted = counted.length === n;
+  const controlsDisabled = paused || interactionBlocked();
 
   return (
-    <section className="count-playground count-meadow" aria-label={text}>
+    <section className="count-playground count-meadow" aria-label={text} aria-disabled={controlsDisabled || undefined}>
       <header className="count-meadow-header">
         <span className="count-meadow-badge" aria-hidden="true"><Sparkles size={24} /></span>
         <div>
@@ -77,9 +78,9 @@ export default function CountGame({
               key={i}
               className={`count-object ${isCounted ? "counted" : ""}`}
               aria-label={`${object.labels[lang]} ${i + 1}`}
-              disabled={paused}
+              disabled={controlsDisabled}
               onClick={() => {
-                if (paused || interactionBlocked()) return;
+                if (controlsDisabled) return;
                 if (!countedRef.current.includes(i)) {
                   speak(
                     itemsForWorld("numbers")[countedRef.current.length].labels[lang],
@@ -103,7 +104,7 @@ export default function CountGame({
 
       <div
         className={`count-answer-stage ${allCounted ? "ready" : "locked"}`}
-        aria-disabled={!allCounted || paused || undefined}
+        aria-disabled={!allCounted || controlsDisabled || undefined}
       >
         <div className="count-answer-title">
           <strong>{lang === "tr" ? "Kaç tane?" : "Wie viele?"}</strong>
@@ -117,8 +118,9 @@ export default function CountGame({
           <OptionGrid
             {...{ options, target, hint, lang, settings }}
             hiddenLabels
+            disabled={!allCounted || controlsDisabled}
             onPick={(item) => {
-              if (!allCounted || paused || interactionBlocked()) return;
+              if (!allCounted || controlsDisabled) return;
               item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
             }}
           />
