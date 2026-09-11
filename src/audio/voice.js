@@ -7,23 +7,32 @@ let voices = [],
 const subs = new Set();
 const synth = () =>
   typeof window !== "undefined" ? window.speechSynthesis : null;
+
+const NATURAL_QUALITY = /premium|enhanced|natural|neural|siri/i;
+const COMPACT_QUALITY = /compact|espeak|festival/i;
+const FRIENDLY_VOICES = /anna|petra|helena|katja|marie|yelda|emel|cem|seda/i;
+const localeFor = (lang) => (lang === "tr" ? "tr-TR" : "de-DE");
+
 export function refreshVoices() {
   voices = synth()?.getVoices?.() || [];
   subs.forEach((fn) => fn());
   return voices;
 }
 export function getVoices(lang) {
+  const exactLocale = localeFor(lang).toLowerCase();
   return voices
     .filter((v) => v.lang?.toLowerCase().startsWith(lang))
-    .sort((a, b) => voiceScore(b) - voiceScore(a));
+    .sort((a, b) => voiceScore(b, exactLocale) - voiceScore(a, exactLocale));
 }
-function voiceScore(v) {
+function voiceScore(v, exactLocale = "") {
   const name = v.name || "";
+  const locale = String(v.lang || "").toLowerCase();
   return (
-    (v.localService ? 120 : 0) +
-    (/premium|enhanced|natural|neural|siri/i.test(name) ? 60 : 0) +
-    (/anna|petra|markus|viktor|yelda|cem|emel/i.test(name) ? 18 : 0) +
-    (/compact/i.test(name) ? -20 : 0)
+    (NATURAL_QUALITY.test(name) ? 320 : 0) +
+    (FRIENDLY_VOICES.test(name) ? 70 : 0) +
+    (locale === exactLocale ? 55 : 0) +
+    (v.localService ? 35 : 0) +
+    (COMPACT_QUALITY.test(name) ? -180 : 0)
   );
 }
 export function chooseVoice(lang, uri) {
@@ -44,6 +53,16 @@ export function stopSpeech() {
   settle?.(false);
   settle = null;
 }
+function naturalRate(lang, configured) {
+  const value = Number(configured);
+  if (Number.isFinite(value)) return Math.min(1.08, Math.max(0.82, value));
+  return lang === "tr" ? 0.92 : 0.94;
+}
+function naturalPitch(configured) {
+  const value = Number(configured);
+  if (Number.isFinite(value)) return Math.min(1.12, Math.max(0.92, value));
+  return 1.02;
+}
 export function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   const engine = synth();
@@ -55,9 +74,11 @@ export function speak(text, lang = "de", settings = {}) {
     let finished = false;
     const u = new SpeechSynthesisUtterance(text);
     current = u;
-    u.lang = lang === "tr" ? "tr-TR" : "de-DE";
-    u.rate = settings.rate ?? (lang === "tr" ? 0.86 : 0.9);
-    u.pitch = settings.pitch ?? 1;
+    u.lang = localeFor(lang);
+    // Calm, warm child-game prosody. Extreme pitch/rate settings make even
+    // premium voices sound synthetic, especially on iOS.
+    u.rate = naturalRate(lang, settings.rate);
+    u.pitch = naturalPitch(settings.pitch);
     u.volume = 1;
     const voice = chooseVoice(lang, settings.voices?.[lang]);
     if (voice) u.voice = voice;
