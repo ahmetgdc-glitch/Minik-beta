@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
 import Visual from "../components/Visual.jsx";
 import { choicesFor, sample } from "../utils/random.js";
@@ -49,6 +50,7 @@ export default function SocialStepsGame({
     round.items.map((item) => item.id),
     help,
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   function blocked() {
     return paused || interactionBlocked();
@@ -73,7 +75,7 @@ export default function SocialStepsGame({
   }
 
   return (
-    <div className="social-steps-game" aria-disabled={paused || undefined}>
+    <div className="social-steps-game" aria-disabled={controlsDisabled || undefined}>
       <div className="social-scenario-title">{round.title[lang]}</div>
       <div className="social-sequence-strip" aria-label={round.title[lang]}>
         {[round.first, round.second].map((item, index) => (
@@ -81,8 +83,8 @@ export default function SocialStepsGame({
             <div
               className="social-step-card complete social-step-listenable"
               role="button"
-              tabIndex={paused ? -1 : 0}
-              aria-disabled={paused || undefined}
+              tabIndex={controlsDisabled ? -1 : 0}
+              aria-disabled={controlsDisabled || undefined}
               aria-label={lang === "tr" ? `${item.labels.tr} kelimesini tekrar dinle` : `${item.labels.de} noch einmal anhören`}
               onClick={() => hearStep(item)}
               onKeyDown={(event) => handleStepKeyDown(event, item)}
@@ -90,7 +92,7 @@ export default function SocialStepsGame({
               <span className="social-step-number">{index + 1}</span>
               <Visual item={item} lang={lang} photos={settings.photos} />
               <b>{item.labels[lang]}</b>
-              <span className="social-step-hear" aria-hidden="true">🔊</span>
+              <span className="social-step-hear" aria-hidden="true"><Volume2 size={18} /></span>
             </div>
             <span className="social-step-arrow" aria-hidden="true">→</span>
           </React.Fragment>
@@ -101,13 +103,13 @@ export default function SocialStepsGame({
         </div>
       </div>
 
-      <div className={`answer-grid options-${round.options.length}`}>
+      <div className={`answer-grid options-${round.options.length}`} aria-disabled={controlsDisabled || undefined}>
         {round.options.map((item) => (
           <button
             key={item.id}
             className={`answer-card ${hint >= 2 && item.id === round.target.id ? "hint-target" : ""}`}
             onClick={() => pick(item)}
-            disabled={paused}
+            disabled={controlsDisabled}
             aria-label={item.labels[lang]}
           >
             <Visual item={item} lang={lang} photos={settings.photos} />
