@@ -1,4 +1,5 @@
-import { gameVoiceClip, preloadGameVoiceClips } from "./gameVoiceClips.js";
+import { preloadGameVoiceClips } from "./gameVoiceClips.js";
+import { naturalVoicePlan, preloadNaturalVoicePlans } from "./naturalVoicePlans.js";
 
 let voices = [],
   settle = null,
@@ -140,21 +141,38 @@ async function speakGameClip(url, token) {
     cloudPlayer = null;
   }
 }
+async function playPreferredClip(url, token) {
+  const localClip = localizedGameClip(url);
+  if (localClip) {
+    const playedLocal = await speakGameClip(localClip, token);
+    if (playedLocal || token !== sequence) return playedLocal;
+  }
+  return speakGameClip(url, token);
+}
+async function speakNaturalPlan(plan, token) {
+  if (!plan?.length) return false;
+  for (const clip of plan) {
+    if (token !== sequence) return false;
+    const played = await playPreferredClip(clip, token);
+    if (!played) return false;
+  }
+  return token === sequence;
+}
 export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   if (!text || settings.audio === false) return false;
   const token = sequence;
-  const clip = gameVoiceClip(text, lang);
-  if (clip) {
-    const localClip = localizedGameClip(clip);
-    if (localClip) {
-      const playedLocal = await speakGameClip(localClip, token);
-      if (playedLocal || token !== sequence) return playedLocal;
-    }
-    const played = await speakGameClip(clip, token);
+  const plan = naturalVoicePlan(text, lang);
+  if (plan.length) {
+    const played = await speakNaturalPlan(plan, token);
     if (played || token !== sequence) return played;
   }
-  return speakSystem(text, lang, settings, token);
+  // Child-facing gameplay is natural-voice-only by default. Browser speech is
+  // deliberately opt-in because its quality varies widely and often sounds robotic.
+  if (settings.systemVoiceFallback === true) {
+    return speakSystem(text, lang, settings, token);
+  }
+  return false;
 }
 export async function cloudTTS(text, lang, provider) {
   stopSpeech();
@@ -179,4 +197,7 @@ if (synth()) {
   refreshVoices();
   synth().addEventListener("voiceschanged", refreshVoices);
 }
-if (typeof Audio !== "undefined") preloadGameVoiceClips();
+if (typeof Audio !== "undefined") {
+  preloadGameVoiceClips();
+  preloadNaturalVoicePlans();
+}
