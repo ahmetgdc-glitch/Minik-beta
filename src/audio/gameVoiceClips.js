@@ -35,6 +35,10 @@ const CLIPS = {
     "Acht": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/f2e4024a-f145-4103-9cf2-f6e52b19b496.mp3",
     "Neun": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/2f08ff30-4fab-4cf6-89c5-8e72b1186c24.mp3",
     "Zehn": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c0e42436-e0c7-4084-91fe-ed1582b30be6.mp3",
+    "Kreis": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ae1612d6-16d8-4dff-89f9-9e156ae7add8.mp3",
+    "Quadrat": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/86a3c3cb-a10e-400c-87ba-fd65c4bd2731.mp3",
+    "Dreieck": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/2bed5aa0-5f98-4671-860b-f352307c9662.mp3",
+    "Rechteck": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/18009c97-4f1d-4795-bd8f-b18df4d339e0.mp3",
   },
   tr: {
     "Harika!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e3d0dbf1-3f7e-4808-aa2d-080742f7db36.mp3",
@@ -68,6 +72,10 @@ const CLIPS = {
     "Sekiz": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/1b79d0d2-06df-4461-8248-dc141b6514eb.mp3",
     "Dokuz": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6abdf4c5-268c-45d1-a66c-9cc43d256602.mp3",
     "On": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/51ee98ac-74b8-43b2-b4d1-c9ff3a39f66c.mp3",
+    "Daire": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b23c10e3-6a3c-423e-abd8-97bfe14750aa.mp3",
+    "Kare": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7e6c7307-d359-4f6d-96ab-abf3a247e7dd.mp3",
+    "Üçgen": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/26398ef5-8b0e-40e5-b3b5-9191128faf0f.mp3",
+    "Dikdörtgen": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/9b4374d9-2ae4-40e7-a47b-309832e1f358.mp3",
   },
 };
 
