@@ -15,9 +15,15 @@ test("discovery scene disables every child control while the session is locked",
   assert.match(scene, /if \(!controlsDisabled\) pager\.onKeyDown\(event\)/);
 });
 
-test("discovery completion rechecks the live guard before solving", () => {
-  assert.match(explore, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
-  assert.match(explore, /if \(controlsDisabled \|\| found\.length < targetCount\) return/);
+test("discovery completion locks immediately and still rechecks the live session guard", () => {
+  assert.match(explore, /const completionLock = useRef\(false\);/);
+  assert.match(explore, /const sessionDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(explore, /const controlsDisabled = sessionDisabled \|\| completionLock\.current;/);
+  assert.match(explore, /const sceneInteractionBlocked = \(\) => completionLock\.current \|\| interactionBlocked\(\);/);
+  assert.match(explore, /if \(paused \|\| interactionBlocked\(\) \|\| completionLock\.current\) return;/);
+  assert.match(explore, /if \(targetCount > 0 && next\.length >= targetCount\) completionLock\.current = true;/);
+  assert.match(explore, /if \(sessionDisabled \|\| targetCount === 0 \|\| found\.length < targetCount\) return;/);
   assert.match(explore, /if \(!interactionBlocked\(\)\) onSolve\(found\)/);
-  assert.match(explore, /if \(!controlsDisabled\) speak\(help, lang, settings\)/);
+  assert.match(explore, /interactionBlocked=\{sceneInteractionBlocked\}/);
+  assert.match(explore, /if \(controlsDisabled\) return;/);
 });
