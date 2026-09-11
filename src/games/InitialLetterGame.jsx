@@ -52,14 +52,41 @@ export default function InitialLetterGame({
     targetLetter,
   );
 
+  function blocked() {
+    return paused || interactionBlocked();
+  }
+
+  function hearTarget() {
+    if (blocked()) return;
+    speak(target.labels[lang], lang, settings);
+  }
+
+  function handleTargetKeyDown(event) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    hearTarget();
+  }
+
   function pick(letter) {
-    if (paused || interactionBlocked()) return;
+    if (blocked()) return;
     letter === targetLetter ? onSolve([target.id]) : onWrong([target.id]);
   }
 
+  const replayLabel = lang === "tr"
+    ? `${target.labels.tr} kelimesini tekrar dinle`
+    : `${target.labels.de} noch einmal anhören`;
+
   return (
     <div className="initial-letter-game" aria-disabled={paused || undefined}>
-      <div className="initial-letter-target">
+      <div
+        className="initial-letter-target"
+        role="button"
+        tabIndex={paused ? -1 : 0}
+        aria-label={replayLabel}
+        aria-disabled={paused || undefined}
+        onClick={hearTarget}
+        onKeyDown={handleTargetKeyDown}
+      >
         <Visual item={target} lang={lang} photos={settings.photos} />
         <strong>{target.labels[lang]}</strong>
       </div>
