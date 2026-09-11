@@ -71,9 +71,11 @@
   border-radius:32px;
   background:rgba(255,255,255,.7);
   box-shadow:0 14px 34px rgba(43,74,101,.1);
-  transition:transform .18s ease,box-shadow .18s ease;
+  transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
 }
 .count-answer-stage.ready { transform:translateY(-3px);box-shadow:0 0 0 7px rgba(255,255,255,.42),0 18px 38px rgba(43,74,101,.14); }
+.count-answer-stage.locked { opacity:.62; }
+.count-answer-stage.locked .number-options { pointer-events:none;filter:saturate(.45); }
 .count-answer-title { text-align:center;margin-bottom:12px;color:#203750; }
 .count-answer-title strong { display:block;font-size:clamp(20px,2.8vw,28px);font-weight:950; }
 .count-answer-title span { display:block;margin-top:3px;font-size:13px;font-weight:800;color:#687f91; }
