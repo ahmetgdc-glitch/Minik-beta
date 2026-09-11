@@ -5,7 +5,6 @@ let voices = [],
   settle = null,
   current = null,
   cloudPlayer = null,
-  voicePlayer = null,
   cloudAbort = null,
   sequence = 0;
 const subs = new Set();
@@ -16,48 +15,6 @@ const NATURAL_QUALITY = /premium|enhanced|natural|neural|siri/i;
 const COMPACT_QUALITY = /compact|espeak|festival/i;
 const FRIENDLY_VOICES = /anna|petra|helena|katja|marie|yelda|emel|cem|seda/i;
 const localeFor = (lang) => (lang === "tr" ? "tr-TR" : "de-DE");
-// 8 silent mono PCM samples. A data URL keeps the unlock independent from
-// network/service-worker state and is small enough to execute instantly.
-const SILENT_WAV =
-  "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
-
-function naturalPlayer() {
-  if (typeof Audio === "undefined") return null;
-  if (!voicePlayer) {
-    voicePlayer = new Audio();
-    voicePlayer.preload = "auto";
-    voicePlayer.setAttribute?.("playsinline", "");
-  }
-  return voicePlayer;
-}
-
-/**
- * Unlock the persistent HTMLMediaElement used for recorded Mino speech.
- * iOS Safari does not consider an unlocked AudioContext sufficient for later
- * HTMLAudioElement.play() calls. Reusing this exact element after a gesture
- * makes delayed lesson narration reliable after navigation.
- */
-export async function primeVoiceAudio() {
-  const player = naturalPlayer();
-  if (!player) return false;
-  try {
-    player.pause();
-    player.onended = null;
-    player.onerror = null;
-    player.src = SILENT_WAV;
-    player.volume = 0;
-    player.currentTime = 0;
-    const started = player.play();
-    if (started?.then) await started;
-    player.pause();
-    player.currentTime = 0;
-    player.volume = 1;
-    return true;
-  } catch {
-    try { player.volume = 1; } catch {}
-    return false;
-  }
-}
 
 export function refreshVoices() {
   voices = synth()?.getVoices?.() || [];
@@ -94,11 +51,6 @@ export function stopSpeech() {
   synth()?.cancel();
   cloudAbort?.abort();
   cloudPlayer?.pause();
-  if (voicePlayer) {
-    voicePlayer.pause();
-    voicePlayer.onended = null;
-    voicePlayer.onerror = null;
-  }
   cloudPlayer = null;
   current = null;
   settle?.(false);
@@ -162,41 +114,31 @@ function localizedGameClip(url) {
   }
 }
 async function speakGameClip(url, token) {
-  if (!url) return false;
-  const player = naturalPlayer();
-  if (!player) return false;
+  if (!url || typeof Audio === "undefined") return false;
   try {
-    player.pause();
-    player.onended = null;
-    player.onerror = null;
-    player.volume = 1;
-    player.src = url;
-    player.currentTime = 0;
-    player.load?.();
-    cloudPlayer = player;
+    cloudPlayer = new Audio(url);
+    cloudPlayer.preload = "auto";
     return await new Promise((resolve) => {
       let done = false;
       const finish = (ok) => {
         if (done) return;
         done = true;
-        player.onended = null;
-        player.onerror = null;
-        if (cloudPlayer === player) cloudPlayer = null;
+        if (cloudPlayer) {
+          cloudPlayer.onended = null;
+          cloudPlayer.onerror = null;
+        }
         settle = null;
         resolve(Boolean(ok && token === sequence));
       };
       settle = () => finish(false);
-      player.onended = () => finish(true);
-      player.onerror = () => finish(false);
-      try {
-        const started = player.play();
-        Promise.resolve(started).catch(() => finish(false));
-      } catch {
-        finish(false);
-      }
+      cloudPlayer.onended = () => finish(true);
+      cloudPlayer.onerror = () => finish(false);
+      Promise.resolve(cloudPlayer.play()).catch(() => finish(false));
     });
   } catch {
     return false;
+  } finally {
+    cloudPlayer = null;
   }
 }
 async function playPreferredClip(url, token) {
@@ -225,8 +167,8 @@ export async function speak(text, lang = "de", settings = {}) {
     const played = await speakNaturalPlan(plan, token);
     if (played || token !== sequence) return played;
   }
-  // Recorded voice remains the default. System speech is only an emergency
-  // fallback when the parent/user explicitly enabled it.
+  // Child-facing gameplay is natural-voice-only by default. Browser speech is
+  // deliberately opt-in because its quality varies widely and often sounds robotic.
   if (settings.systemVoiceFallback === true) {
     return speakSystem(text, lang, settings, token);
   }
@@ -256,7 +198,6 @@ if (synth()) {
   synth().addEventListener("voiceschanged", refreshVoices);
 }
 if (typeof Audio !== "undefined") {
-  naturalPlayer();
   preloadGameVoiceClips();
   preloadNaturalVoicePlans();
 }
