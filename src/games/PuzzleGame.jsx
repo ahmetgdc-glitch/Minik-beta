@@ -9,6 +9,8 @@ export default function PuzzleGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onSolve,
 }) {
@@ -44,6 +46,7 @@ export default function PuzzleGame({
       : `assets/illustrations/${target.asset}.svg`,
   );
   function pick(i) {
+    if (paused || interactionBlocked()) return;
     if (selected === null) {
       setSelected(i);
       return;
@@ -56,7 +59,7 @@ export default function PuzzleGame({
   }
   const misplaced = order.findIndex((x, i) => x !== i);
   return (
-    <div className="puzzle-layout">
+    <div className="puzzle-layout" aria-disabled={paused || undefined}>
       <div className="puzzle-reference">
         <Visual item={target} lang={lang} photos={settings.photos} />
         <span>{lang === "tr" ? "Resmi tamamla" : "So sieht’s aus"}</span>
@@ -72,6 +75,7 @@ export default function PuzzleGame({
             }}
             aria-label={`${lang === "tr" ? "Parça" : "Puzzleteil"} ${index + 1}`}
             onClick={() => pick(index)}
+            disabled={paused}
           >
             {hint >= 3 && <span>{piece + 1}</span>}
           </button>
