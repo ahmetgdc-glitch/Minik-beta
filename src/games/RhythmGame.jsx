@@ -27,6 +27,7 @@ export default function RhythmGame({
     [cursor, setCursor] = useState(-1),
     [input, setInput] = useState([]),
     [lit, setLit] = useState(-1);
+  const controlsDisabled = paused || interactionBlocked();
 
   async function repeat() {
     if (paused || playing || interactionBlocked()) return;
@@ -54,7 +55,7 @@ export default function RhythmGame({
   );
 
   useEffect(() => {
-    if (!playing || paused) return;
+    if (!playing || controlsDisabled) return;
     if (cursor >= sequence.length) {
       setPlaying(false);
       setLit(-1);
@@ -70,7 +71,7 @@ export default function RhythmGame({
     setLit(sequence[cursor]);
     const off = setTimeout(() => setLit(-1), 340),
       next = setTimeout(() => {
-        if (interactionBlocked()) {
+        if (paused || interactionBlocked()) {
           setPlaying(false);
           setLit(-1);
           stopSounds();
@@ -83,15 +84,15 @@ export default function RhythmGame({
       clearTimeout(next);
       stopSounds();
     };
-  }, [cursor, playing, paused, sequence]);
+  }, [cursor, playing, controlsDisabled, paused, sequence, interactionBlocked]);
 
   useEffect(() => {
-    if (!paused) return;
+    if (!controlsDisabled) return;
     setPlaying(false);
     setLit(-1);
     setCursor(-1);
     stopSounds();
-  }, [paused]);
+  }, [controlsDisabled]);
 
   async function tap(i) {
     if (playing || paused || interactionBlocked()) return;
@@ -121,7 +122,7 @@ export default function RhythmGame({
         : "Jetzt bist du dran!";
 
   return (
-    <section className="rhythm-stage rhythm-playground" aria-label={text} aria-disabled={paused || undefined}>
+    <section className="rhythm-stage rhythm-playground" aria-label={text} aria-disabled={controlsDisabled || undefined}>
       <div className="rhythm-sky" aria-hidden="true">
         <span className="rhythm-cloud rhythm-cloud-one" />
         <span className="rhythm-cloud rhythm-cloud-two" />
@@ -163,7 +164,7 @@ export default function RhythmGame({
             key={i}
             className={`music-pad ${lit === i ? "lit" : ""} ${hint >= 2 && !playing && sequence[input.length] === i ? "hint-target" : ""}`}
             style={{ "--pad": color }}
-            disabled={playing || paused}
+            disabled={playing || controlsDisabled}
             onClick={() => tap(i)}
             aria-label={`${lang === "tr" ? "Ses" : "Ton"} ${i + 1}`}
           >
@@ -174,7 +175,7 @@ export default function RhythmGame({
         ))}
       </div>
 
-      <button className="rhythm-repeat" onClick={repeat} disabled={playing || paused}>
+      <button className="rhythm-repeat" onClick={repeat} disabled={playing || controlsDisabled}>
         <span className="rhythm-repeat-icon"><Play size={28} fill="currentColor" /></span>
         <span>
           <strong>{lang === "tr" ? "Melodiyi dinle" : "Melodie anhören"}</strong>
