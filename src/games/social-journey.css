@@ -63,6 +63,24 @@
   transform: translateY(-4px);
 }
 
+.social-step-listenable {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.social-step-listenable:hover,
+.social-step-listenable:focus-visible {
+  transform: translateY(-8px);
+  box-shadow: 0 0 0 6px rgba(255,255,255,.7), 0 20px 36px rgba(49, 91, 75, .2);
+  outline: none;
+}
+
+.social-step-listenable:active {
+  transform: translateY(-2px) scale(.985);
+}
+
 .social-step-card.question {
   border: 5px dashed rgba(73, 112, 150, .38);
   background: rgba(255,255,255,.68);
@@ -80,6 +98,17 @@
 
 .social-step-card b {
   font-size: clamp(.95rem, 2.1vw, 1.16rem);
+}
+
+.social-step-hear {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.86);
+  box-shadow: 0 7px 15px rgba(42,79,67,.12);
+  font-size: 1rem;
 }
 
 .social-step-number {
@@ -125,7 +154,7 @@
   .social-sequence-strip::after { display: none; }
   .social-step-card {
     min-height: 150px;
-    grid-template-columns: minmax(90px, 130px) 1fr;
+    grid-template-columns: minmax(90px, 130px) 1fr auto;
     text-align: left;
   }
   .social-step-card.question {
@@ -147,4 +176,5 @@
 @media (prefers-reduced-motion: reduce) {
   .social-step-card.complete,
   .social-step-arrow { transform: none; }
+  .social-step-listenable { transition: none; }
 }
