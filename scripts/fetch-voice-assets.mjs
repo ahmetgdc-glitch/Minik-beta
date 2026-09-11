@@ -6,6 +6,7 @@ const sourceFiles = [
   "src/audio/animalVoiceClips.js",
   "src/audio/numberVoiceClips.js",
   "src/audio/helpVoiceClips.js",
+  "src/audio/categoryVoiceClips.js",
   "src/audio/foodVoiceClips.js",
   "src/audio/naturalVoicePlans.js",
 ];
