@@ -604,6 +604,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
           hint={hint}
           paused={paused}
           round={round}
+          interactionBlocked={interactionBlocked}
           onReady={ready}
           onWrong={wrong}
           onSolve={solve}
