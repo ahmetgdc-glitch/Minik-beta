@@ -11,6 +11,8 @@ export default function DailyOrderGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -24,19 +26,18 @@ export default function DailyOrderGame({
     };
   }, [items, difficulty]);
 
-  const text =
-    lang === "tr"
-      ? `${prompt.labels.tr} sonrasında ne gelir?`
-      : `Was kommt nach ${prompt.labels.de}?`;
-  const help =
-    lang === "tr"
-      ? `${prompt.labels.tr} sonrasında ${target.labels.tr} gelir.`
-      : `Nach ${prompt.labels.de} kommt ${target.labels.de}.`;
+  const text = lang === "tr" ? `${prompt.labels.tr} sonrasında ne gelir?` : `Was kommt nach ${prompt.labels.de}?`;
+  const help = lang === "tr" ? `${prompt.labels.tr} sonrasında ${target.labels.tr} gelir.` : `Nach ${prompt.labels.de} kommt ${target.labels.de}.`;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
 
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([prompt.id, target.id]) : onWrong([prompt.id, target.id]);
+  }
+
   return (
-    <div className="concept-game routine-order-game">
+    <div className="concept-game routine-order-game" aria-disabled={paused || undefined}>
       <section className="routine-journey-stage" aria-label={lang === "tr" ? "Şimdi olan" : "Was jetzt passiert"}>
         <span className="routine-scene-label">{lang === "tr" ? "Şimdi" : "Jetzt"}</span>
         <div className="routine-now-scene">
@@ -53,11 +54,8 @@ export default function DailyOrderGame({
             <button
               key={item.id}
               className={`routine-next-scene ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
-              onClick={() =>
-                item.id === target.id
-                  ? onSolve([prompt.id, target.id])
-                  : onWrong([prompt.id, target.id])
-              }
+              onClick={() => pick(item)}
+              disabled={paused}
               aria-label={item.labels[lang]}
             >
               <Visual item={item} lang={lang} photos={settings.photos} />
