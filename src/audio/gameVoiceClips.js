@@ -39,6 +39,10 @@ const CLIPS = {
     "Quadrat": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/86a3c3cb-a10e-400c-87ba-fd65c4bd2731.mp3",
     "Dreieck": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/2bed5aa0-5f98-4671-860b-f352307c9662.mp3",
     "Rechteck": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/18009c97-4f1d-4795-bd8f-b18df4d339e0.mp3",
+    "Stern": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7b98bca6-a073-45b1-9617-3b02510d4f11.mp3",
+    "Herz": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e8db580d-32ef-446b-9452-ea01b3b2c745.mp3",
+    "Raute": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/164b1769-40fb-4767-a426-5efec520c621.mp3",
+    "Oval": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/014b2b7e-384d-4a1f-8f88-01af6a16f2cd.mp3",
   },
   tr: {
     "Harika!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e3d0dbf1-3f7e-4808-aa2d-080742f7db36.mp3",
@@ -76,6 +80,10 @@ const CLIPS = {
     "Kare": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7e6c7307-d359-4f6d-96ab-abf3a247e7dd.mp3",
     "Üçgen": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/26398ef5-8b0e-40e5-b3b5-9191128faf0f.mp3",
     "Dikdörtgen": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/9b4374d9-2ae4-40e7-a47b-309832e1f358.mp3",
+    "Yıldız": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/83aa5501-5240-44ac-af65-310a2255217f.mp3",
+    "Kalp": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/2c1b539c-5e34-4e6b-8148-871cacb4b68c.mp3",
+    "Eşkenar dörtgen": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/fe7f32ef-1eb4-49a6-9932-7451ba2d274a.mp3",
+    "Oval": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4c81fd84-a7a8-4357-ac7b-5320bcd62b2f.mp3",
   },
 };
 
