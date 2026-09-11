@@ -16,6 +16,7 @@ test("Safari lifecycle pause blocks answer handlers synchronously before React r
 
 test("manual pause and lifecycle resume keep the synchronous pause guard in sync", () => {
   assert.match(source, /const pauseManually = useCallback\(\(\) => \{[\s\S]*manualPauseRef\.current = true;[\s\S]*pausedRef\.current = true;[\s\S]*setPaused\(true\)/);
-  assert.ok((source.match(/onClick=\{pauseManually\}/g) || []).length >= 2, "both visible pause controls must share the synchronous pause helper");
+  assert.equal((source.match(/onClick=\{pauseManually\}/g) || []).length, 1, "the visible pause control must share the synchronous pause helper");
+  assert.match(source, /className="icon-button game-back-button"[\s\S]*onClick=\{exit\}/);
   assert.match(source, /lifecyclePauseRef\.current = false;[\s\S]{0,100}?pausedRef\.current = false;[\s\S]{0,60}?setPaused\(false\)/);
 });
