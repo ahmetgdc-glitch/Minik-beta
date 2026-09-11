@@ -15,12 +15,20 @@ test("missing-object game uses an immersive memory stage instead of the legacy r
 });
 
 test("missing-object preview lets children hear visible words before the memory question", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
   assert.match(game, /function replayPreview\(item\)/);
-  assert.match(game, /if \(hidden \|\| paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /if \(hidden \|\| controlsDisabled\) return/);
   assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
   assert.match(game, /listening-target/);
   assert.match(game, /role={!hidden \? "button" : undefined}/);
+  assert.match(game, /tabIndex={!hidden && !controlsDisabled \? 0 : undefined}/);
+  assert.match(game, /aria-disabled={!hidden && controlsDisabled \? true : undefined}/);
   assert.match(game, /onKeyDown=\{\(event\) => previewKeyDown\(event, x\)\}/);
+});
+
+test("missing-object choices and continue button are truly disabled while locked", () => {
+  assert.match(game, /disabled=\{controlsDisabled\}/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
 });
 
 test("missing-object stage preserves a visible vanished slot and large child-first controls", () => {
