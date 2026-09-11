@@ -29,19 +29,20 @@ export default function PatternGame({
     ? "Hangi resmin tekrar ettiğine bak."
     : "Schau, welches Bild sich wiederholt.";
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
+  const controlsDisabled = paused || interactionBlocked();
 
   function speakNode(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     speak(item.labels[lang], lang, settings);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   return (
-    <div className="pattern-path-game" aria-disabled={paused || undefined}>
+    <div className="pattern-path-game" aria-disabled={controlsDisabled || undefined}>
       <section className="pattern-path-stage" aria-label={text}>
         <span className="pattern-path-label">{lang === "tr" ? "Deseni takip et" : "Folge dem Muster"}</span>
         <div className="pattern-path-sequence">
@@ -51,9 +52,9 @@ export default function PatternGame({
                 className={`pattern-path-node ${hint >= 2 ? "pattern-emphasis" : ""}`}
                 style={{ animationDelay: `${k * 0.2}s` }}
                 role="button"
-                tabIndex={paused ? -1 : 0}
+                tabIndex={controlsDisabled ? -1 : 0}
                 aria-label={base[i].labels[lang]}
-                aria-disabled={paused || undefined}
+                aria-disabled={controlsDisabled || undefined}
                 onClick={() => speakNode(base[i])}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
@@ -78,7 +79,7 @@ export default function PatternGame({
               key={x.id}
               className={`pattern-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
               onClick={() => pick(x)}
-              disabled={paused}
+              disabled={controlsDisabled}
               aria-label={x.labels[lang]}
             >
               <Visual item={x} lang={lang} photos={settings.photos} />
