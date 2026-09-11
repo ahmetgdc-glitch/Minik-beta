@@ -1,4 +1,5 @@
 const normalize = (text) => String(text || "").trim();
+const preloaded = new Map();
 
 const CLIPS = {
   de: {
@@ -22,6 +23,26 @@ export function gameVoiceClip(text, lang = "de") {
 
 export function hasGameVoiceClip(text, lang = "de") {
   return Boolean(gameVoiceClip(text, lang));
+}
+
+export function preloadGameVoiceClips(lang) {
+  if (typeof Audio === "undefined") return 0;
+  const groups = lang && CLIPS[lang] ? [CLIPS[lang]] : Object.values(CLIPS);
+  let added = 0;
+  for (const group of groups) {
+    for (const url of Object.values(group)) {
+      if (preloaded.has(url)) continue;
+      try {
+        const audio = new Audio();
+        audio.preload = "auto";
+        audio.src = url;
+        audio.load?.();
+        preloaded.set(url, audio);
+        added++;
+      } catch {}
+    }
+  }
+  return added;
 }
 
 export const gameVoiceClipCount = Object.values(CLIPS).reduce(
