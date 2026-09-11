@@ -9,6 +9,7 @@ export const helpVoiceEntries = {
     "Hör das Geräusch noch einmal genau an.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8b91d904-69de-427d-8016-c1f4d8d0ee2e.mp3",
     "Schau, welches Bild sich wiederholt.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/739c86b0-6e6c-4411-b959-82860fd872a3.mp3",
     "Denk an die Reihe von eben.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/5fca0836-58d1-46f7-bd9a-6f62ff0bfff5.mp3",
+    "Tippe auf das große Bild. Wische weiter!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/f41af944-b86e-4880-b489-5a575033f2dc.mp3",
   },
   tr: {
     "Parlayan tuşları takip et.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d5b92968-a360-4259-88f4-793c7c2b790f.mp3",
@@ -18,6 +19,7 @@ export const helpVoiceEntries = {
     "Sesi bir kez daha dikkatle dinle.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/057b5a35-db0d-47c0-bdbd-bf129a12e59f.mp3",
     "Hangi resmin tekrar ettiğine bak.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/25ce175c-48f0-4c33-acde-ceda36542152.mp3",
     "Az önceki sırayı hatırla.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/19af7d7b-ee89-437d-8cca-3bfaaac75fdb.mp3",
+    "Büyük resme dokun. Sonra kaydır!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a3a4ffbe-cd09-46c6-ae23-e203ecee6446.mp3",
   },
 };
 
