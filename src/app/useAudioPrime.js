@@ -12,33 +12,45 @@ export function useAudioPrime(enabled = true) {
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
 
-    let primed = false;
+    let webAudioReady = false;
+    let voiceAudioReady = false;
     const cleanupGestureListeners = () => {
       window.removeEventListener("pointerdown", prime, true);
       window.removeEventListener("touchend", prime, true);
       window.removeEventListener("keydown", prime, true);
     };
+    const maybeFinish = () => {
+      if (!webAudioReady || !voiceAudioReady) return;
+      cleanupGestureListeners();
+    };
     const prime = () => {
       refreshVoices();
-      // Calling this function is intentionally synchronous up to audio.play().
-      // Do not await it here: Safari must see play() in the original gesture.
-      primeVoiceAudio().catch(() => false);
+      // play() is called synchronously inside primeVoiceAudio before its first
+      // await. Keep touchend armed when pointerdown alone is insufficient.
+      primeVoiceAudio().then((ok) => {
+        voiceAudioReady ||= ok;
+        maybeFinish();
+      }).catch(() => {});
       const context = unlockAudio();
       if (context?.state === "running") {
-        primed = true;
-        cleanupGestureListeners();
+        webAudioReady = true;
+        maybeFinish();
       } else if (context?.resume) {
         context.resume().then(() => {
-          if (context.state !== "running") return;
-          primed = true;
-          cleanupGestureListeners();
+          webAudioReady = context.state === "running";
+          maybeFinish();
         }).catch(() => {});
       }
     };
     const resumeAfterBackground = () => {
-      if (document.visibilityState !== "visible" || primed) return;
-      // Keep listeners armed; the next real tap will re-unlock Safari audio.
+      if (document.visibilityState !== "visible") return;
+      // Safari can suspend WebAudio while the app is backgrounded. Re-arm the
+      // gesture path; the persistent voice element itself remains reusable.
+      webAudioReady = false;
       refreshVoices();
+      window.addEventListener("pointerdown", prime, true);
+      window.addEventListener("touchend", prime, true);
+      window.addEventListener("keydown", prime, true);
     };
 
     // Capture runs before navigation/button handlers, which is important on
@@ -51,7 +63,8 @@ export function useAudioPrime(enabled = true) {
     return () => {
       cleanupGestureListeners();
       document.removeEventListener("visibilitychange", resumeAfterBackground);
-      primed = false;
+      webAudioReady = false;
+      voiceAudioReady = false;
     };
   }, [enabled]);
 }
