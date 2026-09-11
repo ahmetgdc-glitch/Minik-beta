@@ -48,6 +48,10 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     guide.width = Math.max(1, Math.round(rect.width));
     guide.height = Math.max(1, Math.round(rect.height));
     const g = guide.getContext("2d", { willReadFrequently: true });
+    const paintCanvas = document.createElement("canvas");
+    paintCanvas.width = guide.width;
+    paintCanvas.height = guide.height;
+    const paintCtx = paintCanvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
       if (url !== guideUrlRef.current) return;
@@ -60,7 +64,14 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
       const y = (rect.height - drawH) / 2;
       g.clearRect(0, 0, guide.width, guide.height);
       g.drawImage(img, x, y, drawW, drawH);
-      guideRef.current = { canvas: guide, ctx: g, width: rect.width, height: rect.height };
+      guideRef.current = {
+        canvas: guide,
+        ctx: g,
+        width: rect.width,
+        height: rect.height,
+        paintCanvas,
+        paintCtx,
+      };
     };
     img.src = url;
   }
@@ -150,13 +161,38 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
       return color;
     }
   }
-  function confineToTemplate(ctx) {
-    if (!smartColor || !template || !guideRef.current?.canvas) return;
+  function smartPaintSegment(ctx, a, p) {
     const guide = guideRef.current;
+    const paintCtx = guide?.paintCtx;
+    const paintCanvas = guide?.paintCanvas;
+    if (!guide?.canvas || !paintCtx || !paintCanvas) return false;
+
+    const midpoint = { x: (p.x + a.x) / 2, y: (p.y + a.y) / 2 };
+    if (!guidedColorAt(a) && !guidedColorAt(midpoint) && !guidedColorAt(p)) return false;
+
+    paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+    paintCtx.globalCompositeOperation = "source-over";
+    paintCtx.strokeStyle = "#fff";
+    paintCtx.lineWidth = size;
+    paintCtx.lineCap = "round";
+    paintCtx.lineJoin = "round";
+    paintCtx.beginPath();
+    paintCtx.moveTo(a.x, a.y);
+    paintCtx.lineTo(p.x, p.y);
+    paintCtx.stroke();
+
+    // Instead of painting one sampled color across several illustration
+    // regions, reveal the exact source-art pixels under the brush. A stroke
+    // crossing an eye, outline and face therefore keeps every region clean.
+    paintCtx.globalCompositeOperation = "source-in";
+    paintCtx.drawImage(guide.canvas, 0, 0, guide.width, guide.height);
+    paintCtx.globalCompositeOperation = "source-over";
+
     ctx.save();
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(guide.canvas, 0, 0, guide.width, guide.height);
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(paintCanvas, 0, 0, guide.width, guide.height);
     ctx.restore();
+    return true;
   }
   function start(e) {
     if (blocked()) return;
@@ -173,21 +209,32 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     if (!drawing.current || blocked()) return;
     e.preventDefault();
     const c = canvasRef.current, ctx = c.getContext("2d"), p = point(e), a = last.current;
-    const midpoint = { x: (p.x + a.x) / 2, y: (p.y + a.y) / 2 };
-    const guidedColor = eraser ? color : guidedColorAt(midpoint);
     const segment = Math.hypot(p.x - a.x, p.y - a.y);
-    strokeDistance.current += segment;
-    if (segment > 0 && (guidedColor || eraser)) {
-      ctx.globalCompositeOperation = eraser ? "destination-out" : "source-over";
-      ctx.strokeStyle = guidedColor || color;
+    let painted = false;
+
+    if (segment > 0 && eraser) {
+      ctx.globalCompositeOperation = "destination-out";
       ctx.lineWidth = size;
       ctx.beginPath();
       ctx.moveTo(a.x, a.y);
       ctx.lineTo(p.x, p.y);
       ctx.stroke();
       ctx.globalCompositeOperation = "source-over";
-      if (!eraser) confineToTemplate(ctx);
+      painted = true;
+    } else if (segment > 0 && smartColor && template) {
+      painted = smartPaintSegment(ctx, a, p);
+    } else if (segment > 0) {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = size;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      painted = true;
     }
+
+    if (painted) strokeDistance.current += segment;
     last.current = p;
   }
   function end(e) {
