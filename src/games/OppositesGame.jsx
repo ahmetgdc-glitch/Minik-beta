@@ -35,6 +35,11 @@ export default function OppositesGame({
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
 
+  function replayPrompt() {
+    if (paused || interactionBlocked()) return;
+    speak(prompt.labels[lang], lang, settings);
+  }
+
   function pick(item) {
     if (paused || interactionBlocked()) return;
     item.id === target.id ? onSolve([prompt.id, target.id]) : onWrong([prompt.id, target.id]);
@@ -43,10 +48,16 @@ export default function OppositesGame({
   return (
     <div className="opposites-playground" aria-disabled={paused || undefined}>
       <section className="opposites-stage" aria-label={prompt.labels[lang]}>
-        <div className="opposites-prompt-scene">
+        <button
+          type="button"
+          className="opposites-prompt-scene"
+          onClick={replayPrompt}
+          disabled={paused}
+          aria-label={lang === "tr" ? `${prompt.labels.tr} kelimesini tekrar dinle` : `${prompt.labels.de} noch einmal anhören`}
+        >
           <Visual item={prompt} lang={lang} photos={settings.photos} />
           <strong>{prompt.labels[lang]}</strong>
-        </div>
+        </button>
         <span className="opposites-stage-arrow" aria-hidden="true">↔</span>
         <div className="opposites-stage-prompt">
           <span>{lang === "tr" ? "Bunun zıttı hangisi?" : "Was ist das Gegenteil?"}</span>
