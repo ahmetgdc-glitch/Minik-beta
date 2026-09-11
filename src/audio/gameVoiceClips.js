@@ -3,6 +3,11 @@ import {
   animalVoiceClipCount,
   animalVoiceEntries,
 } from "./animalVoiceClips.js";
+import {
+  numberVoiceClip,
+  numberVoiceClipCount,
+  numberVoiceEntries,
+} from "./numberVoiceClips.js";
 
 const normalize = (text) => String(text || "").trim();
 const preloaded = new Map();
@@ -110,7 +115,7 @@ const CLIPS = {
 };
 
 export function gameVoiceClip(text, lang = "de") {
-  return CLIPS[lang]?.[normalize(text)] || animalVoiceClip(text, lang);
+  return CLIPS[lang]?.[normalize(text)] || numberVoiceClip(text, lang) || animalVoiceClip(text, lang);
 }
 
 export function hasGameVoiceClip(text, lang = "de") {
@@ -120,10 +125,13 @@ export function hasGameVoiceClip(text, lang = "de") {
 export function preloadGameVoiceClips(lang) {
   if (typeof Audio === "undefined") return 0;
   const baseGroups = lang && CLIPS[lang] ? [CLIPS[lang]] : Object.values(CLIPS);
+  const numberGroups = lang && numberVoiceEntries[lang]
+    ? [numberVoiceEntries[lang]]
+    : Object.values(numberVoiceEntries);
   const animalGroups = lang && animalVoiceEntries[lang]
     ? [animalVoiceEntries[lang]]
     : Object.values(animalVoiceEntries);
-  const groups = [...baseGroups, ...animalGroups];
+  const groups = [...baseGroups, ...numberGroups, ...animalGroups];
   let added = 0;
   for (const group of groups) {
     for (const url of Object.values(group)) {
@@ -143,4 +151,5 @@ export function preloadGameVoiceClips(lang) {
 
 export const gameVoiceClipCount =
   Object.values(CLIPS).reduce((sum, group) => sum + Object.keys(group).length, 0) +
+  numberVoiceClipCount +
   animalVoiceClipCount;
