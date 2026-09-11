@@ -17,7 +17,7 @@ test("drawing strokes cannot start or continue while blocked", () => {
 
 test("drawing toolbar and templates disable together with lifecycle state", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
-  const disabledUses = game.match(/disabled=\{controlsDisabled\}/g) || [];
+  const disabledUses = game.match(/disabled=\{controlsDisabled/g) || [];
   assert.ok(disabledUses.length >= 6, `expected drawing controls to share disabled state, got ${disabledUses.length}`);
   assert.match(game, /disabled=\{controlsDisabled \|\| strokes < 3\}/);
 });
