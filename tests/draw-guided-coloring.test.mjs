@@ -25,6 +25,14 @@ test("smart coloring reveals source artwork pixel-for-pixel instead of dragging 
   assert.match(game, /Farben automatisch/);
 });
 
+test("smart coloring responds to a simple child tap, not only a drag", () => {
+  assert.match(game, /MIN_STROKE_DISTANCE/);
+  assert.match(game, /Math\.hypot\(p\.x - a\.x, p\.y - a\.y\) < \.5/);
+  assert.match(game, /paintCtx\.arc\(p\.x, p\.y, Math\.max\(2, size \/ 2\), 0, Math\.PI \* 2\)/);
+  assert.match(game, /smartPaintSegment\(ctx, p, p\)/);
+  assert.match(game, /strokeDistance\.current = MIN_STROKE_DISTANCE/);
+});
+
 test("smart coloring mask follows the real visible guide bounds", () => {
   assert.ok(game.includes('w.querySelector(".draw-template.has-item")'));
   assert.match(game, /visibleGuide\?\.getBoundingClientRect\(\)/);
