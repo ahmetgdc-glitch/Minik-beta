@@ -1,4 +1,5 @@
 import React from "react";
+import { Headphones, Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
 import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
 export default function ListenGame({
@@ -31,13 +32,32 @@ export default function ListenGame({
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
+  function repeatWord() {
+    if (paused || interactionBlocked()) return;
+    speak(text, lang, settings);
+  }
+
   return (
-    <div className="listen-playground" aria-disabled={paused || undefined}>
-      <div className="listen-orb" aria-hidden="true"><span>♪</span></div>
+    <section className="listen-playground" aria-disabled={paused || undefined}>
+      <div className="listen-stage" aria-label={lang === "tr" ? "Mino dinleme istasyonu" : "Minos Hörstation"}>
+        <div className="listen-stage-copy">
+          <span className="listen-badge"><Headphones size={20} /> {lang === "tr" ? "Kulaklarını aç" : "Ohren auf"}</span>
+          <strong>{lang === "tr" ? "Mino bir kelime söylüyor" : "Mino sagt dir ein Wort"}</strong>
+          <small>{lang === "tr" ? "İyi dinle ve doğru resmi bul." : "Hör genau hin und finde das passende Bild."}</small>
+        </div>
+        <button className="listen-orb" type="button" onClick={repeatWord} disabled={paused} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
+          <span className="listen-wave wave-one" aria-hidden="true" />
+          <span className="listen-wave wave-two" aria-hidden="true" />
+          <span className="listen-wave wave-three" aria-hidden="true" />
+          <Volume2 className="listen-speaker" size={72} aria-hidden="true" />
+          <span className="listen-replay-label">{lang === "tr" ? "Tekrar dinle" : "Nochmal hören"}</span>
+        </button>
+      </div>
+      <div className="listen-choice-label">{lang === "tr" ? "Hangi resim?" : "Welches Bild passt?"}</div>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
         onPick={pick}
       />
-    </div>
+    </section>
   );
 }
