@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const screen = fs.readFileSync(new URL("../src/app/GamesScreen.jsx", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../src/app/playground.css", import.meta.url), "utf8");
+const guards = fs.readFileSync(new URL("../src/app/playground-guards.css", import.meta.url), "utf8");
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 
 test("games screen uses the immersive playground instead of the legacy card grid", () => {
@@ -29,6 +30,15 @@ test("playground keeps large child-first touch scenes with narrow-phone adaptati
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
+test("playground artwork is contained in its own row and cannot cover card labels", () => {
+  assert.match(guards, /grid-template-rows:\s*minmax\(0, 1fr\) auto/);
+  assert.match(guards, /\.playground-island-art\s*\{[\s\S]*?overflow:\s*hidden/);
+  assert.match(guards, /\.playground-island-art > \.art,[\s\S]*?max-height:\s*100%/);
+  assert.match(guards, /\.playground-island h3\s*\{[\s\S]*?position:\s*relative[\s\S]*?z-index:\s*2/);
+  assert.match(guards, /@media \(max-width: 620px\)[\s\S]*?grid-template-rows:\s*minmax\(125px, 1fr\) auto/);
+});
+
 test("playground stylesheet is part of the production entry", () => {
   assert.match(main, /import "\.\/app\/playground\.css";/);
+  assert.match(main, /import "\.\/app\/playground-guards\.css";/);
 });
