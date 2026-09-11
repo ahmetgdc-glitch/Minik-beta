@@ -13,6 +13,15 @@ test("shadow game renders inside an immersive cave playground", () => {
   assert.match(css, /width:min\(56vw,330px\)/);
 });
 
+test("shadow stage replays only the spoken task and keeps the answer hidden", () => {
+  assert.match(game, /function repeatPrompt\(\)/);
+  assert.match(game, /speak\(text, lang, settings\)/);
+  assert.match(game, /onClick=\{repeatPrompt\}/);
+  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /shadow-listen-hint/);
+  assert.doesNotMatch(game, /speak\(target\.labels/);
+});
+
 test("shadow playground keeps large answer choices on narrow phones", () => {
   assert.match(css, /@media\(max-width:700px\)/);
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
