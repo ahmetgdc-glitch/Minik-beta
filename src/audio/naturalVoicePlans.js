@@ -18,6 +18,11 @@ const PHRASES = {
     "Was sieht Mino zum Schluss?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/9452c6e2-e242-4c05-bf24-e458376e7ea8.mp3",
     "Sprich mir nach.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/88a42dc3-64e1-4ef5-a005-679608bf2bb4.mp3",
     "Fahre die Spur nach. Starte am grünen Punkt.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8fe4c85f-0d14-4c8d-af92-9a6722678b9e.mp3",
+    "Das wiederholen wir noch einmal.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7049a5d4-a64f-4a1b-93b4-3bb7e58101f8.mp3",
+    "Tippe auf dieses Bild.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/38f4ab97-9cc8-41a9-8d19-aae2be010d82.mp3",
+    "Was ist das Gegenteil?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e11ad4ef-1a25-4b0b-89c8-9500bdb3bfc8.mp3",
+    "Was kommt danach?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/adc49683-6915-4d6f-a48e-14efa86a7501.mp3",
+    "Als Nächstes kommt:": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4ab987ed-cd0a-4285-8a19-f2335540d916.mp3",
   },
   tr: {
     "Merhaba! Haydi dünyayı keşfedelim!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/437aeecc-5ab2-4b53-9ebf-42176f604168.mp3",
@@ -32,6 +37,11 @@ const PHRASES = {
     "Mino en son ne görüyor?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/bf757ed3-4958-47f2-a1c5-91ee334f6420.mp3",
     "Benimle söyle.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e7bd6dc8-0298-44f0-9d1f-48bdee05abe8.mp3",
     "İzi takip et. Yeşil noktadan başla.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/36dfed75-dec9-41a1-987f-6d86a6a1619a.mp3",
+    "Bir kez daha hatırlayalım.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/51092f45-122e-4600-ae94-11c38be22d97.mp3",
+    "Bu resmi seç.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/f2b5547e-680e-4296-b7c7-6afb163a1237.mp3",
+    "Bunun zıttı hangisi?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7026f8c9-9e8d-443d-9fef-2702601e4178.mp3",
+    "Sonra ne gelir?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c653dce8-27e8-4f73-bf36-a7346aaf2621.mp3",
+    "Sırada:": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/039d066f-fb6c-4c97-888a-a7672e9245bc.mp3",
   },
 };
 
@@ -55,6 +65,12 @@ export function naturalVoicePlan(text, lang = "de") {
     match = value.match(/^(.+?)\s+nerede\?$/u);
     if (match) return resolve(["Bu resmi bul.", stripEnd(match[1])], lang);
 
+    match = value.match(/^(.+?)\s+nerede\?\s+Bir kez daha hatırlayalım\.$/u);
+    if (match) return resolve(["Bu resmi bul.", stripEnd(match[1]), "Bir kez daha hatırlayalım."], lang);
+
+    match = value.match(/^(.+?)\.\s+Bu resmi seç\.$/u);
+    if (match) return resolve([stripEnd(match[1]), "Bu resmi seç."], lang);
+
     match = value.match(/^Hangi sepete ait\?\s*(.+?)\.?$/u);
     if (match) return resolve(["Hangi sepete ait?", stripEnd(match[1])], lang);
 
@@ -63,6 +79,15 @@ export function naturalVoicePlan(text, lang = "de") {
 
     match = value.match(/^Benimle söyle:\s*(.+?)\.?$/u);
     if (match) return resolve(["Benimle söyle.", stripEnd(match[1])], lang);
+
+    match = value.match(/^(.+?)\.\s+Bunun zıttı hangisi\?$/u);
+    if (match) return resolve([stripEnd(match[1]), "Bunun zıttı hangisi?"], lang);
+
+    match = value.match(/^(.+?)\s+sonrasında ne gelir\?$/u);
+    if (match) return resolve([stripEnd(match[1]), "Sonra ne gelir?"], lang);
+
+    match = value.match(/^(.+?)\s+sonrasında\s+(.+?)\s+gelir\.$/u);
+    if (match) return resolve([stripEnd(match[1]), "Sırada:", stripEnd(match[2])], lang);
 
     match = value.match(/^(.+?),\s*sonra\s+(.+?),\s*ardından\s+(.+?)\.?$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
@@ -74,6 +99,12 @@ export function naturalVoicePlan(text, lang = "de") {
     match = value.match(/^Finde:\s*(.+?)\.?$/u);
     if (match) return resolve(["Finde dieses Bild.", stripEnd(match[1])], lang);
 
+    match = value.match(/^Wo ist\s+(.+?)\?\s+Das wiederholen wir noch einmal\.$/u);
+    if (match) return resolve(["Finde dieses Bild.", stripEnd(match[1]), "Das wiederholen wir noch einmal."], lang);
+
+    match = value.match(/^(.+?)\.\s+Tippe auf dieses Bild\.$/u);
+    if (match) return resolve([stripEnd(match[1]), "Tippe auf dieses Bild."], lang);
+
     match = value.match(/^In welchen Korb gehört das\?\s*(.+?)\.?$/u);
     if (match) return resolve(["In welchen Korb gehört das?", stripEnd(match[1])], lang);
 
@@ -82,6 +113,15 @@ export function naturalVoicePlan(text, lang = "de") {
 
     match = value.match(/^Sprich mir nach:\s*(.+?)\.?$/u);
     if (match) return resolve(["Sprich mir nach.", stripEnd(match[1])], lang);
+
+    match = value.match(/^(.+?)\.\s+Was ist das Gegenteil\?$/u);
+    if (match) return resolve([stripEnd(match[1]), "Was ist das Gegenteil?"], lang);
+
+    match = value.match(/^Was kommt nach\s+(.+?)\?$/u);
+    if (match) return resolve([stripEnd(match[1]), "Was kommt danach?"], lang);
+
+    match = value.match(/^Nach\s+(.+?)\s+kommt\s+(.+?)\.$/u);
+    if (match) return resolve([stripEnd(match[1]), "Als Nächstes kommt:", stripEnd(match[2])], lang);
 
     match = value.match(/^(.+?),\s*dann\s+(.+?),\s*danach\s+(.+?)\.?$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
