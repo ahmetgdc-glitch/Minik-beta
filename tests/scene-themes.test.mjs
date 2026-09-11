@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const explorer = readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
+const exploreGame = readFileSync(new URL("../src/games/ExploreGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/worlds/scene-themes.css", import.meta.url), "utf8");
 const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 
@@ -30,4 +31,16 @@ test("major preschool world families receive distinct visual moods", () => {
   assert.match(css, /--world-accent/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(main, /\.\/worlds\/scene-themes\.css/);
+});
+
+test("spoken discovery words keep the matching object highlighted for the real speech lifetime", () => {
+  assert.match(exploreGame, /const \[speakingId, setSpeakingId\] = useState\(null\)/);
+  assert.match(exploreGame, /async function speakItem/);
+  assert.match(exploreGame, /await speak\(item\.labels\[lang\]/);
+  assert.match(exploreGame, /if \(run === speechRun\.current\) setSpeakingId\(null\)/);
+  assert.match(explorer, /const speaking = item\.id === speakingId/);
+  assert.match(explorer, /speaking \? "speaking" : ""/);
+  assert.match(explorer, /data-speaking=\{speaking \|\| undefined\}/);
+  assert.match(css, /discovery-object\.speaking/);
+  assert.match(css, /@keyframes discovery-speaking/);
 });
