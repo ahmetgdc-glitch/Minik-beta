@@ -32,7 +32,7 @@ export default function DifferentGame({
   if (!round) return null;
 
   return (
-    <div className="different-game" aria-label={prompt}>
+    <section className="different-game difference-playground" aria-label={prompt}>
       <div className="different-grid">
         {cells.map((cell) => (
           <button
@@ -45,6 +45,6 @@ export default function DifferentGame({
           </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
