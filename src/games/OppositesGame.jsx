@@ -34,25 +34,26 @@ export default function OppositesGame({
   const help = lang === "tr" ? `${target.labels.tr}, ${prompt.labels.tr} kelimesinin zıttıdır.` : `${target.labels.de} ist das Gegenteil von ${prompt.labels.de}.`;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
+  const controlsDisabled = paused || interactionBlocked();
 
   function replayPrompt() {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     speak(prompt.labels[lang], lang, settings);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([prompt.id, target.id]) : onWrong([prompt.id, target.id]);
   }
 
   return (
-    <div className="opposites-playground" aria-disabled={paused || undefined}>
+    <div className="opposites-playground" aria-disabled={controlsDisabled || undefined}>
       <section className="opposites-stage" aria-label={prompt.labels[lang]}>
         <button
           type="button"
           className="opposites-prompt-scene"
           onClick={replayPrompt}
-          disabled={paused}
+          disabled={controlsDisabled}
           aria-label={lang === "tr" ? `${prompt.labels.tr} kelimesini tekrar dinle` : `${prompt.labels.de} noch einmal anhören`}
         >
           <Visual item={prompt} lang={lang} photos={settings.photos} />
@@ -72,7 +73,7 @@ export default function OppositesGame({
               key={item.id}
               className={`opposites-choice ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
               onClick={() => pick(item)}
-              disabled={paused}
+              disabled={controlsDisabled}
               aria-label={item.labels[lang]}
             >
               <Visual item={item} lang={lang} photos={settings.photos} />
