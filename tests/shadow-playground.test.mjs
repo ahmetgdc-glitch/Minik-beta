@@ -17,8 +17,11 @@ test("shadow stage replays only the spoken task and keeps the answer hidden", ()
   assert.match(game, /function repeatPrompt\(\)/);
   assert.match(game, /speak\(text, lang, settings\)/);
   assert.match(game, /onClick=\{repeatPrompt\}/);
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
   assert.match(game, /shadow-listen-hint/);
+  assert.match(game, /<Volume2 size=\{24\} \/>/);
+  assert.doesNotMatch(game, /🔊/);
   assert.doesNotMatch(game, /speak\(target\.labels/);
 });
 
