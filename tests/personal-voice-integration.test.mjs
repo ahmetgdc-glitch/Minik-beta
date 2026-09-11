@@ -1,0 +1,59 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+import {
+  personalVoiceClip,
+  personalVoiceClipCount,
+  personalVoiceEntries,
+} from "../src/audio/personalVoiceClips.js";
+import { naturalVoicePlan } from "../src/audio/naturalVoicePlans.js";
+
+const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
+const natural = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
+const downloader = readFileSync(new URL("../scripts/fetch-personal-voice-assets.mjs", import.meta.url), "utf8");
+const pkg = readFileSync(new URL("../package.json", import.meta.url), "utf8");
+
+test("authorized personal voice covers the central DE/TR MINIK prompts", () => {
+  assert.equal(personalVoiceClipCount, 34);
+  assert.equal(Object.keys(personalVoiceEntries.de).length, 17);
+  assert.equal(Object.keys(personalVoiceEntries.tr).length, 17);
+
+  for (const [lang, entries] of Object.entries(personalVoiceEntries)) {
+    for (const [text, url] of Object.entries(entries)) {
+      assert.equal(personalVoiceClip(text, lang), url);
+      assert.match(url, /^https:\/\/resource2\.heygen\.ai\/text_to_speech\//);
+      assert.match(url, /id=[a-f0-9-]+\.wav$/);
+    }
+  }
+});
+
+test("natural speech plans prefer the personal voice over legacy recordings", () => {
+  const de = naturalVoicePlan("Hallo! Komm, wir entdecken die Welt!", "de");
+  const tr = naturalVoicePlan("Merhaba! Haydi dünyayı keşfedelim!", "tr");
+  assert.equal(de.length, 1);
+  assert.equal(tr.length, 1);
+  assert.match(de[0], /resource2\.heygen\.ai/);
+  assert.match(tr[0], /resource2\.heygen\.ai/);
+  assert.ok(
+    natural.indexOf("personalVoiceClip(text, lang)") < natural.indexOf("naturalPhraseClip(text, lang)"),
+    "personal voice must be checked before the legacy natural recording library",
+  );
+});
+
+test("personal wav clips are localized before service worker generation", () => {
+  const personalIndex = pkg.indexOf("fetch-personal-voice-assets.mjs");
+  const workerIndex = pkg.indexOf("build-sw.mjs");
+  assert.ok(personalIndex > 0, "personal voice localization must be part of npm build");
+  assert.ok(workerIndex > personalIndex, "service worker must be generated after personal voice files exist");
+  assert.match(downloader, /src\/audio\/personalVoiceClips\.js/);
+  assert.match(downloader, /resource2\\\.heygen\\\.ai/);
+  assert.match(downloader, /\.voice-cache\/personal/);
+  assert.match(downloader, /personal-manifest\.json/);
+  assert.match(downloader, /MINIK_REQUIRE_LOCAL_VOICE/);
+});
+
+test("runtime can resolve both legacy mp3 and personal wav files locally", () => {
+  assert.match(voice, /\\\.\(\?:mp3\|wav\)\$\/iu/);
+  assert.match(voice, /assets\/voice\/\$\{filename\}/);
+});
