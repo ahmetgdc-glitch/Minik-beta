@@ -21,9 +21,10 @@ test("CI caches voice assets and requires a complete localized library", () => {
   assert.match(workflow, /MINIK_REQUIRE_LOCAL_VOICE: "1"/);
 });
 
-test("voice asset downloader covers fixed prompts, natural plans and modular animal vocabulary", () => {
+test("voice asset downloader covers prompts and modular learning vocabulary", () => {
   assert.match(downloader, /src\/audio\/gameVoiceClips\.js/);
   assert.match(downloader, /src\/audio\/animalVoiceClips\.js/);
+  assert.match(downloader, /src\/audio\/foodVoiceClips\.js/);
   assert.match(downloader, /src\/audio\/naturalVoicePlans\.js/);
   assert.match(downloader, /fetchWithRetry/);
   assert.match(downloader, /\.voice-cache/);
