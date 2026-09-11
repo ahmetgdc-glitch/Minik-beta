@@ -1,0 +1,265 @@
+.aquarium-heading {
+  width: min(1160px, 100%);
+  margin-inline: auto;
+}
+
+.aquarium-tank {
+  min-height: clamp(360px, 55vh, 620px);
+  border-radius: clamp(32px, 6vw, 64px);
+  box-shadow: 0 28px 70px rgba(29, 91, 126, .17);
+}
+
+.aquarium-mino {
+  width: clamp(170px, 30vw, 330px);
+}
+
+.treasure-panel {
+  width: min(1080px, calc(100% - 20px));
+  margin: clamp(-34px, -4vw, -18px) auto 28px;
+  position: relative;
+  z-index: 3;
+  border-radius: 34px;
+  box-shadow: 0 18px 45px rgba(41, 71, 90, .13);
+}
+
+.treasure-reef {
+  position: relative;
+  width: min(1160px, 100%);
+  margin: 0 auto clamp(36px, 6vw, 72px);
+  padding: clamp(24px, 5vw, 54px) clamp(12px, 3vw, 30px) clamp(46px, 7vw, 82px);
+  border-radius: clamp(32px, 6vw, 64px);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255,255,255,.72) 0 5%, transparent 6%),
+    radial-gradient(circle at 82% 25%, rgba(255,255,255,.55) 0 3%, transparent 4%),
+    linear-gradient(180deg, #e4f9ff 0%, #d9f6f2 55%, #fff4cf 100%);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.treasure-reef::before {
+  content: "";
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: -72px;
+  height: 155px;
+  border-radius: 50% 50% 0 0;
+  background: rgba(226, 181, 99, .38);
+  z-index: -1;
+}
+
+.treasure-reef-heading,
+.outfit-parade-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: clamp(20px, 4vw, 38px);
+}
+
+.treasure-reef-heading h2,
+.outfit-parade-heading h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 3.3rem);
+  line-height: 1;
+}
+
+.treasure-reef-heading span,
+.outfit-parade-heading p {
+  margin: 0;
+  color: #587181;
+  font-weight: 800;
+}
+
+.treasure-objects {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 3vw, 30px);
+}
+
+.treasure-object {
+  position: relative;
+  min-height: clamp(245px, 30vw, 350px);
+  display: grid;
+  align-content: end;
+  justify-items: center;
+  gap: 7px;
+  padding: clamp(18px, 3vw, 34px);
+  border: 0;
+  border-radius: 48% 52% 44% 56% / 57% 45% 55% 43%;
+  background: rgba(255,255,255,.55);
+  color: inherit;
+  box-shadow: 0 14px 34px rgba(37, 84, 105, .1);
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.treasure-object:nth-child(3n + 2) {
+  translate: 0 clamp(16px, 3vw, 34px);
+  border-radius: 57% 43% 52% 48% / 44% 58% 42% 56%;
+}
+
+.treasure-object:nth-child(3n + 3) {
+  border-radius: 43% 57% 58% 42% / 55% 43% 57% 45%;
+}
+
+.treasure-object:disabled {
+  opacity: .58;
+  filter: saturate(.45);
+  cursor: default;
+}
+
+.treasure-object.owned {
+  background: rgba(255,255,255,.82);
+}
+
+.treasure-object.equipped {
+  outline: 4px solid rgba(54, 180, 152, .35);
+  outline-offset: -4px;
+}
+
+.treasure-object > .art,
+.treasure-object > img,
+.treasure-object > svg {
+  width: min(76%, 220px);
+  height: clamp(135px, 18vw, 215px);
+  object-fit: contain;
+  filter: drop-shadow(0 15px 15px rgba(39, 77, 96, .15));
+  transition: transform .22s ease;
+}
+
+.treasure-object h3 {
+  margin: 0;
+  max-width: 15ch;
+  text-align: center;
+  font-size: clamp(1.2rem, 3vw, 1.8rem);
+  line-height: 1.05;
+}
+
+.treasure-object > span {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.8);
+  color: #567080;
+  font-size: .82rem;
+  font-weight: 900;
+}
+
+.treasure-object:not(:disabled):active > .art,
+.treasure-object:not(:disabled):active > img,
+.treasure-object:not(:disabled):active > svg {
+  transform: scale(.92) rotate(-3deg);
+}
+
+.outfit-parade {
+  position: relative;
+  width: min(1160px, 100%);
+  margin: 0 auto clamp(42px, 7vw, 84px);
+  padding: clamp(26px, 5vw, 54px);
+  border-radius: clamp(32px, 6vw, 64px);
+  background: linear-gradient(145deg, #fff4db, #f1e9ff 52%, #e4f8ff);
+  overflow: hidden;
+}
+
+.outfit-parade-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(220px, 31%);
+  gap: clamp(14px, 3vw, 28px);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x mandatory;
+  padding: 10px 4px 20px;
+  scrollbar-width: none;
+}
+
+.outfit-parade-track::-webkit-scrollbar { display: none; }
+
+.outfit-character {
+  min-height: clamp(280px, 36vw, 410px);
+  display: grid;
+  align-content: end;
+  justify-items: center;
+  gap: 7px;
+  padding: 20px;
+  border: 0;
+  border-radius: 45% 55% 49% 51% / 55% 45% 55% 45%;
+  background: rgba(255,255,255,.68);
+  color: inherit;
+  scroll-snap-align: center;
+  cursor: pointer;
+  box-shadow: 0 15px 35px rgba(57, 68, 97, .1);
+}
+
+.outfit-character:nth-child(even) {
+  border-radius: 57% 43% 54% 46% / 43% 58% 42% 57%;
+}
+
+.outfit-character.locked {
+  opacity: .55;
+  filter: grayscale(.35);
+}
+
+.outfit-character.selected {
+  background: rgba(255,255,255,.94);
+  outline: 4px solid rgba(123, 96, 222, .25);
+}
+
+.outfit-character .mino-avatar {
+  width: min(90%, 250px);
+  height: clamp(180px, 25vw, 280px);
+  filter: drop-shadow(0 17px 18px rgba(58, 69, 94, .14));
+  transition: transform .2s ease;
+}
+
+.outfit-character b {
+  font-size: clamp(1.2rem, 2.7vw, 1.75rem);
+}
+
+.outfit-character > span {
+  color: #667083;
+  font-weight: 900;
+}
+
+.outfit-character:not(:disabled):active .mino-avatar {
+  transform: scale(.94) translateY(4px);
+}
+
+@media (max-width: 720px) {
+  .aquarium-tank { min-height: clamp(330px, 58vh, 520px); }
+  .treasure-objects { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .treasure-object { min-height: clamp(220px, 54vw, 300px); }
+  .treasure-object:nth-child(3n + 2) { translate: 0 0; }
+  .treasure-object:nth-child(even) { translate: 0 18px; }
+  .outfit-parade-track { grid-auto-columns: minmax(220px, 72%); }
+  .outfit-parade-heading { align-items: start; flex-direction: column; }
+}
+
+@media (max-width: 390px) {
+  .treasure-reef { padding-inline: 10px; }
+  .treasure-objects { gap: 10px; }
+  .treasure-object {
+    min-height: 205px;
+    padding: 14px 10px;
+  }
+  .treasure-object > .art,
+  .treasure-object > img,
+  .treasure-object > svg { height: 118px; }
+  .treasure-object h3 { font-size: 1.05rem; }
+  .treasure-reef-heading { align-items: start; flex-direction: column; }
+  .outfit-parade { padding-inline: 16px; }
+  .outfit-parade-track { grid-auto-columns: 82%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .treasure-object > .art,
+  .treasure-object > img,
+  .treasure-object > svg,
+  .outfit-character .mino-avatar { transition: none; }
+}
