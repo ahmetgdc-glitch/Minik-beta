@@ -26,6 +26,7 @@ import "./games/difference-playground.css";
 import "./games/missing-stage.css";
 import "./games/opposites-playground.css";
 import "./games/pattern-path.css";
+import "./games/letter-playground.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
