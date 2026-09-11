@@ -21,6 +21,7 @@ import "./rewards/immersive-rewards.css";
 import "./rewards/achievement-trail.css";
 import "./games/story-journey.css";
 import "./games/routine-journey.css";
+import "./games/memory-playground.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
