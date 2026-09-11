@@ -17,8 +17,9 @@ export default function SoundsGame({
 }) {
   const { target, options } = useSelection(itemsForWorld("sounds"), difficulty),
     [playing, setPlaying] = useState(false);
+  const controlsDisabled = paused || interactionBlocked();
   async function repeat() {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     stopSpeech();
     const context = await ensureAudioReady();
     if (!context || paused || interactionBlocked()) {
@@ -35,11 +36,11 @@ export default function SoundsGame({
     : "Hör das Geräusch noch einmal genau an.";
   useLesson(onReady, text, repeat, [target.id], help);
   useEffect(() => {
-    if (paused) {
+    if (controlsDisabled) {
       stopSounds();
       setPlaying(false);
     }
-  }, [paused]);
+  }, [controlsDisabled]);
   useEffect(() => () => {
     stopSounds();
     setPlaying(false);
@@ -51,16 +52,16 @@ export default function SoundsGame({
   }, [playing]);
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   return (
-    <div className="sounds-playground" aria-disabled={paused || undefined}>
+    <div className="sounds-playground" aria-disabled={controlsDisabled || undefined}>
       <button
         className={`sound-orb ${playing ? "playing" : ""}`}
         onClick={repeat}
-        disabled={paused}
+        disabled={controlsDisabled}
         aria-label={lang === "tr" ? "Sesi tekrar dinle" : "Geräusch noch einmal hören"}
       >
         <Volume2 size={48} />
@@ -74,6 +75,7 @@ export default function SoundsGame({
       </button>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
+        disabled={controlsDisabled}
         onPick={pick}
       />
     </div>
