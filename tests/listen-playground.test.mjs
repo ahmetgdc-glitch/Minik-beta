@@ -17,9 +17,10 @@ test("listening game uses an immersive Mino listening station", () => {
   assert.match(css, /min-height:clamp\(190px,30svh,310px\)/);
 });
 
-test("listening replay and answer paths share lifecycle safety", () => {
+test("listening replay speaks only the target word and keeps lifecycle safety", () => {
   assert.match(game, /function repeatWord\(\)/);
   assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onClick=\{repeatWord\}/);
   assert.match(game, /disabled=\{paused\}/);
 });
