@@ -35,6 +35,7 @@ import "./games/puzzle-playground.css";
 import "./games/social-journey.css";
 import "./games/trace-playground.css";
 import "./games/speak-stage.css";
+import "./games/rhythm-playground.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
