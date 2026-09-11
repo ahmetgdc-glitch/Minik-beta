@@ -77,14 +77,8 @@ const components = {
   rhythm: RhythmGame,
 };
 const praise = {
-  de: [
-    "Wunderbar!",
-    "Das hast du toll gemacht!",
-    "Gefunden!",
-    "Super, weiter so!",
-    "Richtig gut!",
-  ],
-  tr: ["Harika!", "Çok güzel yaptın!", "Buldun!", "Aferin sana!", "Çok iyi!"],
+  de: ["Super gemacht!", "Wunderbar!", "Das hast du toll gemacht!"],
+  tr: ["Harika!", "Çok güzel yaptın!"],
 };
 export default function GameSession({ gameId, worldId, onNavigate }) {
   const progress = useProgress(),
@@ -119,13 +113,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     [earned, setEarned] = useState(() => checkpoint?.earned || 0);
   const manualPauseRef = useRef(false);
   const lifecyclePauseRef = useRef(false);
-  // Block child input synchronously during lifecycle transitions. React may not
-  // commit `paused` before iOS Safari dispatches a queued tap/pointer event.
   const pausedRef = useRef(false);
-  // Keep lifecycle-critical state in refs as well as React state. Safari can
-  // fire pagehide/visibilitychange in the tiny window after setPhase/setRound
-  // but before React commits the render. Checkpoints must reflect the decision
-  // that already happened, not the previous render.
   const phaseRef = useRef(checkpoint?.phase || "active");
   const roundRef = useRef(Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)));
   useModalSafety(paused, () => {
@@ -185,10 +173,6 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     [sessionId, worldId, gameId, lang],
   );
   const persistCheckpoint = useCallback(() => {
-    // Do not create a resumable game before the child has actually interacted.
-    // This avoids ghost “continue” sessions when Safari backgrounds immediately
-    // after opening a game. Use refs here because lifecycle events can arrive
-    // before React has committed the most recent phase/round state update.
     if (phaseRef.current === "done" || playedRef.current < 1) return;
     try {
       saveCheckpoint(window.localStorage, progress.activeProfileId, {
@@ -221,15 +205,9 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     [],
   );
   useEffect(() => {
-    // A parent can change this setting from another open MINIK tab. Stop an
-    // utterance that is already running immediately instead of waiting for the
-    // next lesson/replay action to notice that voice output was disabled.
     if (!settings.audio) stopSpeech();
   }, [settings.audio]);
   useEffect(() => {
-    // Safari uses pagehide both for real exits and for the back/forward cache.
-    // A persisted page must not be finalized, otherwise returning from BFCache
-    // would leave a live game permanently marked as an incomplete session.
     const onPageHide = (event) => {
       if (!manualPauseRef.current) lifecyclePauseRef.current = true;
       pausedRef.current = true;
@@ -237,9 +215,6 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       stopSpeech();
       stopSounds();
       persistCheckpoint();
-      // A real page exit may terminate Safari before React unmount cleanup runs.
-      // Persist the incomplete session synchronously through the progress store,
-      // but never finalize a BFCache navigation because that page can return.
       if (!event.persisted) saveSession(false);
     };
     const onPageShow = (event) => {
@@ -257,12 +232,6 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     };
   }, [persistCheckpoint, saveSession]);
   useEffect(() => {
-    // Hash routing does not trigger pagehide. A Safari back-swipe, browser Back
-    // button, or an externally changed hash can therefore unmount the game
-    // without running the normal pause/exit controls. Finalize that deliberate
-    // route leave as an incomplete session and discard its resume checkpoint.
-    // Explicit MINIK exits are idempotent here because saveSession() is guarded
-    // by saved.current and clearCheckpoint() is safe to call more than once.
     const onRouteLeave = () => {
       if (phaseRef.current === "done") return;
       saveSession(false);
@@ -322,10 +291,6 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   useEffect(() => {
     if (!lesson.text || paused || phase !== "active" || !settings.audio) return;
     const t = setTimeout(() => {
-      // React may not have committed the phase/pause render yet when a child
-      // answers inside this 200 ms window. The lifecycle refs are updated
-      // synchronously, so a stale instruction can never speak over praise or
-      // restart audio after Safari/background pause.
       if (
         phaseRef.current !== "active" ||
         manualPauseRef.current ||
@@ -559,111 +524,62 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         >
           <ArrowLeft />
         </button>
-        <div className="session-track">
-          <span>
-            {spec[lang]}{" "}
-            <small>
-              {round + 1} / {totalRounds}
-            </small>
-          </span>
-          <div className="round-track">
-            {Array.from({ length: totalRounds }, (_, i) => (
-              <i
-                key={i}
-                className={
-                  i < round ? "complete" : i === round ? "current" : ""
-                }
-              />
-            ))}
-          </div>
+        <div className="game-title">
+          <b>{spec?.[lang]}</b>
+          <span>{world?.labels?.[lang]}</span>
         </div>
         <button
-          className="icon-button"
-          onClick={pauseManually}
-          aria-label={lang === "tr" ? "Duraklat" : "Pause"}
+          className="icon-button replay-button"
+          onClick={() => lesson.repeat?.()}
+          disabled={!lesson.repeat || paused}
+          aria-label={lang === "tr" ? "Tekrar dinle" : "Noch einmal anhören"}
         >
-          <Pause />
+          <Volume2 />
         </button>
       </header>
-      <div className="game-heading" inert={paused || phase !== "active" ? true : undefined}>
-        <span className="eyebrow">{world.labels[lang]}</span>
-        <h1>{lesson.text}</h1>
-        <button
-          className="replay-audio"
-          onClick={() => {
-            if (interactionBlocked()) return;
-            setActivity((a) => a + 1);
-            unlockAudio();
-            lesson.repeat?.();
-          }}
-          disabled={paused || phase !== "active"}
-          aria-label={lang === "tr" ? "Tekrar dinle" : "Noch einmal hören"}
-        >
-          <Volume2 size={23} />
-        </button>
-      </div>
-      <div
-        className="game-area"
-        inert={paused || phase !== "active" ? true : undefined}
-        onClickCapture={event => {
-          if (interactionBlocked()) { event.preventDefault(); event.stopPropagation(); }
-        }}
-        onPointerDownCapture={event => {
-          if (interactionBlocked()) { event.preventDefault(); event.stopPropagation(); }
-        }}
-        onPointerDown={() => setActivity((a) => a + 1)}
-      >
+      <div className="game-stage" inert={paused ? true : undefined}>
+        <FishGuide
+          lang={lang}
+          message={message || lesson.text}
+          hint={hint}
+          onHelp={help}
+          disabled={interactionBlocked()}
+        />
         <Component
-          key={`${round}-${gameId}`}
-          {...{ items, world, progress, lang, settings, difficulty, round, hint, paused, interactionBlocked }}
+          key={`${gameId}-${worldId}-${round}`}
+          items={items}
+          world={world}
+          progress={progress}
+          difficulty={difficulty}
+          lang={lang}
+          settings={settings}
+          hint={hint}
+          paused={paused}
+          round={round}
           onReady={ready}
           onWrong={wrong}
           onSolve={solve}
         />
       </div>
-      <div inert={paused || phase !== "active" ? true : undefined}>
-        <FishGuide lang={lang} message={message} stage={hint} onHelp={help} outfit={progress.minoOutfit} />
-      </div>
-      {phase === "success" && (
-        <div className="star-burst" aria-live="polite">
-          <Art name="glowing-star" />
-          <b>+1</b>
-        </div>
-      )}
       {paused && (
-        <div className="modal-scrim">
-          <div
-            className="pause-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="pause-title"
+        <div className="pause-overlay" role="dialog" aria-modal="true">
+          <Mino />
+          <h2>{lang === "tr" ? "Mola zamanı" : "Kleine Pause"}</h2>
+          <button
+            className="primary"
+            onClick={() => {
+              manualPauseRef.current = false;
+              lifecyclePauseRef.current = false;
+              pausedRef.current = false;
+              setPaused(false);
+              unlockAudio();
+            }}
           >
-            <Mino />
-            <h2 id="pause-title">
-              {lang === "tr" ? "Küçük bir mola" : "Eine kleine Pause"}
-            </h2>
-            <p>
-              {lang === "tr" ? "Mino seni bekliyor." : "Mino wartet auf dich."}
-            </p>
-            <button
-              className="primary"
-              autoFocus
-              onClick={() => {
-                manualPauseRef.current = false;
-                lifecyclePauseRef.current = false;
-                pausedRef.current = false;
-                setPaused(false);
-                unlockAudio();
-              }}
-            >
-              <Play size={22} />
-              {lang === "tr" ? "Devam et" : "Weiterspielen"}
-            </button>
-            <button className="secondary" onClick={exit}>
-              <Home size={20} />
-              {lang === "tr" ? "Dünyama dön" : "Zur Lernwelt"}
-            </button>
-          </div>
+            <Play size={20} /> {lang === "tr" ? "Devam et" : "Weiterspielen"}
+          </button>
+          <button className="secondary" onClick={exit}>
+            <Home size={20} /> {lang === "tr" ? "Dünyama dön" : "Zur Lernwelt"}
+          </button>
         </div>
       )}
     </section>
