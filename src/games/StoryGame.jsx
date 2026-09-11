@@ -1,9 +1,25 @@
 import React, { useMemo, useState } from "react";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight, Volume2 } from "lucide-react";
 import Visual from "../components/Visual.jsx";
 import { sample, choicesFor } from "../utils/random.js";
 import { useLesson, OptionGrid } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
+
+function storySentence(labels, lang) {
+  if (labels.length <= 1) {
+    return lang === "tr"
+      ? `Mino ${labels[0] || "bir şey"} görüyor.`
+      : `Mino sieht ${labels[0] || "etwas"}.`;
+  }
+  if (labels.length === 2) {
+    return lang === "tr"
+      ? `Mino önce ${labels[0]} ve sonra ${labels[1]} görüyor.`
+      : `Mino sieht zuerst ${labels[0]} und dann ${labels[1]}.`;
+  }
+  return lang === "tr"
+    ? `Mino önce ${labels[0]}, sonra ${labels[1]} ve en son ${labels[2]} görüyor.`
+    : `Mino sieht zuerst ${labels[0]}, dann ${labels[1]} und zum Schluss ${labels[2]}.`;
+}
 
 export default function StoryGame({
   items,
@@ -25,11 +41,10 @@ export default function StoryGame({
   if (!target) return null;
 
   const labels = storyItems.map((item) => item.labels[lang]);
-  const story = lang === "tr"
-    ? `Mino önce ${labels[0]}, sonra ${labels[1]} ve en son ${labels[2]} görüyor.`
-    : `Mino sieht zuerst ${labels[0]}, dann ${labels[1]} und zum Schluss ${labels[2]}.`;
+  const story = storySentence(labels, lang);
   const prompt = lang === "tr" ? "Mino en son ne görüyor?" : "Was sieht Mino zum Schluss?";
   const text = question ? prompt : story;
+  const controlsDisabled = paused || interactionBlocked();
 
   useLesson(
     onReady,
@@ -65,7 +80,7 @@ export default function StoryGame({
   }
 
   return (
-    <div className="story-game" aria-disabled={paused || undefined}>
+    <div className="story-game" aria-disabled={controlsDisabled || undefined}>
       {!question ? (
         <>
           <div className="story-journey" aria-label={lang === "tr" ? "Hikâye yolculuğu" : "Bilderbuch-Reise"}>
@@ -74,8 +89,8 @@ export default function StoryGame({
                 <section
                   className="story-page story-page-listenable"
                   role="button"
-                  tabIndex={paused ? -1 : 0}
-                  aria-disabled={paused || undefined}
+                  tabIndex={controlsDisabled ? -1 : 0}
+                  aria-disabled={controlsDisabled || undefined}
                   aria-label={lang === "tr" ? `${item.labels.tr} kelimesini tekrar dinle` : `${item.labels.de} noch einmal anhören`}
                   onClick={() => hearStoryItem(item)}
                   onKeyDown={(event) => handleStoryKeyDown(event, item)}
@@ -88,7 +103,7 @@ export default function StoryGame({
                       {index + 1}
                     </span>
                     <b>{item.labels[lang]}</b>
-                    <span className="story-hear-cue" aria-hidden="true">🔊</span>
+                    <span className="story-hear-cue" aria-hidden="true"><Volume2 size={18} /></span>
                   </div>
                 </section>
                 {index < storyItems.length - 1 && (
@@ -100,18 +115,24 @@ export default function StoryGame({
             ))}
           </div>
           <div className="story-continue-wrap">
-            <button className="primary centered story-continue story-journey-button" onClick={beginRecall} disabled={paused}>
+            <button className="primary centered story-continue story-journey-button" onClick={beginRecall} disabled={controlsDisabled}>
               {lang === "tr" ? "Şimdi hatırla" : "Jetzt erinnern"} <ArrowRight size={20} />
             </button>
           </div>
         </>
       ) : (
         <div className="story-recall-stage">
-          <div className="story-memory-cue story-large-cue">
-            <span>1</span><i /><span>2</span><i /><span className={hint >= 2 ? "hinted" : ""}>?</span>
+          <div className="story-memory-cue story-large-cue" aria-hidden="true">
+            {storyItems.slice(0, -1).map((item, index) => (
+              <React.Fragment key={item.id}>
+                <span>{index + 1}</span><i />
+              </React.Fragment>
+            ))}
+            <span className={hint >= 2 ? "hinted" : ""}>?</span>
           </div>
           <OptionGrid
             {...{ options, target, hint, lang, settings }}
+            disabled={controlsDisabled}
             onPick={pick}
           />
         </div>
