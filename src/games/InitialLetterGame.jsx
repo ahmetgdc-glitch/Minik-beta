@@ -26,6 +26,8 @@ export default function InitialLetterGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -50,8 +52,13 @@ export default function InitialLetterGame({
     targetLetter,
   );
 
+  function pick(letter) {
+    if (paused || interactionBlocked()) return;
+    letter === targetLetter ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="initial-letter-game">
+    <div className="initial-letter-game" aria-disabled={paused || undefined}>
       <div className="initial-letter-target">
         <Visual item={target} lang={lang} photos={settings.photos} />
         <strong>{target.labels[lang]}</strong>
@@ -61,9 +68,8 @@ export default function InitialLetterGame({
           <button
             key={letter}
             className={`letter-choice ${hint >= 2 && letter === targetLetter ? "hint-target" : ""}`}
-            onClick={() =>
-              letter === targetLetter ? onSolve([target.id]) : onWrong([target.id])
-            }
+            onClick={() => pick(letter)}
+            disabled={paused}
             aria-label={letter}
           >
             {letter}
