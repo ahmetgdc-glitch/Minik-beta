@@ -19,12 +19,13 @@ export default function ShadowGame({
     lang === "tr"
       ? "Bu gölge hangi resme ait?"
       : "Zu welchem Bild gehört der Schatten?";
+  const help = lang === "tr" ? "Şekle dikkatlice bak." : "Schau genau auf die Form.";
   useLesson(
     onReady,
     text,
     () => speak(text, lang, settings),
     [target.id],
-    target.labels[lang],
+    help,
   );
 
   function pick(item) {
