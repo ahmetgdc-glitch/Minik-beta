@@ -8,6 +8,8 @@ export default function ShadowGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -24,16 +26,20 @@ export default function ShadowGame({
     [target.id],
     target.labels[lang],
   );
+
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="shadow-playground">
+    <div className="shadow-playground" aria-disabled={paused || undefined}>
       <div className="shadow-stage">
         <Visual item={target} lang={lang} silhouette={hint < 3} />
       </div>
       <OptionGrid
         {...{ target, options, hint, lang, settings }}
-        onPick={(item) =>
-          item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-        }
+        onPick={pick}
       />
     </div>
   );
