@@ -13,6 +13,7 @@ test("background lifecycle pauses automatically and resumes on visibility return
 
 test("manual child pause cannot be auto-resumed by lifecycle events", () => {
   assert.match(source, /const pauseManually = useCallback\(\(\) => \{[\s\S]*manualPauseRef\.current = true;[\s\S]*pausedRef\.current = true;[\s\S]*setPaused\(true\)/);
-  assert.ok((source.match(/onClick=\{pauseManually\}/g) || []).length >= 2);
+  assert.equal((source.match(/onClick=\{pauseManually\}/g) || []).length, 1);
+  assert.match(source, /className="icon-button game-back-button"[\s\S]*onClick=\{exit\}/);
   assert.match(source, /if \(!event\.persisted \|\| manualPauseRef\.current \|\| !lifecyclePauseRef\.current\) return/);
 });
