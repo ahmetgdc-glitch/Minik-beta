@@ -29,6 +29,7 @@ import "./games/pattern-path.css";
 import "./games/letter-playground.css";
 import "./games/listen-playground.css";
 import "./games/shadow-playground.css";
+import "./games/sound-stage.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
