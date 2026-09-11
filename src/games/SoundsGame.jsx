@@ -10,6 +10,7 @@ export default function SoundsGame({
   settings,
   hint,
   paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -17,6 +18,7 @@ export default function SoundsGame({
   const { target, options } = useSelection(itemsForWorld("sounds"), difficulty),
     [playing, setPlaying] = useState(false);
   function repeat() {
+    if (paused || interactionBlocked()) return;
     stopSpeech();
     playSound(target.sound);
     setPlaying(true);
@@ -35,14 +37,19 @@ export default function SoundsGame({
     const t = setTimeout(() => setPlaying(false), 2200);
     return () => clearTimeout(t);
   }, [playing]);
+
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="sounds-playground">
+    <div className="sounds-playground" aria-disabled={paused || undefined}>
       <button
         className={`sound-orb ${playing ? "playing" : ""}`}
         onClick={repeat}
-        aria-label={
-          lang === "tr" ? "Sesi tekrar dinle" : "Geräusch noch einmal hören"
-        }
+        disabled={paused}
+        aria-label={lang === "tr" ? "Sesi tekrar dinle" : "Geräusch noch einmal hören"}
       >
         <Volume2 size={48} />
         <span className="sound-bars">
@@ -55,9 +62,7 @@ export default function SoundsGame({
       </button>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
-        onPick={(item) =>
-          item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-        }
+        onPick={pick}
       />
     </div>
   );
