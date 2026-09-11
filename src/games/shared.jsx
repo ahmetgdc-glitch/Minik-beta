@@ -30,15 +30,17 @@ export function OptionGrid({
   settings,
   onPick,
   hiddenLabels = false,
+  disabled = false,
 }) {
   const wrong = options.find((x) => x.id !== target?.id);
   return (
-    <div className={`answer-grid options-${options.length}`}>
+    <div className={`answer-grid options-${options.length}`} aria-disabled={disabled || undefined}>
       {options.map((item) => (
         <button
           key={item.id}
           className={`answer-card ${hint >= 2 && item.id === target?.id ? "hint-target" : ""} ${hint >= 2 && options.length > 2 && item.id === wrong?.id ? "quiet-option" : ""}`}
-          onClick={() => onPick(item)}
+          onClick={() => { if (!disabled) onPick(item); }}
+          disabled={disabled}
           aria-label={item.labels[lang]}
         >
           <Visual item={item} lang={lang} photos={settings.photos} />
