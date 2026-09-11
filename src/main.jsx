@@ -17,6 +17,7 @@ import "./games/games.css";
 import "./worlds/worlds.css";
 import "./games/immersive.css";
 import "./app/playground.css";
+import "./rewards/immersive-rewards.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
