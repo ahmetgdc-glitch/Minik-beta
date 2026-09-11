@@ -40,6 +40,10 @@ export default function SoundsGame({
       setPlaying(false);
     }
   }, [paused]);
+  useEffect(() => () => {
+    stopSounds();
+    setPlaying(false);
+  }, []);
   useEffect(() => {
     if (!playing) return;
     const t = setTimeout(() => setPlaying(false), 2200);
