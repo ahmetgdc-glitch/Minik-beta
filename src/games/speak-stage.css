@@ -1,0 +1,144 @@
+.speak-game {
+  width: min(100%, 920px);
+  margin: 0 auto;
+  display: grid;
+  justify-items: center;
+  gap: clamp(16px, 3vw, 26px);
+  padding: clamp(6px, 2vw, 18px);
+}
+
+.speak-hero {
+  position: relative;
+  width: min(100%, 720px);
+  min-height: clamp(260px, 40vw, 430px);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: clamp(24px, 5vw, 42px);
+  border-radius: clamp(32px, 7vw, 56px);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.94) 0 8%, transparent 9%),
+    radial-gradient(circle at 84% 22%, rgba(255,255,255,.72) 0 6%, transparent 7%),
+    linear-gradient(180deg, #d8f3ff 0 58%, #c5edb6 59% 76%, #8fd07b 77% 100%);
+  box-shadow: 0 24px 54px rgba(38, 91, 93, .16);
+}
+
+.speak-hero .visual {
+  width: min(56vw, 280px);
+  max-height: 260px;
+  filter: drop-shadow(0 16px 18px rgba(44, 83, 73, .16));
+}
+
+.speak-hero strong {
+  font-size: clamp(1.5rem, 4.6vw, 2.8rem);
+  line-height: 1;
+  font-weight: 1000;
+  text-align: center;
+}
+
+.speak-repeat {
+  position: absolute;
+  right: clamp(14px, 3vw, 24px);
+  top: clamp(14px, 3vw, 24px);
+  width: clamp(54px, 8vw, 68px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 9px 22px rgba(45, 81, 74, .16);
+}
+
+.mic-button {
+  width: min(82vw, 360px);
+  min-height: clamp(100px, 18vw, 150px);
+  border-radius: 999px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 18px 28px;
+  border: 0;
+  background: linear-gradient(145deg, #ff7f8e, #ec5570);
+  color: #fff;
+  box-shadow: 0 18px 38px rgba(211, 70, 99, .26);
+  font-size: clamp(1.05rem, 2.7vw, 1.35rem);
+  font-weight: 1000;
+  touch-action: manipulation;
+}
+
+.mic-button svg {
+  width: clamp(42px, 8vw, 64px);
+  height: clamp(42px, 8vw, 64px);
+}
+
+.mic-button.listening {
+  animation: speakPulse 1.05s ease-in-out infinite;
+  background: linear-gradient(145deg, #46c5a8, #229d86);
+  box-shadow: 0 18px 40px rgba(38, 157, 134, .3);
+}
+
+.heard-speech,
+.speech-issue,
+.speak-hint,
+.speech-fallback {
+  width: min(100%, 680px);
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 22px;
+  text-align: center;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 10px 24px rgba(44, 79, 92, .1);
+}
+
+.speech-fallback {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+
+.speak-assisted {
+  min-height: 54px;
+  border-radius: 999px;
+  padding-inline: 22px;
+}
+
+@keyframes speakPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+@media (max-width: 640px) {
+  .speak-hero {
+    min-height: 240px;
+    padding: 22px 16px 24px;
+  }
+  .speak-hero .visual {
+    width: min(62vw, 230px);
+    max-height: 210px;
+  }
+  .mic-button {
+    width: min(92vw, 360px);
+    min-height: 94px;
+    padding: 16px 22px;
+  }
+}
+
+@media (max-width: 430px) {
+  .speak-hero {
+    min-height: 220px;
+    border-radius: 28px;
+  }
+  .mic-button {
+    width: 94vw;
+    grid-template-columns: auto 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mic-button.listening { animation: none; }
+}
