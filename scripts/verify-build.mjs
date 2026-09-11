@@ -20,6 +20,7 @@ const voiceSourceFiles = [
   "src/audio/helpVoiceClips.js",
   "src/audio/categoryVoiceClips.js",
   "src/audio/vehicleVoiceClips.js",
+  "src/audio/bodyVoiceClips.js",
   "src/audio/foodVoiceClips.js",
   "src/audio/naturalVoicePlans.js",
 ];
