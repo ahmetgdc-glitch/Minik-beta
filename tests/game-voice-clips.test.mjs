@@ -5,8 +5,9 @@ import { naturalVoicePlan } from "../src/audio/naturalVoicePlans.js";
 
 const clips = readFileSync(new URL("../src/audio/gameVoiceClips.js", import.meta.url), "utf8");
 const animals = readFileSync(new URL("../src/audio/animalVoiceClips.js", import.meta.url), "utf8");
+const food = readFileSync(new URL("../src/audio/foodVoiceClips.js", import.meta.url), "utf8");
 const plans = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
-const voiceLibrary = `${clips}\n${animals}\n${plans}`;
+const voiceLibrary = `${clips}\n${animals}\n${food}\n${plans}`;
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const session = readFileSync(new URL("../src/games/GameSession.jsx", import.meta.url), "utf8");
 
@@ -63,6 +64,8 @@ test("dynamic common game prompts are composed only from recorded clips", () => 
   for (const [text, lang, minParts] of [
     ["Finde: Hund.", "de", 2],
     ["Köpek nerede?", "tr", 2],
+    ["Finde: Apfel.", "de", 2],
+    ["Elma nerede?", "tr", 2],
     ["In welchen Korb gehört das? Katze.", "de", 2],
     ["Hangi sepete ait? Kedi.", "tr", 2],
     ["Mit welchem Buchstaben beginnt Hund?", "de", 2],
@@ -122,15 +125,23 @@ test("all thirty animals use natural Mino voice in both languages", () => {
   ]) assert.ok(animals.includes(`\"${word}\"`), `missing natural animal clip: ${word}`);
 });
 
+test("beginner fruit vocabulary uses natural Mino voice in both languages", () => {
+  for (const word of [
+    "Apfel", "Banane", "Birne", "Erdbeere", "Trauben",
+    "Elma", "Muz", "Armut", "Portakal", "Çilek", "Üzüm",
+  ]) assert.ok(food.includes(`\"${word}\"`), `missing natural food clip: ${word}`);
+  assert.ok(clips.includes(`\"Orange\"`), "German Orange reuses the natural color recording");
+});
+
 test("animal vocabulary remains modular and wired into the shared player", () => {
   assert.match(clips, /animalVoiceClip\(text, lang\)/);
   assert.match(clips, /animalVoiceEntries/);
   assert.match(clips, /animalVoiceClipCount/);
 });
 
-test("natural Mino library keeps at least 189 recorded prompts and words", () => {
+test("natural Mino library keeps at least 200 recorded prompts and words", () => {
   const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 189, `expected at least 189 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 200, `expected at least 200 natural clips, got ${urls.length}`);
 });
 
 test("speech uses natural plans before any optional browser synthesis", () => {
