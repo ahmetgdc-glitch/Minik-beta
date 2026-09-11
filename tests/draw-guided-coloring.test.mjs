@@ -39,3 +39,11 @@ test("guided coloring has dedicated mobile and reduced-motion styling", () => {
   assert.match(css, /prefers-reduced-motion/);
   assert.match(main, /\.\/games\/draw-coloring\.css/);
 });
+
+test("automatic coloring prioritizes the artwork over manual-palette clutter", () => {
+  assert.match(css, /\.draw-colors\.automatic\{display:none\}/);
+  assert.match(css, /\.draw-toolbar:has\(\.smart-color-toggle\.active\) \.draw-tool-label\{display:none\}/);
+  assert.match(css, /width:82%;height:82%;top:9%;left:9%/);
+  assert.match(css, /width:88%;height:88%;top:6%;left:6%/);
+  assert.match(css, /min-height:58dvh/);
+});
