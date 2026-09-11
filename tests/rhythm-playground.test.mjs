@@ -23,15 +23,18 @@ test("rhythm stage keeps a visible sequence progress path", () => {
 
 test("rhythm controls are blocked while paused, stale or during playback", () => {
   assert.match(game, /interactionBlocked = \(\) => false/);
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
   assert.match(game, /if \(paused \|\| playing \|\| interactionBlocked\(\)\) return/);
   assert.match(game, /if \(playing \|\| paused \|\| interactionBlocked\(\)\) return/);
-  assert.match(game, /disabled=\{playing \|\| paused\}/);
-  assert.match(game, /if \(!paused\) return;[\s\S]*setPlaying\(false\)[\s\S]*stopSounds\(\)/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(game, /disabled=\{playing \|\| controlsDisabled\}/);
+  assert.match(game, /if \(!controlsDisabled\) return;[\s\S]*setPlaying\(false\)[\s\S]*stopSounds\(\)/);
 });
 
 test("rhythm async audio rechecks lifecycle state before mutating progress", () => {
   assert.match(game, /await ensureAudioReady\(\);[\s\S]*if \(paused \|\| interactionBlocked\(\)\) return/);
   assert.match(game, /await playNote\(i\);[\s\S]*if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /setTimeout\(\(\) => \{[\s\S]*if \(paused \|\| interactionBlocked\(\)\)/);
 });
 
 test("rhythm playground stays large and adapts to phones", () => {
