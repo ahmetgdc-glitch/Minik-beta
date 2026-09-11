@@ -19,10 +19,11 @@ test("game interaction guard blocks every paused or non-active lifecycle state",
   }
 });
 
-test("GameSession applies the synchronous guard to answer, help and replay controls", () => {
+test("GameSession applies and forwards the synchronous lifecycle guard", () => {
   const source = fs.readFileSync("src/games/GameSession.jsx", "utf8");
   assert.match(source, /const interactionBlocked = useCallback/);
   assert.ok((source.match(/if \(interactionBlocked\(\)\) return;/g) || []).length >= 4);
+  assert.match(source, /interactionBlocked=\{interactionBlocked\}/);
   assert.match(source, /disabled=\{paused \|\| phase !== "active"\}/);
   assert.match(source, /inert=\{paused \|\| phase !== "active" \? true : undefined\}/);
 });
