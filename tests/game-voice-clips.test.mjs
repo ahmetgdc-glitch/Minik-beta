@@ -100,7 +100,7 @@ test("dynamic common game prompts are composed only from recorded clips", () => 
   ]) {
     const plan = naturalVoicePlan(text, lang);
     assert.ok(plan.length >= minParts, `expected natural plan for ${lang}: ${text}`);
-    assert.ok(plan.every((url) => url.endsWith(".mp3")), `plan must contain recordings: ${text}`);
+    assert.ok(plan.every((url) => /\.(?:mp3|wav)$/iu.test(url)), `plan must contain recordings: ${text}`);
   }
 });
 
