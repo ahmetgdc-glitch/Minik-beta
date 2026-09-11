@@ -3,7 +3,7 @@ import { Eraser, RotateCcw, Trash2, Check, Palette, Image as ImageIcon, Sparkles
 import Visual, { assetUrl } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
-import { isMeaningfulStroke, pushDrawingHistory } from "./drawing.js";
+import { isMeaningfulStroke, MIN_STROKE_DISTANCE, pushDrawingHistory } from "./drawing.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
 const COLORS = ["#203750", "#ef5b5b", "#ff9d42", "#ffd43b", "#4bb978", "#3b92c9", "#855fd1", "#ef7eb2"];
@@ -176,14 +176,20 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
 
     paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
     paintCtx.globalCompositeOperation = "source-over";
+    paintCtx.fillStyle = "#fff";
     paintCtx.strokeStyle = "#fff";
     paintCtx.lineWidth = size;
     paintCtx.lineCap = "round";
     paintCtx.lineJoin = "round";
     paintCtx.beginPath();
-    paintCtx.moveTo(a.x, a.y);
-    paintCtx.lineTo(p.x, p.y);
-    paintCtx.stroke();
+    if (Math.hypot(p.x - a.x, p.y - a.y) < .5) {
+      paintCtx.arc(p.x, p.y, Math.max(2, size / 2), 0, Math.PI * 2);
+      paintCtx.fill();
+    } else {
+      paintCtx.moveTo(a.x, a.y);
+      paintCtx.lineTo(p.x, p.y);
+      paintCtx.stroke();
+    }
 
     // Instead of painting one sampled color across several illustration
     // regions, reveal the exact source-art pixels under the brush. A stroke
@@ -208,6 +214,10 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     strokeDistance.current = 0;
     drawing.current = true;
     last.current = p;
+    if (smartColor && template && !eraser) {
+      const ctx = canvasRef.current?.getContext("2d");
+      if (ctx && smartPaintSegment(ctx, p, p)) strokeDistance.current = MIN_STROKE_DISTANCE;
+    }
   }
   function move(e) {
     if (!drawing.current || blocked()) return;
