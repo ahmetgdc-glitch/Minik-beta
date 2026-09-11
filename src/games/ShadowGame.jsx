@@ -27,24 +27,25 @@ export default function ShadowGame({
     [target.id],
     help,
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   function repeatPrompt() {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     speak(text, lang, settings);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   return (
-    <div className="shadow-playground" aria-disabled={paused || undefined}>
+    <div className="shadow-playground" aria-disabled={controlsDisabled || undefined}>
       <button
         type="button"
         className="shadow-stage"
         onClick={repeatPrompt}
-        disabled={paused}
+        disabled={controlsDisabled}
         aria-label={lang === "tr" ? "Soruyu tekrar dinle" : "Aufgabe noch einmal hören"}
       >
         <Visual item={target} lang={lang} silhouette={hint < 3} />
@@ -52,6 +53,7 @@ export default function ShadowGame({
       </button>
       <OptionGrid
         {...{ target, options, hint, lang, settings }}
+        disabled={controlsDisabled}
         onPick={pick}
       />
     </div>
