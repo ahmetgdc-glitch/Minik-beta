@@ -11,6 +11,8 @@ export default function StoryGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -37,8 +39,18 @@ export default function StoryGame({
     `${prompt} ${target.labels[lang]}`,
   );
 
+  function beginRecall() {
+    if (paused || interactionBlocked()) return;
+    setQuestion(true);
+  }
+
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="story-game">
+    <div className="story-game" aria-disabled={paused || undefined}>
       {!question ? (
         <>
           <div className="story-journey" aria-label={lang === "tr" ? "Hikâye yolculuğu" : "Bilderbuch-Reise"}>
@@ -64,7 +76,7 @@ export default function StoryGame({
             ))}
           </div>
           <div className="story-continue-wrap">
-            <button className="primary centered story-continue story-journey-button" onClick={() => setQuestion(true)}>
+            <button className="primary centered story-continue story-journey-button" onClick={beginRecall} disabled={paused}>
               {lang === "tr" ? "Şimdi hatırla" : "Jetzt erinnern"} <ArrowRight size={20} />
             </button>
           </div>
@@ -76,7 +88,7 @@ export default function StoryGame({
           </div>
           <OptionGrid
             {...{ options, target, hint, lang, settings }}
-            onPick={(item) => item.id === target.id ? onSolve([target.id]) : onWrong([target.id])}
+            onPick={pick}
           />
         </div>
       )}
