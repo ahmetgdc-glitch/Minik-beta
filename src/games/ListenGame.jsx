@@ -24,11 +24,14 @@ export default function ListenGame({
     target.labels[lang],
   );
   return (
-    <OptionGrid
-      {...{ options, target, hint, lang, settings }}
-      onPick={(item) =>
-        item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-      }
-    />
+    <div className="listen-playground">
+      <div className="listen-orb" aria-hidden="true"><span>♪</span></div>
+      <OptionGrid
+        {...{ options, target, hint, lang, settings }}
+        onPick={(item) =>
+          item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
+        }
+      />
+    </div>
   );
 }
