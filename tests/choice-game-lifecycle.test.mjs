@@ -6,7 +6,9 @@ function hasLifecycleGuard(source) {
   const direct = /if \(paused \|\| interactionBlocked\(\)\) return/.test(source);
   const helper = /function blocked\(\) \{[\s\S]*?return paused \|\| interactionBlocked\(\);[\s\S]*?\}/.test(source)
     && /if \(blocked\(\)\) return/.test(source);
-  return direct || helper;
+  const rendered = /const controlsDisabled = paused \|\| interactionBlocked\(\);/.test(source)
+    && /if \(controlsDisabled\) return/.test(source);
+  return direct || helper || rendered;
 }
 
 for (const name of ["InitialLetterGame.jsx", "ListenGame.jsx"]) {
