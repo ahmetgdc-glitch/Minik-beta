@@ -21,6 +21,10 @@ const CLIPS = {
     "Hör zu und spiele die Melodie nach.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/923f99bb-834b-4fea-b051-bccabafc8996.mp3",
     "Hör genau hin. Was klingt so?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ad72450d-ca86-4f9f-b710-876f097fd598.mp3",
     "Zu welchem Bild gehört der Schatten?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a146d0e6-8f41-44c3-af2d-6fda1aee07a0.mp3",
+    "Rot": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/aad018ed-9d25-402f-8302-d7f517a1f37c.mp3",
+    "Blau": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d0a7f727-afc7-4ad3-8eb7-61d12f28b46b.mp3",
+    "Gelb": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/7def4071-cb7d-4b6b-ba2c-8f9c9c19306a.mp3",
+    "Grün": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e1b2d992-59ad-4664-8940-86a406f78f97.mp3",
   },
   tr: {
     "Harika!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e3d0dbf1-3f7e-4808-aa2d-080742f7db36.mp3",
@@ -40,6 +44,10 @@ const CLIPS = {
     "Dinle ve aynı melodiyi çal.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e888d8e2-9b39-474b-b026-44716bc4b6b4.mp3",
     "Dinle. Bu ne sesi?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ab4e2e00-1f39-4707-ae2c-bf9902a4fc03.mp3",
     "Bu gölge hangi resme ait?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/62f84e5f-a5d6-4a31-b7d4-9239c32d94e1.mp3",
+    "Kırmızı": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c42f1d80-730a-446f-9e0f-6e201a012db9.mp3",
+    "Mavi": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e777b005-243d-4cdf-b444-c146f2cc5a89.mp3",
+    "Sarı": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e1921ae7-2b3a-4dce-b8c9-6ab5c36b9569.mp3",
+    "Yeşil": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/cfacb226-f943-48ba-9804-9064e7fe9f53.mp3",
   },
 };
 
