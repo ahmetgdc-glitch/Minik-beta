@@ -31,6 +31,8 @@ export default function MatchGame({
     chosen.map((x) => x.id),
     lang === "tr" ? "Önce resmi, sonra eşini seç." : "Tippe auf ein Bild und dann auf seinen Zwilling.",
   );
+  const controlsDisabled = paused || interactionBlocked();
+
   function drop(source, target) {
     if (paused || interactionBlocked()) return;
     const result = placePair(matchedRef.current, source, target, chosen.map(x => x.id));
@@ -45,7 +47,7 @@ export default function MatchGame({
   const help = selected || chosen.find((x) => !matched.includes(x.id))?.id;
   const progressLabel = lang === "tr" ? `${matched.length} / ${chosen.length} eş bulundu` : `${matched.length} / ${chosen.length} Paare gefunden`;
   return (
-    <section className="match-playground" aria-label={text}>
+    <section className="match-playground" aria-label={text} aria-disabled={controlsDisabled || undefined}>
       <header className="match-stage-header">
         <span className="match-stage-badge">{lang === "tr" ? "İkizleri bul" : "Finde die Zwillinge"}</span>
         <div className="match-progress" role="status" aria-label={progressLabel}>
@@ -61,7 +63,7 @@ export default function MatchGame({
               <button
                 key={item.id}
                 className={`match-source ${matched.includes(item.id) ? "placed" : ""} ${selected === item.id ? "selected" : ""}`}
-                disabled={paused || matched.includes(item.id)}
+                disabled={controlsDisabled || matched.includes(item.id)}
                 aria-label={`${item.labels[lang]} ${lang === "tr" ? "seç" : "auswählen"}`}
                 {...placement.sourceProps(item.id)}
                 aria-pressed={selected === item.id}
@@ -80,7 +82,7 @@ export default function MatchGame({
               <button
                 key={item.id}
                 data-drop-id={item.id}
-                disabled={paused || matched.includes(item.id)}
+                disabled={controlsDisabled || matched.includes(item.id)}
                 className={`match-slot ${placement.drag?.over === item.id ? "drop-hover" : ""} ${matched.includes(item.id) ? "filled" : ""} ${hint >= 2 && help === item.id ? "hint-target" : ""}`}
                 onClick={() => drop(selected, item.id)}
                 aria-label={`${item.labels[lang]} ${lang === "tr" ? "yerleştir" : "ablegen"}`}
