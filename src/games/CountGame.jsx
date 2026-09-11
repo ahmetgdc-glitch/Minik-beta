@@ -101,17 +101,24 @@ export default function CountGame({
         })}
       </div>
 
-      <div className={`count-answer-stage ${allCounted ? "ready" : ""}`}>
+      <div
+        className={`count-answer-stage ${allCounted ? "ready" : "locked"}`}
+        aria-disabled={!allCounted || paused || undefined}
+      >
         <div className="count-answer-title">
           <strong>{lang === "tr" ? "Kaç tane?" : "Wie viele?"}</strong>
-          <span>{lang === "tr" ? "Doğru sayı adasına dokun" : "Tippe auf die richtige Zahleninsel"}</span>
+          <span>
+            {allCounted
+              ? lang === "tr" ? "Doğru sayı adasına dokun" : "Tippe auf die richtige Zahleninsel"
+              : lang === "tr" ? "Önce tüm resimlere dokun ve say" : "Zähle zuerst alle Bilder"}
+          </span>
         </div>
         <div className="number-options">
           <OptionGrid
             {...{ options, target, hint, lang, settings }}
             hiddenLabels
             onPick={(item) => {
-              if (paused || interactionBlocked()) return;
+              if (!allCounted || paused || interactionBlocked()) return;
               item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
             }}
           />
