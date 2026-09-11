@@ -548,13 +548,9 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     >
       <header className="game-header" inert={paused ? true : undefined}>
         <button
-          className="icon-button"
-          onClick={pauseManually}
-          aria-label={
-            lang === "tr"
-              ? "Oyunu duraklat ve çık"
-              : "Spiel pausieren und verlassen"
-          }
+          className="icon-button game-back-button"
+          onClick={exit}
+          aria-label={lang === "tr" ? "Öğrenme dünyasına dön" : "Zurück zur Lernwelt"}
         >
           <ArrowLeft />
         </button>
