@@ -69,7 +69,7 @@ export default function MemoryGame({
     const now = openRef.current;
     if (now.length >= 2 || now.includes(card.id)) return;
     const next = [...now, card.id];
-    openRef.current = next; // synchronous guard: blocks a third rapid tap before React rerenders
+    openRef.current = next;
     if (next.length >= 2) lockedRef.current = true;
     setOpen(next);
     speak(card.item.labels[lang], lang, settings);
@@ -77,8 +77,8 @@ export default function MemoryGame({
 
   const helpPair = chosen.find((i) => !matched.includes(i.id))?.id;
   return (
-    <>
-      <div className="mini-status">{matched.length} / {chosen.length} {lang === "tr" ? "çift" : "Paare"}</div>
+    <section className="memory-playground" aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"}>
+      <div className="memory-playground-status">{matched.length} / {chosen.length} {lang === "tr" ? "çift" : "Paare"}</div>
       <div className={`memory-grid cards-${cards.length}`}>
         {cards.map((card, index) => {
           const found = matched.includes(card.item.id);
@@ -100,6 +100,6 @@ export default function MemoryGame({
           );
         })}
       </div>
-    </>
+    </section>
   );
 }
