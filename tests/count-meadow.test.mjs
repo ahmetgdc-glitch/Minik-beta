@@ -19,10 +19,17 @@ test("counting keeps one-tap-per-object progression and natural number speech", 
   assert.match(game, /countedRef\.current = \[\.\.\.countedRef\.current, i\]/);
 });
 
+test("counting blocks answers until every object has been counted", () => {
+  assert.match(game, /count-answer-stage \$\{allCounted \? "ready" : "locked"\}/);
+  assert.match(game, /aria-disabled=\{!allCounted \|\| paused \|\| undefined\}/);
+  assert.match(game, /if \(!allCounted \|\| paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(css, /\.count-answer-stage\.locked \.number-options \{ pointer-events:none/);
+});
+
 test("counting blocks object and answer interactions while paused", () => {
   assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
   assert.match(game, /disabled=\{paused\}/);
-  assert.match(game, /onPick=\{\(item\) => \{[\s\S]*if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /onPick=\{\(item\) => \{[\s\S]*if \(!allCounted \|\| paused \|\| interactionBlocked\(\)\) return/);
 });
 
 test("count meadow keeps large responsive touch targets", () => {
