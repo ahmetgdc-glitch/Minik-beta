@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Eraser, RotateCcw, Trash2, Check, Palette, Image as ImageIcon, Sparkles } from "lucide-react";
 import Visual from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
+import { speak } from "../audio/voice.js";
 import { isMeaningfulStroke, pushDrawingHistory } from "./drawing.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
 const COLORS = ["#203750", "#ef5b5b", "#ff9d42", "#ffd43b", "#4bb978", "#3b92c9", "#855fd1", "#ef7eb2"];
 const SIZES = [8, 16, 28];
 
-export default function DrawGame({ items = [], lang, hint, paused, interactionBlocked = () => false, onReady, onSolve }) {
+export default function DrawGame({ items = [], lang, hint, paused, interactionBlocked = () => false, onReady, onSolve, settings = {} }) {
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
   const drawing = useRef(false);
@@ -27,7 +28,8 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
   const blocked = () => paused || interactionBlocked();
 
   const text = lang === "tr" ? "Büyük tuvalde boya, çiz ve hayal et." : "Male, zeichne und erfinde etwas auf der großen Fläche.";
-  useLesson(onReady, text, () => {}, [template?.id || "creative.draw"], lang === "tr" ? "Bir renk seç. İstersen bir boyama resmi seç." : "Wähle eine Farbe. Du kannst auch eine Malvorlage wählen.");
+  const help = lang === "tr" ? "Bir renk seç. İstersen bir boyama resmi seç." : "Wähle eine Farbe. Du kannst auch eine Malvorlage wählen.";
+  useLesson(onReady, text, () => speak(text, lang, settings), [template?.id || "creative.draw"], help);
 
   function fitCanvas() {
     const c = canvasRef.current, w = wrapRef.current;
