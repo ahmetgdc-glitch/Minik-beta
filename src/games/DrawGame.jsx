@@ -8,6 +8,31 @@ import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
 const COLORS = ["#203750", "#ef5b5b", "#ff9d42", "#ffd43b", "#4bb978", "#3b92c9", "#855fd1", "#ef7eb2"];
 const SIZES = [8, 16, 28];
+const SMART_ALPHA_MIN = 28;
+const SMART_REGION_DISTANCE = 900;
+
+function colorDistance(a, b) {
+  const dr = a.r - b.r, dg = a.g - b.g, db = a.b - b.b;
+  return dr * dr + dg * dg + db * db;
+}
+
+function paletteFrom(source) {
+  if (!source?.data) return [];
+  const counts = new Map();
+  const data = source.data;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] < 220) continue;
+    const key = `${data[i]},${data[i + 1]},${data[i + 2]}`;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 32)
+    .map(([key]) => {
+      const [r, g, b] = key.split(",").map(Number);
+      return { r, g, b };
+    });
+}
 
 export default function DrawGame({ items = [], lang, hint, paused, interactionBlocked = () => false, onReady, onSolve, settings = {} }) {
   const canvasRef = useRef(null);
@@ -33,7 +58,7 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
   const blocked = () => paused || interactionBlocked();
 
   const text = lang === "tr" ? "Büyük tuvalde boya, çiz ve hayal et." : "Male, zeichne und erfinde etwas auf der großen Fläche.";
-  const help = lang === "tr" ? "Bir boyama resmi seç. Taşırmadan boya seçeneği renkleri otomatik doğru seçer." : "Wähle eine Malvorlage. Mit Zauber-Ausmalen bleibst du im Motiv und die Farben werden automatisch richtig.";
+  const help = lang === "tr" ? "Bir boyama resmi seç. Taşırmadan boya seçeneği dokunduğun bölgeyi temizce doğru renkle doldurur." : "Wähle eine Malvorlage. Zauber-Ausmalen füllt den berührten Bereich sauber mit der richtigen Farbe.";
   useLesson(onReady, text, () => speak(text, lang, settings), [template?.id || "creative.draw"], help);
 
   function buildGuide(url = guideUrlRef.current) {
@@ -48,10 +73,6 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     guide.width = Math.max(1, Math.round(rect.width));
     guide.height = Math.max(1, Math.round(rect.height));
     const g = guide.getContext("2d", { willReadFrequently: true });
-    const paintCanvas = document.createElement("canvas");
-    paintCanvas.width = guide.width;
-    paintCanvas.height = guide.height;
-    const paintCtx = paintCanvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
       if (url !== guideUrlRef.current) return;
@@ -68,13 +89,16 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
       const y = boxY + (boxH - drawH) / 2;
       g.clearRect(0, 0, guide.width, guide.height);
       g.drawImage(img, x, y, drawW, drawH);
+      let sourceData = null;
+      try { sourceData = g.getImageData(0, 0, guide.width, guide.height); } catch {}
       guideRef.current = {
         canvas: guide,
         ctx: g,
         width: rect.width,
         height: rect.height,
-        paintCanvas,
-        paintCtx,
+        sourceData,
+        palette: paletteFrom(sourceData),
+        regionCache: new Map(),
       };
     };
     img.src = url;
@@ -151,59 +175,91 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     setSmartColor(Boolean(item));
     setEraser(false);
   }
-  function guidedColorAt(p) {
-    if (!smartColor || !template) return color;
-    const guide = guideRef.current;
+
+  function rawGuideSample(guide, p) {
     if (!guide?.ctx) return null;
     const x = Math.max(0, Math.min(guide.canvas.width - 1, Math.round(p.x)));
     const y = Math.max(0, Math.min(guide.canvas.height - 1, Math.round(p.y)));
     try {
-      const px = guide.ctx.getImageData(x, y, 1, 1).data;
-      if (px[3] < 28) return null;
-      return `rgb(${px[0]} ${px[1]} ${px[2]})`;
+      const data = guide.sourceData?.data;
+      const offset = (y * guide.canvas.width + x) * 4;
+      const px = data ? data.subarray(offset, offset + 4) : guide.ctx.getImageData(x, y, 1, 1).data;
+      if (px[3] < SMART_ALPHA_MIN) return null;
+      return { r: px[0], g: px[1], b: px[2], a: px[3] };
     } catch {
-      return color;
+      return null;
     }
   }
-  function smartPaintSegment(ctx, a, p) {
+
+  function guideSampleAt(p) {
     const guide = guideRef.current;
-    const paintCtx = guide?.paintCtx;
-    const paintCanvas = guide?.paintCanvas;
-    if (!guide?.canvas || !paintCtx || !paintCanvas) return false;
-
-    const midpoint = { x: (p.x + a.x) / 2, y: (p.y + a.y) / 2 };
-    if (!guidedColorAt(a) && !guidedColorAt(midpoint) && !guidedColorAt(p)) return false;
-
-    paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
-    paintCtx.globalCompositeOperation = "source-over";
-    paintCtx.fillStyle = "#fff";
-    paintCtx.strokeStyle = "#fff";
-    paintCtx.lineWidth = size;
-    paintCtx.lineCap = "round";
-    paintCtx.lineJoin = "round";
-    paintCtx.beginPath();
-    if (Math.hypot(p.x - a.x, p.y - a.y) < .5) {
-      paintCtx.arc(p.x, p.y, Math.max(2, size / 2), 0, Math.PI * 2);
-      paintCtx.fill();
-    } else {
-      paintCtx.moveTo(a.x, a.y);
-      paintCtx.lineTo(p.x, p.y);
-      paintCtx.stroke();
+    const sample = rawGuideSample(guide, p);
+    if (!sample) return null;
+    let best = sample, bestDistance = Infinity;
+    for (const candidate of guide.palette || []) {
+      const distance = colorDistance(sample, candidate);
+      if (distance < bestDistance) {
+        best = candidate;
+        bestDistance = distance;
+      }
     }
-
-    // Instead of painting one sampled color across several illustration
-    // regions, reveal the exact source-art pixels under the brush. A stroke
-    // crossing an eye, outline and face therefore keeps every region clean.
-    paintCtx.globalCompositeOperation = "source-in";
-    paintCtx.drawImage(guide.canvas, 0, 0, guide.width, guide.height);
-    paintCtx.globalCompositeOperation = "source-over";
-
-    ctx.save();
-    ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(paintCanvas, 0, 0, guide.width, guide.height);
-    ctx.restore();
-    return true;
+    return bestDistance <= 3600 ? best : sample;
   }
+
+  function guidedColorAt(p) {
+    if (!smartColor || !template) return color;
+    const sample = guideSampleAt(p);
+    return sample ? `rgb(${sample.r} ${sample.g} ${sample.b})` : null;
+  }
+
+  function regionCanvasFor(sample) {
+    const guide = guideRef.current;
+    if (!guide?.sourceData?.data || !sample) return null;
+    const key = `${sample.r},${sample.g},${sample.b}`;
+    const cached = guide.regionCache.get(key);
+    if (cached) return cached;
+
+    const region = document.createElement("canvas");
+    region.width = guide.canvas.width;
+    region.height = guide.canvas.height;
+    const regionCtx = region.getContext("2d");
+    const output = regionCtx.createImageData(region.width, region.height);
+    const source = guide.sourceData.data;
+    for (let i = 0; i < source.length; i += 4) {
+      if (source[i + 3] < SMART_ALPHA_MIN) continue;
+      const candidate = { r: source[i], g: source[i + 1], b: source[i + 2] };
+      if (colorDistance(sample, candidate) > SMART_REGION_DISTANCE) continue;
+      output.data[i] = source[i];
+      output.data[i + 1] = source[i + 1];
+      output.data[i + 2] = source[i + 2];
+      output.data[i + 3] = source[i + 3];
+    }
+    regionCtx.putImageData(output, 0, 0);
+    guide.regionCache.set(key, region);
+    return region;
+  }
+
+  function smartFillSegment(ctx, a, p) {
+    const guide = guideRef.current;
+    if (!guide?.canvas || !guide?.sourceData) return false;
+    const distance = Math.hypot(p.x - a.x, p.y - a.y);
+    const steps = Math.min(64, Math.max(1, Math.ceil(distance / 10)));
+    let painted = false;
+    for (let i = 0; i <= steps; i++) {
+      const t = steps ? i / steps : 0;
+      const samplePoint = { x: a.x + (p.x - a.x) * t, y: a.y + (p.y - a.y) * t };
+      const sample = guideSampleAt(samplePoint);
+      const region = regionCanvasFor(sample);
+      if (!region) continue;
+      ctx.save();
+      ctx.globalCompositeOperation = "source-over";
+      ctx.drawImage(region, 0, 0, guide.width, guide.height);
+      ctx.restore();
+      painted = true;
+    }
+    return painted;
+  }
+
   function start(e) {
     if (blocked()) return;
     e.preventDefault();
@@ -216,7 +272,7 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     last.current = p;
     if (smartColor && template && !eraser) {
       const ctx = canvasRef.current?.getContext("2d");
-      if (ctx && smartPaintSegment(ctx, p, p)) strokeDistance.current = MIN_STROKE_DISTANCE;
+      if (ctx && smartFillSegment(ctx, p, p)) strokeDistance.current = MIN_STROKE_DISTANCE;
     }
   }
   function move(e) {
@@ -236,7 +292,7 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
       ctx.globalCompositeOperation = "source-over";
       painted = true;
     } else if (segment > 0 && smartColor && template) {
-      painted = smartPaintSegment(ctx, a, p);
+      painted = smartFillSegment(ctx, a, p);
     } else if (segment > 0) {
       ctx.globalCompositeOperation = "source-over";
       ctx.strokeStyle = color;
@@ -329,12 +385,12 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
         onClick={() => { if (!blocked() && template) { setSmartColor((value) => !value); setEraser(false); } }}
       >
         <Sparkles size={21}/>
-        <span><b>{lang === "tr" ? "Taşırmadan boya" : "Zauber-Ausmalen"}</b><small>{lang === "tr" ? "Renkler otomatik" : "Farben automatisch"}</small></span>
+        <span><b>{lang === "tr" ? "Taşırmadan boya" : "Zauber-Ausmalen"}</b><small>{lang === "tr" ? "Bölgeyi otomatik doldur" : "Bereich automatisch füllen"}</small></span>
       </button>
       <span className="draw-tool-label"><Palette size={20}/>{automaticColors ? (lang === "tr" ? "Otomatik renk" : "Auto-Farbe") : (lang === "tr" ? "Renk" : "Farbe")}</span>
       <div className={`draw-colors ${automaticColors ? "automatic" : ""}`}>{COLORS.map(c => <button key={c} disabled={controlsDisabled || automaticColors} aria-label={c} className={color === c && !eraser ? "active" : ""} style={{"--c": c}} onClick={() => { if (!blocked()) { setColor(c); setEraser(false); } }} />)}</div>
-      <div className="draw-sizes">{SIZES.map(s => <button key={s} disabled={controlsDisabled} className={size === s ? "active" : ""} onClick={() => { if (!blocked()) setSize(s); }}><i style={{width: s, height: s}}/></button>)}</div>
-      <button disabled={controlsDisabled} className={eraser ? "tool-button active" : "tool-button"} onClick={() => { if (!blocked()) setEraser(e => !e); }} aria-label={lang === "tr" ? "Silgi" : "Radierer"}><Eraser size={21}/></button>
+      <div className="draw-sizes">{SIZES.map(s => <button key={s} disabled={controlsDisabled || automaticColors} className={size === s ? "active" : ""} onClick={() => { if (!blocked() && !automaticColors) setSize(s); }}><i style={{width: s, height: s}}/></button>)}</div>
+      <button disabled={controlsDisabled || automaticColors} className={eraser ? "tool-button draw-eraser active" : "tool-button draw-eraser"} onClick={() => { if (!blocked() && !automaticColors) setEraser(e => !e); }} aria-label={lang === "tr" ? "Silgi" : "Radierer"}><Eraser size={21}/></button>
       <button disabled={controlsDisabled} className="tool-button" onClick={undo} aria-label={lang === "tr" ? "Geri al" : "Rückgängig"}><RotateCcw size={21}/></button>
       <button disabled={controlsDisabled} className="tool-button" onClick={clear} aria-label={lang === "tr" ? "Sil" : "Löschen"}><Trash2 size={21}/></button>
     </div>
@@ -343,7 +399,7 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
         {template ? <img className="draw-guide-image" src={templateUrl} alt="" draggable="false"/> : <ImageIcon size={110}/>} 
       </div>
       <canvas ref={canvasRef} onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}/>
-      {automaticColors && <div className="smart-color-hint" aria-hidden="true"><Sparkles size={16}/>{lang === "tr" ? "Taşmaz · doğru renk" : "Bleibt im Motiv · richtige Farbe"}</div>}
+      {automaticColors && <div className="smart-color-hint" aria-hidden="true"><Sparkles size={16}/>{lang === "tr" ? "Dokun · bölge dolsun" : "Tippen · Bereich füllt sich"}</div>}
     </div>
     <button className="primary draw-done" disabled={controlsDisabled || strokes < 3} onClick={() => { if (!blocked()) onSolve([template?.id || "creative.draw"]); }}><Check size={22}/>{lang === "tr" ? "Resmim hazır" : "Mein Bild ist fertig"}</button>
     <ConfirmDialog
