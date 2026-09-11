@@ -8,9 +8,19 @@ const game = readFileSync(new URL("../src/games/SocialStepsGame.jsx", import.met
 
 test("social steps use a large visual journey", () => {
   assert.match(game, /social-sequence-strip/);
-  assert.match(game, /social-step-card complete/);
+  assert.match(game, /social-step-card complete social-step-listenable/);
   assert.match(css, /min-height: clamp\(260px, 38vw, 420px\)/);
   assert.match(css, /grid-template-columns: 1fr auto 1fr auto 1fr/);
+});
+
+test("completed social steps can replay their spoken labels safely", () => {
+  assert.match(game, /function hearStep\(item\)/);
+  assert.match(game, /if \(blocked\(\)\) return/);
+  assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /onClick=\{\(\) => hearStep\(item\)\}/);
+  assert.match(game, /onKeyDown=\{\(event\) => handleStepKeyDown\(event, item\)\}/);
+  assert.match(game, /social-step-hear/);
+  assert.match(css, /\.social-step-listenable\s*\{[\s\S]*?touch-action:\s*manipulation/);
 });
 
 test("social journey becomes a vertical route on phones", () => {
