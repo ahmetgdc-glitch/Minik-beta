@@ -33,9 +33,14 @@ test("core game starts and help prompts keep natural voice coverage", () => {
   ]) assert.ok(clips.includes(phrase), `missing natural clip: ${phrase}`);
 });
 
-test("natural Mino library keeps at least 35 recorded prompts", () => {
+test("core color vocabulary uses the same natural Mino voice", () => {
+  for (const word of ["Rot", "Blau", "Gelb", "Grün", "Kırmızı", "Mavi", "Sarı", "Yeşil"])
+    assert.ok(clips.includes(`\"${word}\"`), `missing natural vocabulary clip: ${word}`);
+});
+
+test("natural Mino library keeps at least 43 recorded prompts and words", () => {
   const urls = clips.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 35, `expected at least 35 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 43, `expected at least 43 natural clips, got ${urls.length}`);
 });
 
 test("speech prefers recorded game voice before browser synthesis", () => {
