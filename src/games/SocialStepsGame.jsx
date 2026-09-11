@@ -11,6 +11,8 @@ export default function SocialStepsGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -48,8 +50,15 @@ export default function SocialStepsGame({
     help,
   );
 
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === round.target.id
+      ? onSolve(round.items.map((entry) => entry.id))
+      : onWrong(round.items.map((entry) => entry.id));
+  }
+
   return (
-    <div className="social-steps-game">
+    <div className="social-steps-game" aria-disabled={paused || undefined}>
       <div className="social-scenario-title">{round.title[lang]}</div>
       <div className="social-sequence-strip" aria-label={round.title[lang]}>
         {[round.first, round.second].map((item, index) => (
@@ -73,11 +82,8 @@ export default function SocialStepsGame({
           <button
             key={item.id}
             className={`answer-card ${hint >= 2 && item.id === round.target.id ? "hint-target" : ""}`}
-            onClick={() =>
-              item.id === round.target.id
-                ? onSolve(round.items.map((entry) => entry.id))
-                : onWrong(round.items.map((entry) => entry.id))
-            }
+            onClick={() => pick(item)}
+            disabled={paused}
             aria-label={item.labels[lang]}
           >
             <Visual item={item} lang={lang} photos={settings.photos} />
