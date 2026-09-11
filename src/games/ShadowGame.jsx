@@ -1,4 +1,5 @@
 import React from "react";
+import { Volume2 } from "lucide-react";
 import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
 import Visual from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
@@ -49,7 +50,7 @@ export default function ShadowGame({
         aria-label={lang === "tr" ? "Soruyu tekrar dinle" : "Aufgabe noch einmal hören"}
       >
         <Visual item={target} lang={lang} silhouette={hint < 3} />
-        <span className="shadow-listen-hint" aria-hidden="true">🔊</span>
+        <span className="shadow-listen-hint" aria-hidden="true"><Volume2 size={24} /></span>
       </button>
       <OptionGrid
         {...{ target, options, hint, lang, settings }}
