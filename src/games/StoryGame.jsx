@@ -39,13 +39,28 @@ export default function StoryGame({
     `${prompt} ${target.labels[lang]}`,
   );
 
+  function blocked() {
+    return paused || interactionBlocked();
+  }
+
+  function hearStoryItem(item) {
+    if (blocked() || question) return;
+    speak(item.labels[lang], lang, settings);
+  }
+
+  function handleStoryKeyDown(event, item) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    hearStoryItem(item);
+  }
+
   function beginRecall() {
-    if (paused || interactionBlocked()) return;
+    if (blocked()) return;
     setQuestion(true);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (blocked()) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
@@ -56,7 +71,15 @@ export default function StoryGame({
           <div className="story-journey" aria-label={lang === "tr" ? "Hikâye yolculuğu" : "Bilderbuch-Reise"}>
             {storyItems.map((item, index) => (
               <React.Fragment key={item.id}>
-                <section className="story-page">
+                <section
+                  className="story-page story-page-listenable"
+                  role="button"
+                  tabIndex={paused ? -1 : 0}
+                  aria-disabled={paused || undefined}
+                  aria-label={lang === "tr" ? `${item.labels.tr} kelimesini tekrar dinle` : `${item.labels.de} noch einmal anhören`}
+                  onClick={() => hearStoryItem(item)}
+                  onKeyDown={(event) => handleStoryKeyDown(event, item)}
+                >
                   <div className="story-page-visual">
                     <Visual item={item} lang={lang} photos={settings.photos} />
                   </div>
@@ -65,6 +88,7 @@ export default function StoryGame({
                       {index + 1}
                     </span>
                     <b>{item.labels[lang]}</b>
+                    <span className="story-hear-cue" aria-hidden="true">🔊</span>
                   </div>
                 </section>
                 {index < storyItems.length - 1 && (
