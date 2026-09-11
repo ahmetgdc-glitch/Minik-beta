@@ -17,6 +17,30 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
   await fs.access(path.resolve(root, match[1]));
 }
 
+const voiceSourcePattern = /https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/([a-f0-9-]+\.mp3)/g;
+const voiceSources = await Promise.all(
+  ["src/audio/gameVoiceClips.js", "src/audio/animalVoiceClips.js"].map((file) =>
+    fs.readFile(path.resolve(file), "utf8"),
+  ),
+);
+const expectedVoiceFiles = new Set(
+  voiceSources.flatMap((source) => [...source.matchAll(voiceSourcePattern)].map((match) => match[1])),
+);
+const builtVoiceFiles = (await fs.readdir(path.join(root, "assets/voice"))).filter((file) =>
+  file.endsWith(".mp3"),
+);
+assert.equal(
+  builtVoiceFiles.length,
+  expectedVoiceFiles.size,
+  `Expected ${expectedVoiceFiles.size} localized voice clips, found ${builtVoiceFiles.length}`,
+);
+const voiceManifest = JSON.parse(
+  await fs.readFile(path.join(root, "assets/voice/manifest.json"), "utf8"),
+);
+assert.equal(voiceManifest.expected, expectedVoiceFiles.size);
+assert.equal(voiceManifest.available, expectedVoiceFiles.size);
+assert.equal(voiceManifest.missing.length, 0);
+
 for (const scope of [
   "https://example.test/",
   "https://example.test/Minik-beta/",
@@ -142,9 +166,11 @@ for (const scope of [
     const landscape = await request(scope + `assets/scenes/${scene}.webp`);
     assert.ok(landscape?.body.byteLength > 1000, `${scene} must work on the first offline visit`);
   }
+  const naturalVoice = await request(scope + `assets/voice/${builtVoiceFiles[0]}`);
+  assert.ok(naturalVoice?.body.byteLength > 100, "Natural Mino voice must work on the first offline visit");
   assert.equal(request("https://unrelated.test/asset.svg"), undefined);
   assert.equal(request(scope, "cors", "POST"), undefined);
   console.log(
-    `Build + offline contract passed: ${scope} (${active[1].size} cached files)`,
+    `Build + offline contract passed: ${scope} (${active[1].size} cached files, ${builtVoiceFiles.length} voice clips)`,
   );
 }
