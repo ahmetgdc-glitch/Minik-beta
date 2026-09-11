@@ -1,0 +1,118 @@
+.review-island {
+  width: min(100%, 980px);
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(18px, 3vw, 30px);
+  padding: clamp(4px, 1vw, 10px);
+}
+
+.review-island__stage {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(250px, 38vh, 390px);
+  border-radius: clamp(30px, 6vw, 52px);
+  padding: clamp(22px, 5vw, 42px);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.92) 0 8%, transparent 9%),
+    radial-gradient(circle at 80% 24%, rgba(255,255,255,.7) 0 6%, transparent 7%),
+    linear-gradient(180deg, #c9f0ff 0 54%, #9fe0b3 55% 73%, #69bf7f 74% 100%);
+  box-shadow: 0 22px 50px rgba(37, 101, 87, .18);
+  isolation: isolate;
+}
+
+.review-island__stage::before,
+.review-island__stage::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  bottom: -60px;
+  width: 58%;
+  height: 150px;
+  border-radius: 50% 50% 0 0;
+  background: rgba(52, 142, 81, .28);
+}
+
+.review-island__stage::before { left: -7%; transform: rotate(7deg); }
+.review-island__stage::after { right: -8%; transform: rotate(-7deg); }
+
+.review-island__focus {
+  width: min(100%, 520px);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.review-island__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.88);
+  box-shadow: 0 8px 24px rgba(43, 91, 78, .14);
+  font-weight: 900;
+  font-size: clamp(.95rem, 2vw, 1.12rem);
+}
+
+.review-island__orb {
+  width: clamp(112px, 24vw, 190px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.8);
+  box-shadow: 0 16px 38px rgba(39, 92, 73, .18), inset 0 0 0 7px rgba(255,255,255,.55);
+  font-size: clamp(3.6rem, 12vw, 7rem);
+  animation: reviewFloat 3.4s ease-in-out infinite;
+}
+
+.review-island__orb span { filter: drop-shadow(0 8px 10px rgba(35, 76, 61, .16)); }
+
+.review-island__title {
+  margin: 0;
+  font-weight: 1000;
+  font-size: clamp(1.25rem, 4vw, 2.25rem);
+  line-height: 1.08;
+}
+
+.review-island__subtitle {
+  margin: 0;
+  max-width: 34ch;
+  font-weight: 700;
+  opacity: .74;
+  font-size: clamp(.9rem, 2.5vw, 1.05rem);
+}
+
+.review-island .option-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 2.4vw, 22px);
+}
+
+.review-island .option-card {
+  min-height: clamp(150px, 25vw, 230px);
+  border-radius: clamp(24px, 5vw, 38px);
+  box-shadow: 0 14px 28px rgba(43, 74, 91, .14);
+}
+
+.review-practice .review-island__orb { background: #fff2c9; }
+.review-learning .review-island__orb { background: #daf4ff; }
+.review-mastered .review-island__orb { background: #e0f8dd; }
+
+@keyframes reviewFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@media (max-width: 640px) {
+  .review-island__stage { min-height: 220px; padding: 20px 16px 24px; }
+  .review-island .option-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .review-island .option-card { min-height: 142px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-island__orb { animation: none; }
+}
