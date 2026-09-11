@@ -30,6 +30,11 @@ export default function PatternGame({
     : "Schau, welches Bild sich wiederholt.";
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
 
+  function speakNode(item) {
+    if (paused || interactionBlocked()) return;
+    speak(item.labels[lang], lang, settings);
+  }
+
   function pick(item) {
     if (paused || interactionBlocked()) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
@@ -45,6 +50,17 @@ export default function PatternGame({
               <div
                 className={`pattern-path-node ${hint >= 2 ? "pattern-emphasis" : ""}`}
                 style={{ animationDelay: `${k * 0.2}s` }}
+                role="button"
+                tabIndex={paused ? -1 : 0}
+                aria-label={base[i].labels[lang]}
+                aria-disabled={paused || undefined}
+                onClick={() => speakNode(base[i])}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    speakNode(base[i]);
+                  }
+                }}
               >
                 <Visual item={base[i]} lang={lang} photos={settings.photos} />
               </div>
