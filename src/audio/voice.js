@@ -71,8 +71,8 @@ function voiceScore(v, exactLocale = "") {
   const locale = String(v.lang || "").toLowerCase();
   return (
     (NATURAL_QUALITY.test(name) ? 320 : 0) +
-    (FRIENDLY_VOICES.test(name) ? 70 : 0) +
-    (locale === exactLocale ? 55 : 0) +
+    (FRIENDLY_VOICES.test(name) ? 90 : 0) +
+    (locale === exactLocale ? 180 : 0) +
     (v.localService ? 35 : 0) +
     (COMPACT_QUALITY.test(name) ? -180 : 0)
   );
@@ -147,6 +147,28 @@ function speakSystem(text, lang, settings, token) {
     }
   });
 }
+
+function shouldPreferNativeSystem(text, lang, settings = {}) {
+  if (settings.preferNativeSystem === true) return true;
+  if (settings.preferNativeSystem === false) return false;
+  const value = String(text || "").trim();
+  if (!value) return false;
+
+  // Single vocabulary labels are where generic AI clips most often reveal a
+  // foreign accent. Let the device use its native de-DE / tr-TR voice there.
+  if (!/[.!?]$/u.test(value) && value.split(/\s+/u).length <= 3) return true;
+
+  // Turkish dynamic questions were previously assembled from multiple clips,
+  // which could sound chopped up or accent individual words. Prefer one native
+  // sentence on the device and fall back to the recording plan if unavailable.
+  if (
+    lang === "tr" &&
+    /(nerede\?|hangi harfle başlıyor\?|Benimle söyle:|Hangi sepete ait\?|Bunun zıttı hangisi\?|sonrasında)/u.test(value)
+  ) return true;
+
+  return false;
+}
+
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
   try {
@@ -214,12 +236,23 @@ export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   if (!text || settings.audio === false) return false;
   const token = sequence;
+  const preferNative = shouldPreferNativeSystem(text, lang, settings);
+
+  if (preferNative) {
+    const native = await speakSystem(text, lang, settings, token);
+    if (native || token !== sequence) return native;
+  }
+
   const plan = naturalVoicePlan(text, lang);
   if (plan.length) {
     const played = await speakNaturalPlan(plan, token);
     if (played || token !== sequence) return played;
   }
-  if (settings.systemVoiceFallback === true) {
+
+  // Never leave a child-facing instruction silent. Recorded Mino speech remains
+  // first choice, while the best native de-DE / tr-TR device voice covers any
+  // sentence or vocabulary item that has not been recorded yet.
+  if (settings.systemVoiceFallback !== false) {
     return speakSystem(text, lang, settings, token);
   }
   return false;
