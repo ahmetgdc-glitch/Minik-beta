@@ -31,13 +31,26 @@ test("story journey keeps the recall question and scoring behavior", () => {
 });
 
 test("story pages replay their spoken labels only before recall begins", () => {
-  assert.match(story, /function hearStoryItem\(item\)/);
+  assert.match(story, /async function hearStoryItem\(item\)/);
   assert.match(story, /if \(blocked\(\) \|\| question\) return/);
-  assert.match(story, /speak\(item\.labels\[lang\], lang, settings\)/);
+  assert.match(story, /await speak\(item\.labels\[lang\], lang, settings\)/);
   assert.match(story, /onClick=\{\(\) => hearStoryItem\(item\)\}/);
   assert.match(story, /onKeyDown=\{\(event\) => handleStoryKeyDown\(event, item\)\}/);
   assert.match(story, /<Volume2 size=\{18\} \/>/);
   assert.match(story, /aria-label=\{lang === "tr" \? `\$\{item\.labels\.tr\} kelimesini tekrar dinle` : `\$\{item\.labels\.de\} noch einmal anhören`\}/);
+});
+
+test("story page stays visibly linked to the label while speech is active", () => {
+  assert.match(story, /const \[speakingId, setSpeakingId\] = useState\(null\)/);
+  assert.match(story, /const speechRun = useRef\(0\)/);
+  assert.match(story, /const run = \+\+speechRun\.current/);
+  assert.match(story, /if \(run === speechRun\.current\) setSpeakingId\(null\)/);
+  assert.match(story, /speakingId === item\.id \? "speaking" : ""/);
+  assert.match(story, /speechRun\.current \+= 1;[\s\S]*setSpeakingId\(null\);[\s\S]*setQuestion\(true\)/);
+  assert.match(css, /\.story-page-listenable\.speaking\s*\{/);
+  assert.match(css, /\.story-page-listenable\.speaking \.story-page-visual\s*\{[\s\S]*?animation:\s*story-speaking-bounce/);
+  assert.match(css, /@keyframes story-speaking-cue/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.story-page-listenable\.speaking \.story-page-visual/);
 });
 
 test("picture-book scenes remain large and clearly tappable on phones", () => {
