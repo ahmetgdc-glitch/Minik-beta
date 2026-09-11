@@ -52,6 +52,7 @@ export default function SortGame({
     [target.id],
     group.labels[lang],
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   function place(source, destination) {
     if (paused || interactionBlocked() || source !== target.id) return;
@@ -67,7 +68,7 @@ export default function SortGame({
   });
 
   return (
-    <section className="sort-playground sort-workshop" ref={placement.boardRef} aria-label={text}>
+    <section className="sort-playground sort-workshop" ref={placement.boardRef} aria-label={text} aria-disabled={controlsDisabled || undefined}>
       <div className="sort-workshop-sky" aria-hidden="true">
         <span className="sort-workshop-cloud cloud-one" />
         <span className="sort-workshop-cloud cloud-two" />
@@ -86,7 +87,7 @@ export default function SortGame({
         <button
           className={`sort-object ${placement.drag ? "is-dragging" : ""}`}
           {...placement.sourceProps(target.id)}
-          disabled={paused}
+          disabled={controlsDisabled}
           aria-label={`${target.labels[lang]}. ${lang === "tr" ? "Sepete sürükle veya sepete dokun." : "Zum Korb ziehen oder einen Korb antippen."}`}
         >
           <Visual item={target} lang={lang} photos={settings.photos} />
@@ -108,7 +109,7 @@ export default function SortGame({
               data-drop-id={g.id}
               className={`sort-basket ${active ? "drop-hover" : ""} ${hinted ? "hint-target" : ""}`}
               style={{ "--basket": g.color }}
-              disabled={paused}
+              disabled={controlsDisabled}
               aria-label={g.labels[lang]}
               onClick={() => place(target.id, g.id)}
             >
