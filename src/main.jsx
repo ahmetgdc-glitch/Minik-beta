@@ -37,6 +37,7 @@ import "./games/trace-playground.css";
 import "./games/speak-stage.css";
 import "./games/rhythm-playground.css";
 import "./games/sort-workshop.css";
+import "./games/count-meadow.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
