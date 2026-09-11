@@ -9,8 +9,14 @@ export default function SceneExplorer({ items, worldId, lang, settings, found = 
   const pointer = useRef(null);
   const t = (de, tr) => lang === "tr" ? tr : de;
   const controlsDisabled = paused || interactionBlocked();
-  return <section className={`discovery-stage stage-${sceneForWorld(worldId)}`} aria-label={t("Entdecken und hören", "Keşfet ve dinle")} aria-disabled={controlsDisabled || undefined}>
-    <img className="discovery-backdrop" src={assetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`)} alt="" draggable="false" />
+  const scene = sceneForWorld(worldId);
+  return <section
+    className={`discovery-stage stage-${scene} world-${worldId}`}
+    data-world={worldId}
+    aria-label={t("Entdecken und hören", "Keşfet ve dinle")}
+    aria-disabled={controlsDisabled || undefined}
+  >
+    <img className="discovery-backdrop" src={assetUrl(`assets/scenes/${scene}.webp`)} alt="" draggable="false" />
     <div
       className="discovery-viewport"
       ref={pager.scrollRef}
