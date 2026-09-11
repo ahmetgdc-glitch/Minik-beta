@@ -4,8 +4,9 @@ import fs from "node:fs";
 
 test("speech fallback is recorded as assisted instead of independent mastery", () => {
   const source = fs.readFileSync(new URL("../src/games/SpeakGame.jsx", import.meta.url), "utf8");
+  assert.match(source, /const blocked = interactionBlocked\(\);/);
   assert.match(source, /function assistedSolve\(\) \{/);
-  assert.match(source, /if \(paused \|\| interactionBlocked\(\)\) return;/);
+  assert.match(source, /if \(paused \|\| blocked\) return;/);
   assert.match(source, /onSolve\(\[target\.id\], \{ assisted: true \}\);/);
   const assistedButtons = source.match(/onClick=\{assistedSolve\}/g) || [];
   assert.ok(assistedButtons.length >= 2, "unsupported and permission-blocked speech paths must use the guarded assisted solve helper");
