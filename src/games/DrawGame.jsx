@@ -8,7 +8,7 @@ import ConfirmDialog from "../components/ConfirmDialog.jsx";
 const COLORS = ["#203750", "#ef5b5b", "#ff9d42", "#ffd43b", "#4bb978", "#3b92c9", "#855fd1", "#ef7eb2"];
 const SIZES = [8, 16, 28];
 
-export default function DrawGame({ items = [], lang, hint, paused, onReady, onSolve }) {
+export default function DrawGame({ items = [], lang, hint, paused, interactionBlocked = () => false, onReady, onSolve }) {
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
   const drawing = useRef(false);
@@ -24,6 +24,7 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
   const templates = useMemo(() => [null, ...items.slice(0, 5)], [items]);
   const [templateId, setTemplateId] = useState(null);
   const template = templates.find(x => x?.id === templateId) || null;
+  const blocked = () => paused || interactionBlocked();
 
   const text = lang === "tr" ? "Büyük tuvalde boya, çiz ve hayal et." : "Male, zeichne und erfinde etwas auf der großen Fläche.";
   useLesson(onReady, text, () => {}, [template?.id || "creative.draw"], lang === "tr" ? "Bir renk seç. İstersen bir boyama resmi seç." : "Wähle eine Farbe. Du kannst auch eine Malvorlage wählen.");
@@ -55,6 +56,15 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!paused && !interactionBlocked()) return;
+    drawing.current = false;
+    strokeDistance.current = 0;
+    pendingSnapshot.current = null;
+    last.current = null;
+    setConfirmClear(false);
+  }, [paused, interactionBlocked]);
+
   function point(e) {
     const r = canvasRef.current.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
@@ -70,7 +80,7 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     history.current = pushDrawingHistory(history.current, value);
   }
   function start(e) {
-    if (paused) return;
+    if (blocked()) return;
     e.preventDefault();
     e.currentTarget.setPointerCapture?.(e.pointerId);
     pendingSnapshot.current = snapshot();
@@ -79,7 +89,7 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     last.current = point(e);
   }
   function move(e) {
-    if (!drawing.current || paused) return;
+    if (!drawing.current || blocked()) return;
     e.preventDefault();
     const c = canvasRef.current, ctx = c.getContext("2d"), p = point(e), a = last.current;
     ctx.globalCompositeOperation = eraser ? "destination-out" : "source-over";
@@ -97,12 +107,18 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
   }
   function end(e) {
     if (!drawing.current) return;
+    if (blocked()) {
+      drawing.current = false;
+      strokeDistance.current = 0;
+      pendingSnapshot.current = null;
+      last.current = null;
+      return;
+    }
     const meaningful = isMeaningfulStroke(strokeDistance.current);
     if (meaningful) {
       save(pendingSnapshot.current);
       setStrokes(s => s + 1);
     } else {
-      // A tap without real drawing must not count as a finished picture.
       const src = pendingSnapshot.current;
       if (src) {
         const c = canvasRef.current, ctx = c?.getContext("2d"), r = c?.getBoundingClientRect();
@@ -121,6 +137,7 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     last.current = null;
   }
   function clearNow() {
+    if (blocked()) return;
     save();
     const c = canvasRef.current, ctx = c?.getContext("2d");
     if (!c || !ctx) return;
@@ -129,6 +146,7 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     setConfirmClear(false);
   }
   function clear() {
+    if (blocked()) return;
     if (strokes > 0) {
       setConfirmClear(true);
       return;
@@ -136,6 +154,7 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     clearNow();
   }
   function undo() {
+    if (blocked()) return;
     const src = history.current.pop();
     if (!src) return;
     const c = canvasRef.current, ctx = c.getContext("2d"), r = c.getBoundingClientRect();
@@ -146,19 +165,21 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
     setStrokes(s => Math.max(0, s - 1));
   }
 
+  const controlsDisabled = paused || interactionBlocked();
+
   return <div className="draw-stage">
     <div className="draw-template-strip" aria-label={lang === "tr" ? "Boyama resimleri" : "Malvorlagen"}>
-      {templates.map((item, i) => <button key={item?.id || "free"} className={(item?.id || null) === templateId ? "active" : ""} onClick={() => setTemplateId(item?.id || null)}>
+      {templates.map((item) => <button key={item?.id || "free"} disabled={controlsDisabled} className={(item?.id || null) === templateId ? "active" : ""} onClick={() => { if (!blocked()) setTemplateId(item?.id || null); }}>
         {item ? <Visual item={item} lang={lang} photos={false}/> : <><Sparkles size={28}/><b>{lang === "tr" ? "Serbest" : "Frei"}</b></>}
       </button>)}
     </div>
     <div className="draw-toolbar" aria-label={lang === "tr" ? "Boyama araçları" : "Malwerkzeuge"}>
       <span className="draw-tool-label"><Palette size={20}/>{lang === "tr" ? "Renk" : "Farbe"}</span>
-      <div className="draw-colors">{COLORS.map(c => <button key={c} aria-label={c} className={color === c && !eraser ? "active" : ""} style={{"--c": c}} onClick={() => {setColor(c); setEraser(false)}} />)}</div>
-      <div className="draw-sizes">{SIZES.map(s => <button key={s} className={size === s ? "active" : ""} onClick={() => setSize(s)}><i style={{width: s, height: s}}/></button>)}</div>
-      <button className={eraser ? "tool-button active" : "tool-button"} onClick={() => setEraser(e => !e)} aria-label={lang === "tr" ? "Silgi" : "Radierer"}><Eraser size={21}/></button>
-      <button className="tool-button" onClick={undo} aria-label={lang === "tr" ? "Geri al" : "Rückgängig"}><RotateCcw size={21}/></button>
-      <button className="tool-button" onClick={clear} aria-label={lang === "tr" ? "Sil" : "Löschen"}><Trash2 size={21}/></button>
+      <div className="draw-colors">{COLORS.map(c => <button key={c} disabled={controlsDisabled} aria-label={c} className={color === c && !eraser ? "active" : ""} style={{"--c": c}} onClick={() => { if (!blocked()) { setColor(c); setEraser(false); } }} />)}</div>
+      <div className="draw-sizes">{SIZES.map(s => <button key={s} disabled={controlsDisabled} className={size === s ? "active" : ""} onClick={() => { if (!blocked()) setSize(s); }}><i style={{width: s, height: s}}/></button>)}</div>
+      <button disabled={controlsDisabled} className={eraser ? "tool-button active" : "tool-button"} onClick={() => { if (!blocked()) setEraser(e => !e); }} aria-label={lang === "tr" ? "Silgi" : "Radierer"}><Eraser size={21}/></button>
+      <button disabled={controlsDisabled} className="tool-button" onClick={undo} aria-label={lang === "tr" ? "Geri al" : "Rückgängig"}><RotateCcw size={21}/></button>
+      <button disabled={controlsDisabled} className="tool-button" onClick={clear} aria-label={lang === "tr" ? "Sil" : "Löschen"}><Trash2 size={21}/></button>
     </div>
     <div className={`draw-canvas-wrap ${hint >= 2 ? "hint-frame" : ""}`} ref={wrapRef}>
       <div className={`draw-template ${template ? "has-item" : "free"}`} aria-hidden="true">
@@ -166,9 +187,9 @@ export default function DrawGame({ items = [], lang, hint, paused, onReady, onSo
       </div>
       <canvas ref={canvasRef} onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerCancel={end} onLostPointerCapture={end}/>
     </div>
-    <button className="primary draw-done" disabled={strokes < 3} onClick={() => onSolve([template?.id || "creative.draw"])}><Check size={22}/>{lang === "tr" ? "Resmim hazır" : "Mein Bild ist fertig"}</button>
+    <button className="primary draw-done" disabled={controlsDisabled || strokes < 3} onClick={() => { if (!blocked()) onSolve([template?.id || "creative.draw"]); }}><Check size={22}/>{lang === "tr" ? "Resmim hazır" : "Mein Bild ist fertig"}</button>
     <ConfirmDialog
-      open={confirmClear}
+      open={confirmClear && !controlsDisabled}
       title={lang === "tr" ? "Resmi silelim mi?" : "Bild löschen?"}
       message={lang === "tr" ? "Tuvaldeki çizimin tamamı silinecek." : "Deine ganze Zeichnung auf der Leinwand wird gelöscht."}
       confirmLabel={lang === "tr" ? "Sil" : "Löschen"}
