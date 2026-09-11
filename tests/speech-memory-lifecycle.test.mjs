@@ -7,9 +7,10 @@ const memory = readFileSync(new URL("../src/games/MemoryGame.jsx", import.meta.u
 
 test("speaking game blocks replay, microphone and assisted solves when stale", () => {
   assert.match(speak, /interactionBlocked = \(\) => false/);
-  assert.match(speak, /paused \|\| interactionBlocked\(\)/);
+  assert.match(speak, /const blocked = interactionBlocked\(\);/);
   assert.match(speak, /function assistedSolve\(\)/);
-  assert.match(speak, /disabled=\{paused\}/);
+  assert.match(speak, /disabled=\{paused \|\| blocked\}/);
+  assert.match(speak, /disabled=\{listening \|\| paused \|\| blocked\}/);
 });
 
 test("memory buttons reflect pause state in the DOM", () => {
