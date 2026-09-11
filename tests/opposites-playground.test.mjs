@@ -15,10 +15,20 @@ test("opposites uses a visual two-sided playground instead of the legacy concept
   assert.doesNotMatch(game, /<OptionGrid/);
 });
 
+test("opposites lets children replay the prompt word without bypassing interaction guards", () => {
+  assert.match(game, /function replayPrompt\(\)/);
+  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /speak\(prompt\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /onClick={replayPrompt}/);
+  assert.match(game, /noch einmal anhören/);
+  assert.match(game, /tekrar dinle/);
+});
+
 test("opposites playground keeps large visual controls and phone adaptation", () => {
   assert.match(css, /min-height:\s*clamp\(310px, 52vh, 520px\)/);
   assert.match(css, /width:\s*min\(64%, 290px\)/);
   assert.match(css, /touch-action:\s*manipulation/);
+  assert.match(css, /\.opposites-prompt-scene:active/);
   assert.match(css, /@media \(max-width: 650px\)/);
   assert.match(css, /prefers-reduced-motion/);
 });
