@@ -17,10 +17,10 @@ export default function DifferentGame({
   onSolve,
 }) {
   const [round] = useState(() => buildDifferenceRound(items));
-  const prompt = lang === "tr" ? "Hangi resim farklı?" : "Welches Bild ist anders?";
-  const help = lang === "tr"
+  const prompt = lang === "tr"
     ? "Üç resim aynı. Farklı olanı bul."
     : "Drei Bilder sind gleich. Finde das andere.";
+  const help = prompt;
 
   useLesson(
     onReady,
