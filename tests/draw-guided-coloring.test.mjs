@@ -10,13 +10,17 @@ test("drawing offers a spill-proof smart coloring mode for templates", () => {
   assert.match(game, /smartColor/);
   assert.match(game, /Zauber-Ausmalen/);
   assert.match(game, /Taşırmadan boya/);
-  assert.match(game, /destination-in/);
-  assert.match(game, /confineToTemplate/);
+  assert.match(game, /smartPaintSegment/);
+  assert.match(game, /globalCompositeOperation = "source-in"/);
 });
 
-test("smart coloring samples the source artwork for correct automatic colors", () => {
+test("smart coloring reveals source artwork pixel-for-pixel instead of dragging one sampled color across regions", () => {
   assert.match(game, /getImageData/);
   assert.match(game, /guidedColorAt/);
+  assert.match(game, /paintCtx\.drawImage\(guide\.canvas/);
+  assert.match(game, /ctx\.drawImage\(paintCanvas/);
+  assert.doesNotMatch(game, /destination-in/);
+  assert.match(game, /if \(painted\) strokeDistance\.current \+= segment/);
   assert.match(game, /Renkler otomatik/);
   assert.match(game, /Farben automatisch/);
 });
@@ -30,6 +34,7 @@ test("switching coloring templates resets incompatible old paint safely", () => 
 test("guided coloring has dedicated mobile and reduced-motion styling", () => {
   assert.match(css, /smart-color-toggle/);
   assert.match(css, /smart-coloring/);
+  assert.match(css, /grayscale\(1\)/);
   assert.match(css, /@media\(max-width:680px\)/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(main, /\.\/games\/draw-coloring\.css/);
