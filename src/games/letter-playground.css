@@ -1,0 +1,15 @@
+.initial-letter-game{width:min(100%,1120px);margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:clamp(18px,3vw,34px)}
+.initial-letter-target{position:relative;width:min(100%,820px);min-height:clamp(280px,48svh,500px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:clamp(22px,4vw,42px);border-radius:48px;background:radial-gradient(circle at 50% 28%,#fff9d9 0 18%,transparent 19%),linear-gradient(155deg,#dff7ff,#eefce5 48%,#fff0cb);box-shadow:0 18px 42px rgba(63,88,99,.14);overflow:hidden}
+.initial-letter-target::before,.initial-letter-target::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.5)}
+.initial-letter-target::before{width:120px;height:120px;left:-28px;top:38px}.initial-letter-target::after{width:170px;height:170px;right:-45px;bottom:-55px}
+.initial-letter-target .visual{position:relative;z-index:1;width:min(52vw,300px);height:min(52vw,300px);filter:drop-shadow(0 14px 18px rgba(42,65,71,.14));animation:letterTargetFloat 3.4s ease-in-out infinite}
+.initial-letter-target strong{position:relative;z-index:1;font-size:clamp(1.45rem,4vw,2.5rem);font-weight:900;line-height:1.05;text-align:center}
+.letter-choice-grid{width:min(100%,920px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2.4vw,22px);padding:0 4px}
+.letter-choice-grid.options-4{grid-template-columns:repeat(4,minmax(0,1fr))}.letter-choice-grid.options-6{grid-template-columns:repeat(3,minmax(0,1fr))}
+.letter-choice{min-height:clamp(108px,18svh,170px);border:0;border-radius:34px;background:linear-gradient(180deg,#fff,#f3f8ff);box-shadow:0 11px 0 #dbe7ef,0 17px 26px rgba(68,91,104,.12);font:900 clamp(2.8rem,9vw,5.4rem)/1 Nunito,sans-serif;color:#263e4c;display:grid;place-items:center;touch-action:manipulation;transition:transform .16s ease,box-shadow .16s ease,background .16s ease}
+.letter-choice:nth-child(3n+1){transform:rotate(-2deg)}.letter-choice:nth-child(3n+2){transform:translateY(8px)}.letter-choice:nth-child(3n){transform:rotate(2deg)}
+.letter-choice:active{transform:translateY(7px) scale(.97);box-shadow:0 4px 0 #dbe7ef,0 8px 14px rgba(68,91,104,.12)}
+.letter-choice.hint-target{background:linear-gradient(180deg,#fffbd8,#ffe989);box-shadow:0 11px 0 #e9ca54,0 0 0 7px rgba(255,221,79,.24),0 18px 30px rgba(101,87,24,.16)}
+@keyframes letterTargetFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-10px) rotate(1deg)}}
+@media(max-width:700px){.initial-letter-target{min-height:clamp(250px,40svh,390px);border-radius:36px;padding:20px}.initial-letter-target .visual{width:min(62vw,250px);height:min(62vw,250px)}.letter-choice-grid,.letter-choice-grid.options-4,.letter-choice-grid.options-6{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.letter-choice{min-height:112px;border-radius:28px}.letter-choice:nth-child(n){transform:none}}
+@media(prefers-reduced-motion:reduce){.initial-letter-target .visual{animation:none}.letter-choice{transition:none}}
