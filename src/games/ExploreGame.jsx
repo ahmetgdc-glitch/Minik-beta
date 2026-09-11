@@ -9,12 +9,15 @@ export default function ExploreGame({ items, world, progress, difficulty, lang, 
   const [found, setFound] = useState([]);
   const [speakingId, setSpeakingId] = useState(null);
   const foundRef = useRef([]);
+  const completionLock = useRef(false);
   const speechRun = useRef(0);
   const sceneItems = useMemo(() => sample(items, explorationSize(difficulty)), [items, round, difficulty]);
   const targetCount = sceneItems.length;
   const text = lang === "tr" ? "Bak bakalım! Resme dokun." : "Schau mal! Tippe auf das Bild.";
   const help = lang === "tr" ? "Kaydır ve diğer resimleri keşfet." : "Wische und entdecke die anderen Bilder.";
-  const controlsDisabled = paused || interactionBlocked();
+  const sessionDisabled = paused || interactionBlocked();
+  const controlsDisabled = sessionDisabled || completionLock.current;
+  const sceneInteractionBlocked = () => completionLock.current || interactionBlocked();
   useLesson(onReady, text, () => speak(text, lang, settings), sceneItems.map(x => x.id), help);
 
   async function speakItem(item) {
@@ -28,34 +31,36 @@ export default function ExploreGame({ items, world, progress, difficulty, lang, 
   }
 
   function discover(item) {
-    if (paused || interactionBlocked()) return;
+    if (paused || interactionBlocked() || completionLock.current) return;
     const next = addDiscovery(foundRef.current, item.id, sceneItems.map(x => x.id));
     if (next !== foundRef.current) {
       foundRef.current = next;
+      if (targetCount > 0 && next.length >= targetCount) completionLock.current = true;
       setFound(next);
     }
     speakItem(item);
   }
 
   useEffect(() => {
-    if (!controlsDisabled) return;
+    if (!sessionDisabled) return;
     speechRun.current += 1;
     setSpeakingId(null);
-  }, [controlsDisabled]);
+  }, [sessionDisabled]);
 
   useEffect(() => () => {
     speechRun.current += 1;
   }, []);
 
   useEffect(() => {
-    if (controlsDisabled || found.length < targetCount) return;
+    if (sessionDisabled || targetCount === 0 || found.length < targetCount) return;
     const timer = setTimeout(() => {
       if (!interactionBlocked()) onSolve(found);
     }, 350);
     return () => clearTimeout(timer);
-  }, [controlsDisabled, found, targetCount, onSolve, interactionBlocked]);
+  }, [sessionDisabled, found, targetCount, onSolve, interactionBlocked]);
 
-  return <SceneExplorer items={sceneItems} worldId={world.id} {...{lang, settings, found, speakingId, hint, paused, interactionBlocked}}
+  return <SceneExplorer items={sceneItems} worldId={world.id} {...{lang, settings, found, speakingId, hint, paused}}
+    interactionBlocked={sceneInteractionBlocked}
     outfit={progress.minoOutfit} onDiscover={discover} onMino={() => {
       if (controlsDisabled) return;
       speechRun.current += 1;
