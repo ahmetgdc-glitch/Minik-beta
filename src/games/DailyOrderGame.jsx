@@ -30,26 +30,27 @@ export default function DailyOrderGame({
   const help = lang === "tr" ? `${prompt.labels.tr} sonrasında ${target.labels.tr} gelir.` : `Nach ${prompt.labels.de} kommt ${target.labels.de}.`;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
+  const controlsDisabled = paused || interactionBlocked();
 
   function replayPrompt() {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     speak(prompt.labels[lang], lang, settings);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([prompt.id, target.id]) : onWrong([prompt.id, target.id]);
   }
 
   return (
-    <div className="concept-game routine-order-game" aria-disabled={paused || undefined}>
+    <div className="concept-game routine-order-game" aria-disabled={controlsDisabled || undefined}>
       <section className="routine-journey-stage" aria-label={lang === "tr" ? "Şimdi olan" : "Was jetzt passiert"}>
         <span className="routine-scene-label">{lang === "tr" ? "Şimdi" : "Jetzt"}</span>
         <button
           type="button"
           className="routine-now-scene"
           onClick={replayPrompt}
-          disabled={paused}
+          disabled={controlsDisabled}
           aria-label={lang === "tr" ? `${prompt.labels.tr} kelimesini tekrar dinle` : `${prompt.labels.de} noch einmal anhören`}
         >
           <Visual item={prompt} lang={lang} photos={settings.photos} />
@@ -66,7 +67,7 @@ export default function DailyOrderGame({
               key={item.id}
               className={`routine-next-scene ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
               onClick={() => pick(item)}
-              disabled={paused}
+              disabled={controlsDisabled}
               aria-label={item.labels[lang]}
             >
               <Visual item={item} lang={lang} photos={settings.photos} />
