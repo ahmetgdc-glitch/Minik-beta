@@ -7,6 +7,8 @@ export default function ListenGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -23,14 +25,18 @@ export default function ListenGame({
     [target.id],
     target.labels[lang],
   );
+
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="listen-playground">
+    <div className="listen-playground" aria-disabled={paused || undefined}>
       <div className="listen-orb" aria-hidden="true"><span>♪</span></div>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
-        onPick={(item) =>
-          item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-        }
+        onPick={pick}
       />
     </div>
   );
