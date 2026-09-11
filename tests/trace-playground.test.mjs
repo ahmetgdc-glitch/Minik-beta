@@ -13,6 +13,13 @@ test("tracing uses a large touch-first playground", () => {
   assert.match(css, /max-height: min\(70svh, 620px\)/);
 });
 
+test("tracing disables drawing and restart controls during stale transitions", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(game, /pointerEvents: controlsDisabled \? "none" : undefined/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
+});
+
 test("tracing expands for phones", () => {
   assert.match(css, /@media \(max-width: 700px\)/);
   assert.match(css, /width: min\(94vw, 560px\)/);
