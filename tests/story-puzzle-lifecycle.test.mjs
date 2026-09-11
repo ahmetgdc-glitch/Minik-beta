@@ -8,8 +8,10 @@ const puzzle = readFileSync(new URL("../src/games/PuzzleGame.jsx", import.meta.u
 test("StoryGame.jsx blocks paused and stale lifecycle input", () => {
   assert.match(story, /interactionBlocked = \(\) => false/);
   assert.match(story, /function blocked\(\) \{[\s\S]*?return paused \|\| interactionBlocked\(\);[\s\S]*?\}/);
+  assert.match(story, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
   assert.match(story, /if \(blocked\(\)\) return/);
-  assert.match(story, /disabled=\{paused\}/);
+  assert.match(story, /disabled=\{controlsDisabled\}/);
+  assert.match(story, /disabled=\{controlsDisabled\}[\s\S]*onPick=\{pick\}/);
 });
 
 test("PuzzleGame.jsx blocks paused and stale lifecycle input", () => {
