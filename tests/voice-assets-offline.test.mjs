@@ -21,9 +21,10 @@ test("CI caches voice assets and requires a complete localized library", () => {
   assert.match(workflow, /MINIK_REQUIRE_LOCAL_VOICE: "1"/);
 });
 
-test("voice asset downloader covers both fixed prompts and modular animal vocabulary", () => {
+test("voice asset downloader covers fixed prompts, natural plans and modular animal vocabulary", () => {
   assert.match(downloader, /src\/audio\/gameVoiceClips\.js/);
   assert.match(downloader, /src\/audio\/animalVoiceClips\.js/);
+  assert.match(downloader, /src\/audio\/naturalVoicePlans\.js/);
   assert.match(downloader, /fetchWithRetry/);
   assert.match(downloader, /\.voice-cache/);
   assert.match(downloader, /dist\/assets\/voice/);
@@ -33,12 +34,16 @@ test("service worker precaches localized voice files", () => {
   assert.match(worker, /p\.startsWith\("assets\/voice\/"\)/);
 });
 
-test("runtime tries local natural voice before remote and system fallbacks", () => {
+test("runtime prefers local recording, then remote recording, without automatic robot speech", () => {
   const localIndex = voice.indexOf("speakGameClip(localClip, token)");
-  const remoteIndex = voice.indexOf("speakGameClip(clip, token)");
+  const remoteIndex = voice.indexOf("return speakGameClip(url, token)");
+  const optInIndex = voice.indexOf("settings.systemVoiceFallback === true");
   const systemIndex = voice.indexOf("return speakSystem(text, lang, settings, token)");
-  assert.ok(localIndex > 0, "local natural clip must be attempted");
-  assert.ok(remoteIndex > localIndex, "remote recording must remain the second fallback");
-  assert.ok(systemIndex > remoteIndex, "browser speech must remain the final fallback");
+  assert.ok(localIndex > 0, "local natural clip must be attempted first");
+  assert.ok(remoteIndex > localIndex, "remote recording must remain the recording fallback");
+  assert.ok(optInIndex > remoteIndex, "system voice must not be considered before recorded audio");
+  assert.ok(systemIndex > optInIndex, "browser speech must only exist behind explicit opt-in");
   assert.match(voice, /assets\/voice\/\$\{filename\}/);
+  assert.match(voice, /naturalVoicePlan\(text, lang\)/);
+  assert.match(voice, /if \(settings\.systemVoiceFallback === true\)/);
 });
