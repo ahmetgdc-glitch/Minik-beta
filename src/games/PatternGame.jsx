@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { sample, choicesFor } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
-import { useLesson, OptionGrid } from "./shared.jsx";
+import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 export default function PatternGame({
   items,
@@ -34,25 +34,40 @@ export default function PatternGame({
     target.labels[lang],
   );
   return (
-    <>
-      <div className="pattern-row">
-        {sequence.map((i, k) => (
-          <div
-            key={k}
-            className={hint >= 2 ? "pattern-emphasis" : ""}
-            style={{ animationDelay: `${k * 0.2}s` }}
-          >
-            <Visual item={base[i]} lang={lang} photos={settings.photos} />
-          </div>
-        ))}
-        <div className="pattern-question">?</div>
-      </div>
-      <OptionGrid
-        {...{ options, target, hint, lang, settings }}
-        onPick={(x) =>
-          x.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-        }
-      />
-    </>
+    <div className="pattern-path-game">
+      <section className="pattern-path-stage" aria-label={text}>
+        <span className="pattern-path-label">{lang === "tr" ? "Deseni takip et" : "Folge dem Muster"}</span>
+        <div className="pattern-path-sequence">
+          {sequence.map((i, k) => (
+            <React.Fragment key={k}>
+              <div
+                className={`pattern-path-node ${hint >= 2 ? "pattern-emphasis" : ""}`}
+                style={{ animationDelay: `${k * 0.2}s` }}
+              >
+                <Visual item={base[i]} lang={lang} photos={settings.photos} />
+              </div>
+              <span className="pattern-path-connector" aria-hidden="true" />
+            </React.Fragment>
+          ))}
+          <div className="pattern-path-question">?</div>
+        </div>
+      </section>
+      <section className="pattern-choice-wrap" aria-label={lang === "tr" ? "Sıradaki resmi seç" : "Wähle das nächste Bild"}>
+        <h2 className="pattern-choice-title">{lang === "tr" ? "Sonraki durak hangisi?" : "Was kommt auf den nächsten Platz?"}</h2>
+        <div className="pattern-choice-grid">
+          {options.map((x) => (
+            <button
+              key={x.id}
+              className={`pattern-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
+              onClick={() => x.id === target.id ? onSolve([target.id]) : onWrong([target.id])}
+              aria-label={x.labels[lang]}
+            >
+              <Visual item={x} lang={lang} photos={settings.photos} />
+              <b>{x.labels[lang]}</b>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
