@@ -19,7 +19,56 @@
     <title>MINIK – Lernen mit Mino</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main id="minik-boot" style="min-height:100dvh;display:grid;place-items:center;padding:24px;background:#f5f8fc;color:#183544;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-align:center;box-sizing:border-box">
+        <div style="max-width:520px">
+          <div style="font-size:52px;line-height:1" aria-hidden="true">🐟</div>
+          <h1 style="font-size:28px;margin:14px 0 8px">MINIK startet …</h1>
+          <p id="minik-boot-status" style="font-size:17px;line-height:1.45;margin:0">Mino lädt deine Lernwelt.</p>
+          <pre id="minik-boot-error" style="display:none;margin-top:18px;padding:14px;border-radius:14px;background:#fff3f3;color:#7c1d1d;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace"></pre>
+        </div>
+      </main>
+    </div>
+    <script>
+      (function () {
+        var bootStartedAt = Date.now();
+        var firstError = "";
+        function text(value) {
+          try { return String(value == null ? "" : value); } catch (_) { return "Unbekannter Fehler"; }
+        }
+        function describe(event) {
+          if (!event) return "Unbekannter Startfehler";
+          if (event.reason) {
+            var reason = event.reason;
+            return text(reason && (reason.stack || reason.message) || reason);
+          }
+          if (event.target && event.target !== window) {
+            var target = event.target;
+            return "Datei konnte nicht geladen werden: " + text(target.src || target.href || target.tagName);
+          }
+          return text(event.error && (event.error.stack || event.error.message) || event.message || "JavaScript-Startfehler");
+        }
+        function showFailure(message) {
+          if (firstError) return;
+          firstError = message || "Unbekannter Startfehler";
+          window.__MINIK_BOOT_ERROR__ = firstError;
+          var status = document.getElementById("minik-boot-status");
+          var output = document.getElementById("minik-boot-error");
+          if (status) status.textContent = "MINIK konnte auf diesem Gerät nicht starten. Bitte sende einen Screenshot von diesem Text.";
+          if (output) {
+            output.style.display = "block";
+            output.textContent = firstError + "\n\nSeite: " + location.href + "\nSafari: " + navigator.userAgent;
+          }
+        }
+        window.addEventListener("error", function (event) { showFailure(describe(event)); }, true);
+        window.addEventListener("unhandledrejection", function (event) { showFailure(describe(event)); });
+        window.setTimeout(function () {
+          var boot = document.getElementById("minik-boot");
+          if (!boot || firstError) return;
+          showFailure("Zeitüberschreitung: React hat nach " + Math.round((Date.now() - bootStartedAt) / 1000) + " Sekunden noch nicht gestartet. Möglicherweise wurde das JavaScript-Modul blockiert oder nicht geladen.");
+        }, 8000);
+      })();
+    </script>
     <script type="module" src="./src/main.jsx"></script>
   </body>
 </html>
