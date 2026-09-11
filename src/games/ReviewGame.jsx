@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
+import { Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
-import Visual from "../components/Visual.jsx";
 import { itemMastery } from "../learning/mastery.js";
 import { reviewItems } from "../learning/review.js";
 import { choicesFor } from "../utils/random.js";
@@ -39,6 +39,11 @@ export default function ReviewGame({
 
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
 
+  function replayTarget() {
+    if (paused || interactionBlocked()) return;
+    speak(target.labels[lang], lang, settings);
+  }
+
   function pick(item) {
     if (paused || interactionBlocked()) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
@@ -49,16 +54,22 @@ export default function ReviewGame({
       <section className="review-island__stage" aria-label={badge}>
         <div className="review-island__focus">
           <div className="review-island__badge">{badge}</div>
-          <div className="review-island__orb" aria-hidden="true">
-            <Visual item={target} lang={lang} photos={settings.photos} />
-          </div>
+          <button
+            type="button"
+            className="review-island__orb review-island__listen"
+            onClick={replayTarget}
+            disabled={paused}
+            aria-label={lang === "tr" ? `${target.labels.tr} kelimesini tekrar dinle` : `${target.labels.de} noch einmal anhören`}
+          >
+            <Volume2 size={64} aria-hidden="true" />
+          </button>
           <h3 className="review-island__title">
             {lang === "tr" ? "Mino ile tekrar zamanı" : "Trainingszeit mit Mino"}
           </h3>
           <p className="review-island__subtitle">
             {lang === "tr"
-              ? "Doğru resmi bul ve öğrendiğini güçlendir."
-              : "Finde das richtige Bild und festige, was du schon gelernt hast."}
+              ? "Kelimeyi dinle, doğru resmi bul ve öğrendiğini güçlendir."
+              : "Hör das Wort, finde das richtige Bild und festige, was du schon gelernt hast."}
           </p>
         </div>
       </section>
