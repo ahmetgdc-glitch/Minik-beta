@@ -19,6 +19,7 @@ import "./games/immersive.css";
 import "./app/playground.css";
 import "./rewards/immersive-rewards.css";
 import "./rewards/achievement-trail.css";
+import "./games/story-journey.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
