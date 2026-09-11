@@ -34,7 +34,7 @@ export default function ListenGame({
 
   function repeatWord() {
     if (paused || interactionBlocked()) return;
-    speak(text, lang, settings);
+    speak(target.labels[lang], lang, settings);
   }
 
   return (
