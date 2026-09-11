@@ -10,6 +10,9 @@ export const helpVoiceEntries = {
     "Schau, welches Bild sich wiederholt.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/739c86b0-6e6c-4411-b959-82860fd872a3.mp3",
     "Denk an die Reihe von eben.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/5fca0836-58d1-46f7-bd9a-6f62ff0bfff5.mp3",
     "Tippe auf das große Bild. Wische weiter!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/f41af944-b86e-4880-b489-5a575033f2dc.mp3",
+    "Los geht’s!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/24d462f2-0337-48bd-8aa1-9fcd0229199b.mp3",
+    "Male, zeichne und erfinde etwas auf der großen Fläche.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/74b9e0b5-9988-4606-a343-a1b29169926b.mp3",
+    "Wähle eine Farbe. Du kannst auch eine Malvorlage wählen.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/dc99f1db-97f2-4351-a5bb-0d2e33cca235.mp3",
   },
   tr: {
     "Parlayan tuşları takip et.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/d5b92968-a360-4259-88f4-793c7c2b790f.mp3",
@@ -20,6 +23,9 @@ export const helpVoiceEntries = {
     "Hangi resmin tekrar ettiğine bak.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/25ce175c-48f0-4c33-acde-ceda36542152.mp3",
     "Az önceki sırayı hatırla.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/19af7d7b-ee89-437d-8cca-3bfaaac75fdb.mp3",
     "Büyük resme dokun. Sonra kaydır!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a3a4ffbe-cd09-46c6-ae23-e203ecee6446.mp3",
+    "Haydi başlayalım!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/371a569d-f95d-4271-b6b9-72a43a072ffa.mp3",
+    "Büyük tuvalde boya, çiz ve hayal et.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/73c50da8-e0bd-434c-95fc-bb424e477389.mp3",
+    "Bir renk seç. İstersen bir boyama resmi seç.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a7087455-423e-4098-83c6-4aa20f149ab7.mp3",
   },
 };
 
