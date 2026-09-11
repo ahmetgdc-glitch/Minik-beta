@@ -11,6 +11,8 @@ export default function OppositesGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -28,19 +30,18 @@ export default function OppositesGame({
     };
   }, [pairs, items, difficulty]);
 
-  const text =
-    lang === "tr"
-      ? `${prompt.labels.tr}. Bunun zıttı hangisi?`
-      : `${prompt.labels.de}. Was ist das Gegenteil?`;
-  const help =
-    lang === "tr"
-      ? `${target.labels.tr}, ${prompt.labels.tr} kelimesinin zıttıdır.`
-      : `${target.labels.de} ist das Gegenteil von ${prompt.labels.de}.`;
+  const text = lang === "tr" ? `${prompt.labels.tr}. Bunun zıttı hangisi?` : `${prompt.labels.de}. Was ist das Gegenteil?`;
+  const help = lang === "tr" ? `${target.labels.tr}, ${prompt.labels.tr} kelimesinin zıttıdır.` : `${target.labels.de} ist das Gegenteil von ${prompt.labels.de}.`;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
 
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([prompt.id, target.id]) : onWrong([prompt.id, target.id]);
+  }
+
   return (
-    <div className="opposites-playground">
+    <div className="opposites-playground" aria-disabled={paused || undefined}>
       <section className="opposites-stage" aria-label={prompt.labels[lang]}>
         <div className="opposites-prompt-scene">
           <Visual item={prompt} lang={lang} photos={settings.photos} />
@@ -59,11 +60,8 @@ export default function OppositesGame({
             <button
               key={item.id}
               className={`opposites-choice ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
-              onClick={() =>
-                item.id === target.id
-                  ? onSolve([prompt.id, target.id])
-                  : onWrong([prompt.id, target.id])
-              }
+              onClick={() => pick(item)}
+              disabled={paused}
               aria-label={item.labels[lang]}
             >
               <Visual item={item} lang={lang} photos={settings.photos} />
