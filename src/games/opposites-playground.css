@@ -34,10 +34,31 @@
   z-index: 2;
   min-height: clamp(250px, 42vh, 420px);
   width: min(48%, 500px);
+  border: 0;
+  border-radius: 32px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   display: grid;
   place-items: center;
   text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .16s ease, background .16s ease;
 }
+
+.opposites-prompt-scene:hover,
+.opposites-prompt-scene:focus-visible {
+  background: rgba(255,255,255,.2);
+}
+
+.opposites-prompt-scene:focus-visible {
+  outline: 5px solid rgba(80,158,210,.58);
+  outline-offset: 3px;
+}
+
+.opposites-prompt-scene:active { transform: scale(.985); }
+.opposites-prompt-scene:disabled { cursor: default; }
 
 .opposites-prompt-scene .visual {
   width: min(64%, 290px);
@@ -218,5 +239,6 @@
   .opposites-choice.hint-target {
     animation: none;
   }
+  .opposites-prompt-scene,
   .opposites-choice { transition: none; }
 }
