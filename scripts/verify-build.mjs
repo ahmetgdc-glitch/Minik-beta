@@ -85,12 +85,19 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   assert.ok(!stores.has(old), "Old cache for this app must be removed");
   assert.ok(stores.has(other), "Another app's cache must remain untouched");
   const active = [...stores.entries()].find(([name]) => name.startsWith(prefix));
-  assert.ok(active[1].size >= 270, "Complete compact core must be cached");
+  assert.ok(active[1].size >= 8, "App shell must be cached");
+  assert.ok(active[1].size < 120, `Boot cache must stay lightweight on Safari, found ${active[1].size} files`);
+  assert.equal(
+    [...active[1].keys()].some((url) => url.includes("/assets/voice/") && url.endsWith(".mp3")),
+    false,
+    "Boot cache must not preload the whole voice library",
+  );
   function request(url, mode = "cors", method = "GET") {
     let response;
     listeners.get("fetch")({ request: { url, mode, method }, respondWith(promise) { response = promise; } });
     return response;
   }
+  assert.equal(request(scope + "reset.html", "navigate"), undefined, "Recovery page must bypass the service worker");
   serverFailure = true;
   const degradedPage = await request(scope, "navigate");
   assert.match(degradedPage.body.toString(), /MINIK/, "A temporary 5xx navigation must fall back to the cached app shell");
@@ -104,9 +111,18 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
     const landscape = await request(scope + `assets/scenes/${scene}.webp`);
     assert.ok(landscape?.body.byteLength > 1000, `${scene} must work on the first offline visit`);
   }
-  const naturalVoice = await request(scope + `assets/voice/${builtVoiceFiles[0]}`);
-  assert.ok(naturalVoice?.body.byteLength > 100, "Natural Mino voice must work on the first offline visit");
+
+  // Rich content is cached on demand rather than during startup. Once heard,
+  // a natural voice clip remains available offline without boot-time pressure.
+  offline = false;
+  const voiceUrl = scope + `assets/voice/${builtVoiceFiles[0]}`;
+  const warmedVoice = await request(voiceUrl);
+  assert.ok(warmedVoice?.body.byteLength > 100);
+  offline = true;
+  const cachedVoice = await request(voiceUrl);
+  assert.ok(cachedVoice?.body.byteLength > 100, "A used natural voice clip must remain available offline");
+
   assert.equal(request("https://unrelated.test/asset.svg"), undefined);
   assert.equal(request(scope, "cors", "POST"), undefined);
-  console.log(`Build + offline contract passed: ${scope} (${active[1].size} cached files, ${builtVoiceFiles.length} voice clips)`);
+  console.log(`Build + offline contract passed: ${scope} (${active[1].size} boot files, ${builtVoiceFiles.length} localized voice clips)`);
 }
