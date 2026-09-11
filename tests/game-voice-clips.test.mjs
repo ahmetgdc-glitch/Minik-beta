@@ -56,14 +56,16 @@ test("all shape vocabulary uses natural Mino voice in both languages", () => {
   ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural shape clip: ${word}`);
 });
 
-test("twenty-four beginner animals use natural Mino voice in both languages", () => {
+test("all thirty animals use natural Mino voice in both languages", () => {
   for (const word of [
     "Löwe", "Hund", "Katze", "Kuh", "Pferd", "Schaf", "Tiger", "Affe",
     "Kaninchen", "Bär", "Elefant", "Giraffe", "Pinguin", "Frosch", "Fisch", "Vogel",
     "Fuchs", "Schwein", "Ente", "Huhn", "Schildkröte", "Schmetterling", "Marienkäfer", "Biene",
+    "Oktopus", "Delfin", "Hai", "Wal", "Schnecke", "Igel",
     "Aslan", "Köpek", "Kedi", "İnek", "At", "Koyun", "Kaplan", "Maymun",
     "Tavşan", "Ayı", "Fil", "Zürafa", "Penguen", "Kurbağa", "Balık", "Kuş",
     "Tilki", "Domuz", "Ördek", "Tavuk", "Kaplumbağa", "Kelebek", "Uğur böceği", "Arı",
+    "Ahtapot", "Yunus", "Köpek balığı", "Balina", "Salyangoz", "Kirpi",
   ]) assert.ok(animals.includes(`\"${word}\"`), `missing natural animal clip: ${word}`);
 });
 
@@ -73,9 +75,9 @@ test("animal vocabulary remains modular and wired into the shared player", () =>
   assert.match(clips, /animalVoiceClipCount/);
 });
 
-test("natural Mino library keeps at least 143 recorded prompts and words", () => {
+test("natural Mino library keeps at least 155 recorded prompts and words", () => {
   const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 143, `expected at least 143 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 155, `expected at least 155 natural clips, got ${urls.length}`);
 });
 
 test("speech prefers recorded game voice before browser synthesis", () => {
