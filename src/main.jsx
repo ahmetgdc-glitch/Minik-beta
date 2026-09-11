@@ -15,6 +15,7 @@ import "@fontsource/nunito/latin-ext-900.css";
 import "./styles.css";
 import "./games/games.css";
 import "./worlds/worlds.css";
+import "./worlds/scene-themes.css";
 import "./games/immersive.css";
 import "./app/playground.css";
 import "./app/playground-guards.css";
