@@ -36,7 +36,7 @@ export default function SoundsGame({
     return () => clearTimeout(t);
   }, [playing]);
   return (
-    <>
+    <div className="sounds-playground">
       <button
         className={`sound-orb ${playing ? "playing" : ""}`}
         onClick={repeat}
@@ -59,6 +59,6 @@ export default function SoundsGame({
           item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
         }
       />
-    </>
+    </div>
   );
 }
