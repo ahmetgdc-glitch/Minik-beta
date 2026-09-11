@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Volume2 } from "lucide-react";
 import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
 import { itemsForWorld } from "../data/content.js";
-import { playSound, stopSounds } from "../audio/sounds.js";
+import { ensureAudioReady, playSound, stopSounds } from "../audio/sounds.js";
 import { stopSpeech } from "../audio/voice.js";
 export default function SoundsGame({
   difficulty,
@@ -17,11 +17,16 @@ export default function SoundsGame({
 }) {
   const { target, options } = useSelection(itemsForWorld("sounds"), difficulty),
     [playing, setPlaying] = useState(false);
-  function repeat() {
+  async function repeat() {
     if (paused || interactionBlocked()) return;
     stopSpeech();
-    playSound(target.sound);
-    setPlaying(true);
+    const context = await ensureAudioReady();
+    if (!context || paused || interactionBlocked()) {
+      setPlaying(false);
+      return;
+    }
+    const duration = playSound(target.sound, settings);
+    setPlaying(duration > 0);
   }
   const text =
     lang === "tr" ? "Dinle. Bu ne sesi?" : "Hör genau hin. Was klingt so?";
