@@ -1,0 +1,107 @@
+/* Distinct visual moods for discovery worlds. The three offline backdrops remain
+   lightweight; these layers stop 25 worlds from feeling like the same screen. */
+.discovery-stage{
+  --world-accent:#1f7f8f;
+  --world-label:#fffef7f2;
+  --world-glow:#ffffff38;
+}
+.discovery-stage::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:var(--world-overlay,linear-gradient(180deg,transparent,transparent));
+  opacity:var(--world-overlay-opacity,.72);
+}
+.discovery-stage .discovery-viewport{position:relative;z-index:1}
+.discovery-stage .discovery-footer{z-index:3}
+.discovery-stage .discovery-word{
+  background:var(--world-label);
+  color:var(--world-accent);
+  border:2px solid #ffffffb8;
+  box-shadow:0 5px 0 color-mix(in srgb,var(--world-accent) 18%,transparent),0 14px 30px #173b4d14;
+}
+.discovery-stage .discovery-position,.discovery-stage .discovery-progress{
+  border:1px solid #ffffffb8;
+  backdrop-filter:blur(10px);
+}
+
+/* Meadow family: each topic gets a recognisable outdoor mood. */
+.world-animals{--world-accent:#276d47;--world-overlay:radial-gradient(circle at 12% 18%,#fff9a955 0 8%,transparent 9%),linear-gradient(180deg,#a9eeff18,#76c86e20)}
+.world-nature{--world-accent:#347541;--world-overlay:linear-gradient(180deg,#c7f4ff18,#4ca85624)}
+.world-food{--world-accent:#a75d26;--world-label:#fff8eaf5;--world-overlay:radial-gradient(circle at 85% 16%,#ffd85d55 0 8%,transparent 9%),linear-gradient(180deg,#ffeab214,#f49a5422)}
+.world-weather{--world-accent:#3b698f;--world-label:#f6fbfff5;--world-overlay:linear-gradient(180deg,#7bb7d45c 0 38%,transparent 70%)}
+.world-sports{--world-accent:#25704e;--world-overlay:linear-gradient(180deg,transparent 48%,#1673442e 49% 100%)}
+
+/* Town family: cooler contrast and a road-like lower band. */
+.world-vehicles,.world-places,.world-jobs,.world-safety{
+  --world-accent:#315f79;
+  --world-label:#f9fdfff4;
+  --world-overlay:linear-gradient(180deg,#a8dff21f 0 56%,#516c7740 57% 74%,#364b5558 75% 100%);
+}
+.world-vehicles{--world-accent:#255f7b}
+.world-places{--world-accent:#725134;--world-overlay:linear-gradient(180deg,#ffe8ba22 0 54%,#9d815035 55% 74%,#5a514449 75% 100%)}
+.world-jobs{--world-accent:#5f4e8d}
+.world-safety{--world-accent:#a34d35;--world-label:#fff8f4f5}
+
+/* Learning studio: soft paper light plus playful geometry/confetti. */
+.world-colors,.world-shapes,.world-numbers,.world-letters,.world-school{
+  --world-accent:#6b579a;
+  --world-label:#fffdfaf5;
+  --world-overlay:
+    radial-gradient(circle at 12% 18%,#ffdc696e 0 4%,transparent 4.5%),
+    radial-gradient(circle at 88% 20%,#7dd9df68 0 3.5%,transparent 4%),
+    radial-gradient(circle at 17% 79%,#f38bb95f 0 4%,transparent 4.5%),
+    radial-gradient(circle at 83% 77%,#92d97962 0 4%,transparent 4.5%),
+    linear-gradient(180deg,#fff8db18,#ffffff12);
+}
+.world-colors{--world-accent:#c24d75}
+.world-shapes{--world-accent:#2d7d91}
+.world-numbers{--world-accent:#6c57a4}
+.world-letters{--world-accent:#a45563}
+.world-school{--world-accent:#427083}
+
+/* Home and social worlds: warm, calm, safe interior light. */
+.world-home,.world-body,.world-feelings,.world-clothes,.world-people,.world-routines{
+  --world-accent:#8a5b4c;
+  --world-label:#fffaf2f5;
+  --world-overlay:linear-gradient(135deg,#ffd9ad32,#fff6dd12 45%,#e5b8a72b 100%);
+}
+.world-body{--world-accent:#bd5961}
+.world-feelings{--world-accent:#a7587e;--world-overlay:radial-gradient(circle at 78% 17%,#ffd8e067 0 9%,transparent 10%),linear-gradient(135deg,#ffe8c82d,#f6c7df28)}
+.world-clothes{--world-accent:#6f5ca8}
+.world-people{--world-accent:#8a6047}
+.world-routines{--world-accent:#54785e}
+
+/* Wonder worlds: richer light, stage glow and playfulness. */
+.world-music,.world-sounds,.world-actions,.world-toys{
+  --world-accent:#6b4f98;
+  --world-label:#fffafcf4;
+  --world-overlay:radial-gradient(ellipse at 50% 0,#fff1a757 0 20%,transparent 52%),linear-gradient(135deg,#8c71bd21,#ef8dbb22 50%,#76c7dd22);
+}
+.world-music{--world-accent:#704fa4;--world-overlay:radial-gradient(ellipse at 50% 0,#ffe67167 0 24%,transparent 54%),linear-gradient(135deg,#7b67bd32,#e97fae2e)}
+.world-sounds{--world-accent:#347b88}
+.world-actions{--world-accent:#4e7b4c}
+.world-toys{--world-accent:#c05d55}
+
+/* Space remains the most dramatic world. */
+.world-space{
+  --world-accent:#514b96;
+  --world-label:#f7f4fff4;
+  --world-overlay:
+    radial-gradient(circle at 18% 17%,#ffffffd1 0 1.3px,transparent 1.8px),
+    radial-gradient(circle at 74% 22%,#ffffffaa 0 1px,transparent 1.6px),
+    radial-gradient(circle at 88% 68%,#fff6b3bd 0 1.4px,transparent 2px),
+    linear-gradient(180deg,#17173c3a,#3730781f);
+  --world-overlay-opacity:.95;
+}
+
+@media(max-width:620px){
+  .discovery-stage .discovery-word{border-radius:19px;padding:8px 14px}
+  .discovery-stage::before{opacity:calc(var(--world-overlay-opacity,.72) * .88)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .discovery-stage .discovery-object.discovered>.item-visual{animation:none}
+}
