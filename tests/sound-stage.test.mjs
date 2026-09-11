@@ -13,6 +13,12 @@ test("real-sound game uses an immersive sound stage", () => {
   assert.match(css, /min-height:clamp\(190px,30svh,300px\)/);
 });
 
+test("real-sound stage stops active effects when it unmounts", () => {
+  assert.match(game, /useEffect\(\(\) => \(\) => \{/);
+  assert.match(game, /stopSounds\(\)/);
+  assert.match(game, /setPlaying\(false\)/);
+});
+
 test("real-sound stage keeps large answer choices on phones", () => {
   assert.match(css, /@media\(max-width:700px\)/);
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
