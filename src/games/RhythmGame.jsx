@@ -12,6 +12,7 @@ export default function RhythmGame({
   lang,
   hint,
   paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -28,10 +29,10 @@ export default function RhythmGame({
     [lit, setLit] = useState(-1);
 
   async function repeat() {
-    if (paused || playing) return;
+    if (paused || playing || interactionBlocked()) return;
     stopSpeech();
     await ensureAudioReady();
-    if (paused) return;
+    if (paused || interactionBlocked()) return;
     setInput([]);
     setCursor(0);
     setPlaying(true);
@@ -59,10 +60,24 @@ export default function RhythmGame({
       setLit(-1);
       return;
     }
+    if (interactionBlocked()) {
+      setPlaying(false);
+      setLit(-1);
+      stopSounds();
+      return;
+    }
     playNote(sequence[cursor]);
     setLit(sequence[cursor]);
     const off = setTimeout(() => setLit(-1), 340),
-      next = setTimeout(() => setCursor((c) => c + 1), 650);
+      next = setTimeout(() => {
+        if (interactionBlocked()) {
+          setPlaying(false);
+          setLit(-1);
+          stopSounds();
+          return;
+        }
+        setCursor((c) => c + 1);
+      }, 650);
     return () => {
       clearTimeout(off);
       clearTimeout(next);
@@ -79,9 +94,9 @@ export default function RhythmGame({
   }, [paused]);
 
   async function tap(i) {
-    if (playing || paused) return;
+    if (playing || paused || interactionBlocked()) return;
     await playNote(i);
-    if (paused) return;
+    if (paused || interactionBlocked()) return;
     if (i !== sequence[input.length]) {
       onWrong(["sounds.piano"]);
       setInput([]);
@@ -89,7 +104,7 @@ export default function RhythmGame({
     }
     const next = [...input, i];
     setInput(next);
-    if (next.length === sequence.length) onSolve(["sounds.piano"]);
+    if (next.length === sequence.length && !interactionBlocked()) onSolve(["sounds.piano"]);
   }
 
   const heardCount = playing ? Math.max(0, Math.min(sequence.length, cursor)) : 0;
@@ -106,7 +121,7 @@ export default function RhythmGame({
         : "Jetzt bist du dran!";
 
   return (
-    <section className="rhythm-stage rhythm-playground" aria-label={text}>
+    <section className="rhythm-stage rhythm-playground" aria-label={text} aria-disabled={paused || undefined}>
       <div className="rhythm-sky" aria-hidden="true">
         <span className="rhythm-cloud rhythm-cloud-one" />
         <span className="rhythm-cloud rhythm-cloud-two" />
@@ -159,11 +174,7 @@ export default function RhythmGame({
         ))}
       </div>
 
-      <button
-        className="rhythm-repeat"
-        onClick={repeat}
-        disabled={playing || paused}
-      >
+      <button className="rhythm-repeat" onClick={repeat} disabled={playing || paused}>
         <span className="rhythm-repeat-icon"><Play size={28} fill="currentColor" /></span>
         <span>
           <strong>{lang === "tr" ? "Melodiyi dinle" : "Melodie anhören"}</strong>
