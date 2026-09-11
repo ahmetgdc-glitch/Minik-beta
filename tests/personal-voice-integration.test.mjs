@@ -41,6 +41,15 @@ test("natural speech plans prefer the personal voice over legacy recordings", ()
   );
 });
 
+test("runtime tries an exact personal clip before any native system voice", () => {
+  assert.match(voice, /import \{ personalVoiceClip \} from "\.\/personalVoiceClips\.js";/);
+  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
+  const nativeIndex = voice.indexOf("const preferNative = shouldPreferNativeSystem(text, lang, settings)");
+  assert.ok(personalIndex > 0, "runtime must look up the exact authorized personal clip");
+  assert.ok(nativeIndex > personalIndex, "native system speech must not bypass an available personal clip");
+  assert.match(voice, /await playPreferredClip\(personalClip, token\)/);
+});
+
 test("personal wav clips are localized before service worker generation", () => {
   const personalIndex = pkg.indexOf("fetch-personal-voice-assets.mjs");
   const workerIndex = pkg.indexOf("build-sw.mjs");
