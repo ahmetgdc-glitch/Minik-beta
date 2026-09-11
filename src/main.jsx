@@ -39,6 +39,7 @@ import "./games/rhythm-playground.css";
 import "./games/sort-workshop.css";
 import "./games/count-meadow.css";
 import "./games/match-playground.css";
+import "./games/draw-coloring.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
