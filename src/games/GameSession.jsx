@@ -51,6 +51,7 @@ import DifferentGame from "./DifferentGame.jsx";
 import SocialStepsGame from "./SocialStepsGame.jsx";
 import SpeakGame from "./SpeakGame.jsx";
 import { useModalSafety } from "../app/useModalSafety.js";
+
 const components = {
   speak: SpeakGame,
   socialsteps: SocialStepsGame,
@@ -76,10 +77,12 @@ const components = {
   lettertrace: TraceGame,
   rhythm: RhythmGame,
 };
+
 const praise = {
   de: ["Super gemacht!", "Wunderbar!", "Das hast du toll gemacht!"],
   tr: ["Harika!", "Çok güzel yaptın!"],
 };
+
 export default function GameSession({ gameId, worldId, onNavigate }) {
   const progress = useProgress(),
     settings = progress.settings,
@@ -111,11 +114,13 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     [message, setMessage] = useState(""),
     [activity, setActivity] = useState(0),
     [earned, setEarned] = useState(() => checkpoint?.earned || 0);
+
   const manualPauseRef = useRef(false);
   const lifecyclePauseRef = useRef(false);
   const pausedRef = useRef(false);
   const phaseRef = useRef(checkpoint?.phase || "active");
   const roundRef = useRef(Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)));
+
   useModalSafety(paused, () => {
     manualPauseRef.current = false;
     lifecyclePauseRef.current = false;
@@ -123,6 +128,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     setPaused(false);
     unlockAudio();
   });
+
   const locked = useRef(checkpoint?.phase === "success" || checkpoint?.phase === "demo"),
     mistakes = useRef(checkpoint?.mistakes || 0),
     attempt = useRef(checkpoint?.attempts || 0),
@@ -132,6 +138,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     hintRef = useRef(checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0)),
     activeSeconds = useRef(checkpoint?.activeSeconds || 0),
     lastWrongTap = useRef(null);
+
   const interactionBlocked = useCallback(() => shouldBlockGameInteraction({
     locked: locked.current,
     paused: pausedRef.current || paused,
@@ -140,6 +147,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     phase: phaseRef.current,
     hidden: typeof document !== "undefined" && document.hidden,
   }), [paused]);
+
   const [sessionId] = useState(
       () => checkpoint?.sessionId || `minik-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     ),
@@ -150,6 +158,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     const choices = recommendedActivities(progress, lang, 3);
     return choices.find(({ world: w, game: g }) => w.id !== worldId || g.id !== gameId) || choices[0] || null;
   }, [progress, lang, worldId, gameId]);
+
   const saveSession = useCallback(
     (completed) => {
       if (saved.current || !playedRef.current) return;
@@ -172,6 +181,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     },
     [sessionId, worldId, gameId, lang],
   );
+
   const persistCheckpoint = useCallback(() => {
     if (phaseRef.current === "done" || playedRef.current < 1) return;
     try {
@@ -194,9 +204,11 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       });
     } catch {}
   }, [progress.activeProfileId, progress.activeProfile?.ageGroup, gameId, worldId, sessionId, lang, difficulty]);
+
   const removeCheckpoint = useCallback(() => {
     try { clearCheckpoint(window.localStorage, progress.activeProfileId); } catch {}
   }, [progress.activeProfileId]);
+
   useEffect(
     () => () => {
       stopSpeech();
@@ -204,9 +216,11 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     },
     [],
   );
+
   useEffect(() => {
     if (!settings.audio) stopSpeech();
   }, [settings.audio]);
+
   useEffect(() => {
     const onPageHide = (event) => {
       if (!manualPauseRef.current) lifecyclePauseRef.current = true;
@@ -231,6 +245,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       window.removeEventListener("pageshow", onPageShow);
     };
   }, [persistCheckpoint, saveSession]);
+
   useEffect(() => {
     const onRouteLeave = () => {
       if (phaseRef.current === "done") return;
@@ -240,6 +255,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     window.addEventListener("hashchange", onRouteLeave);
     return () => window.removeEventListener("hashchange", onRouteLeave);
   }, [saveSession, removeCheckpoint]);
+
   useEffect(() => {
     const visibility = () => {
       if (document.hidden) {
@@ -261,6 +277,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     document.addEventListener("visibilitychange", visibility);
     return () => document.removeEventListener("visibilitychange", visibility);
   }, [persistCheckpoint]);
+
   useEffect(() => {
     if (paused || phase === "done") {
       stopSpeech();
@@ -270,12 +287,14 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     const t = setInterval(() => activeSeconds.current++, 1000);
     return () => clearInterval(t);
   }, [paused, phase]);
+
   useEffect(() => {
     if (phase === "done") return;
     persistCheckpoint();
     const t = setInterval(persistCheckpoint, 5000);
     return () => clearInterval(t);
   }, [persistCheckpoint, phase]);
+
   useEffect(() => {
     hintRef.current = hint;
   }, [hint]);
@@ -285,9 +304,11 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   useEffect(() => {
     roundRef.current = round;
   }, [round]);
+
   const ready = useCallback((info) => {
     setLesson(info);
   }, []);
+
   useEffect(() => {
     if (!lesson.text || paused || phase !== "active" || !settings.audio) return;
     const t = setTimeout(() => {
@@ -301,6 +322,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     }, 200);
     return () => clearTimeout(t);
   }, [lesson, paused, phase, settings.audio]);
+
   useEffect(() => {
     if (paused || phase !== "active" || !settings.autoHelp) return;
     const stillInteractive = () =>
@@ -331,6 +353,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       clearTimeout(help);
     };
   }, [round, activity, paused, phase, settings.autoHelp, settings.audio, lang]);
+
   function record(correct, ids, meta = {}) {
     const id = `${sessionId}:${round}:${++attempt.current}`;
     playedRef.current++;
@@ -347,6 +370,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       at: Date.now(),
     });
   }
+
   const wrong = useCallback(
     (ids) => {
       if (interactionBlocked()) return;
@@ -384,6 +408,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     },
     [round, paused, lesson, lang, settings],
   );
+
   const solve = useCallback(
     (ids, meta = {}) => {
       if (interactionBlocked()) return;
@@ -400,6 +425,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     },
     [round, paused, lang, settings],
   );
+
   useEffect(() => {
     if (paused || !["success", "demo"].includes(phase)) return;
     const t = setTimeout(
@@ -430,6 +456,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     );
     return () => clearTimeout(t);
   }, [phase, paused, round, totalRounds, saveSession, removeCheckpoint]);
+
   function help() {
     if (interactionBlocked()) return;
     setHint(2);
@@ -438,6 +465,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     setMessage(lesson.help || lesson.text);
     speak(lesson.help || lesson.text, lang, settings);
   }
+
   const pauseManually = useCallback(() => {
     manualPauseRef.current = true;
     lifecyclePauseRef.current = false;
@@ -447,12 +475,15 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     persistCheckpoint();
     setPaused(true);
   }, [persistCheckpoint]);
+
   function exit() {
     saveSession(false);
     removeCheckpoint();
     onNavigate(`/world/${worldId}`);
   }
+
   if (!world || !spec || !Component) return null;
+
   if (phase === "done")
     return (
       <section className="session-finish">
@@ -507,11 +538,14 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         </div>
       </section>
     );
+
   return (
-    <section className={`game-session game-${gameId} phase-${phase}`}
+    <section
+      className={`game-session game-${gameId} phase-${phase}`}
       data-age={progress.activeProfile?.ageGroup || "4-5"}
       data-world={worldId}
-      style={{ "--scene-background": `url("${assetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`)}")` }}>
+      style={{ "--scene-background": `url("${assetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`)}")` }}
+    >
       <header className="game-header" inert={paused ? true : undefined}>
         <button
           className="icon-button"
@@ -529,15 +563,29 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
           <span>{world?.labels?.[lang]}</span>
         </div>
         <button
+          className="icon-button pause-button"
+          onClick={pauseManually}
+          aria-label={lang === "tr" ? "Oyunu duraklat" : "Spiel pausieren"}
+        >
+          <Pause />
+        </button>
+        <button
           className="icon-button replay-button"
-          onClick={() => lesson.repeat?.()}
-          disabled={!lesson.repeat || paused}
+          onClick={() => {
+            if (interactionBlocked()) return;
+            lesson.repeat?.();
+          }}
+          disabled={paused || phase !== "active"}
+          aria-disabled={!lesson.repeat || paused || phase !== "active"}
           aria-label={lang === "tr" ? "Tekrar dinle" : "Noch einmal anhören"}
         >
           <Volume2 />
         </button>
       </header>
-      <div className="game-stage" inert={paused ? true : undefined}>
+      <div
+        className="game-stage"
+        inert={paused || phase !== "active" ? true : undefined}
+      >
         <FishGuide
           lang={lang}
           message={message || lesson.text}
