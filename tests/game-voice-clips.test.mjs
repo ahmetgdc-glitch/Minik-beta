@@ -6,8 +6,9 @@ import { naturalVoicePlan } from "../src/audio/naturalVoicePlans.js";
 const clips = readFileSync(new URL("../src/audio/gameVoiceClips.js", import.meta.url), "utf8");
 const animals = readFileSync(new URL("../src/audio/animalVoiceClips.js", import.meta.url), "utf8");
 const food = readFileSync(new URL("../src/audio/foodVoiceClips.js", import.meta.url), "utf8");
+const help = readFileSync(new URL("../src/audio/helpVoiceClips.js", import.meta.url), "utf8");
 const plans = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
-const voiceLibrary = `${clips}\n${animals}\n${food}\n${plans}`;
+const voiceLibrary = `${clips}\n${animals}\n${food}\n${help}\n${plans}`;
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const session = readFileSync(new URL("../src/games/GameSession.jsx", import.meta.url), "utf8");
 
@@ -58,6 +59,16 @@ test("home and common unmapped game prompts have recorded Mino phrases", () => {
     "Was kommt danach?", "Sonra ne gelir?",
     "Als Nächstes kommt:", "Sırada:",
   ]) assert.ok(plans.includes(phrase), `missing natural plan phrase: ${phrase}`);
+});
+
+test("new home and drawing guidance has full natural DE/TR recordings", () => {
+  for (const phrase of [
+    "Los geht’s!", "Haydi başlayalım!",
+    "Male, zeichne und erfinde etwas auf der großen Fläche.",
+    "Büyük tuvalde boya, çiz ve hayal et.",
+    "Wähle eine Farbe. Du kannst auch eine Malvorlage wählen.",
+    "Bir renk seç. İstersen bir boyama resmi seç.",
+  ]) assert.ok(help.includes(phrase), `missing natural help clip: ${phrase}`);
 });
 
 test("dynamic common game prompts are composed only from recorded clips", () => {
@@ -141,21 +152,23 @@ test("animal vocabulary remains modular and wired into the shared player", () =>
   assert.match(clips, /animalVoiceClipCount/);
 });
 
-test("natural Mino library keeps at least 212 recorded prompts and words", () => {
+test("natural Mino library keeps at least 218 recorded prompts and words", () => {
   const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 212, `expected at least 212 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 218, `expected at least 218 natural clips, got ${urls.length}`);
 });
 
-test("speech uses natural plans before any optional browser synthesis", () => {
+test("fixed Mino speech keeps recorded plans while pronunciation-sensitive speech can use native locale", () => {
   assert.match(voice, /naturalVoicePlan\(text, lang\)/);
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
-  assert.match(voice, /settings\.systemVoiceFallback === true/);
+  assert.match(voice, /shouldPreferNativeSystem\(text, lang, settings\)/);
+  assert.match(voice, /lang === "tr" \? "tr-TR" : "de-DE"/);
 });
 
-test("robotic browser TTS is opt-in, not the child-facing default", () => {
-  assert.match(voice, /if \(settings\.systemVoiceFallback === true\)/);
+test("missing child-facing speech falls back to native DE or TR instead of staying silent", () => {
+  assert.match(voice, /if \(settings\.systemVoiceFallback !== false\)/);
   assert.match(voice, /return speakSystem\(text, lang, settings, token\)/);
-  assert.match(voice, /return false;/);
+  assert.match(voice, /settings\.preferNativeSystem === true/);
+  assert.match(voice, /settings\.preferNativeSystem === false/);
 });
 
 test("game praise only uses phrases with natural clip coverage", () => {
