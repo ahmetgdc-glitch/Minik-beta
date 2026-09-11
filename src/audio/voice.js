@@ -1,4 +1,5 @@
 import { naturalVoicePlan } from "./naturalVoicePlans.js";
+import { personalVoiceClip } from "./personalVoiceClips.js";
 
 let voices = [],
   settle = null,
@@ -236,8 +237,18 @@ export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   if (!text || settings.audio === false) return false;
   const token = sequence;
-  const preferNative = shouldPreferNativeSystem(text, lang, settings);
 
+  // The owner's authorized MINIK voice is the canonical voice wherever an
+  // exact personal recording exists. Device speech is only a fallback here,
+  // even for short labels or Turkish phrases that would otherwise prefer the
+  // native system voice.
+  const personalClip = personalVoiceClip(text, lang);
+  if (personalClip) {
+    const playedPersonal = await playPreferredClip(personalClip, token);
+    if (playedPersonal || token !== sequence) return playedPersonal;
+  }
+
+  const preferNative = shouldPreferNativeSystem(text, lang, settings);
   if (preferNative) {
     const native = await speakSystem(text, lang, settings, token);
     if (native || token !== sequence) return native;
