@@ -15,9 +15,10 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
   const recognitionRef = useRef(null);
   const expected = target?.labels?.[lang] || "";
   const prompt = lang === "tr" ? `Benimle söyle: ${expected}` : `Sprich mir nach: ${expected}`;
+  const blocked = interactionBlocked();
 
   function repeat() {
-    if (paused || interactionBlocked()) return;
+    if (paused || blocked) return;
     speak(expected, lang, settings);
   }
   useLesson(onReady, prompt, repeat, [target?.id].filter(Boolean), expected);
@@ -36,10 +37,12 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
   }
 
   useEffect(() => () => stopRecognition(), []);
-  useEffect(() => { if (paused) stopRecognition(); }, [paused]);
+  useEffect(() => {
+    if (paused || blocked) stopRecognition();
+  }, [paused, blocked]);
 
   function startListening() {
-    if (!available || listening || paused || interactionBlocked()) return;
+    if (!available || listening || paused || blocked) return;
     setIssue(null);
     setHeard("");
     const Ctor = speechRecognitionCtor(window);
@@ -83,30 +86,30 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
   }
 
   function assistedSolve() {
-    if (paused || interactionBlocked()) return;
+    if (paused || blocked) return;
     onSolve([target.id], { assisted: true });
   }
 
   if (!target) return null;
   return (
-    <div className="speak-game" aria-disabled={paused || undefined}>
+    <div className="speak-game" aria-disabled={paused || blocked || undefined}>
       <div className="speak-hero">
         <Visual item={target} lang={lang} photos={settings.photos} />
         <strong>{expected}</strong>
-        <button className="speak-repeat" onClick={repeat} disabled={paused} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
+        <button className="speak-repeat" onClick={repeat} disabled={paused || blocked} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
           <Volume2 size={28} />
         </button>
       </div>
       {available ? (
         <>
-          <button className={`mic-button ${listening ? "listening" : ""}`} onClick={startListening} disabled={listening || paused}>
+          <button className={`mic-button ${listening ? "listening" : ""}`} onClick={startListening} disabled={listening || paused || blocked}>
             {listening ? <MicOff size={38} /> : <Mic size={38} />}
             <span>{listening ? (lang === "tr" ? "Dinliyorum…" : "Ich höre…") : (lang === "tr" ? "Söyle" : "Nachsprechen")}</span>
           </button>
           {heard && <p className="heard-speech">{lang === "tr" ? "Duydum:" : "Gehört:"} <b>{heard}</b></p>}
           {issue && <p className={`speech-issue ${issue.kind}`} role="status">{issue.text}</p>}
           {issue?.kind === "permission" && (
-            <button className="secondary speak-assisted" onClick={assistedSolve} disabled={paused}>
+            <button className="secondary speak-assisted" onClick={assistedSolve} disabled={paused || blocked}>
               <Check size={22} /> {lang === "tr" ? "Mino ile söyledim" : "Ich habe mit Mino mitgesprochen"}
             </button>
           )}
@@ -114,7 +117,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
       ) : (
         <div className="speech-fallback">
           <p>{lang === "tr" ? "Bu cihaz konuşma tanımayı desteklemiyor. Kelimeyi yüksek sesle söyle." : "Dieses Gerät unterstützt keine Spracherkennung. Sprich das Wort laut nach."}</p>
-          <button className="primary" onClick={assistedSolve} disabled={paused}>
+          <button className="primary" onClick={assistedSolve} disabled={paused || blocked}>
             <Check size={24} /> {lang === "tr" ? "Söyledim" : "Ich habe es gesagt"}
           </button>
         </div>
