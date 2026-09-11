@@ -25,7 +25,10 @@ export default function PatternGame({
   const target = base[difficulty === 6 ? 2 : 1],
     [options] = useState(() => choicesFor(target, items, difficulty));
   const text = lang === "tr" ? "Sırada hangi resim var?" : "Welches Bild kommt als Nächstes?";
-  useLesson(onReady, text, () => speak(text, lang, settings), [target.id], target.labels[lang]);
+  const help = lang === "tr"
+    ? "Hangi resmin tekrar ettiğine bak."
+    : "Schau, welches Bild sich wiederholt.";
+  useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
 
   function pick(item) {
     if (paused || interactionBlocked()) return;
