@@ -14,6 +14,11 @@ import {
   categoryVoiceClipCount,
   categoryVoiceEntries,
 } from "./categoryVoiceClips.js";
+import {
+  vehicleVoiceClip,
+  vehicleVoiceClipCount,
+  vehicleVoiceEntries,
+} from "./vehicleVoiceClips.js";
 
 const normalize = (text) => String(text || "").trim();
 const stripEnd = (text) => normalize(text).replace(/[.!?]+$/u, "").trim();
@@ -65,7 +70,7 @@ export function naturalPhraseClip(text, lang = "de") {
 }
 
 function recordedClip(text, lang) {
-  return naturalPhraseClip(text, lang) || helpVoiceClip(text, lang) || categoryVoiceClip(text, lang) || gameVoiceClip(text, lang) || foodVoiceClip(text, lang);
+  return naturalPhraseClip(text, lang) || helpVoiceClip(text, lang) || categoryVoiceClip(text, lang) || vehicleVoiceClip(text, lang) || gameVoiceClip(text, lang) || foodVoiceClip(text, lang);
 }
 
 function resolve(parts, lang) {
@@ -83,71 +88,47 @@ export function naturalVoicePlan(text, lang = "de") {
   if (lang === "tr") {
     match = value.match(/^(.+?)\s+nerede\?$/u);
     if (match) return resolve(["Bu resmi bul.", stripEnd(match[1])], lang);
-
     match = value.match(/^(.+?)\s+nerede\?\s+Bir kez daha hatırlayalım\.$/u);
     if (match) return resolve(["Bu resmi bul.", stripEnd(match[1]), "Bir kez daha hatırlayalım."], lang);
-
     match = value.match(/^(.+?)\.\s+Bu resmi seç\.$/u);
     if (match) return resolve([stripEnd(match[1]), "Bu resmi seç."], lang);
-
     match = value.match(/^Hangi sepete ait\?\s*(.+?)\.?$/u);
     if (match) return resolve(["Hangi sepete ait?", stripEnd(match[1])], lang);
-
     match = value.match(/^(.+?)\s+hangi harfle başlıyor\?$/u);
     if (match) return resolve([stripEnd(match[1]), "Bu kelime hangi harfle başlıyor?"], lang);
-
     match = value.match(/^Benimle söyle:\s*(.+?)\.?$/u);
     if (match) return resolve(["Benimle söyle.", stripEnd(match[1])], lang);
-
     match = value.match(/^(.+?)\.\s+Bunun zıttı hangisi\?$/u);
     if (match) return resolve([stripEnd(match[1]), "Bunun zıttı hangisi?"], lang);
-
     match = value.match(/^(.+?)\s+sonrasında ne gelir\?$/u);
     if (match) return resolve([stripEnd(match[1]), "Sonra ne gelir?"], lang);
-
     match = value.match(/^(.+?)\s+sonrasında\s+(.+?)\s+gelir\.$/u);
     if (match) return resolve([stripEnd(match[1]), "Sırada:", stripEnd(match[2])], lang);
-
     match = value.match(/^(.+?),\s*sonra\s+(.+?),\s*ardından\s+(.+?)\.?$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
-
-    if (/Yeşil noktadan başla\.?$/u.test(value)) {
-      return resolve(["İzi takip et. Yeşil noktadan başla."], lang);
-    }
+    if (/Yeşil noktadan başla\.?$/u.test(value)) return resolve(["İzi takip et. Yeşil noktadan başla."], lang);
   } else {
     match = value.match(/^Finde:\s*(.+?)\.?$/u);
     if (match) return resolve(["Finde dieses Bild.", stripEnd(match[1])], lang);
-
     match = value.match(/^Wo ist\s+(.+?)\?\s+Das wiederholen wir noch einmal\.$/u);
     if (match) return resolve(["Finde dieses Bild.", stripEnd(match[1]), "Das wiederholen wir noch einmal."], lang);
-
     match = value.match(/^(.+?)\.\s+Tippe auf dieses Bild\.$/u);
     if (match) return resolve([stripEnd(match[1]), "Tippe auf dieses Bild."], lang);
-
     match = value.match(/^In welchen Korb gehört das\?\s*(.+?)\.?$/u);
     if (match) return resolve(["In welchen Korb gehört das?", stripEnd(match[1])], lang);
-
     match = value.match(/^Mit welchem Buchstaben beginnt\s+(.+?)\?$/u);
     if (match) return resolve([stripEnd(match[1]), "Mit welchem Buchstaben beginnt das Wort?"], lang);
-
     match = value.match(/^Sprich mir nach:\s*(.+?)\.?$/u);
     if (match) return resolve(["Sprich mir nach.", stripEnd(match[1])], lang);
-
     match = value.match(/^(.+?)\.\s+Was ist das Gegenteil\?$/u);
     if (match) return resolve([stripEnd(match[1]), "Was ist das Gegenteil?"], lang);
-
     match = value.match(/^Was kommt nach\s+(.+?)\?$/u);
     if (match) return resolve([stripEnd(match[1]), "Was kommt danach?"], lang);
-
     match = value.match(/^Nach\s+(.+?)\s+kommt\s+(.+?)\.$/u);
     if (match) return resolve([stripEnd(match[1]), "Als Nächstes kommt:", stripEnd(match[2])], lang);
-
     match = value.match(/^(.+?),\s*dann\s+(.+?),\s*danach\s+(.+?)\.?$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
-
-    if (/Starte am grünen Punkt\.?$/u.test(value)) {
-      return resolve(["Fahre die Spur nach. Starte am grünen Punkt."], lang);
-    }
+    if (/Starte am grünen Punkt\.?$/u.test(value)) return resolve(["Fahre die Spur nach. Starte am grünen Punkt."], lang);
   }
   return [];
 }
@@ -155,16 +136,11 @@ export function naturalVoicePlan(text, lang = "de") {
 export function preloadNaturalVoicePlans(lang) {
   if (typeof Audio === "undefined") return 0;
   const phraseGroups = lang && PHRASES[lang] ? [PHRASES[lang]] : Object.values(PHRASES);
-  const helpGroups = lang && helpVoiceEntries[lang]
-    ? [helpVoiceEntries[lang]]
-    : Object.values(helpVoiceEntries);
-  const categoryGroups = lang && categoryVoiceEntries[lang]
-    ? [categoryVoiceEntries[lang]]
-    : Object.values(categoryVoiceEntries);
-  const foodGroups = lang && foodVoiceEntries[lang]
-    ? [foodVoiceEntries[lang]]
-    : Object.values(foodVoiceEntries);
-  const groups = [...phraseGroups, ...helpGroups, ...categoryGroups, ...foodGroups];
+  const helpGroups = lang && helpVoiceEntries[lang] ? [helpVoiceEntries[lang]] : Object.values(helpVoiceEntries);
+  const categoryGroups = lang && categoryVoiceEntries[lang] ? [categoryVoiceEntries[lang]] : Object.values(categoryVoiceEntries);
+  const vehicleGroups = lang && vehicleVoiceEntries[lang] ? [vehicleVoiceEntries[lang]] : Object.values(vehicleVoiceEntries);
+  const foodGroups = lang && foodVoiceEntries[lang] ? [foodVoiceEntries[lang]] : Object.values(foodVoiceEntries);
+  const groups = [...phraseGroups, ...helpGroups, ...categoryGroups, ...vehicleGroups, ...foodGroups];
   let added = 0;
   for (const group of groups) {
     for (const url of Object.values(group)) {
@@ -184,6 +160,4 @@ export function preloadNaturalVoicePlans(lang) {
 
 export const naturalVoicePlanClipCount =
   Object.values(PHRASES).reduce((sum, group) => sum + Object.keys(group).length, 0) +
-  helpVoiceClipCount +
-  categoryVoiceClipCount +
-  foodVoiceClipCount;
+  helpVoiceClipCount + categoryVoiceClipCount + vehicleVoiceClipCount + foodVoiceClipCount;
