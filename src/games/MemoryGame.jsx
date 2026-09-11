@@ -77,7 +77,7 @@ export default function MemoryGame({
 
   const helpPair = chosen.find((i) => !matched.includes(i.id))?.id;
   return (
-    <section className="memory-playground" aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"}>
+    <section className="memory-playground" aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"} aria-disabled={paused || undefined}>
       <div className="memory-playground-status">{matched.length} / {chosen.length} {lang === "tr" ? "çift" : "Paare"}</div>
       <div className={`memory-grid cards-${cards.length}`}>
         {cards.map((card, index) => {
@@ -87,7 +87,7 @@ export default function MemoryGame({
             <button
               className={`memory-card ${show ? "flipped" : ""} ${found ? "matched" : ""}`}
               key={card.id}
-              disabled={found || open.length >= 2 || lockedRef.current}
+              disabled={paused || found || open.length >= 2 || lockedRef.current}
               onClick={() => flip(card)}
               aria-label={show ? card.item.labels[lang] : lang === "tr" ? `Kart ${index + 1}, çevir` : `Karte ${index + 1}, umdrehen`}
             >
