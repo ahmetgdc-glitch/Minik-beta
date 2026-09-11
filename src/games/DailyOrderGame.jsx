@@ -31,6 +31,11 @@ export default function DailyOrderGame({
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
 
+  function replayPrompt() {
+    if (paused || interactionBlocked()) return;
+    speak(prompt.labels[lang], lang, settings);
+  }
+
   function pick(item) {
     if (paused || interactionBlocked()) return;
     item.id === target.id ? onSolve([prompt.id, target.id]) : onWrong([prompt.id, target.id]);
@@ -40,10 +45,16 @@ export default function DailyOrderGame({
     <div className="concept-game routine-order-game" aria-disabled={paused || undefined}>
       <section className="routine-journey-stage" aria-label={lang === "tr" ? "Şimdi olan" : "Was jetzt passiert"}>
         <span className="routine-scene-label">{lang === "tr" ? "Şimdi" : "Jetzt"}</span>
-        <div className="routine-now-scene">
+        <button
+          type="button"
+          className="routine-now-scene"
+          onClick={replayPrompt}
+          disabled={paused}
+          aria-label={lang === "tr" ? `${prompt.labels.tr} kelimesini tekrar dinle` : `${prompt.labels.de} noch einmal anhören`}
+        >
           <Visual item={prompt} lang={lang} photos={settings.photos} />
           <b>{prompt.labels[lang]}</b>
-        </div>
+        </button>
         <span className="routine-path-arrow" aria-hidden="true">→</span>
       </section>
 
