@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { sample, choicesFor } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
-import { useLesson, OptionGrid } from "./shared.jsx";
+import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 export default function MissingGame({
   items,
@@ -32,30 +32,50 @@ export default function MissingGame({
     target.labels[lang],
   );
   return (
-    <>
-      <div className="remember-row">
-        {row.map((x) => (
-          <div key={x.id}>
-            {hidden && x.id === target.id && hint < 3 ? (
-              <span className="missing-mark">?</span>
-            ) : (
-              <Visual item={x} lang={lang} photos={settings.photos} />
-            )}
-          </div>
-        ))}
-      </div>
+    <div className="missing-stage-game">
+      <section className="missing-stage" aria-label={text}>
+        <span className="missing-stage-label">
+          {hidden
+            ? lang === "tr" ? "Hangisi kayboldu?" : "Was ist verschwunden?"
+            : lang === "tr" ? "İyi bak ve hatırla" : "Gut anschauen und merken"}
+        </span>
+        <div className="missing-object-row">
+          {row.map((x) => {
+            const vanished = hidden && x.id === target.id && hint < 3;
+            return (
+              <div key={x.id} className={`missing-object-slot ${vanished ? "vanished" : ""}`}>
+                {vanished ? (
+                  <span className="missing-mark">?</span>
+                ) : (
+                  <Visual item={x} lang={lang} photos={settings.photos} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
       {!hidden ? (
-        <button className="primary centered" onClick={() => setHidden(true)}>
-          {lang === "tr" ? "Hazırım!" : "Ich bin bereit!"}
+        <button className="primary centered missing-ready" onClick={() => setHidden(true)}>
+          {lang === "tr" ? "Hatırladım!" : "Ich habe es mir gemerkt!"}
         </button>
       ) : (
-        <OptionGrid
-          {...{ options, target, hint, lang, settings }}
-          onPick={(x) =>
-            x.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-          }
-        />
+        <section className="missing-choices" aria-label={lang === "tr" ? "Kaybolan resmi seç" : "Wähle das verschwundene Bild"}>
+          <h2 className="missing-choices-title">{lang === "tr" ? "Hangi resim eksik?" : "Welches Bild fehlt?"}</h2>
+          <div className="missing-choice-grid">
+            {options.map((x) => (
+              <button
+                key={x.id}
+                className={`missing-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
+                onClick={() => x.id === target.id ? onSolve([target.id]) : onWrong([target.id])}
+                aria-label={x.labels[lang]}
+              >
+                <Visual item={x} lang={lang} photos={settings.photos} />
+                <b>{x.labels[lang]}</b>
+              </button>
+            ))}
+          </div>
+        </section>
       )}
-    </>
+    </div>
   );
 }
