@@ -13,7 +13,12 @@ test("speaking game blocks replay, microphone and assisted solves when stale", (
   assert.match(speak, /disabled=\{listening \|\| paused \|\| blocked\}/);
 });
 
-test("memory buttons reflect pause state in the DOM", () => {
-  assert.match(memory, /aria-disabled=\{paused \|\| undefined\}/);
-  assert.match(memory, /disabled=\{paused \|\| found \|\| open\.length >= 2 \|\| lockedRef\.current\}/);
+test("memory buttons reflect the full session lock in the DOM", () => {
+  assert.match(memory, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(memory, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(memory, /disabled=\{controlsDisabled \|\| found \|\| open\.length >= 2 \|\| lockedRef\.current\}/);
+});
+
+test("memory releases its local comparison lock when a parent transition cancels the timer", () => {
+  assert.match(memory, /if \(interactionBlocked\(\)\) \{[\s\S]*?openRef\.current = \[\];[\s\S]*?setOpen\(\[\]\);[\s\S]*?lockedRef\.current = false;[\s\S]*?return;/);
 });
