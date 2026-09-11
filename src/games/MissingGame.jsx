@@ -36,9 +36,10 @@ export default function MissingGame({
     [target.id],
     help,
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   function replayPreview(item) {
-    if (hidden || paused || interactionBlocked()) return;
+    if (hidden || controlsDisabled) return;
     speak(item.labels[lang], lang, settings);
   }
 
@@ -49,17 +50,17 @@ export default function MissingGame({
   }
 
   function revealQuestion() {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     setHidden(true);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   return (
-    <div className="missing-stage-game" aria-disabled={paused || undefined}>
+    <div className="missing-stage-game" aria-disabled={controlsDisabled || undefined}>
       <section className="missing-stage" aria-label={text}>
         <span className="missing-stage-label">
           {hidden
@@ -74,7 +75,8 @@ export default function MissingGame({
                 key={x.id}
                 className={`missing-object-slot ${vanished ? "vanished" : ""} ${!hidden ? "listening-target" : ""}`}
                 role={!hidden ? "button" : undefined}
-                tabIndex={!hidden && !paused ? 0 : undefined}
+                tabIndex={!hidden && !controlsDisabled ? 0 : undefined}
+                aria-disabled={!hidden && controlsDisabled ? true : undefined}
                 aria-label={!hidden ? (lang === "tr" ? `${x.labels.tr} kelimesini dinle` : `${x.labels.de} anhören`) : undefined}
                 onClick={() => replayPreview(x)}
                 onKeyDown={(event) => previewKeyDown(event, x)}
@@ -90,7 +92,7 @@ export default function MissingGame({
         </div>
       </section>
       {!hidden ? (
-        <button className="primary centered missing-ready" onClick={revealQuestion} disabled={paused}>
+        <button className="primary centered missing-ready" onClick={revealQuestion} disabled={controlsDisabled}>
           {lang === "tr" ? "Hatırladım!" : "Ich habe es mir gemerkt!"}
         </button>
       ) : (
@@ -102,7 +104,7 @@ export default function MissingGame({
                 key={x.id}
                 className={`missing-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
                 onClick={() => pick(x)}
-                disabled={paused}
+                disabled={controlsDisabled}
                 aria-label={x.labels[lang]}
               >
                 <Visual item={x} lang={lang} photos={settings.photos} />
