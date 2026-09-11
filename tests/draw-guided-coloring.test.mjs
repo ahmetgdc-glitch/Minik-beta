@@ -25,6 +25,15 @@ test("smart coloring reveals source artwork pixel-for-pixel instead of dragging 
   assert.match(game, /Farben automatisch/);
 });
 
+test("smart coloring mask follows the real visible guide bounds", () => {
+  assert.ok(game.includes('w.querySelector(".draw-template.has-item")'));
+  assert.match(game, /visibleGuide\?\.getBoundingClientRect\(\)/);
+  assert.match(game, /guideRect\.left - rect\.left/);
+  assert.match(game, /guideRect\.top - rect\.top/);
+  assert.match(game, /boxX \+ \(boxW - drawW\) \/ 2/);
+  assert.match(game, /boxY \+ \(boxH - drawH\) \/ 2/);
+});
+
 test("switching coloring templates resets incompatible old paint safely", () => {
   assert.match(game, /function selectTemplate/);
   assert.match(game, /resetCanvas\(\)/);
@@ -41,9 +50,9 @@ test("guided coloring has dedicated mobile and reduced-motion styling", () => {
 });
 
 test("automatic coloring prioritizes the artwork over manual-palette clutter", () => {
-  assert.match(css, /\.draw-colors\.automatic\{display:none\}/);
-  assert.match(css, /\.draw-toolbar:has\(\.smart-color-toggle\.active\) \.draw-tool-label\{display:none\}/);
-  assert.match(css, /width:82%;height:82%;top:9%;left:9%/);
-  assert.match(css, /width:88%;height:88%;top:6%;left:6%/);
-  assert.match(css, /min-height:58dvh/);
+  assert.ok(css.includes(".draw-colors.automatic{display:none}"));
+  assert.ok(css.includes(".draw-toolbar:has(.smart-color-toggle.active) .draw-tool-label{display:none}"));
+  assert.ok(css.includes("width:82%;height:82%;top:9%;left:9%"));
+  assert.ok(css.includes("width:88%;height:88%;top:6%;left:6%"));
+  assert.ok(css.includes("min-height:58dvh"));
 });
