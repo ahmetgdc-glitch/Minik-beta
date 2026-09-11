@@ -21,11 +21,17 @@ test("matching preserves safe drag and tap placement", () => {
   assert.match(game, /data-drop-id/);
 });
 
-test("matching playground stays large and adapts to phones", () => {
-  assert.match(css, /min-height:420px/);
-  assert.match(css, /@media\(max-width:760px\)/);
-  assert.match(css, /grid-template-columns:1fr/);
+test("matching makes artwork substantially larger and stays phone friendly", () => {
+  assert.match(css, /min-height:clamp\(500px,58svh,650px\)/);
+  assert.match(css, /height:clamp\(185px,24svh,270px\)/);
+  assert.match(css, /@media\(max-width:520px\)/);
+  assert.match(css, /height:145px/);
   assert.match(css, /prefers-reduced-motion/);
+});
+
+test("matching can expand beyond the legacy narrow game area", () => {
+  assert.match(css, /game-area:has\(> \.match-playground\)/);
+  assert.match(css, /max-width:1260px/);
 });
 
 test("matching playground stylesheet is loaded in production", () => {
