@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { speak } from "../audio/voice.js";
 import { choicesFor, sample } from "../utils/random.js";
-import { OptionGrid, useLesson } from "./shared.jsx";
+import Visual from "../components/Visual.jsx";
+import { useLesson } from "./shared.jsx";
 import { pairsForWorld } from "./opposites.js";
 
 export default function OppositesGame({
@@ -39,20 +40,38 @@ export default function OppositesGame({
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
 
   return (
-    <div className="concept-game">
-      <div className="concept-prompt" aria-label={prompt.labels[lang]}>
-        <strong>{prompt.labels[lang]}</strong>
-        <span>↔</span>
-        <small>{lang === "tr" ? "Zıttını bul" : "Finde das Gegenteil"}</small>
-      </div>
-      <OptionGrid
-        {...{ options, target, hint, lang, settings }}
-        onPick={(item) =>
-          item.id === target.id
-            ? onSolve([prompt.id, target.id])
-            : onWrong([prompt.id, target.id])
-        }
-      />
+    <div className="opposites-playground">
+      <section className="opposites-stage" aria-label={prompt.labels[lang]}>
+        <div className="opposites-prompt-scene">
+          <Visual item={prompt} lang={lang} photos={settings.photos} />
+          <strong>{prompt.labels[lang]}</strong>
+        </div>
+        <span className="opposites-stage-arrow" aria-hidden="true">↔</span>
+        <div className="opposites-stage-prompt">
+          <span>{lang === "tr" ? "Bunun zıttı hangisi?" : "Was ist das Gegenteil?"}</span>
+        </div>
+      </section>
+
+      <section className="opposites-choice-wrap" aria-label={lang === "tr" ? "Zıt olanı seç" : "Wähle das Gegenteil"}>
+        <h2 className="opposites-choice-title">{lang === "tr" ? "Karşısına hangisi gelir?" : "Was gehört auf die andere Seite?"}</h2>
+        <div className="opposites-choice-grid">
+          {options.map((item) => (
+            <button
+              key={item.id}
+              className={`opposites-choice ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
+              onClick={() =>
+                item.id === target.id
+                  ? onSolve([prompt.id, target.id])
+                  : onWrong([prompt.id, target.id])
+              }
+              aria-label={item.labels[lang]}
+            >
+              <Visual item={item} lang={lang} photos={settings.photos} />
+              <b>{item.labels[lang]}</b>
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
