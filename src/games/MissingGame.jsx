@@ -26,12 +26,15 @@ export default function MissingGame({
     : lang === "tr"
       ? "Resimlere dikkatle bak."
       : "Schau dir die Bilder gut an.";
+  const help = lang === "tr"
+    ? "Az önceki sırayı hatırla."
+    : "Denk an die Reihe von eben.";
   useLesson(
     onReady,
     text,
     () => speak(text, lang, settings),
     [target.id],
-    target.labels[lang],
+    help,
   );
 
   function revealQuestion() {
