@@ -7,7 +7,8 @@ const puzzle = readFileSync(new URL("../src/games/PuzzleGame.jsx", import.meta.u
 
 test("StoryGame.jsx blocks paused and stale lifecycle input", () => {
   assert.match(story, /interactionBlocked = \(\) => false/);
-  assert.match(story, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(story, /function blocked\(\) \{[\s\S]*?return paused \|\| interactionBlocked\(\);[\s\S]*?\}/);
+  assert.match(story, /if \(blocked\(\)\) return/);
   assert.match(story, /disabled=\{paused\}/);
 });
 
