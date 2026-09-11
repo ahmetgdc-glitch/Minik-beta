@@ -17,6 +17,10 @@ const CLIPS = {
     "Wir drehen die Karten zusammen um.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6fc0b29a-4e95-4f4b-a80e-a6b1bde09881.mp3",
     "Schau auf das kleine Vorbild.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8e559f66-8d9a-415b-b18a-1271fc9ebf2b.mp3",
     "Tippe jedes Bild einmal an und zähle mit.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3eb6681e-fbb7-483d-8b2f-77e63c69990c.mp3",
+    "In welchen Korb gehört das?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4021889f-8153-4aa2-aa4d-0533f623d33c.mp3",
+    "Hör zu und spiele die Melodie nach.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/923f99bb-834b-4fea-b051-bccabafc8996.mp3",
+    "Hör genau hin. Was klingt so?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ad72450d-ca86-4f9f-b710-876f097fd598.mp3",
+    "Zu welchem Bild gehört der Schatten?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a146d0e6-8f41-44c3-af2d-6fda1aee07a0.mp3",
   },
   tr: {
     "Harika!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e3d0dbf1-3f7e-4808-aa2d-080742f7db36.mp3",
@@ -32,6 +36,10 @@ const CLIPS = {
     "Kartları birlikte çevirelim.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/24aad09e-7b89-4491-b81d-c4fd24dbbc9e.mp3",
     "Küçük resme bak.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3e683442-9eb8-4909-9343-3b769968734b.mp3",
     "Her resme bir kez dokun ve say.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c79c4594-6c7c-4ebc-8862-cb0e5fe2bf66.mp3",
+    "Hangi sepete ait?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/2ffa01a5-0765-4568-ae67-13f5f7d4db55.mp3",
+    "Dinle ve aynı melodiyi çal.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e888d8e2-9b39-474b-b026-44716bc4b6b4.mp3",
+    "Dinle. Bu ne sesi?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ab4e2e00-1f39-4707-ae2c-bf9902a4fc03.mp3",
+    "Bu gölge hangi resme ait?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/62f84e5f-a5d6-4a31-b7d4-9239c32d94e1.mp3",
   },
 };
 
