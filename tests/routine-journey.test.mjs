@@ -14,6 +14,15 @@ test("daily order uses an immersive routine scene instead of the legacy answer c
   assert.doesNotMatch(game, /answer-card/);
 });
 
+test("routine prompt can replay the current step without bypassing lifecycle guards", () => {
+  assert.match(game, /function replayPrompt\(\)/);
+  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /speak\(prompt\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /className="routine-now-scene"/);
+  assert.match(game, /onClick=\{replayPrompt\}/);
+  assert.match(game, /disabled=\{paused\}/);
+});
+
 test("routine journey keeps large child-first scenes with phone adaptation", () => {
   assert.match(css, /min-height:\s*clamp\(300px, 58vh, 560px\)/);
   assert.match(css, /width:\s*min\(52vw, 320px\)/);
