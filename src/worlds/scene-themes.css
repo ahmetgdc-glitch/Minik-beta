@@ -20,7 +20,7 @@
   background:var(--world-label);
   color:var(--world-accent);
   border:2px solid #ffffffb8;
-  box-shadow:0 5px 0 color-mix(in srgb,var(--world-accent) 18%,transparent),0 14px 30px #173b4d14;
+  box-shadow:0 5px 0 #173b4d20,0 14px 30px #173b4d14;
 }
 .discovery-stage .discovery-position,.discovery-stage .discovery-progress{
   border:1px solid #ffffffb8;
@@ -99,7 +99,6 @@
 
 @media(max-width:620px){
   .discovery-stage .discovery-word{border-radius:19px;padding:8px 14px}
-  .discovery-stage::before{opacity:calc(var(--world-overlay-opacity,.72) * .88)}
 }
 
 @media(prefers-reduced-motion:reduce){
