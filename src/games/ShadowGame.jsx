@@ -28,6 +28,11 @@ export default function ShadowGame({
     help,
   );
 
+  function repeatPrompt() {
+    if (paused || interactionBlocked()) return;
+    speak(text, lang, settings);
+  }
+
   function pick(item) {
     if (paused || interactionBlocked()) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
@@ -35,9 +40,16 @@ export default function ShadowGame({
 
   return (
     <div className="shadow-playground" aria-disabled={paused || undefined}>
-      <div className="shadow-stage">
+      <button
+        type="button"
+        className="shadow-stage"
+        onClick={repeatPrompt}
+        disabled={paused}
+        aria-label={lang === "tr" ? "Soruyu tekrar dinle" : "Aufgabe noch einmal hören"}
+      >
         <Visual item={target} lang={lang} silhouette={hint < 3} />
-      </div>
+        <span className="shadow-listen-hint" aria-hidden="true">🔊</span>
+      </button>
       <OptionGrid
         {...{ target, options, hint, lang, settings }}
         onPick={pick}
