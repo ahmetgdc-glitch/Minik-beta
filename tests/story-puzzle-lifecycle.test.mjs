@@ -14,10 +14,12 @@ test("StoryGame.jsx blocks paused and stale lifecycle input", () => {
   assert.match(story, /disabled=\{controlsDisabled\}[\s\S]*onPick=\{pick\}/);
 });
 
-test("PuzzleGame.jsx blocks paused and stale lifecycle input", () => {
+test("PuzzleGame.jsx blocks paused and stale lifecycle input in logic and DOM", () => {
   assert.match(puzzle, /interactionBlocked = \(\) => false/);
   assert.match(puzzle, /if \(paused \|\| interactionBlocked\(\)\) return/);
   assert.match(puzzle, /useDragPlacement\(\{[\s\S]*paused,[\s\S]*interactionBlocked,/);
-  assert.match(puzzle, /disabled=\{paused \|\| filled\}/);
-  assert.match(puzzle, /disabled=\{paused \|\| done\}/);
+  assert.match(puzzle, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(puzzle, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(puzzle, /disabled=\{controlsDisabled \|\| filled\}/);
+  assert.match(puzzle, /disabled=\{controlsDisabled \|\| done\}/);
 });
