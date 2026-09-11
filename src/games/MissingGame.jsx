@@ -37,6 +37,17 @@ export default function MissingGame({
     help,
   );
 
+  function replayPreview(item) {
+    if (hidden || paused || interactionBlocked()) return;
+    speak(item.labels[lang], lang, settings);
+  }
+
+  function previewKeyDown(event, item) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    replayPreview(item);
+  }
+
   function revealQuestion() {
     if (paused || interactionBlocked()) return;
     setHidden(true);
@@ -59,7 +70,15 @@ export default function MissingGame({
           {row.map((x) => {
             const vanished = hidden && x.id === target.id && hint < 3;
             return (
-              <div key={x.id} className={`missing-object-slot ${vanished ? "vanished" : ""}`}>
+              <div
+                key={x.id}
+                className={`missing-object-slot ${vanished ? "vanished" : ""} ${!hidden ? "listening-target" : ""}`}
+                role={!hidden ? "button" : undefined}
+                tabIndex={!hidden && !paused ? 0 : undefined}
+                aria-label={!hidden ? (lang === "tr" ? `${x.labels.tr} kelimesini dinle` : `${x.labels.de} anhören`) : undefined}
+                onClick={() => replayPreview(x)}
+                onKeyDown={(event) => previewKeyDown(event, x)}
+              >
                 {vanished ? (
                   <span className="missing-mark">?</span>
                 ) : (
