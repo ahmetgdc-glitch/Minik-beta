@@ -9,6 +9,8 @@ export default function PatternGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -22,19 +24,16 @@ export default function PatternGame({
         : [0, 1, 0, 1, 0];
   const target = base[difficulty === 6 ? 2 : 1],
     [options] = useState(() => choicesFor(target, items, difficulty));
-  const text =
-    lang === "tr"
-      ? "Sırada hangi resim var?"
-      : "Welches Bild kommt als Nächstes?";
-  useLesson(
-    onReady,
-    text,
-    () => speak(text, lang, settings),
-    [target.id],
-    target.labels[lang],
-  );
+  const text = lang === "tr" ? "Sırada hangi resim var?" : "Welches Bild kommt als Nächstes?";
+  useLesson(onReady, text, () => speak(text, lang, settings), [target.id], target.labels[lang]);
+
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="pattern-path-game">
+    <div className="pattern-path-game" aria-disabled={paused || undefined}>
       <section className="pattern-path-stage" aria-label={text}>
         <span className="pattern-path-label">{lang === "tr" ? "Deseni takip et" : "Folge dem Muster"}</span>
         <div className="pattern-path-sequence">
@@ -59,7 +58,8 @@ export default function PatternGame({
             <button
               key={x.id}
               className={`pattern-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
-              onClick={() => x.id === target.id ? onSolve([target.id]) : onWrong([target.id])}
+              onClick={() => pick(x)}
+              disabled={paused}
               aria-label={x.labels[lang]}
             >
               <Visual item={x} lang={lang} photos={settings.photos} />
