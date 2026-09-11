@@ -19,8 +19,15 @@ test("completed social steps can replay their spoken labels safely", () => {
   assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onClick=\{\(\) => hearStep\(item\)\}/);
   assert.match(game, /onKeyDown=\{\(event\) => handleStepKeyDown\(event, item\)\}/);
-  assert.match(game, /social-step-hear/);
+  assert.match(game, /<Volume2 size=\{18\} \/>/);
+  assert.match(game, /tabIndex=\{controlsDisabled \? -1 : 0\}/);
   assert.match(css, /\.social-step-listenable\s*\{[\s\S]*?touch-action:\s*manipulation/);
+});
+
+test("social journey disables replay and answer controls during locked transitions", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
 });
 
 test("social journey becomes a vertical route on phones", () => {
