@@ -1,0 +1,222 @@
+.opposites-playground {
+  width: min(100%, 1160px);
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(20px, 4vw, 38px);
+}
+
+.opposites-stage {
+  position: relative;
+  min-height: clamp(310px, 52vh, 520px);
+  overflow: hidden;
+  padding: clamp(20px, 4vw, 40px);
+  border-radius: 40px;
+  background:
+    radial-gradient(circle at 17% 13%, rgba(255,255,255,.86) 0 5%, transparent 6%),
+    linear-gradient(135deg, #e5f7ff 0 49.5%, #fff1d5 50.5% 100%);
+  box-shadow: inset 0 0 0 3px rgba(255,255,255,.78), 0 22px 46px rgba(47,72,84,.15);
+}
+
+.opposites-stage::after {
+  content: "";
+  position: absolute;
+  top: 8%;
+  bottom: 8%;
+  left: 50%;
+  width: 4px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: repeating-linear-gradient(to bottom, rgba(77,103,116,.18) 0 12px, transparent 12px 24px);
+}
+
+.opposites-prompt-scene {
+  position: relative;
+  z-index: 2;
+  min-height: clamp(250px, 42vh, 420px);
+  width: min(48%, 500px);
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.opposites-prompt-scene .visual {
+  width: min(64%, 290px);
+  height: min(64%, 290px);
+  filter: drop-shadow(0 16px 18px rgba(41,65,76,.15));
+  animation: opposite-float 3.2s ease-in-out infinite;
+}
+
+.opposites-prompt-scene strong {
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.88);
+  font-size: clamp(1.3rem, 3.6vw, 2rem);
+  box-shadow: 0 10px 22px rgba(40,67,78,.1);
+}
+
+.opposites-stage-arrow {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: clamp(68px, 9vw, 92px);
+  height: clamp(68px, 9vw, 92px);
+  border-radius: 50%;
+  background: rgba(255,255,255,.94);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgba(50,77,88,.16);
+}
+
+.opposites-stage-prompt {
+  position: absolute;
+  z-index: 2;
+  right: clamp(18px, 4vw, 42px);
+  top: 50%;
+  width: min(37%, 390px);
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: clamp(1.25rem, 3vw, 1.9rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.opposites-stage-prompt span {
+  display: inline-block;
+  padding: 14px 18px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.82);
+  box-shadow: 0 10px 22px rgba(67,67,50,.1);
+}
+
+.opposites-choice-wrap {
+  display: grid;
+  gap: 14px;
+}
+
+.opposites-choice-title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.25rem, 3vw, 1.85rem);
+  font-weight: 900;
+}
+
+.opposites-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(215px, 100%), 1fr));
+  gap: clamp(14px, 2.8vw, 24px);
+}
+
+.opposites-choice {
+  min-height: clamp(190px, 30vw, 310px);
+  padding: clamp(14px, 2.5vw, 24px);
+  border: 0;
+  border-radius: 32px;
+  background: linear-gradient(180deg, #fffdfa, #eef8ff);
+  box-shadow: inset 0 0 0 4px rgba(255,255,255,.92), 0 16px 30px rgba(42,70,82,.14);
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+
+.opposites-choice .visual {
+  width: min(70%, 215px);
+  height: min(70%, 215px);
+}
+
+.opposites-choice b {
+  font-size: clamp(1.12rem, 2.8vw, 1.55rem);
+}
+
+.opposites-choice:hover,
+.opposites-choice:focus-visible {
+  transform: translateY(-5px);
+  box-shadow: inset 0 0 0 5px rgba(255,255,255,.97), 0 23px 38px rgba(42,70,82,.2);
+}
+
+.opposites-choice:active { transform: scale(.98); }
+
+.opposites-choice.hint-target {
+  outline: 7px solid rgba(255,194,45,.76);
+  outline-offset: 3px;
+  animation: opposite-hint 1s ease-in-out infinite;
+}
+
+@keyframes opposite-float {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-9px) rotate(1deg); }
+}
+
+@keyframes opposite-hint {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+
+@media (max-width: 650px) {
+  .opposites-stage {
+    min-height: 440px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, #e5f7ff 0 49.5%, #fff1d5 50.5% 100%);
+  }
+  .opposites-stage::after {
+    left: 8%;
+    right: 8%;
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 4px;
+    transform: translateY(-50%);
+    background: repeating-linear-gradient(to right, rgba(77,103,116,.18) 0 12px, transparent 12px 24px);
+  }
+  .opposites-prompt-scene {
+    width: 100%;
+    min-height: 210px;
+  }
+  .opposites-prompt-scene .visual {
+    width: min(48vw, 205px);
+    height: min(48vw, 205px);
+  }
+  .opposites-stage-arrow {
+    top: 50%;
+  }
+  .opposites-stage-prompt {
+    left: 10%;
+    right: 10%;
+    top: auto;
+    bottom: 6%;
+    width: auto;
+    transform: none;
+  }
+  .opposites-choice-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 11px;
+  }
+  .opposites-choice {
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 430px) {
+  .opposites-choice-grid { grid-template-columns: 1fr; }
+  .opposites-choice {
+    grid-template-columns: minmax(120px,.8fr) 1fr;
+    aspect-ratio: auto;
+    min-height: 150px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .opposites-prompt-scene .visual,
+  .opposites-choice.hint-target {
+    animation: none;
+  }
+  .opposites-choice { transition: none; }
+}
