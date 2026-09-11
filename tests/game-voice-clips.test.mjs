@@ -66,6 +66,8 @@ test("dynamic common game prompts are composed only from recorded clips", () => 
     ["Köpek nerede?", "tr", 2],
     ["Finde: Apfel.", "de", 2],
     ["Elma nerede?", "tr", 2],
+    ["Finde: Wassermelone.", "de", 2],
+    ["Karpuz nerede?", "tr", 2],
     ["In welchen Korb gehört das? Katze.", "de", 2],
     ["Hangi sepete ait? Kedi.", "tr", 2],
     ["Mit welchem Buchstaben beginnt Hund?", "de", 2],
@@ -125,10 +127,10 @@ test("all thirty animals use natural Mino voice in both languages", () => {
   ]) assert.ok(animals.includes(`\"${word}\"`), `missing natural animal clip: ${word}`);
 });
 
-test("beginner fruit vocabulary uses natural Mino voice in both languages", () => {
+test("core fruit vocabulary uses natural Mino voice in both languages", () => {
   for (const word of [
-    "Apfel", "Banane", "Birne", "Erdbeere", "Trauben",
-    "Elma", "Muz", "Armut", "Portakal", "Çilek", "Üzüm",
+    "Apfel", "Banane", "Birne", "Erdbeere", "Trauben", "Wassermelone", "Kirschen", "Pfirsich", "Zitrone", "Ananas", "Kiwi",
+    "Elma", "Muz", "Armut", "Portakal", "Çilek", "Üzüm", "Karpuz", "Kiraz", "Şeftali", "Limon", "Ananas", "Kivi",
   ]) assert.ok(food.includes(`\"${word}\"`), `missing natural food clip: ${word}`);
   assert.ok(clips.includes(`\"Orange\"`), "German Orange reuses the natural color recording");
 });
@@ -139,9 +141,9 @@ test("animal vocabulary remains modular and wired into the shared player", () =>
   assert.match(clips, /animalVoiceClipCount/);
 });
 
-test("natural Mino library keeps at least 200 recorded prompts and words", () => {
+test("natural Mino library keeps at least 212 recorded prompts and words", () => {
   const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 200, `expected at least 200 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 212, `expected at least 212 natural clips, got ${urls.length}`);
 });
 
 test("speech uses natural plans before any optional browser synthesis", () => {
