@@ -21,11 +21,14 @@ test("initial-letter target can replay the spoken learning word", () => {
   assert.match(game, /aria-label=\{replayLabel\}/);
 });
 
-test("initial-letter replay respects paused and stale interaction guards", () => {
+test("initial-letter replay and letter choices respect paused and stale interaction guards", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
   assert.match(game, /function blocked\(\)/);
   assert.match(game, /return paused \|\| interactionBlocked\(\)/);
   assert.match(game, /if \(blocked\(\)\) return/);
-  assert.match(game, /tabIndex=\{paused \? -1 : 0\}/);
+  assert.match(game, /tabIndex=\{controlsDisabled \? -1 : 0\}/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
 });
 
 test("initial-letter playground adapts to narrow phones", () => {
