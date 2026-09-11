@@ -23,11 +23,14 @@ export default function MemoryGame({
   ])));
   const [open, setOpen] = useState([]);
   const [matched, setMatched] = useState([]);
+  const [speakingCardId, setSpeakingCardId] = useState(null);
   const openRef = useRef([]);
   const lockedRef = useRef(false);
   const matchedRef = useRef([]);
+  const speechRun = useRef(0);
 
   const text = lang === "tr" ? "Aynı iki resmi bul." : "Finde zwei gleiche Bilder.";
+  const controlsDisabled = paused || interactionBlocked();
   useLesson(
     onReady,
     text,
@@ -38,6 +41,16 @@ export default function MemoryGame({
 
   useEffect(() => { openRef.current = open; }, [open]);
   useEffect(() => { matchedRef.current = matched; }, [matched]);
+
+  useEffect(() => {
+    if (!controlsDisabled) return;
+    speechRun.current += 1;
+    setSpeakingCardId(null);
+  }, [controlsDisabled]);
+
+  useEffect(() => () => {
+    speechRun.current += 1;
+  }, []);
 
   useEffect(() => {
     if (open.length !== 2 || paused) return;
@@ -60,7 +73,8 @@ export default function MemoryGame({
         const next = [...matchedRef.current, a.item.id];
         matchedRef.current = next;
         setMatched(next);
-        speak(a.item.labels[lang], lang, settings);
+        // The second card has just spoken this same label. Do not restart the
+        // word here: that used to cut the child's pronunciation off halfway.
         if (next.length === chosen.length) onSolve(chosen.map((i) => i.id));
       } else {
         onWrong([a.item.id, b.item.id]);
@@ -70,7 +84,17 @@ export default function MemoryGame({
       lockedRef.current = false;
     }, ok ? 450 : 900);
     return () => clearTimeout(timer);
-  }, [open, paused, cards, chosen, lang, settings, onSolve, onWrong]);
+  }, [open, paused, cards, chosen, onSolve, onWrong, interactionBlocked]);
+
+  async function speakCard(card) {
+    const run = ++speechRun.current;
+    setSpeakingCardId(card.id);
+    try {
+      await speak(card.item.labels[lang], lang, settings);
+    } finally {
+      if (run === speechRun.current) setSpeakingCardId(null);
+    }
+  }
 
   function flip(card) {
     if (paused || interactionBlocked() || lockedRef.current || matchedRef.current.includes(card.item.id)) return;
@@ -80,11 +104,10 @@ export default function MemoryGame({
     openRef.current = next;
     if (next.length >= 2) lockedRef.current = true;
     setOpen(next);
-    speak(card.item.labels[lang], lang, settings);
+    speakCard(card);
   }
 
   const helpPair = chosen.find((i) => !matched.includes(i.id))?.id;
-  const controlsDisabled = paused || interactionBlocked();
   return (
     <section className="memory-playground" aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"} aria-disabled={controlsDisabled || undefined}>
       <div className="memory-playground-status">{matched.length} / {chosen.length} {lang === "tr" ? "çift" : "Paare"}</div>
@@ -94,7 +117,7 @@ export default function MemoryGame({
           const show = found || open.includes(card.id) || hint >= 3 || (hint >= 2 && card.item.id === helpPair);
           return (
             <button
-              className={`memory-card ${show ? "flipped" : ""} ${found ? "matched" : ""}`}
+              className={`memory-card ${show ? "flipped" : ""} ${found ? "matched" : ""} ${speakingCardId === card.id ? "speaking" : ""}`}
               key={card.id}
               disabled={controlsDisabled || found || open.length >= 2 || lockedRef.current}
               onClick={() => flip(card)}
