@@ -18,10 +18,14 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
 }
 
 const voiceSourcePattern = /https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/([a-f0-9-]+\.mp3)/g;
+const voiceSourceFiles = [
+  "src/audio/gameVoiceClips.js",
+  "src/audio/animalVoiceClips.js",
+  "src/audio/foodVoiceClips.js",
+  "src/audio/naturalVoicePlans.js",
+];
 const voiceSources = await Promise.all(
-  ["src/audio/gameVoiceClips.js", "src/audio/animalVoiceClips.js"].map((file) =>
-    fs.readFile(path.resolve(file), "utf8"),
-  ),
+  voiceSourceFiles.map((file) => fs.readFile(path.resolve(file), "utf8")),
 );
 const expectedVoiceFiles = new Set(
   voiceSources.flatMap((source) => [...source.matchAll(voiceSourcePattern)].map((match) => match[1])),
