@@ -13,6 +13,21 @@ test("initial-letter game keeps a large visual target and toy-like letter choice
   assert.match(css, /font:900 clamp\(2\.8rem,9vw,5\.4rem\)/);
 });
 
+test("initial-letter target can replay the spoken learning word", () => {
+  assert.match(game, /function hearTarget\(\)/);
+  assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /onClick=\{hearTarget\}/);
+  assert.match(game, /onKeyDown=\{handleTargetKeyDown\}/);
+  assert.match(game, /aria-label=\{replayLabel\}/);
+});
+
+test("initial-letter replay respects paused and stale interaction guards", () => {
+  assert.match(game, /function blocked\(\)/);
+  assert.match(game, /return paused \|\| interactionBlocked\(\)/);
+  assert.match(game, /if \(blocked\(\)\) return/);
+  assert.match(game, /tabIndex=\{paused \? -1 : 0\}/);
+});
+
 test("initial-letter playground adapts to narrow phones", () => {
   assert.match(css, /@media\(max-width:700px\)/);
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
