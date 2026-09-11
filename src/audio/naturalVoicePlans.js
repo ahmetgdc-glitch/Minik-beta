@@ -1,4 +1,9 @@
 import { gameVoiceClip } from "./gameVoiceClips.js";
+import {
+  foodVoiceClip,
+  foodVoiceClipCount,
+  foodVoiceEntries,
+} from "./foodVoiceClips.js";
 
 const normalize = (text) => String(text || "").trim();
 const stripEnd = (text) => normalize(text).replace(/[.!?]+$/u, "").trim();
@@ -49,15 +54,19 @@ export function naturalPhraseClip(text, lang = "de") {
   return PHRASES[lang]?.[normalize(text)] || "";
 }
 
+function recordedClip(text, lang) {
+  return naturalPhraseClip(text, lang) || gameVoiceClip(text, lang) || foodVoiceClip(text, lang);
+}
+
 function resolve(parts, lang) {
-  const urls = parts.map((part) => naturalPhraseClip(part, lang) || gameVoiceClip(part, lang));
+  const urls = parts.map((part) => recordedClip(part, lang));
   return urls.length && urls.every(Boolean) ? urls : [];
 }
 
 export function naturalVoicePlan(text, lang = "de") {
   const value = normalize(text);
   if (!value) return [];
-  const exact = naturalPhraseClip(value, lang) || gameVoiceClip(value, lang);
+  const exact = recordedClip(value, lang);
   if (exact) return [exact];
 
   let match;
@@ -135,7 +144,11 @@ export function naturalVoicePlan(text, lang = "de") {
 
 export function preloadNaturalVoicePlans(lang) {
   if (typeof Audio === "undefined") return 0;
-  const groups = lang && PHRASES[lang] ? [PHRASES[lang]] : Object.values(PHRASES);
+  const phraseGroups = lang && PHRASES[lang] ? [PHRASES[lang]] : Object.values(PHRASES);
+  const foodGroups = lang && foodVoiceEntries[lang]
+    ? [foodVoiceEntries[lang]]
+    : Object.values(foodVoiceEntries);
+  const groups = [...phraseGroups, ...foodGroups];
   let added = 0;
   for (const group of groups) {
     for (const url of Object.values(group)) {
@@ -153,7 +166,6 @@ export function preloadNaturalVoicePlans(lang) {
   return added;
 }
 
-export const naturalVoicePlanClipCount = Object.values(PHRASES).reduce(
-  (sum, group) => sum + Object.keys(group).length,
-  0,
-);
+export const naturalVoicePlanClipCount =
+  Object.values(PHRASES).reduce((sum, group) => sum + Object.keys(group).length, 0) +
+  foodVoiceClipCount;
