@@ -11,11 +11,12 @@ export default function MemoryGame({
   settings,
   hint,
   paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
 }) {
-  const [chosen] = useState(() => sample(items, difficulty === 2 ? 3 : difficulty === 4 ? 4 : 6));
+  const [chosen] = useState(() => sample(items, difficulty === 2 ? 2 : difficulty === 4 ? 4 : 6));
   const [cards] = useState(() => shuffle(chosen.flatMap((item) => [
     { id: item.id + "a", item },
     { id: item.id + "b", item },
@@ -46,6 +47,7 @@ export default function MemoryGame({
     if (!a || !b) { lockedRef.current = false; setOpen([]); return; }
     const ok = a.item.id === b.item.id;
     const timer = setTimeout(() => {
+      if (interactionBlocked()) return;
       if (ok) {
         const next = [...matchedRef.current, a.item.id];
         matchedRef.current = next;
@@ -63,7 +65,7 @@ export default function MemoryGame({
   }, [open, paused, cards, chosen, lang, settings, onSolve, onWrong]);
 
   function flip(card) {
-    if (paused || lockedRef.current || matchedRef.current.includes(card.item.id)) return;
+    if (paused || interactionBlocked() || lockedRef.current || matchedRef.current.includes(card.item.id)) return;
     const now = openRef.current;
     if (now.length >= 2 || now.includes(card.id)) return;
     const next = [...now, card.id];

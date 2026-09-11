@@ -15,6 +15,7 @@ import "@fontsource/nunito/latin-ext-900.css";
 import "./styles.css";
 import "./games/games.css";
 import "./worlds/worlds.css";
+import "./games/immersive.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

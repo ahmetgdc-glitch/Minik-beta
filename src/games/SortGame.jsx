@@ -4,6 +4,8 @@ import { sample, shuffle } from "../utils/random.js";
 import Visual, { Art } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
+import { useDragPlacement } from "./useDragPlacement.js";
+import DragPreview from "./DragPreview.jsx";
 const contrasts = {
   animals: "vehicles",
   food: "clothes",
@@ -18,6 +20,8 @@ export default function SortGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -45,21 +49,31 @@ export default function SortGame({
     [target.id],
     group.labels[lang],
   );
+  function place(source, destination) {
+    if (paused || interactionBlocked() || source !== target.id) return;
+    if (!groups.some(g => g.id === destination)) return;
+    destination === group.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+  const placement = useDragPlacement({ paused, interactionBlocked, onDrop: place,
+    onSelect: () => speak(target.labels[lang], lang, settings) });
   return (
-    <>
-      <div className="sort-object">
+    <div className="sort-playground" ref={placement.boardRef}>
+      <button className={`sort-object ${placement.drag ? "is-dragging" : ""}`}
+        {...placement.sourceProps(target.id)} disabled={paused}
+        aria-label={`${target.labels[lang]}. ${lang === "tr" ? "Sepete sürükle veya sepete dokun." : "Zum Korb ziehen oder einen Korb antippen."}`}>
         <Visual item={target} lang={lang} photos={settings.photos} />
         <b>{target.labels[lang]}</b>
-      </div>
+      </button>
       <div className="sort-baskets">
         {groups.map((g) => (
           <button
             key={g.id}
-            className={`sort-basket ${hint >= 2 && g.id === group.id ? "hint-target" : ""}`}
+            data-drop-id={g.id}
+            className={`sort-basket ${placement.drag?.over === g.id ? "drop-hover" : ""} ${hint >= 2 && g.id === group.id ? "hint-target" : ""}`}
             style={{ "--basket": g.color }}
-            onClick={() =>
-              g.id === group.id ? onSolve([target.id]) : onWrong([target.id])
-            }
+            disabled={paused}
+            aria-label={g.labels[lang]}
+            onClick={() => place(target.id, g.id)}
           >
             <div className="basket-example">
               <Art name={g.asset} />
@@ -69,6 +83,7 @@ export default function SortGame({
           </button>
         ))}
       </div>
-    </>
+      <DragPreview drag={placement.drag} items={[target]} {...{lang, settings}} />
+    </div>
   );
 }

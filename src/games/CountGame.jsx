@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { sample } from "../utils/random.js";
 import { itemsForWorld } from "../data/content.js";
 import { useLesson, OptionGrid } from "./shared.jsx";
@@ -11,6 +11,8 @@ export default function CountGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -29,6 +31,7 @@ export default function CountGame({
     choicesFor(target, itemsForWorld("numbers").slice(0, maximum), difficulty),
   );
   const [counted, setCounted] = useState([]);
+  const countedRef = useRef([]);
   const text = lang === "tr" ? "Kaç tane var?" : "Wie viele sind es?";
   useLesson(
     onReady,
@@ -41,20 +44,22 @@ export default function CountGame({
   );
   return (
     <>
-      <div className={`count-field count-${n > 10 ? "many" : "few"}`}>
+      <div className={`count-field count-${n > 10 ? "many" : "few"}`} style={{ "--count-columns": Math.min(n, n <= 5 ? 3 : 5), "--count-height": `${n <= 2 ? 32 : n <= 5 ? 20 : n <= 10 ? 14 : 10}svh` }}>
         {Array.from({ length: n }, (_, i) => (
           <button
             key={i}
             className={counted.includes(i) ? "counted" : ""}
             aria-label={`${object.labels[lang]} ${i + 1}`}
             onClick={() => {
-              if (!counted.includes(i)) {
+              if (paused || interactionBlocked()) return;
+              if (!countedRef.current.includes(i)) {
                 speak(
-                  itemsForWorld("numbers")[counted.length].labels[lang],
+                  itemsForWorld("numbers")[countedRef.current.length].labels[lang],
                   lang,
                   settings,
                 );
-                setCounted([...counted, i]);
+                countedRef.current = [...countedRef.current, i];
+                setCounted(countedRef.current);
               }
             }}
           >

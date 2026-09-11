@@ -22,7 +22,8 @@ import { worldById, uniqueVisuals } from "../data/content.js";
 import { speak, stopSpeech } from "../audio/voice.js";
 import { playSound, stopSounds, unlockAudio } from "../audio/sounds.js";
 import FishGuide from "../components/FishGuide.jsx";
-import { Mino, Art } from "../components/Visual.jsx";
+import { Mino, Art, assetUrl } from "../components/Visual.jsx";
+import { sceneForWorld } from "../worlds/scenes.js";
 import { recommendedActivities } from "../learning/recommendations.js";
 import { maxOptionsForAge } from "../learning/age.js";
 import { shouldAcceptWrongTap, shouldBlockGameInteraction } from "./inputGuard.js";
@@ -542,7 +543,10 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       </section>
     );
   return (
-    <section className={`game-session game-${gameId} phase-${phase}`}>
+    <section className={`game-session game-${gameId} phase-${phase}`}
+      data-age={progress.activeProfile?.ageGroup || "4-5"}
+      data-world={worldId}
+      style={{ "--scene-background": `url("${assetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`)}")` }}>
       <header className="game-header" inert={paused ? true : undefined}>
         <button
           className="icon-button"
@@ -601,6 +605,12 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       <div
         className="game-area"
         inert={paused || phase !== "active" ? true : undefined}
+        onClickCapture={event => {
+          if (interactionBlocked()) { event.preventDefault(); event.stopPropagation(); }
+        }}
+        onPointerDownCapture={event => {
+          if (interactionBlocked()) { event.preventDefault(); event.stopPropagation(); }
+        }}
         onPointerDown={() => setActivity((a) => a + 1)}
       >
         <Component
@@ -612,7 +622,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         />
       </div>
       <div inert={paused || phase !== "active" ? true : undefined}>
-        <FishGuide lang={lang} message={message} stage={hint} onHelp={help} />
+        <FishGuide lang={lang} message={message} stage={hint} onHelp={help} outfit={progress.minoOutfit} />
       </div>
       {phase === "success" && (
         <div className="star-burst" aria-live="polite">

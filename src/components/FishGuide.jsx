@@ -1,6 +1,6 @@
 import React from "react";
-import { Mino } from "./Visual.jsx";
-export default function FishGuide({ message, onHelp, stage = 0, lang = "de" }) {
+import { MinoAvatar } from "./Visual.jsx";
+export default function FishGuide({ message, onHelp, stage = 0, lang = "de", outfit }) {
   return (
     <div className={`fish-guide stage-${stage}`}>
       <button
@@ -10,8 +10,8 @@ export default function FishGuide({ message, onHelp, stage = 0, lang = "de" }) {
           lang === "tr" ? "Mino’dan yardım iste" : "Mino um Hilfe bitten"
         }
       >
-        <Mino />
-        <span>?</span>
+        <MinoAvatar outfit={outfit} />
+        <span className="mino-help-symbol">?</span>
       </button>
       <div className="speech-bubble" aria-live="polite">
         <strong>Mino</strong>

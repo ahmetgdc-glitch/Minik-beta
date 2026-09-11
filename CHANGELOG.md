@@ -2,6 +2,9 @@
 
 ## 1.66.0 Beta 67 — Minos große Entdeckerwelt
 
+- Zweite Runde: echtes Drag & Drop für Sortieren und Zuordnen mit Tippalternative, Abbruch-/Mehrfinger-Schutz und sieben zusätzlichen Verhaltenstests (216 insgesamt).
+- Größere Spielflächen, Antwortobjekte, Memory-Paare und Mino; Zähl-Taps werden synchron gegen Duplikate geschützt.
+
 - Neue bildschirmfüllende Startlandschaft mit großem Mino, nativen Wischgesten und fünf Themenreisen zu allen 25 bestehenden Welten.
 - Große Lernobjekte in Landschaften statt einer Wortkartenwand; Antippen spricht das Wort, Pfeile und Tastatur ergänzen Wischen.
 - Entdeckerspiel übernimmt diese Darstellung mit altersabhängig begrenzter Objektzahl und erhaltenem Pause-/Fortschrittsschutz.

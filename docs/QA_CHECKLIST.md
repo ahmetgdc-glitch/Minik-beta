@@ -4,7 +4,7 @@ Stand: **2026-09-11 · 1.66.0 Beta 67**. „Bestanden“ bedeutet automatisiert 
 
 ## Automatisiert bestanden
 
-- [x] **209/209 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, Audio, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **209/216 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, Audio, Eltern-Gate, Dialoge und Release-Härtung.
 - [x] `validate-content.mjs`: 25 Lernwelten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets vorhanden.
 - [x] Antwortmengen bleiben eindeutig und altersgerecht; Altersstufe 2–3 erhält maximal zwei Optionen.
 - [x] Direkte/alte Spiel-URLs können Altersfreigaben und Weltzuordnung nicht umgehen.
@@ -28,7 +28,7 @@ Stand: **2026-09-11 · 1.66.0 Beta 67**. „Bestanden“ bedeutet automatisiert 
 
 ## Noch real zu prüfen, bevor „final 1.0“ behauptet wird
 
-- [ ] GitHub Actions im tatsächlichen Repository vollständig grün ausführen.
+- [x] GitHub Actions für den ersten Szenen-Commit `9a68b23` vollständig grün: Runs `34546134828` und `34546135569`.
 - [ ] Veröffentlichte Pages-URL auf iPhone, iPad und Desktop öffnen.
 - [ ] Physisches iPhone/iPad: Touchgefühl, Hoch-/Querformat, PWA/Home-Screen und längere Sitzung.
 - [ ] Deutsche und türkische installierte Systemstimmen anhören; Tempo, Tonhöhe und schnelle Wiederholungen prüfen.
@@ -44,3 +44,12 @@ Stand: **2026-09-11 · 1.66.0 Beta 67**. „Bestanden“ bedeutet automatisiert 
 - [x] Aktuelles Tier bleibt bei Wechsel auf 768 × 1024 erhalten.
 - [x] Entdeckerspiel gestartet, Objekt entdeckt, Pause stoppt die Bedienung.
 - [ ] Physische iPhone-/iPad-Prüfung: Browsergrößen sind kein Ersatz für reales Touch-/Audio-/PWA-Verhalten.
+
+### Zweite Szenenrunde
+
+- [x] Sortieren: Fisch per Pointer-Geste in Tierkorb, Erfolgsphase und kein verbleibendes Drag-Bild.
+- [x] Zuordnen: ein Paar gezogen, zweites per Antippen; Erfolgsphase.
+- [x] Bei 320 × 740 kein horizontaler Dokumentüberlauf; Bilder passen in ihre Touchflächen.
+- [x] Sieben neue Tests für Mehrfinger, Abbruch, Wiederaufnahme, Tap-Schwelle und doppelte Paarwertung.
+- [x] Memory auf 320 × 740: vier Karten, Bild-/Kartenüberlauf behoben und Aufdecken geprüft.
+- [x] Zählen auf 320 × 740: ein Objekt misst 288 × 237 CSS-Pixel; Zahlen auf gemeinsamer Höhe, kein horizontaler Überlauf.

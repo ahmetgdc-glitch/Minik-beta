@@ -40,10 +40,19 @@ Stand: **11. September 2026 · 1.66.0 Beta 67**. Der langfristige Nutzerauftrag 
 
 ## Prüfung
 
-209 Node-Tests einschließlich aller 203 bisherigen Fälle bestanden. Release-Preflight und frischer Vite-Build erfolgreich. Offline-Verifikation prüft zusätzlich den tatsächlichen Repository-Pfad `/Minik-beta/` und alle drei Landschaften. Browser-QA erfolgt mit `tests/viewport.html` gegen den aktuellen Dev-Server, nicht gegen ein altes `dist`.
+216 Node-Tests einschließlich aller 203 bisherigen Fälle bestanden. Release-Preflight und frischer Vite-Build erfolgreich. Offline-Verifikation prüft zusätzlich den tatsächlichen Repository-Pfad `/Minik-beta/` und alle drei Landschaften. Browser-QA erfolgt mit `tests/viewport.html` gegen den aktuellen Dev-Server, nicht gegen ein altes `dist`.
 
 Beobachtet: Startwelt auf 393 × 852, Tierwelt auf 393 × 852 und 768 × 1024, Bildwechsel, Antippen/Vorlesen, Größenwechsel mit erhaltenem Bild, Spielstart und manueller Pause. Physische iOS-Geräte und akustische Qualität der Systemstimmen sind noch offen.
 
+## Zweite Entwicklungsrunde: große Spielstufen und Ziehen
+
+- Sortieren: große bewegliche Objekte, zwei große Körbe, sichtbares Ziel beim Ziehen; Antippen bleibt als Alternative.
+- Zuordnen: dieselbe Pointer-Steuerung, Schutz gegen Mehrfinger-/Abbruch-/Pause-Ereignisse, jedes Paar zählt einmal. Auf kleiner Schwierigkeit zwei Paare.
+- Memory: zwei Paare auf kleiner Schwierigkeit; bestehende Timer-/Doppeltap-Sperren bleiben erhalten.
+- Spielflächen ohne äußeren Kartenrahmen, größere Antwortobjekte und präsenter Mino mit gewähltem Outfit.
+- Browser geprüft: Sortieren per Drag & Drop, Zuordnen per Drag & Drop und Tippalternative, 320-Pixel-Breite ohne horizontalen Überlauf. Bildüberlauf im Zuordnen korrigiert.
+- Sieben neue Verhaltenstests für Drag-Session und Paarzuordnung.
+
 ## Weiterarbeit
 
-Als Nächstes Sortieren und Zuordnen mit sicherem Ziehen verbessern, Spielobjekte weiter vergrößern und Mino im Spiel stärker integrieren. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 dürfen nicht verloren gehen. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.
+Als Nächstes die Spielkiste vereinfachen, Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 dürfen nicht verloren gehen. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.

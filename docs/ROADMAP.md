@@ -8,7 +8,7 @@ Stand **1.66.0 Beta 67 · 2026-09-11**. Beta 66 bleibt das technische Fundament.
 - [x] Alle bestehenden Welten über fünf wischbare Themenreisen erreichbar
 - [x] Große Entdeckerszenen und lokale Offline-Landschaften
 - [ ] Eigenständige Szenen und Entdeckungsmomente für weitere Themenwelten
-- [ ] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
+- [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
 - [ ] DE/TR-Sprachführung und reale iPhone-/iPad-Interaktion weiter verfeinern
 
