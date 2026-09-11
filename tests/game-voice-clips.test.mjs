@@ -1,10 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { naturalVoicePlan } from "../src/audio/naturalVoicePlans.js";
 
 const clips = readFileSync(new URL("../src/audio/gameVoiceClips.js", import.meta.url), "utf8");
 const animals = readFileSync(new URL("../src/audio/animalVoiceClips.js", import.meta.url), "utf8");
-const voiceLibrary = `${clips}\n${animals}`;
+const plans = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
+const voiceLibrary = `${clips}\n${animals}\n${plans}`;
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const session = readFileSync(new URL("../src/games/GameSession.jsx", import.meta.url), "utf8");
 
@@ -33,6 +35,42 @@ test("core game starts and help prompts keep natural voice coverage", () => {
     "Dinle ve aynı melodiyi çal.", "Dinle. Bu ne sesi?",
     "Bu gölge hangi resme ait?",
   ]) assert.ok(clips.includes(phrase), `missing natural clip: ${phrase}`);
+});
+
+test("home and common unmapped game prompts have recorded Mino phrases", () => {
+  for (const phrase of [
+    "Hallo! Komm, wir entdecken die Welt!", "Merhaba! Haydi dünyayı keşfedelim!",
+    "Wohin möchtest du? Tippe auf ein Bild.", "Nereye gidelim? Bir resme dokun.",
+    "Schön, dass du da bist!", "İyi ki geldin!",
+    "Hallo, ich bin Mino!", "Merhaba, ben Mino!",
+    "Finde dieses Bild.", "Bu resmi bul.",
+    "Mit welchem Buchstaben beginnt das Wort?", "Bu kelime hangi harfle başlıyor?",
+    "Drei Bilder sind gleich. Finde das andere.", "Üç resim aynı. Farklı olanı bul.",
+    "Welches Bild kommt als Nächstes?", "Sırada hangi resim var?",
+    "Schau dir die Bilder gut an.", "Resimlere dikkatle bak.",
+    "Was sieht Mino zum Schluss?", "Mino en son ne görüyor?",
+    "Sprich mir nach.", "Benimle söyle.",
+    "Fahre die Spur nach. Starte am grünen Punkt.", "İzi takip et. Yeşil noktadan başla.",
+  ]) assert.ok(plans.includes(phrase), `missing natural plan phrase: ${phrase}`);
+});
+
+test("dynamic common game prompts are composed only from recorded clips", () => {
+  for (const [text, lang, minParts] of [
+    ["Finde: Hund.", "de", 2],
+    ["Köpek nerede?", "tr", 2],
+    ["In welchen Korb gehört das? Katze.", "de", 2],
+    ["Hangi sepete ait? Kedi.", "tr", 2],
+    ["Mit welchem Buchstaben beginnt Hund?", "de", 2],
+    ["Köpek hangi harfle başlıyor?", "tr", 2],
+    ["Sprich mir nach: Löwe", "de", 2],
+    ["Benimle söyle: Aslan", "tr", 2],
+    ["Fahre den Buchstaben A nach. Starte am grünen Punkt.", "de", 1],
+    ["A harfini çiz. Yeşil noktadan başla.", "tr", 1],
+  ]) {
+    const plan = naturalVoicePlan(text, lang);
+    assert.ok(plan.length >= minParts, `expected natural plan for ${lang}: ${text}`);
+    assert.ok(plan.every((url) => url.endsWith(".mp3")), `plan must contain recordings: ${text}`);
+  }
 });
 
 test("all color vocabulary uses natural Mino voice in both languages", () => {
@@ -75,20 +113,21 @@ test("animal vocabulary remains modular and wired into the shared player", () =>
   assert.match(clips, /animalVoiceClipCount/);
 });
 
-test("natural Mino library keeps at least 155 recorded prompts and words", () => {
+test("natural Mino library keeps at least 179 recorded prompts and words", () => {
   const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 155, `expected at least 155 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 179, `expected at least 179 natural clips, got ${urls.length}`);
 });
 
-test("speech prefers recorded game voice before browser synthesis", () => {
-  assert.match(voice, /gameVoiceClip\(text, lang\)/);
-  assert.match(voice, /speakGameClip\(clip, token\)/);
+test("speech uses natural plans before any optional browser synthesis", () => {
+  assert.match(voice, /naturalVoicePlan\(text, lang\)/);
+  assert.match(voice, /speakNaturalPlan\(plan, token\)/);
+  assert.match(voice, /settings\.systemVoiceFallback === true/);
+});
+
+test("robotic browser TTS is opt-in, not the child-facing default", () => {
+  assert.match(voice, /if \(settings\.systemVoiceFallback === true\)/);
   assert.match(voice, /return speakSystem\(text, lang, settings, token\)/);
-});
-
-test("recorded clip failure safely falls back to local speech", () => {
-  assert.match(voice, /if \(played \|\| token !== sequence\) return played/);
-  assert.match(voice, /return speakSystem/);
+  assert.match(voice, /return false;/);
 });
 
 test("game praise only uses phrases with natural clip coverage", () => {
