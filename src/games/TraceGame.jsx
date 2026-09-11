@@ -1,54 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 // Ordered motor paths: success needs progression along the actual numeral, not arbitrary scribbling.
 export const tracePaths = {
-  1: [
-    [125, 90],
-    [200, 35],
-    [200, 300],
-  ],
-  2: [
-    [85, 95],
-    [95, 55],
-    [150, 30],
-    [220, 45],
-    [255, 85],
-    [245, 130],
-    [200, 180],
-    [100, 290],
-    [260, 290],
-  ],
-  3: [
-    [90, 55],
-    [160, 30],
-    [225, 45],
-    [250, 95],
-    [210, 145],
-    [160, 160],
-    [220, 175],
-    [255, 220],
-    [230, 280],
-    [160, 305],
-    [85, 275],
-  ],
-  4: [
-    [230, 305],
-    [230, 40],
-    [75, 225],
-    [280, 225],
-  ],
-  5: [
-    [260, 40],
-    [100, 40],
-    [90, 155],
-    [180, 145],
-    [245, 180],
-    [255, 230],
-    [225, 280],
-    [150, 305],
-    [90, 280],
-  ],
+  1: [[125, 90], [200, 35], [200, 300]],
+  2: [[85, 95], [95, 55], [150, 30], [220, 45], [255, 85], [245, 130], [200, 180], [100, 290], [260, 290]],
+  3: [[90, 55], [160, 30], [225, 45], [250, 95], [210, 145], [160, 160], [220, 175], [255, 220], [230, 280], [160, 305], [85, 275]],
+  4: [[230, 305], [230, 40], [75, 225], [280, 225]],
+  5: [[260, 40], [100, 40], [90, 155], [180, 145], [245, 180], [255, 230], [225, 280], [150, 305], [90, 280]],
 };
 export const letterTracePaths = {
   C: [[260, 75], [220, 45], [150, 35], [95, 65], [70, 120], [65, 200], [90, 265], [145, 300], [215, 290], [260, 255]],
@@ -74,6 +33,8 @@ export default function TraceGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onSolve,
 }) {
@@ -106,8 +67,16 @@ export default function TraceGame({
     [itemId],
     lang === "tr" ? "Yeşil noktayı takip et." : "Folge dem grünen Punkt.",
   );
+
+  useEffect(() => {
+    if (paused || interactionBlocked()) down.current = false;
+  }, [paused, interactionBlocked]);
+
   function follow(e) {
-    if (!down.current) return;
+    if (!down.current || paused || interactionBlocked()) {
+      down.current = false;
+      return;
+    }
     const rect = e.currentTarget.getBoundingClientRect(),
       x = ((e.clientX - rect.left) * 340) / rect.width,
       y = ((e.clientY - rect.top) * 340) / rect.height;
@@ -127,21 +96,34 @@ export default function TraceGame({
       }
     }
   }
+
+  function start(e) {
+    if (paused || interactionBlocked()) return;
+    down.current = true;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    follow(e);
+  }
+
+  function reset() {
+    if (paused || interactionBlocked()) return;
+    down.current = false;
+    last.current = 0;
+    setIndex(0);
+    setStroke([]);
+  }
+
   return (
-    <div className="trace-wrap">
+    <div className="trace-wrap" aria-disabled={paused || undefined}>
       <svg
         className="trace-board"
         viewBox="0 0 340 340"
         role="img"
         aria-label={text}
-        onPointerDown={(e) => {
-          down.current = true;
-          e.currentTarget.setPointerCapture(e.pointerId);
-          follow(e);
-        }}
+        onPointerDown={start}
         onPointerMove={follow}
         onPointerUp={() => (down.current = false)}
         onPointerCancel={() => (down.current = false)}
+        onLostPointerCapture={() => (down.current = false)}
       >
         <polyline
           points={sourcePath.map((p) => p.join(",")).join(" ")}
@@ -183,14 +165,7 @@ export default function TraceGame({
       <div className="trace-progress">
         <span style={{ width: `${(index / points.length) * 100}%` }} />
       </div>
-      <button
-        className="secondary"
-        onClick={() => {
-          last.current = 0;
-          setIndex(0);
-          setStroke([]);
-        }}
-      >
+      <button className="secondary" onClick={reset} disabled={paused}>
         {lang === "tr" ? "Baştan başla" : "Noch einmal beginnen"}
       </button>
     </div>
