@@ -67,6 +67,7 @@ export default function TraceGame({
     [itemId],
     lang === "tr" ? "Yeşil noktayı takip et." : "Folge dem grünen Punkt.",
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   useEffect(() => {
     if (paused || interactionBlocked()) down.current = false;
@@ -113,12 +114,14 @@ export default function TraceGame({
   }
 
   return (
-    <div className="trace-wrap" aria-disabled={paused || undefined}>
+    <div className="trace-wrap" aria-disabled={controlsDisabled || undefined}>
       <svg
         className="trace-board"
         viewBox="0 0 340 340"
         role="img"
         aria-label={text}
+        aria-disabled={controlsDisabled || undefined}
+        style={{ pointerEvents: controlsDisabled ? "none" : undefined }}
         onPointerDown={start}
         onPointerMove={follow}
         onPointerUp={() => (down.current = false)}
@@ -165,7 +168,7 @@ export default function TraceGame({
       <div className="trace-progress">
         <span style={{ width: `${(index / points.length) * 100}%` }} />
       </div>
-      <button className="secondary" onClick={reset} disabled={paused}>
+      <button className="secondary" onClick={reset} disabled={controlsDisabled}>
         {lang === "tr" ? "Baştan başla" : "Noch einmal beginnen"}
       </button>
     </div>
