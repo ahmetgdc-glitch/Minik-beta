@@ -6,7 +6,7 @@ import { sample } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 import { recognitionIssue, speechMatches, speechRecognitionCtor } from "./pronunciation.js";
 
-export default function SpeakGame({ items, lang, settings, paused, hint, onReady, onWrong, onSolve }) {
+export default function SpeakGame({ items, lang, settings, paused, hint, interactionBlocked = () => false, onReady, onWrong, onSolve }) {
   const [target] = useState(() => sample(items.filter((i) => i.labels?.[lang]), 1)[0]);
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState("");
@@ -16,17 +16,16 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
   const expected = target?.labels?.[lang] || "";
   const prompt = lang === "tr" ? `Benimle söyle: ${expected}` : `Sprich mir nach: ${expected}`;
 
-  function repeat() { speak(expected, lang, settings); }
+  function repeat() {
+    if (paused || interactionBlocked()) return;
+    speak(expected, lang, settings);
+  }
   useLesson(onReady, prompt, repeat, [target?.id].filter(Boolean), expected);
 
   function stopRecognition() {
     const rec = recognitionRef.current;
     recognitionRef.current = null;
     if (rec) {
-      // Detach callbacks before aborting. Safari/WebKit may emit a late
-      // `aborted` error or `end` event after a pause/unmount/result. Those
-      // stale events must never overwrite the next round with a microphone
-      // warning or trigger state updates after the component has gone away.
       rec.onstart = null;
       rec.onend = null;
       rec.onerror = null;
@@ -40,7 +39,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
   useEffect(() => { if (paused) stopRecognition(); }, [paused]);
 
   function startListening() {
-    if (!available || listening || paused) return;
+    if (!available || listening || paused || interactionBlocked()) return;
     setIssue(null);
     setHeard("");
     const Ctor = speechRecognitionCtor(window);
@@ -52,7 +51,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
     rec.maxAlternatives = 3;
     rec.continuous = false;
     rec.onstart = () => {
-      if (recognitionRef.current === rec) setListening(true);
+      if (recognitionRef.current === rec && !interactionBlocked()) setListening(true);
     };
     rec.onend = () => {
       if (recognitionRef.current !== rec) return;
@@ -64,15 +63,17 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
       recognitionRef.current = null;
       setListening(false);
       if (String(event?.error || "").toLowerCase() === "aborted") return;
+      if (interactionBlocked()) return;
       setIssue(recognitionIssue(event?.error, lang));
     };
     rec.onresult = (event) => {
       if (recognitionRef.current !== rec) return;
+      if (paused || interactionBlocked()) {
+        stopRecognition();
+        return;
+      }
       const alternatives = Array.from(event.results?.[0] || []).map((r) => r.transcript || "");
       const best = alternatives[0] || "";
-      // A final recognition result decides this microphone attempt. Stop and
-      // detach the recognizer before calling the game callbacks so duplicate
-      // WebKit result/end events cannot register an extra wrong answer.
       stopRecognition();
       setHeard(best);
       if (alternatives.some((text) => speechMatches(text, expected, lang))) onSolve([target.id]);
@@ -81,13 +82,18 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
     try { rec.start(); } catch { stopRecognition(); }
   }
 
+  function assistedSolve() {
+    if (paused || interactionBlocked()) return;
+    onSolve([target.id], { assisted: true });
+  }
+
   if (!target) return null;
   return (
-    <div className="speak-game">
+    <div className="speak-game" aria-disabled={paused || undefined}>
       <div className="speak-hero">
         <Visual item={target} lang={lang} photos={settings.photos} />
         <strong>{expected}</strong>
-        <button className="speak-repeat" onClick={repeat} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
+        <button className="speak-repeat" onClick={repeat} disabled={paused} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
           <Volume2 size={28} />
         </button>
       </div>
@@ -100,7 +106,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
           {heard && <p className="heard-speech">{lang === "tr" ? "Duydum:" : "Gehört:"} <b>{heard}</b></p>}
           {issue && <p className={`speech-issue ${issue.kind}`} role="status">{issue.text}</p>}
           {issue?.kind === "permission" && (
-            <button className="secondary speak-assisted" onClick={() => onSolve([target.id], { assisted: true })}>
+            <button className="secondary speak-assisted" onClick={assistedSolve} disabled={paused}>
               <Check size={22} /> {lang === "tr" ? "Mino ile söyledim" : "Ich habe mit Mino mitgesprochen"}
             </button>
           )}
@@ -108,7 +114,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, onReady
       ) : (
         <div className="speech-fallback">
           <p>{lang === "tr" ? "Bu cihaz konuşma tanımayı desteklemiyor. Kelimeyi yüksek sesle söyle." : "Dieses Gerät unterstützt keine Spracherkennung. Sprich das Wort laut nach."}</p>
-          <button className="primary" onClick={() => onSolve([target.id], { assisted: true })}>
+          <button className="primary" onClick={assistedSolve} disabled={paused}>
             <Check size={24} /> {lang === "tr" ? "Söyledim" : "Ich habe es gesagt"}
           </button>
         </div>
