@@ -14,6 +14,8 @@ export default function ReviewGame({
   settings,
   hint,
   round,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -37,8 +39,13 @@ export default function ReviewGame({
 
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
 
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className={`review-game review-island review-${state.level}`}>
+    <div className={`review-game review-island review-${state.level}`} aria-disabled={paused || undefined}>
       <section className="review-island__stage" aria-label={badge}>
         <div className="review-island__focus">
           <div className="review-island__badge">{badge}</div>
@@ -57,7 +64,7 @@ export default function ReviewGame({
       </section>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
-        onPick={(item) => item.id === target.id ? onSolve([target.id]) : onWrong([target.id])}
+        onPick={pick}
       />
     </div>
   );
