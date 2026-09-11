@@ -55,13 +55,17 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     const img = new Image();
     img.onload = () => {
       if (url !== guideUrlRef.current) return;
-      const boxW = rect.width * .70;
-      const boxH = rect.height * .70;
+      const visibleGuide = w.querySelector(".draw-template.has-item");
+      const guideRect = visibleGuide?.getBoundingClientRect();
+      const boxW = Math.min(rect.width, guideRect?.width || rect.width * .70);
+      const boxH = Math.min(rect.height, guideRect?.height || rect.height * .70);
+      const boxX = guideRect ? guideRect.left - rect.left : (rect.width - boxW) / 2;
+      const boxY = guideRect ? guideRect.top - rect.top : (rect.height - boxH) / 2;
       const scale = Math.min(boxW / Math.max(1, img.naturalWidth), boxH / Math.max(1, img.naturalHeight));
       const drawW = img.naturalWidth * scale;
       const drawH = img.naturalHeight * scale;
-      const x = (rect.width - drawW) / 2;
-      const y = (rect.height - drawH) / 2;
+      const x = boxX + (boxW - drawW) / 2;
+      const y = boxY + (boxH - drawH) / 2;
       g.clearRect(0, 0, guide.width, guide.height);
       g.drawImage(img, x, y, drawW, drawH);
       guideRef.current = {
