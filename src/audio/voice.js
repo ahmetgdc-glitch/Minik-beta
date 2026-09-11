@@ -1,3 +1,5 @@
+import { gameVoiceClip } from "./gameVoiceClips.js";
+
 let voices = [],
   settle = null,
   current = null,
@@ -63,13 +65,10 @@ function naturalPitch(configured) {
   if (Number.isFinite(value)) return Math.min(1.12, Math.max(0.92, value));
   return 1.02;
 }
-export function speak(text, lang = "de", settings = {}) {
-  stopSpeech();
+function speakSystem(text, lang, settings, token) {
   const engine = synth();
-  if (!text || settings.audio === false || !engine)
-    return Promise.resolve(false);
+  if (!engine) return Promise.resolve(false);
   refreshVoices();
-  const token = sequence;
   return new Promise((resolve) => {
     let finished = false;
     const u = new SpeechSynthesisUtterance(text);
@@ -100,13 +99,51 @@ export function speak(text, lang = "de", settings = {}) {
     u.onend = () => finish(true);
     u.onerror = () => finish(false);
     try {
-      // A stale paused synth state is common after app/background transitions.
       engine.resume?.();
       engine.speak(u);
     } catch {
       finish(false);
     }
   });
+}
+async function speakGameClip(url, token) {
+  if (!url || typeof Audio === "undefined") return false;
+  try {
+    cloudPlayer = new Audio(url);
+    cloudPlayer.preload = "auto";
+    return await new Promise((resolve) => {
+      let done = false;
+      const finish = (ok) => {
+        if (done) return;
+        done = true;
+        if (cloudPlayer) {
+          cloudPlayer.onended = null;
+          cloudPlayer.onerror = null;
+        }
+        settle = null;
+        resolve(Boolean(ok && token === sequence));
+      };
+      settle = () => finish(false);
+      cloudPlayer.onended = () => finish(true);
+      cloudPlayer.onerror = () => finish(false);
+      Promise.resolve(cloudPlayer.play()).catch(() => finish(false));
+    });
+  } catch {
+    return false;
+  } finally {
+    cloudPlayer = null;
+  }
+}
+export async function speak(text, lang = "de", settings = {}) {
+  stopSpeech();
+  if (!text || settings.audio === false) return false;
+  const token = sequence;
+  const clip = gameVoiceClip(text, lang);
+  if (clip) {
+    const played = await speakGameClip(clip, token);
+    if (played || token !== sequence) return played;
+  }
+  return speakSystem(text, lang, settings, token);
 }
 export async function cloudTTS(text, lang, provider) {
   stopSpeech();
