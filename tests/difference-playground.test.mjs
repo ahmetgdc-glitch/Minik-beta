@@ -12,6 +12,13 @@ test("find-the-difference uses the immersive playground shell", () => {
   assert.match(game, /different-tile/);
 });
 
+test("difference tiles are disabled in paused and stale transition states", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(game, /if \(controlsDisabled\) return/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
+});
+
 test("difference playground keeps large touch tiles and phone adaptation", () => {
   assert.match(css, /min-height:\s*clamp\(190px, 31vw, 340px\)/);
   assert.match(css, /touch-action:\s*manipulation/);
