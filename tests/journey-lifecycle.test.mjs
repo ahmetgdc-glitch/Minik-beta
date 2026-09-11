@@ -6,7 +6,9 @@ function hasLifecycleGuard(source) {
   const direct = /if \(paused \|\| interactionBlocked\(\)\) return/.test(source);
   const helper = /function blocked\(\) \{[\s\S]*?return paused \|\| interactionBlocked\(\);[\s\S]*?\}/.test(source)
     && /if \(blocked\(\)\) return/.test(source);
-  return direct || helper;
+  const rendered = /const controlsDisabled = paused \|\| interactionBlocked\(\);/.test(source)
+    && /if \(controlsDisabled\) return/.test(source);
+  return direct || helper || rendered;
 }
 
 for (const name of ["DailyOrderGame.jsx", "SocialStepsGame.jsx"]) {
@@ -14,6 +16,7 @@ for (const name of ["DailyOrderGame.jsx", "SocialStepsGame.jsx"]) {
   test(`${name} blocks paused and stale lifecycle input`, () => {
     assert.match(source, /interactionBlocked = \(\) => false/);
     assert.ok(hasLifecycleGuard(source), `${name} must synchronously guard paused and stale input`);
-    assert.match(source, /disabled=\{paused\}/);
+    assert.match(source, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+    assert.match(source, /disabled=\{controlsDisabled\}/);
   });
 }
