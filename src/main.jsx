@@ -23,6 +23,7 @@ import "./games/story-journey.css";
 import "./games/routine-journey.css";
 import "./games/memory-playground.css";
 import "./games/difference-playground.css";
+import "./games/missing-stage.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
