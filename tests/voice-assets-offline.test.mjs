@@ -26,6 +26,7 @@ test("voice asset downloader covers prompts and modular learning vocabulary", ()
   assert.match(downloader, /src\/audio\/animalVoiceClips\.js/);
   assert.match(downloader, /src\/audio\/foodVoiceClips\.js/);
   assert.match(downloader, /src\/audio\/naturalVoicePlans\.js/);
+  assert.match(downloader, /src\/audio\/helpVoiceClips\.js/);
   assert.match(downloader, /fetchWithRetry/);
   assert.match(downloader, /\.voice-cache/);
   assert.match(downloader, /dist\/assets\/voice/);
@@ -37,16 +38,17 @@ test("localized voice files are packaged but cached only after use", () => {
   assert.match(worker, /await cache\.put\(event\.request,response\.clone\(\)\)/);
 });
 
-test("runtime prefers local recording, then remote recording, without automatic robot speech", () => {
+test("runtime keeps recordings first while native device speech covers gaps and pronunciation", () => {
   const localIndex = voice.indexOf("speakGameClip(localClip, token)");
   const remoteIndex = voice.indexOf("return speakGameClip(url, token)");
-  const optInIndex = voice.indexOf("settings.systemVoiceFallback === true");
-  const systemIndex = voice.indexOf("return speakSystem(text, lang, settings, token)");
-  assert.ok(localIndex > 0, "local natural clip must be attempted first");
+  const planIndex = voice.indexOf("naturalVoicePlan(text, lang)");
+  const fallbackIndex = voice.indexOf("settings.systemVoiceFallback !== false");
+  assert.ok(localIndex > 0, "local natural clip must be attempted first inside a recording plan");
   assert.ok(remoteIndex > localIndex, "remote recording must remain the recording fallback");
-  assert.ok(optInIndex > remoteIndex, "system voice must not be considered before recorded audio");
-  assert.ok(systemIndex > optInIndex, "browser speech must only exist behind explicit opt-in");
+  assert.ok(planIndex > 0, "recorded natural plans must remain available");
+  assert.ok(fallbackIndex > planIndex, "native device speech should cover only after a missing/failed recording plan");
+  assert.match(voice, /shouldPreferNativeSystem\(text, lang, settings\)/);
+  assert.match(voice, /localeFor = \(lang\) => \(lang === "tr" \? "tr-TR" : "de-DE"\)/);
+  assert.match(voice, /settings\.systemVoiceFallback !== false/);
   assert.match(voice, /assets\/voice\/\$\{filename\}/);
-  assert.match(voice, /naturalVoicePlan\(text, lang\)/);
-  assert.match(voice, /if \(settings\.systemVoiceFallback === true\)/);
 });
