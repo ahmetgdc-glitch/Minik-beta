@@ -12,6 +12,11 @@ const CLIPS = {
     "Tippe zwei Teile an und tausche sie.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a3e3d422-d8be-46c2-8094-d10ea2971f7e.mp3",
     "Finde zwei gleiche Bilder.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3642288d-3643-44e0-8a11-aef818c1a055.mp3",
     "Bring das Bild zu seinem Zwilling.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ab73617a-7303-43fd-b6ad-1eef1607bccc.mp3",
+    "Wie viele sind es?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/209ff11b-ec01-46e4-99c5-6e61a40beee5.mp3",
+    "Folge dem grünen Punkt.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/28febea4-cdba-47a4-bef5-41196a0cacf5.mp3",
+    "Wir drehen die Karten zusammen um.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6fc0b29a-4e95-4f4b-a80e-a6b1bde09881.mp3",
+    "Schau auf das kleine Vorbild.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8e559f66-8d9a-415b-b18a-1271fc9ebf2b.mp3",
+    "Tippe jedes Bild einmal an und zähle mit.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3eb6681e-fbb7-483d-8b2f-77e63c69990c.mp3",
   },
   tr: {
     "Harika!": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e3d0dbf1-3f7e-4808-aa2d-080742f7db36.mp3",
@@ -22,6 +27,11 @@ const CLIPS = {
     "İki parçaya dokun, yerlerini değiştir.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/20cb385a-b9de-43eb-a30d-92fd3d160f2c.mp3",
     "Aynı iki resmi bul.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/1d439ed8-910c-445b-9e1e-d61777b0a561.mp3",
     "Resmi eşine götür.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/ed815b11-e8c3-4d9e-a215-f3f40900ce76.mp3",
+    "Kaç tane var?": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/bc9f7bf1-f89b-4a29-8100-e576744b1d70.mp3",
+    "Yeşil noktayı takip et.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/b4ad25a0-1a12-4bb7-b637-24fb0aed9411.mp3",
+    "Kartları birlikte çevirelim.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/24aad09e-7b89-4491-b81d-c4fd24dbbc9e.mp3",
+    "Küçük resme bak.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/3e683442-9eb8-4909-9343-3b769968734b.mp3",
+    "Her resme bir kez dokun ve say.": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c79c4594-6c7c-4ebc-8862-cb0e5fe2bf66.mp3",
   },
 };
 
