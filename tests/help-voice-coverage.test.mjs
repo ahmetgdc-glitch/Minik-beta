@@ -10,10 +10,11 @@ const shadow = readFileSync(new URL("../src/games/ShadowGame.jsx", import.meta.u
 const sounds = readFileSync(new URL("../src/games/SoundsGame.jsx", import.meta.url), "utf8");
 const pattern = readFileSync(new URL("../src/games/PatternGame.jsx", import.meta.url), "utf8");
 const missing = readFileSync(new URL("../src/games/MissingGame.jsx", import.meta.url), "utf8");
+const worldScreen = readFileSync(new URL("../src/worlds/WorldScreen.jsx", import.meta.url), "utf8");
 const fetchScript = readFileSync(new URL("../scripts/fetch-voice-assets.mjs", import.meta.url), "utf8");
 const verifyScript = readFileSync(new URL("../scripts/verify-build.mjs", import.meta.url), "utf8");
 
-test("common game help prompts use natural recorded Mino voice", () => {
+test("common game and world help prompts use natural recorded Mino voice", () => {
   const pairs = [
     ["Folge den leuchtenden Tasten.", "de", rhythm],
     ["Parlayan tuşları takip et.", "tr", rhythm],
@@ -29,13 +30,15 @@ test("common game help prompts use natural recorded Mino voice", () => {
     ["Hangi resmin tekrar ettiğine bak.", "tr", pattern],
     ["Denk an die Reihe von eben.", "de", missing],
     ["Az önceki sırayı hatırla.", "tr", missing],
+    ["Tippe auf das große Bild. Wische weiter!", "de", worldScreen],
+    ["Büyük resme dokun. Sonra kaydır!", "tr", worldScreen],
   ];
-  for (const [phrase, lang, game] of pairs) {
-    assert.ok(game.includes(phrase), `game no longer uses expected help prompt: ${phrase}`);
+  for (const [phrase, lang, source] of pairs) {
+    assert.ok(source.includes(phrase), `source no longer uses expected help prompt: ${phrase}`);
     const clip = helpVoiceClip(phrase, lang);
     assert.match(clip, /^https:\/\/storage\.googleapis\.com\/.+\.mp3$/u, `missing natural help clip: ${phrase}`);
   }
-  assert.ok(helpVoiceClipCount >= 14);
+  assert.ok(helpVoiceClipCount >= 16);
 });
 
 test("help voice library participates in offline production voice pipeline", () => {
