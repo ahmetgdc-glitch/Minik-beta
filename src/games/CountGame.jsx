@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react";
-import { sample } from "../utils/random.js";
+import { Sparkles } from "lucide-react";
+import { sample, choicesFor } from "../utils/random.js";
 import { itemsForWorld } from "../data/content.js";
 import { useLesson, OptionGrid } from "./shared.jsx";
-import { choicesFor } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
+
 export default function CountGame({
   items,
   difficulty,
@@ -33,6 +34,7 @@ export default function CountGame({
   const [counted, setCounted] = useState([]);
   const countedRef = useRef([]);
   const text = lang === "tr" ? "Kaç tane var?" : "Wie viele sind es?";
+
   useLesson(
     onReady,
     text,
@@ -42,43 +44,79 @@ export default function CountGame({
       ? "Her resme bir kez dokun ve say."
       : "Tippe jedes Bild einmal an und zähle mit.",
   );
+
+  const countProgress = `${counted.length} / ${n}`;
+  const allCounted = counted.length === n;
+
   return (
-    <>
-      <div className={`count-field count-${n > 10 ? "many" : "few"}`} style={{ "--count-columns": Math.min(n, n <= 5 ? 3 : 5), "--count-height": `${n <= 2 ? 32 : n <= 5 ? 20 : n <= 10 ? 14 : 10}svh` }}>
-        {Array.from({ length: n }, (_, i) => (
-          <button
-            key={i}
-            className={counted.includes(i) ? "counted" : ""}
-            aria-label={`${object.labels[lang]} ${i + 1}`}
-            onClick={() => {
+    <section className="count-playground count-meadow" aria-label={text}>
+      <header className="count-meadow-header">
+        <span className="count-meadow-badge" aria-hidden="true"><Sparkles size={24} /></span>
+        <div>
+          <strong>{lang === "tr" ? "Mino ile say" : "Zähl mit Mino"}</strong>
+          <span aria-live="polite">
+            {allCounted
+              ? lang === "tr" ? "Hepsini saydın! Şimdi sayıyı seç." : "Alle gezählt! Wähle jetzt die Zahl."
+              : lang === "tr" ? `${countProgress} sayıldı` : `${countProgress} gezählt`}
+          </span>
+        </div>
+      </header>
+
+      <div
+        className={`count-field count-${n > 10 ? "many" : "few"}`}
+        style={{
+          "--count-columns": Math.min(n, n <= 5 ? 3 : 5),
+          "--count-height": `${n <= 2 ? 32 : n <= 5 ? 20 : n <= 10 ? 14 : 10}svh`,
+        }}
+      >
+        {Array.from({ length: n }, (_, i) => {
+          const isCounted = counted.includes(i);
+          const shownNumber = hint >= 2 ? i + 1 : counted.indexOf(i) + 1;
+          return (
+            <button
+              key={i}
+              className={`count-object ${isCounted ? "counted" : ""}`}
+              aria-label={`${object.labels[lang]} ${i + 1}`}
+              disabled={paused}
+              onClick={() => {
+                if (paused || interactionBlocked()) return;
+                if (!countedRef.current.includes(i)) {
+                  speak(
+                    itemsForWorld("numbers")[countedRef.current.length].labels[lang],
+                    lang,
+                    settings,
+                  );
+                  countedRef.current = [...countedRef.current, i];
+                  setCounted(countedRef.current);
+                }
+              }}
+            >
+              <span className="count-object-glow" aria-hidden="true" />
+              <Visual item={object} lang={lang} photos={false} />
+              {(isCounted || hint >= 2) && (
+                <span className="count-number-bubble">{shownNumber}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={`count-answer-stage ${allCounted ? "ready" : ""}`}>
+        <div className="count-answer-title">
+          <strong>{lang === "tr" ? "Kaç tane?" : "Wie viele?"}</strong>
+          <span>{lang === "tr" ? "Doğru sayı adasına dokun" : "Tippe auf die richtige Zahleninsel"}</span>
+        </div>
+        <div className="number-options">
+          <OptionGrid
+            {...{ options, target, hint, lang, settings }}
+            hiddenLabels
+            onPick={(item) => {
               if (paused || interactionBlocked()) return;
-              if (!countedRef.current.includes(i)) {
-                speak(
-                  itemsForWorld("numbers")[countedRef.current.length].labels[lang],
-                  lang,
-                  settings,
-                );
-                countedRef.current = [...countedRef.current, i];
-                setCounted(countedRef.current);
-              }
+              item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
             }}
-          >
-            <Visual item={object} lang={lang} photos={false} />
-            {(counted.includes(i) || hint >= 2) && (
-              <span>{hint >= 2 ? i + 1 : counted.indexOf(i) + 1}</span>
-            )}
-          </button>
-        ))}
+          />
+        </div>
       </div>
-      <div className="number-options">
-        <OptionGrid
-          {...{ options, target, hint, lang, settings }}
-          hiddenLabels
-          onPick={(item) =>
-            item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
-          }
-        />
-      </div>
-    </>
+    </section>
   );
 }
