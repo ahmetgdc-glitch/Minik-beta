@@ -25,7 +25,10 @@ export default function SoundsGame({
   }
   const text =
     lang === "tr" ? "Dinle. Bu ne sesi?" : "Hör genau hin. Was klingt so?";
-  useLesson(onReady, text, repeat, [target.id], target.labels[lang]);
+  const help = lang === "tr"
+    ? "Sesi bir kez daha dikkatle dinle."
+    : "Hör das Geräusch noch einmal genau an.";
+  useLesson(onReady, text, repeat, [target.id], help);
   useEffect(() => {
     if (paused) {
       stopSounds();
