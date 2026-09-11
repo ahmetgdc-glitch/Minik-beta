@@ -62,6 +62,7 @@ export default function PuzzleGame({
       ? target.variants.photo
       : `assets/illustrations/${target.asset}.svg`,
   );
+  const controlsDisabled = paused || interactionBlocked();
 
   function pieceStyle(index) {
     const col = index % cols;
@@ -103,7 +104,7 @@ export default function PuzzleGame({
   const guideOpacity = hint >= 3 ? .30 : hint >= 2 ? .20 : .10;
 
   return (
-    <section className="puzzle-layout real-puzzle" aria-disabled={paused || undefined} ref={placement.boardRef}>
+    <section className="puzzle-layout real-puzzle" aria-disabled={controlsDisabled || undefined} ref={placement.boardRef}>
       <header className="puzzle-topbar">
         <div className="puzzle-reference">
           <Visual item={target} lang={lang} photos={settings.photos} />
@@ -127,7 +128,7 @@ export default function PuzzleGame({
               key={index}
               type="button"
               data-drop-id={slotId(index)}
-              disabled={paused || filled}
+              disabled={controlsDisabled || filled}
               className={`puzzle-slot puzzle-piece shape-${index % 4} ${filled ? "filled" : ""} ${hint >= 2 && selectedIndex === index ? "hint-target" : ""}`}
               style={filled ? pieceStyle(index) : undefined}
               onClick={() => drop(selected, slotId(index))}
@@ -148,7 +149,7 @@ export default function PuzzleGame({
               return <button
                 key={index}
                 type="button"
-                disabled={paused || done}
+                disabled={controlsDisabled || done}
                 className={`puzzle-source puzzle-piece shape-${index % 4} ${done ? "placed" : ""} ${selected === id ? "selected" : ""}`}
                 style={pieceStyle(index)}
                 aria-label={`${lang === "tr" ? "Parça" : "Puzzleteil"} ${index + 1}`}
