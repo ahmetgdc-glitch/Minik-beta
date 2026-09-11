@@ -17,30 +17,25 @@ test("MINIK has natural Mino voice clips in both languages", () => {
 
 test("core game starts and help prompts keep natural voice coverage", () => {
   for (const phrase of [
-    "Schau mal! Tippe auf das Bild.",
-    "Tippe zwei Teile an und tausche sie.",
-    "Finde zwei gleiche Bilder.",
-    "Bring das Bild zu seinem Zwilling.",
-    "Wie viele sind es?",
-    "Folge dem grünen Punkt.",
-    "Wir drehen die Karten zusammen um.",
-    "Schau auf das kleine Vorbild.",
-    "Tippe jedes Bild einmal an und zähle mit.",
-    "Bak bakalım! Resme dokun.",
-    "İki parçaya dokun, yerlerini değiştir.",
-    "Aynı iki resmi bul.",
-    "Resmi eşine götür.",
-    "Kaç tane var?",
-    "Yeşil noktayı takip et.",
-    "Kartları birlikte çevirelim.",
-    "Küçük resme bak.",
-    "Her resme bir kez dokun ve say.",
+    "Schau mal! Tippe auf das Bild.", "Tippe zwei Teile an und tausche sie.",
+    "Finde zwei gleiche Bilder.", "Bring das Bild zu seinem Zwilling.",
+    "Wie viele sind es?", "Folge dem grünen Punkt.",
+    "Wir drehen die Karten zusammen um.", "Schau auf das kleine Vorbild.",
+    "Tippe jedes Bild einmal an und zähle mit.", "In welchen Korb gehört das?",
+    "Hör zu und spiele die Melodie nach.", "Hör genau hin. Was klingt so?",
+    "Zu welchem Bild gehört der Schatten?", "Bak bakalım! Resme dokun.",
+    "İki parçaya dokun, yerlerini değiştir.", "Aynı iki resmi bul.",
+    "Resmi eşine götür.", "Kaç tane var?", "Yeşil noktayı takip et.",
+    "Kartları birlikte çevirelim.", "Küçük resme bak.",
+    "Her resme bir kez dokun ve say.", "Hangi sepete ait?",
+    "Dinle ve aynı melodiyi çal.", "Dinle. Bu ne sesi?",
+    "Bu gölge hangi resme ait?",
   ]) assert.ok(clips.includes(phrase), `missing natural clip: ${phrase}`);
 });
 
-test("natural Mino library keeps at least 27 recorded prompts", () => {
+test("natural Mino library keeps at least 35 recorded prompts", () => {
   const urls = clips.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 27, `expected at least 27 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 35, `expected at least 35 natural clips, got ${urls.length}`);
 });
 
 test("speech prefers recorded game voice before browser synthesis", () => {
