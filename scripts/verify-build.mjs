@@ -12,8 +12,9 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
   await fs.access(path.resolve(root, match[1]));
 }
 
-const voiceSourcePattern = /https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/([a-f0-9-]+\.mp3)/g;
-const voiceSourceFiles = [
+const legacyVoiceSourcePattern = /https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/([a-f0-9-]+\.mp3)/g;
+const personalVoiceSourcePattern = /https:\/\/resource2\.heygen\.ai\/text_to_speech\/[^"'\s]+\/(id=[a-f0-9-]+\.wav)/g;
+const legacyVoiceSourceFiles = [
   "src/audio/gameVoiceClips.js",
   "src/audio/animalVoiceClips.js",
   "src/audio/numberVoiceClips.js",
@@ -24,14 +25,34 @@ const voiceSourceFiles = [
   "src/audio/foodVoiceClips.js",
   "src/audio/naturalVoicePlans.js",
 ];
-const voiceSources = await Promise.all(voiceSourceFiles.map((file) => fs.readFile(path.resolve(file), "utf8")));
-const expectedVoiceFiles = new Set(voiceSources.flatMap((source) => [...source.matchAll(voiceSourcePattern)].map((match) => match[1])));
-const builtVoiceFiles = (await fs.readdir(path.join(root, "assets/voice"))).filter((file) => file.endsWith(".mp3"));
-assert.equal(builtVoiceFiles.length, expectedVoiceFiles.size, `Expected ${expectedVoiceFiles.size} localized voice clips, found ${builtVoiceFiles.length}`);
+const legacyVoiceSources = await Promise.all(legacyVoiceSourceFiles.map((file) => fs.readFile(path.resolve(file), "utf8")));
+const personalVoiceSource = await fs.readFile(path.resolve("src/audio/personalVoiceClips.js"), "utf8");
+const expectedLegacyVoiceFiles = new Set(
+  legacyVoiceSources.flatMap((source) => [...source.matchAll(legacyVoiceSourcePattern)].map((match) => match[1])),
+);
+const expectedPersonalVoiceFiles = new Set(
+  [...personalVoiceSource.matchAll(personalVoiceSourcePattern)].map((match) => match[1]),
+);
+const expectedVoiceFiles = new Set([...expectedLegacyVoiceFiles, ...expectedPersonalVoiceFiles]);
+const builtVoiceFiles = (await fs.readdir(path.join(root, "assets/voice"))).filter((file) => /\.(?:mp3|wav)$/iu.test(file));
+assert.equal(
+  builtVoiceFiles.length,
+  expectedVoiceFiles.size,
+  `Expected ${expectedVoiceFiles.size} localized voice clips, found ${builtVoiceFiles.length}`,
+);
+for (const filename of expectedVoiceFiles) {
+  assert.ok(builtVoiceFiles.includes(filename), `Missing localized voice clip: ${filename}`);
+}
+
 const voiceManifest = JSON.parse(await fs.readFile(path.join(root, "assets/voice/manifest.json"), "utf8"));
-assert.equal(voiceManifest.expected, expectedVoiceFiles.size);
-assert.equal(voiceManifest.available, expectedVoiceFiles.size);
+assert.equal(voiceManifest.expected, expectedLegacyVoiceFiles.size);
+assert.equal(voiceManifest.available, expectedLegacyVoiceFiles.size);
 assert.equal(voiceManifest.missing.length, 0);
+
+const personalVoiceManifest = JSON.parse(await fs.readFile(path.join(root, "assets/voice/personal-manifest.json"), "utf8"));
+assert.equal(personalVoiceManifest.expected, expectedPersonalVoiceFiles.size);
+assert.equal(personalVoiceManifest.available, expectedPersonalVoiceFiles.size);
+assert.equal(personalVoiceManifest.missing.length, 0);
 
 for (const scope of ["https://example.test/", "https://example.test/Minik-beta/", "https://example.test/Minik-2.0-/"]) {
   let offline = false;
@@ -88,7 +109,7 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   assert.ok(active[1].size >= 8, "App shell must be cached");
   assert.ok(active[1].size < 120, `Boot cache must stay lightweight on Safari, found ${active[1].size} files`);
   assert.equal(
-    [...active[1].keys()].some((url) => url.includes("/assets/voice/") && url.endsWith(".mp3")),
+    [...active[1].keys()].some((url) => url.includes("/assets/voice/") && /\.(?:mp3|wav)$/iu.test(url)),
     false,
     "Boot cache must not preload the whole voice library",
   );
