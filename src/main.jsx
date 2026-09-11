@@ -17,6 +17,7 @@ import "./games/games.css";
 import "./worlds/worlds.css";
 import "./games/immersive.css";
 import "./app/playground.css";
+import "./app/playground-guards.css";
 import "./rewards/immersive-rewards.css";
 import "./rewards/achievement-trail.css";
 import "./games/story-journey.css";
