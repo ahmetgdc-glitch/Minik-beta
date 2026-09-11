@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Play } from "lucide-react";
+import { Play, Music2, Sparkles } from "lucide-react";
 import { playNote, stopSounds, ensureAudioReady } from "../audio/sounds.js";
 import { stopSpeech } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
+
 const colors = ["#ee8470", "#eac856", "#71b5de", "#a193d9"];
+const symbols = ["●", "▲", "■", "★"];
+
 export default function RhythmGame({
   difficulty,
   lang,
@@ -23,17 +26,22 @@ export default function RhythmGame({
     [cursor, setCursor] = useState(-1),
     [input, setInput] = useState([]),
     [lit, setLit] = useState(-1);
+
   async function repeat() {
+    if (paused || playing) return;
     stopSpeech();
     await ensureAudioReady();
+    if (paused) return;
     setInput([]);
     setCursor(0);
     setPlaying(true);
   }
+
   const text =
     lang === "tr"
       ? "Dinle ve aynı melodiyi çal."
       : "Hör zu und spiele die Melodie nach.";
+
   useLesson(
     onReady,
     text,
@@ -43,6 +51,7 @@ export default function RhythmGame({
       ? "Parlayan tuşları takip et."
       : "Folge den leuchtenden Tasten.",
   );
+
   useEffect(() => {
     if (!playing || paused) return;
     if (cursor >= sequence.length) {
@@ -59,10 +68,20 @@ export default function RhythmGame({
       clearTimeout(next);
       stopSounds();
     };
-  }, [cursor, playing, paused]);
+  }, [cursor, playing, paused, sequence]);
+
+  useEffect(() => {
+    if (!paused) return;
+    setPlaying(false);
+    setLit(-1);
+    setCursor(-1);
+    stopSounds();
+  }, [paused]);
+
   async function tap(i) {
-    if (playing) return;
+    if (playing || paused) return;
     await playNote(i);
+    if (paused) return;
     if (i !== sequence[input.length]) {
       onWrong(["sounds.piano"]);
       setInput([]);
@@ -72,39 +91,85 @@ export default function RhythmGame({
     setInput(next);
     if (next.length === sequence.length) onSolve(["sounds.piano"]);
   }
+
+  const heardCount = playing ? Math.max(0, Math.min(sequence.length, cursor)) : 0;
+  const status = playing
+    ? lang === "tr"
+      ? "Mino çalıyor…"
+      : "Mino spielt vor…"
+    : input.length
+      ? lang === "tr"
+        ? `${input.length} / ${sequence.length} doğru`
+        : `${input.length} / ${sequence.length} richtig`
+      : lang === "tr"
+        ? "Şimdi sıra sende!"
+        : "Jetzt bist du dran!";
+
   return (
-    <div className="rhythm-stage">
-      <div className="rhythm-dots">
-        {sequence.map((v, i) => (
-          <span
-            key={i}
-            className={i < input.length ? "done" : ""}
-            style={{ background: hint >= 2 ? colors[v] : undefined }}
-          />
-        ))}
+    <section className="rhythm-stage rhythm-playground" aria-label={text}>
+      <div className="rhythm-sky" aria-hidden="true">
+        <span className="rhythm-cloud rhythm-cloud-one" />
+        <span className="rhythm-cloud rhythm-cloud-two" />
+        <Music2 className="rhythm-floating-note note-one" />
+        <Music2 className="rhythm-floating-note note-two" />
       </div>
-      <div className="music-pads">
+
+      <div className="rhythm-hero">
+        <div className="rhythm-hero-badge" aria-hidden="true">
+          <Sparkles size={28} />
+        </div>
+        <div>
+          <strong>{lang === "tr" ? "Mino'nun müzik sahnesi" : "Minos Musikbühne"}</strong>
+          <span aria-live="polite">{status}</span>
+        </div>
+      </div>
+
+      <div className="rhythm-path" aria-label={lang === "tr" ? "Melodi ilerlemesi" : "Melodie-Fortschritt"}>
+        {sequence.map((value, i) => {
+          const completed = i < input.length;
+          const previewed = playing && i < heardCount;
+          const current = playing && i === cursor;
+          return (
+            <span
+              key={i}
+              className={`rhythm-step ${completed ? "done" : ""} ${previewed ? "heard" : ""} ${current ? "current" : ""}`}
+              style={{ "--step-color": hint >= 2 || current ? colors[value] : undefined }}
+              aria-label={`${i + 1}`}
+            >
+              {completed ? "✓" : i + 1}
+            </span>
+          );
+        })}
+      </div>
+
+      <div className="music-pads" role="group" aria-label={lang === "tr" ? "Müzik tuşları" : "Musiktasten"}>
         {colors.map((color, i) => (
           <button
             key={i}
-            className={`${lit === i ? "lit" : ""} ${hint >= 2 && !playing && sequence[input.length] === i ? "hint-target" : ""}`}
+            className={`music-pad ${lit === i ? "lit" : ""} ${hint >= 2 && !playing && sequence[input.length] === i ? "hint-target" : ""}`}
             style={{ "--pad": color }}
-            disabled={playing}
+            disabled={playing || paused}
             onClick={() => tap(i)}
             aria-label={`${lang === "tr" ? "Ses" : "Ton"} ${i + 1}`}
           >
-            <span>{["●", "▲", "■", "★"][i]}</span>
+            <span className="music-pad-glow" aria-hidden="true" />
+            <span className="music-pad-symbol" aria-hidden="true">{symbols[i]}</span>
+            <span className="music-pad-label">{lang === "tr" ? `Ses ${i + 1}` : `Ton ${i + 1}`}</span>
           </button>
         ))}
       </div>
+
       <button
-        className="secondary centered"
+        className="rhythm-repeat"
         onClick={repeat}
-        disabled={playing}
+        disabled={playing || paused}
       >
-        <Play size={20} />
-        {lang === "tr" ? "Melodiyi dinle" : "Melodie anhören"}
+        <span className="rhythm-repeat-icon"><Play size={28} fill="currentColor" /></span>
+        <span>
+          <strong>{lang === "tr" ? "Melodiyi dinle" : "Melodie anhören"}</strong>
+          <small>{lang === "tr" ? "Mino sana bir kez daha çalsın" : "Mino spielt sie dir noch einmal vor"}</small>
+        </span>
       </button>
-    </div>
+    </section>
   );
 }
