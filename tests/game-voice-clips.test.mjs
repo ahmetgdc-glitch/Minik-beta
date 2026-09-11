@@ -51,6 +51,11 @@ test("home and common unmapped game prompts have recorded Mino phrases", () => {
     "Was sieht Mino zum Schluss?", "Mino en son ne görüyor?",
     "Sprich mir nach.", "Benimle söyle.",
     "Fahre die Spur nach. Starte am grünen Punkt.", "İzi takip et. Yeşil noktadan başla.",
+    "Das wiederholen wir noch einmal.", "Bir kez daha hatırlayalım.",
+    "Tippe auf dieses Bild.", "Bu resmi seç.",
+    "Was ist das Gegenteil?", "Bunun zıttı hangisi?",
+    "Was kommt danach?", "Sonra ne gelir?",
+    "Als Nächstes kommt:", "Sırada:",
   ]) assert.ok(plans.includes(phrase), `missing natural plan phrase: ${phrase}`);
 });
 
@@ -66,6 +71,16 @@ test("dynamic common game prompts are composed only from recorded clips", () => 
     ["Benimle söyle: Aslan", "tr", 2],
     ["Fahre den Buchstaben A nach. Starte am grünen Punkt.", "de", 1],
     ["A harfini çiz. Yeşil noktadan başla.", "tr", 1],
+    ["Wo ist Hund? Das wiederholen wir noch einmal.", "de", 3],
+    ["Köpek nerede? Bir kez daha hatırlayalım.", "tr", 3],
+    ["Hund. Tippe auf dieses Bild.", "de", 2],
+    ["Köpek. Bu resmi seç.", "tr", 2],
+    ["Hund. Was ist das Gegenteil?", "de", 2],
+    ["Köpek. Bunun zıttı hangisi?", "tr", 2],
+    ["Was kommt nach Hund?", "de", 2],
+    ["Köpek sonrasında ne gelir?", "tr", 2],
+    ["Nach Hund kommt Katze.", "de", 3],
+    ["Köpek sonrasında Kedi gelir.", "tr", 3],
   ]) {
     const plan = naturalVoicePlan(text, lang);
     assert.ok(plan.length >= minParts, `expected natural plan for ${lang}: ${text}`);
@@ -113,9 +128,9 @@ test("animal vocabulary remains modular and wired into the shared player", () =>
   assert.match(clips, /animalVoiceClipCount/);
 });
 
-test("natural Mino library keeps at least 179 recorded prompts and words", () => {
+test("natural Mino library keeps at least 189 recorded prompts and words", () => {
   const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 179, `expected at least 179 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 189, `expected at least 189 natural clips, got ${urls.length}`);
 });
 
 test("speech uses natural plans before any optional browser synthesis", () => {
