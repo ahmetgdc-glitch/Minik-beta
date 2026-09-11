@@ -32,21 +32,22 @@ export default function DifferentGame({
 
   const cells = useMemo(() => round?.cells || [], [round]);
   if (!round) return null;
+  const controlsDisabled = paused || interactionBlocked();
 
   function pick(cell) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     cell.odd ? onSolve([cell.item.id]) : onWrong([cell.item.id, round.odd.id]);
   }
 
   return (
-    <section className="different-game difference-playground" aria-label={prompt} aria-disabled={paused || undefined}>
+    <section className="different-game difference-playground" aria-label={prompt} aria-disabled={controlsDisabled || undefined}>
       <div className="different-grid">
         {cells.map((cell) => (
           <button
             key={cell.key}
             className={`different-tile ${hint >= 2 && cell.odd ? "hint-target" : ""}`}
             onClick={() => pick(cell)}
-            disabled={paused}
+            disabled={controlsDisabled}
             aria-label={cell.item.labels?.[lang] || cell.item.id}
           >
             <Visual item={cell.item} lang={lang} photos={settings.photos} />
