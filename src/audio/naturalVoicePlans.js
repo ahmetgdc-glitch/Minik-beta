@@ -19,6 +19,11 @@ import {
   vehicleVoiceClipCount,
   vehicleVoiceEntries,
 } from "./vehicleVoiceClips.js";
+import {
+  bodyVoiceClip,
+  bodyVoiceClipCount,
+  bodyVoiceEntries,
+} from "./bodyVoiceClips.js";
 
 const normalize = (text) => String(text || "").trim();
 const stripEnd = (text) => normalize(text).replace(/[.!?]+$/u, "").trim();
@@ -70,7 +75,13 @@ export function naturalPhraseClip(text, lang = "de") {
 }
 
 function recordedClip(text, lang) {
-  return naturalPhraseClip(text, lang) || helpVoiceClip(text, lang) || categoryVoiceClip(text, lang) || vehicleVoiceClip(text, lang) || gameVoiceClip(text, lang) || foodVoiceClip(text, lang);
+  return naturalPhraseClip(text, lang) ||
+    helpVoiceClip(text, lang) ||
+    categoryVoiceClip(text, lang) ||
+    vehicleVoiceClip(text, lang) ||
+    bodyVoiceClip(text, lang) ||
+    gameVoiceClip(text, lang) ||
+    foodVoiceClip(text, lang);
 }
 
 function resolve(parts, lang) {
@@ -139,8 +150,9 @@ export function preloadNaturalVoicePlans(lang) {
   const helpGroups = lang && helpVoiceEntries[lang] ? [helpVoiceEntries[lang]] : Object.values(helpVoiceEntries);
   const categoryGroups = lang && categoryVoiceEntries[lang] ? [categoryVoiceEntries[lang]] : Object.values(categoryVoiceEntries);
   const vehicleGroups = lang && vehicleVoiceEntries[lang] ? [vehicleVoiceEntries[lang]] : Object.values(vehicleVoiceEntries);
+  const bodyGroups = lang && bodyVoiceEntries[lang] ? [bodyVoiceEntries[lang]] : Object.values(bodyVoiceEntries);
   const foodGroups = lang && foodVoiceEntries[lang] ? [foodVoiceEntries[lang]] : Object.values(foodVoiceEntries);
-  const groups = [...phraseGroups, ...helpGroups, ...categoryGroups, ...vehicleGroups, ...foodGroups];
+  const groups = [...phraseGroups, ...helpGroups, ...categoryGroups, ...vehicleGroups, ...bodyGroups, ...foodGroups];
   let added = 0;
   for (const group of groups) {
     for (const url of Object.values(group)) {
@@ -160,4 +172,4 @@ export function preloadNaturalVoicePlans(lang) {
 
 export const naturalVoicePlanClipCount =
   Object.values(PHRASES).reduce((sum, group) => sum + Object.keys(group).length, 0) +
-  helpVoiceClipCount + categoryVoiceClipCount + vehicleVoiceClipCount + foodVoiceClipCount;
+  helpVoiceClipCount + categoryVoiceClipCount + vehicleVoiceClipCount + bodyVoiceClipCount + foodVoiceClipCount;
