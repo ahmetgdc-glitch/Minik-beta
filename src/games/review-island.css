@@ -70,7 +70,30 @@
   animation: reviewFloat 3.4s ease-in-out infinite;
 }
 
-.review-island__orb span { filter: drop-shadow(0 8px 10px rgba(35, 76, 61, .16)); }
+.review-island__listen {
+  border: 0;
+  color: #2f6558;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .14s ease, box-shadow .14s ease, filter .14s ease;
+}
+
+.review-island__listen:hover,
+.review-island__listen:focus-visible {
+  box-shadow: 0 20px 42px rgba(39, 92, 73, .22), inset 0 0 0 8px rgba(255,255,255,.65);
+  outline: 4px solid rgba(255,255,255,.78);
+  outline-offset: 5px;
+}
+
+.review-island__listen:not(:disabled):active {
+  transform: scale(.94);
+}
+
+.review-island__listen:disabled {
+  cursor: default;
+  opacity: .72;
+}
 
 .review-island__title {
   margin: 0;
@@ -115,4 +138,5 @@
 
 @media (prefers-reduced-motion: reduce) {
   .review-island__orb { animation: none; }
+  .review-island__listen { transition: none; }
 }
