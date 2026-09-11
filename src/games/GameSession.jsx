@@ -605,7 +605,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       >
         <Component
           key={`${round}-${gameId}`}
-          {...{ items, world, progress, lang, settings, difficulty, round, hint, paused }}
+          {...{ items, world, progress, lang, settings, difficulty, round, hint, paused, interactionBlocked }}
           onReady={ready}
           onWrong={wrong}
           onSolve={solve}

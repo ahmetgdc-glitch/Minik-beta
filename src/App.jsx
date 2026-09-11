@@ -28,7 +28,7 @@ import { useAudioPrime } from "./app/useAudioPrime.js";
 import { gameFitsAge } from "./learning/age.js";
 import { Mino } from "./components/Visual.jsx";
 import StarBar from "./components/StarBar.jsx";
-import WorldCard from "./components/WorldCard.jsx";
+import WorldAtlas from "./worlds/WorldAtlas.jsx";
 import Home from "./app/Home.jsx";
 import GamesScreen from "./app/GamesScreen.jsx";
 import WorldScreen from "./worlds/WorldScreen.jsx";
@@ -137,7 +137,7 @@ export default function App() {
       </main>
     );
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${!["parents", "profiles"].includes(route) ? "child-world-shell" : ""}`} data-age={progress.activeProfile?.ageGroup || "4-5"}>
       <aside className="sidebar">
         <button
           className="brand"
@@ -310,33 +310,7 @@ export default function App() {
           {!route ? (
             <Home progress={progress} onNavigate={go} />
           ) : route === "worlds" ? (
-            <>
-              <div className="section-heading">
-                <div>
-                  <span className="eyebrow">
-                    {t("So viel zu entdecken", "Keşfedilecek çok şey var")}
-                  </span>
-                  <h1>{t("Deine Lernwelten", "Öğrenme dünyaların")}</h1>
-                  <p>
-                    {t(
-                      "Jede Welt steckt voller neuer Entdeckungen.",
-                      "Her dünya yeni keşiflerle dolu.",
-                    )}
-                  </p>
-                </div>
-              </div>
-              <div className="world-grid all-worlds">
-                {worlds.map((w) => (
-                  <WorldCard
-                    key={w.id}
-                    world={w}
-                    lang={lang}
-                    progress={progress}
-                    onOpen={(w) => go(`/world/${w.id}`)}
-                  />
-                ))}
-              </div>
-            </>
+            <WorldAtlas progress={progress} onOpen={world => go(`/world/${world.id}`)} />
           ) : route === "world" && worldById[arg] ? (
             <WorldScreen
               key={arg}

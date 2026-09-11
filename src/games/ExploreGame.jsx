@@ -1,20 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
-import Visual from "../components/Visual.jsx";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import SceneExplorer from "../worlds/SceneExplorer.jsx";
+import { addDiscovery, explorationSize } from "../worlds/scenes.js";
 import { speak } from "../audio/voice.js";
 import { sample } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 
-export default function ExploreGame({ items, lang, settings, round, hint, paused, onReady, onSolve }) {
+export default function ExploreGame({ items, world, progress, difficulty, lang, settings, round, hint, paused, interactionBlocked = () => false, onReady, onSolve }) {
   const [found, setFound] = useState([]);
-  const sceneItems = useMemo(() => sample(items, Math.min(6, items.length)), [items, round]);
-  const targetCount = Math.min(4, sceneItems.length);
-  const text = lang === "tr" ? "Dünyaya dokun ve neler bulduğunu keşfet." : "Tippe in die Welt und entdecke, was du findest.";
-  const help = lang === "tr" ? "Parlayan resimlerden birine dokun." : "Tippe auf eines der großen Bilder, die leicht wackeln.";
+  const foundRef = useRef([]);
+  const sceneItems = useMemo(() => sample(items, explorationSize(difficulty)), [items, round, difficulty]);
+  const targetCount = sceneItems.length;
+  const text = lang === "tr" ? "Bak bakalım! Resme dokun." : "Schau mal! Tippe auf das Bild.";
+  const help = lang === "tr" ? "Kaydır ve diğer resimleri keşfet." : "Wische und entdecke die anderen Bilder.";
   useLesson(onReady, text, () => speak(text, lang, settings), sceneItems.map(x => x.id), help);
 
   function discover(item) {
-    if (paused || found.includes(item.id)) return;
-    const next = [...found, item.id];
+    if (paused || interactionBlocked()) return;
+    const next = addDiscovery(foundRef.current, item.id, sceneItems.map(x => x.id));
+    if (next === foundRef.current) {
+      speak(item.labels[lang], lang, settings);
+      return;
+    }
+    foundRef.current = next;
     setFound(next);
     speak(item.labels[lang], lang, settings);
   }
@@ -25,23 +32,9 @@ export default function ExploreGame({ items, lang, settings, round, hint, paused
     return () => clearTimeout(timer);
   }, [paused, found, targetCount, onSolve]);
 
-  return <div className={`explore-scene world-${round % 4} ${hint >= 2 ? "show-hints" : ""}`}>
-    <div className="scene-sky"><span className="scene-cloud cloud-a"/><span className="scene-cloud cloud-b"/></div>
-    <div className="scene-hill hill-a"/><div className="scene-hill hill-b"/>
-    <div className="scene-ground"/>
-    {sceneItems.map((item, index) => (
-      <button
-        key={item.id}
-        className={`scene-object scene-pos-${index + 1} ${found.includes(item.id) ? "discovered" : ""}`}
-        onClick={() => discover(item)}
-        aria-label={item.labels[lang]}
-      >
-        <Visual item={item} lang={lang} photos={settings.photos}/>
-        {found.includes(item.id) && <span className="scene-label">✓ {item.labels[lang]}</span>}
-      </button>
-    ))}
-    <div className="scene-progress" aria-live="polite">
+  return <SceneExplorer items={sceneItems} worldId={world.id} {...{lang, settings, found, hint, paused, interactionBlocked}}
+    outfit={progress.minoOutfit} onDiscover={discover} onMino={() => speak(help, lang, settings)}
+    footer={<div className="discovery-progress" role="status" aria-label={`${found.length} / ${targetCount}`}>
       {Array.from({length: targetCount}, (_, i) => <i key={i} className={i < found.length ? "done" : ""}/>) }
-    </div>
-  </div>;
+    </div>} />;
 }

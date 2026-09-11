@@ -19,6 +19,7 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
 
 for (const scope of [
   "https://example.test/",
+  "https://example.test/Minik-beta/",
   "https://example.test/Minik-2.0-/",
 ]) {
   let offline = false;
@@ -137,6 +138,10 @@ for (const scope of [
   assert.match(page.body.toString(), /MINIK/);
   const image = await request(scope + "assets/mascot/mino.webp");
   assert.ok(image.body.byteLength > 1000);
+  for (const scene of ["archipelago", "meadow", "playroom"]) {
+    const landscape = await request(scope + `assets/scenes/${scene}.webp`);
+    assert.ok(landscape?.body.byteLength > 1000, `${scene} must work on the first offline visit`);
+  }
   assert.equal(request("https://unrelated.test/asset.svg"), undefined);
   assert.equal(request(scope, "cors", "POST"), undefined);
   console.log(

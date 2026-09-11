@@ -1,8 +1,12 @@
 # MINIK · Lernen mit Mino
 
-**1.65.0 Beta 66 · 11. September 2026**
+**1.66.0 Beta 67 · 11. September 2026**
 
 MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet große visuelle Spielflächen mit Mino als Helfer, getrennten Kinderprofilen, adaptivem Lernen, Belohnungen und einem offline-fähigen PWA-Kern.
+
+## Neue Entdeckerwelt
+
+Die Startseite ist eine bildschirmfüllende Inselwelt mit großem Mino. Alle bestehenden Welten sind in fünf Themenreisen erreichbar. In den Entdeckerszenen steht ein großes Lernobjekt im Mittelpunkt: antippen, hören, weiterwischen. Pfeile und Tastatur bieten denselben Zugang. Profile, Empfehlungen und Lernfortschritt bleiben erhalten.
 
 ## Aktueller Umfang
 
@@ -43,10 +47,10 @@ Der empfohlene Weg ist das vollständige Projekt auf `main` oder `master` zu lad
 
 Zusätzlich wird der fertige `dist/`-Stand für 14 Tage als Actions-Artefakt **`minik-production-build`** gespeichert. So kann derselbe geprüfte Produktionsbuild auch separat heruntergeladen werden.
 
-Die Quellcode-Release-ZIPs aus der aktuellen Entwicklungsumgebung enthalten bewusst **keinen veralteten `dist/`-Ordner**. Der lokale Paketordner dieser Umgebung ist unvollständig; ein echter frischer Produktionsbuild muss deshalb über eine saubere Node-Installation beziehungsweise GitHub Actions erzeugt werden.
+Die Weiterentwicklung erfolgt im bestehenden Repository `ahmetgdc-glitch/Minik-beta` auf `main`. Ein frischer lokaler Build ist in der aktuellen Arbeitsumgebung möglich; `dist/` wird aus dem Quellstand erzeugt und nicht eingecheckt.
 
-## Grenzen vor 1.0
+## Noch nötige Geräteprüfung
 
-Automatisierte Tests ersetzen keinen echten Gerätetest. Vor einer als „final“ bezeichneten 1.0 müssen insbesondere iPhone/iPad-Touchgefühl, Home-Screen-PWA, Flugmodus, installierte deutsche/türkische Stimmen und Mikrofonberechtigungen auf realer Hardware geprüft werden. Die Sprachqualität hängt von den auf dem Gerät vorhandenen Systemstimmen ab; MINIK enthält keinen kostenpflichtigen TTS-Dienst und keinen API-Schlüssel im Client.
+Automatisierte Tests ersetzen keinen echten Gerätetest. Vor einer als „final“ bezeichneten Version müssen insbesondere iPhone/iPad-Touchgefühl, Home-Screen-PWA, Flugmodus, installierte deutsche/türkische Stimmen und Mikrofonberechtigungen auf realer Hardware geprüft werden. Die Sprachqualität hängt von den auf dem Gerät vorhandenen Systemstimmen ab; MINIK enthält keinen kostenpflichtigen TTS-Dienst und keinen API-Schlüssel im Client.
 
 Weitere Details: [Startanleitung](START_HIER.md) · [Roadmap](docs/ROADMAP.md) · [QA](docs/QA_CHECKLIST.md) · [Technik](docs/TECH_SPEC.md) · [Übergabe](docs/HANDOFF_SUMMARY.md) · [Änderungen](CHANGELOG.md).

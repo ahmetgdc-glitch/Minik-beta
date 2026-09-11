@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.66.0 Beta 67 — Minos große Entdeckerwelt
+
+- Neue bildschirmfüllende Startlandschaft mit großem Mino, nativen Wischgesten und fünf Themenreisen zu allen 25 bestehenden Welten.
+- Große Lernobjekte in Landschaften statt einer Wortkartenwand; Antippen spricht das Wort, Pfeile und Tastatur ergänzen Wischen.
+- Entdeckerspiel übernimmt diese Darstellung mit altersabhängig begrenzter Objektzahl und erhaltenem Pause-/Fortschrittsschutz.
+- Drei eigens für MINIK erzeugte WebP-Landschaften (zusammen 382 KB) werden offline vorgeladen.
+- Sechs neue Tests für vollständige Weltennavigation, Scrollgrenzen, doppelte Entdeckungen, Schwierigkeit und Assetbudget. Offline-Buildprüfung ergänzt den echten `/Minik-beta/`-Pfad.
+
 ## 1.65.0 Beta 66 — Safari-Pause und Interaktionssicherheit zusammengeführt
 
 - Der synchrone `pausedRef`-Schutz gegen iOS-Safari-Tap-Races bleibt erhalten.

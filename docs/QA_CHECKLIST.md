@@ -1,10 +1,10 @@
 # MINIK Release-QA
 
-Stand: **2026-09-10 · 1.65.0 Beta 66**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Physische Gerätetests oder ein echtes GitHub-Deployment werden nicht vorgetäuscht.
+Stand: **2026-09-11 · 1.66.0 Beta 67**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Physische Gerätetests oder ein echtes GitHub-Deployment werden nicht vorgetäuscht.
 
 ## Automatisiert bestanden
 
-- [x] **203/203 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, Audio, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **209/209 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, Audio, Eltern-Gate, Dialoge und Release-Härtung.
 - [x] `validate-content.mjs`: 25 Lernwelten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets vorhanden.
 - [x] Antwortmengen bleiben eindeutig und altersgerecht; Altersstufe 2–3 erhält maximal zwei Optionen.
 - [x] Direkte/alte Spiel-URLs können Altersfreigaben und Weltzuordnung nicht umgehen.
@@ -37,6 +37,10 @@ Stand: **2026-09-10 · 1.65.0 Beta 66**. „Bestanden“ bedeutet automatisiert 
 - [ ] Backup exportieren, Browserdaten getrennt testen und Backup wiederherstellen.
 - [ ] Pädagogische DE/TR-Inhaltsprüfung mit Fachperson.
 
-## Lokale Buildgrenze dieser Arbeitsumgebung
+## Aktueller lokaler Build und visuelle Prüfung
 
-Der Quellstand und die Node-Prüfungen laufen. Ein frischer lokaler Vite-Produktionsbuild kann in dieser Containerumgebung weiterhin nicht abgeschlossen werden, weil die vorhandenen `node_modules` leer/unvollständig sind und die Umgebung keinen normalen npm-Netzwerkzugriff besitzt. Deshalb wird kein alter `dist/`-Stand als aktueller Build ausgegeben. Der GitHub-Workflow führt auf einem sauberen Runner `npm ci` aus und ist der vorgesehene Produktionsbuild-Pfad.
+- [x] Frische Abhängigkeiten installiert; Vite-Produktionsbuild erfolgreich.
+- [x] Startwelt und Tier-Entdeckerszene auf 393 × 852 geprüft.
+- [x] Aktuelles Tier bleibt bei Wechsel auf 768 × 1024 erhalten.
+- [x] Entdeckerspiel gestartet, Objekt entdeckt, Pause stoppt die Bedienung.
+- [ ] Physische iPhone-/iPad-Prüfung: Browsergrößen sind kein Ersatz für reales Touch-/Audio-/PWA-Verhalten.

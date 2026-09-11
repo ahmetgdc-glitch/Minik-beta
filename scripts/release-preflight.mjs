@@ -84,8 +84,8 @@ check(docs.README.includes("503"), "README has stale learning-item count");
 check(docs.README.includes("23 Spiel"), "README has stale game count");
 check(!/12 Spiele|zwölf Spiele|16 Lernwelten/.test(docs.README), "README still advertises an old small release");
 
-// Since the local container cannot currently run Vite, at least verify that
-// every relative JS/JSX/CSS import resolves on a case-sensitive filesystem.
+// Verify that every relative JS/JSX/CSS import resolves on a
+// case-sensitive filesystem before running the production build.
 // This catches a large class of production build failures before GitHub CI.
 const sourceFiles = walkFiles(path.join(root, "src"), (file) => /\.(?:js|jsx|mjs)$/.test(file));
 const importPattern = /(?:^|[;\n])\s*(?:import|export)\s+(?:[^"'\n]*?\s+from\s+)?["']([^"']+)["']/g;

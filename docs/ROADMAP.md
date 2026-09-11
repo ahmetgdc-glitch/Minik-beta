@@ -1,6 +1,16 @@
 # MINIK Roadmap
 
-Stand **1.65.0 Beta 66 · 2026-09-10**. Der funktionale 1.0-Kern ist weitgehend vorhanden. Der verbleibende Weg zur finalen App besteht jetzt vor allem aus echter Geräteprüfung, veröffentlichtem Produktionsbuild und pädagogischem Feinschliff – nicht aus immer neuen kleinen Funktionen.
+Stand **1.66.0 Beta 67 · 2026-09-11**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+
+## Immersive Kinderwelt
+
+- [x] Bildschirmfüllende Startlandschaft mit großem Mino
+- [x] Alle bestehenden Welten über fünf wischbare Themenreisen erreichbar
+- [x] Große Entdeckerszenen und lokale Offline-Landschaften
+- [ ] Eigenständige Szenen und Entdeckungsmomente für weitere Themenwelten
+- [ ] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
+- [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
+- [ ] DE/TR-Sprachführung und reale iPhone-/iPad-Interaktion weiter verfeinern
 
 ## Fundament und Lernkern
 

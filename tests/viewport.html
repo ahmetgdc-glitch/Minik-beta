@@ -44,9 +44,11 @@
     id="app"
     width="393"
     height="852"
-    src="../dist/index.html"
+    src="../"
   ></iframe>
   <script>
+    // Vite preview serves the production build; the dev server serves source.
+    // This harness must never silently inspect an older dist directory.
     document.querySelector("#size").onchange = (e) => {
       const [w, h] = e.target.value.split(",");
       const frame = document.querySelector("#app");

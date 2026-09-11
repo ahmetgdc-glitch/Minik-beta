@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **10. September 2026 · 1.65.0 Beta 66**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **11. September 2026 · 1.66.0 Beta 67**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -29,22 +29,21 @@ Stand: **10. September 2026 · 1.65.0 Beta 66**. Der langfristige Nutzerauftrag 
 - neuer `npm run preflight` prüft Release-Metadaten, Dokumentation, Inhaltsumfang, Manifest und Deploymentworkflow
 - GitHub Actions archiviert den geprüften Produktionsbuild zusätzlich als `minik-production-build`
 
+## Neue Entdeckerwelt — Beta 67
+
+- Entwicklung direkt auf dem bestehenden `main` von `ahmetgdc-glitch/Minik-beta`, Ausgangspunkt Beta 66.
+- Große Startlandschaft mit Mino, zwei direkten Einstiegen und fünf wischbaren Themenreisen. Alle 25 IDs und 503 Inhalte unverändert.
+- Pro Entdeckerszene ein großes Objekt statt einer kleinen Wortkartenwand. Native Scroll-Snap-Navigation, Pfeile, Tastatur und Größenwechsel mit erhaltenem Bild.
+- Entdeckerspiel nutzt dieselbe Szene mit zwei/vier/sechs Objekten gemäß Schwierigkeit. Doppelte Taps zählen nicht erneut; Pausen stoppen die Abschluss-Timer.
+- Lokale Original-Landschaften: zusammen rund 382 KB WebP. Der Service Worker lädt sie mit dem Offline-Kern.
+- `worlds.css` ist eine abgegrenzte Präsentationsschicht; Elternoberflächen und Datenmodelle bleiben auf der bestehenden Architektur.
+
 ## Prüfung
 
-**203/203 automatisierte Tests bestanden.** `scripts/validate-content.mjs` bestätigt 25 Welten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets.
+209 Node-Tests einschließlich aller 203 bisherigen Fälle bestanden. Release-Preflight und frischer Vite-Build erfolgreich. Offline-Verifikation prüft zusätzlich den tatsächlichen Repository-Pfad `/Minik-beta/` und alle drei Landschaften. Browser-QA erfolgt mit `tests/viewport.html` gegen den aktuellen Dev-Server, nicht gegen ein altes `dist`.
 
-Der frühere Service-Worker-/Offline-Vertrag wurde bereits für `/` und `/Minik-2.0-/` simuliert. Im aktuellen Quellarbeitsordner wird bewusst kein alter `dist/` verwendet; eine neue `verify:build`-Prüfung ist erst nach einem frischen Vite-Build sinnvoll.
-
-## Bekannter Umgebungsblocker
-
-Die lokale Containerkopie der npm-Abhängigkeiten ist leer/unvollständig (`vite: not found`) und normaler Registry-Zugriff ist in dieser Umgebung nicht verfügbar. Daher einen lokalen Produktionsbuild **nicht** als bestanden ausgeben. GitHub Actions nutzt einen sauberen Node-22-Runner mit `npm ci`, danach `npm test`, `npm run preflight`, `npm run build` und `npm run verify:build`.
-
-## Noch nicht als erledigt behaupten
-
-- kein echter GitHub-Actions-/Pages-Lauf dieses aktuellen Standes verifiziert
-- kein physischer iPhone-/iPad-Test für Mikrofon, Systemstimmen, PWA und Flugmodus
-- keine pädagogische Langzeit-/Fachprüfung
+Beobachtet: Startwelt auf 393 × 852, Tierwelt auf 393 × 852 und 768 × 1024, Bildwechsel, Antippen/Vorlesen, Größenwechsel mit erhaltenem Bild, Spielstart und manueller Pause. Physische iOS-Geräte und akustische Qualität der Systemstimmen sind noch offen.
 
 ## Weiterarbeit
 
-Ab jetzt Finalisierung priorisieren: reale Releaseblocker, Datenintegrität, Navigations-/Lifecyclefälle, Geräte-QA und Produktionsdeployment. Nicht wieder zu kleinen Quizkarten zurückbauen und nicht künstlich Funktionen hinzufügen, nur um die Featurezahl zu erhöhen.
+Als Nächstes Sortieren und Zuordnen mit sicherem Ziehen verbessern, Spielobjekte weiter vergrößern und Mino im Spiel stärker integrieren. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 dürfen nicht verloren gehen. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.

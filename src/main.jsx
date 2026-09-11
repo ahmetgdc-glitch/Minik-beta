@@ -14,6 +14,7 @@ import "@fontsource/nunito/latin-ext-800.css";
 import "@fontsource/nunito/latin-ext-900.css";
 import "./styles.css";
 import "./games/games.css";
+import "./worlds/worlds.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

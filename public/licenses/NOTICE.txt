@@ -1,4 +1,4 @@
-MINIK 0.3.0 — third-party assets
+MINIK — asset provenance and third-party licenses
 
 Illustrations: Google Noto Emoji
 Copyright 2013 Google, Inc. All Rights Reserved.
@@ -13,3 +13,5 @@ Icons: Lucide, ISC license. See Lucide-ISC.txt.
 React: MIT license. See React-MIT.txt.
 
 Mino mascot and six adult emotion images: generated for MINIK using OpenAI ImageGen on 2026-09-09. Synthetic characters/adults, no source photographs, no references to real people. Resized/cropped and encoded as WebP for delivery. The portraits are not photographs of real people and are identified as generated photo assets in content metadata and in the parent area.
+
+Scene backgrounds (archipelago.webp, meadow.webp, playroom.webp): original images generated for MINIK with OpenAI ImageGen on 2026-09-11, without third-party reference images. Landscape artwork only; no copied app characters, logos, layouts or sounds. Encoded as WebP for offline delivery.

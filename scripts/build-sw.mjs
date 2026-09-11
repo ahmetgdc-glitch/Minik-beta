@@ -35,6 +35,7 @@ const initial = files.filter(
     /assets\/.*\.(js|css|woff2)$/.test(p) ||
     p.startsWith("assets/illustrations/") ||
     p.startsWith("assets/photos/") ||
+    p.startsWith("assets/scenes/") ||
     p === "assets/content-manifest.json",
 );
 

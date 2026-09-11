@@ -1,11 +1,11 @@
-# MINIK 1.65.0 Beta 66 auf GitHub testen
+# MINIK 1.66.0 Beta 67 auf GitHub testen
 
 Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelten, 503 DE/TR-Inhalten und 23 Spieltypen**.
 
 ## Empfohlen: über GitHub Actions veröffentlichen
 
-1. ZIP entpacken.
-2. Den **Inhalt des entpackten Ordners** in das MINIK-Repository übernehmen. `package.json`, `package-lock.json`, `index.html`, `src`, `public`, `scripts`, `tests` und `.github` gehören ins Repository-Hauptverzeichnis. Das ZIP selbst nicht als einzige Datei hochladen.
+1. Das bestehende Repository `ahmetgdc-glitch/Minik-beta` klonen und den aktuellen `main` verwenden. Keine ältere ZIP als Ausgangspunkt übernehmen.
+2. Mit Node ab 22.12 `npm ci` ausführen, anschließend die vier Prüfungen aus `README.md`.
 3. In GitHub **Settings → Pages → Build and deployment → Source → GitHub Actions** auswählen.
 4. Auf `main` oder `master` speichern. Unter **Actions** startet **Build, test and publish MINIK** automatisch; alternativ kann der Workflow manuell gestartet werden.
 5. Der Workflow führt `npm ci`, **200+ automatisierte Tests**, den Release-Preflight, den Produktionsbuild und die Offline-Verifikation aus.
@@ -15,7 +15,7 @@ Der fertige Produktionsordner wird zusätzlich im erfolgreichen Actions-Lauf als
 
 ## Wichtig zu `dist/`
 
-Die aktuelle Quellcode-ZIP enthält absichtlich keinen alten `dist/`-Ordner. `dist/` soll aus genau diesem Quellstand frisch entstehen. Die `index.html` im Projektstamm ist nur der Vite-Einstieg und allein keine fertige statische App.
+Das Repository enthält keinen eingecheckten `dist/`-Ordner. `dist/` soll aus genau diesem Quellstand frisch entstehen. Die `index.html` im Projektstamm ist nur der Vite-Einstieg und allein keine fertige statische App.
 
 ## Auf iPhone/iPad testen
 
