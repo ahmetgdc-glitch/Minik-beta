@@ -10,6 +10,8 @@ export default function DifferentGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -31,14 +33,20 @@ export default function DifferentGame({
   const cells = useMemo(() => round?.cells || [], [round]);
   if (!round) return null;
 
+  function pick(cell) {
+    if (paused || interactionBlocked()) return;
+    cell.odd ? onSolve([cell.item.id]) : onWrong([cell.item.id, round.odd.id]);
+  }
+
   return (
-    <section className="different-game difference-playground" aria-label={prompt}>
+    <section className="different-game difference-playground" aria-label={prompt} aria-disabled={paused || undefined}>
       <div className="different-grid">
         {cells.map((cell) => (
           <button
             key={cell.key}
             className={`different-tile ${hint >= 2 && cell.odd ? "hint-target" : ""}`}
-            onClick={() => cell.odd ? onSolve([cell.item.id]) : onWrong([cell.item.id, round.odd.id])}
+            onClick={() => pick(cell)}
+            disabled={paused}
             aria-label={cell.item.labels?.[lang] || cell.item.id}
           >
             <Visual item={cell.item} lang={lang} photos={settings.photos} />
