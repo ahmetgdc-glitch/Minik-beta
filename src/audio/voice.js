@@ -102,6 +102,16 @@ function speakSystem(text, lang, settings, token) {
     }
   });
 }
+function localizedGameClip(url) {
+  if (!url || typeof document === "undefined") return "";
+  try {
+    const filename = new URL(url).pathname.split("/").pop();
+    if (!filename?.endsWith(".mp3")) return "";
+    return new URL(`assets/voice/${filename}`, document.baseURI).href;
+  } catch {
+    return "";
+  }
+}
 async function speakGameClip(url, token) {
   if (!url || typeof Audio === "undefined") return false;
   try {
@@ -136,6 +146,11 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   const clip = gameVoiceClip(text, lang);
   if (clip) {
+    const localClip = localizedGameClip(clip);
+    if (localClip) {
+      const playedLocal = await speakGameClip(localClip, token);
+      if (playedLocal || token !== sequence) return playedLocal;
+    }
     const played = await speakGameClip(clip, token);
     if (played || token !== sequence) return played;
   }
