@@ -9,7 +9,7 @@ permissions:
   id-token: write
 concurrency:
   group: minik-pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,7 +24,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .voice-cache
-          key: minik-voice-${{ hashFiles('src/audio/gameVoiceClips.js', 'src/audio/animalVoiceClips.js') }}
+          key: minik-voice-${{ hashFiles('src/audio/gameVoiceClips.js', 'src/audio/animalVoiceClips.js', 'src/audio/foodVoiceClips.js', 'src/audio/naturalVoicePlans.js') }}
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
