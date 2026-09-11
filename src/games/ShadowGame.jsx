@@ -25,7 +25,7 @@ export default function ShadowGame({
     target.labels[lang],
   );
   return (
-    <>
+    <div className="shadow-playground">
       <div className="shadow-stage">
         <Visual item={target} lang={lang} silhouette={hint < 3} />
       </div>
@@ -35,6 +35,6 @@ export default function ShadowGame({
           item.id === target.id ? onSolve([target.id]) : onWrong([target.id])
         }
       />
-    </>
+    </div>
   );
 }
