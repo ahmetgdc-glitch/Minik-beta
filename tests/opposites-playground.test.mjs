@@ -16,10 +16,12 @@ test("opposites uses a visual two-sided playground instead of the legacy concept
 });
 
 test("opposites lets children replay the prompt word without bypassing interaction guards", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
   assert.match(game, /function replayPrompt\(\)/);
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /if \(controlsDisabled\) return/);
   assert.match(game, /speak\(prompt\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onClick={replayPrompt}/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
   assert.match(game, /noch einmal anhören/);
   assert.match(game, /tekrar dinle/);
 });
