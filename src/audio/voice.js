@@ -1,4 +1,4 @@
-import { gameVoiceClip } from "./gameVoiceClips.js";
+import { gameVoiceClip, preloadGameVoiceClips } from "./gameVoiceClips.js";
 
 let voices = [],
   settle = null,
@@ -74,15 +74,11 @@ function speakSystem(text, lang, settings, token) {
     const u = new SpeechSynthesisUtterance(text);
     current = u;
     u.lang = localeFor(lang);
-    // Calm, warm child-game prosody. Extreme pitch/rate settings make even
-    // premium voices sound synthetic, especially on iOS.
     u.rate = naturalRate(lang, settings.rate);
     u.pitch = naturalPitch(settings.pitch);
     u.volume = 1;
     const voice = chooseVoice(lang, settings.voices?.[lang]);
     if (voice) u.voice = voice;
-    // iOS/Safari can occasionally omit onend/onerror. Never leave game logic
-    // waiting forever: use a generous watchdog based on utterance length.
     const timeoutMs = Math.min(20000, Math.max(4500, text.length * 180));
     const timer = setTimeout(() => finish(false), timeoutMs);
     function finish(ok) {
@@ -168,3 +164,4 @@ if (synth()) {
   refreshVoices();
   synth().addEventListener("voiceschanged", refreshVoices);
 }
+if (typeof Audio !== "undefined") preloadGameVoiceClips();
