@@ -28,8 +28,15 @@ test("GameSession applies and forwards the synchronous lifecycle guard", () => {
   assert.match(source, /inert=\{paused \|\| phase !== "active" \? true : undefined\}/);
 });
 
+test("game header separates real back navigation from pause", () => {
+  const source = fs.readFileSync("src/games/GameSession.jsx", "utf8");
+  assert.match(source, /className="icon-button game-back-button"[\s\S]*onClick=\{exit\}[\s\S]*Zurück zur Lernwelt/);
+  assert.match(source, /className="icon-button pause-button"[\s\S]*onClick=\{pauseManually\}/);
+  assert.equal((source.match(/onClick=\{pauseManually\}/g) || []).length, 1);
+});
+
 test("manual pause stops audio and checkpoints synchronously before React commits", () => {
   const source = fs.readFileSync("src/games/GameSession.jsx", "utf8");
   assert.match(source, /const pauseManually = useCallback\(\(\) => \{[\s\S]*manualPauseRef\.current = true;[\s\S]*stopSpeech\(\);[\s\S]*stopSounds\(\);[\s\S]*persistCheckpoint\(\);/);
-  assert.ok((source.match(/onClick=\{pauseManually\}/g) || []).length >= 2);
+  assert.match(source, /onClick=\{pauseManually\}/);
 });
