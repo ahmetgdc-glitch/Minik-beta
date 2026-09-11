@@ -14,6 +14,15 @@ test("pattern game uses a large visual path instead of the legacy row and option
   assert.doesNotMatch(game, /<OptionGrid/);
 });
 
+test("pattern path nodes can replay their spoken labels without bypassing lifecycle guards", () => {
+  assert.match(game, /function speakNode\(item\)/);
+  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /onClick=\{\(\) => speakNode\(base\[i\]\)\}/);
+  assert.match(game, /role="button"/);
+  assert.match(game, /tabIndex=\{paused \? -1 : 0\}/);
+});
+
 test("pattern path keeps large child-first nodes and responsive controls", () => {
   assert.match(css, /min-height:\s*clamp\(330px, 55vh, 560px\)/);
   assert.match(css, /touch-action:\s*manipulation/);
