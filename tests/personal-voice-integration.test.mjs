@@ -46,14 +46,14 @@ test("personal wav clips are localized before service worker generation", () => 
   const workerIndex = pkg.indexOf("build-sw.mjs");
   assert.ok(personalIndex > 0, "personal voice localization must be part of npm build");
   assert.ok(workerIndex > personalIndex, "service worker must be generated after personal voice files exist");
-  assert.match(downloader, /src\/audio\/personalVoiceClips\.js/);
-  assert.match(downloader, /resource2\\\.heygen\\\.ai/);
-  assert.match(downloader, /\.voice-cache\/personal/);
-  assert.match(downloader, /personal-manifest\.json/);
-  assert.match(downloader, /MINIK_REQUIRE_LOCAL_VOICE/);
+  assert.ok(downloader.includes("src/audio/personalVoiceClips.js"));
+  assert.ok(downloader.includes("resource2\\.heygen\\.ai"));
+  assert.ok(downloader.includes(".voice-cache/personal"));
+  assert.ok(downloader.includes("personal-manifest.json"));
+  assert.ok(downloader.includes("MINIK_REQUIRE_LOCAL_VOICE"));
 });
 
 test("runtime can resolve both legacy mp3 and personal wav files locally", () => {
-  assert.match(voice, /\\\.\(\?:mp3\|wav\)\$\/iu/);
-  assert.match(voice, /assets\/voice\/\$\{filename\}/);
+  assert.ok(voice.includes("(?:mp3|wav)"));
+  assert.ok(voice.includes("assets/voice/${filename}"));
 });
