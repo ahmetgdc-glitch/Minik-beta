@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const clips = readFileSync(new URL("../src/audio/gameVoiceClips.js", import.meta.url), "utf8");
+const animals = readFileSync(new URL("../src/audio/animalVoiceClips.js", import.meta.url), "utf8");
+const voiceLibrary = `${clips}\n${animals}`;
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const session = readFileSync(new URL("../src/games/GameSession.jsx", import.meta.url), "utf8");
 
@@ -54,16 +56,24 @@ test("all shape vocabulary uses natural Mino voice in both languages", () => {
   ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural shape clip: ${word}`);
 });
 
-test("beginner animals use natural Mino voice in both languages", () => {
+test("sixteen beginner animals use natural Mino voice in both languages", () => {
   for (const word of [
     "Löwe", "Hund", "Katze", "Kuh", "Pferd", "Schaf", "Tiger", "Affe",
+    "Kaninchen", "Bär", "Elefant", "Giraffe", "Pinguin", "Frosch", "Fisch", "Vogel",
     "Aslan", "Köpek", "Kedi", "İnek", "At", "Koyun", "Kaplan", "Maymun",
-  ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural animal clip: ${word}`);
+    "Tavşan", "Ayı", "Fil", "Zürafa", "Penguen", "Kurbağa", "Balık", "Kuş",
+  ]) assert.ok(animals.includes(`\"${word}\"`), `missing natural animal clip: ${word}`);
 });
 
-test("natural Mino library keeps at least 111 recorded prompts and words", () => {
-  const urls = clips.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 111, `expected at least 111 natural clips, got ${urls.length}`);
+test("animal vocabulary remains modular and wired into the shared player", () => {
+  assert.match(clips, /animalVoiceClip\(text, lang\)/);
+  assert.match(clips, /animalVoiceEntries/);
+  assert.match(clips, /animalVoiceClipCount/);
+});
+
+test("natural Mino library keeps at least 127 recorded prompts and words", () => {
+  const urls = voiceLibrary.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
+  assert.ok(urls.length >= 127, `expected at least 127 natural clips, got ${urls.length}`);
 });
 
 test("speech prefers recorded game voice before browser synthesis", () => {
