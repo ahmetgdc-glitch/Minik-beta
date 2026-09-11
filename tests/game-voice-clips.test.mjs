@@ -45,14 +45,16 @@ test("numbers one through ten use natural Mino voice in both languages", () => {
   ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural number clip: ${word}`);
 });
 
-test("core shapes use natural Mino voice in both languages", () => {
-  for (const word of ["Kreis", "Quadrat", "Dreieck", "Rechteck", "Daire", "Kare", "Üçgen", "Dikdörtgen"])
-    assert.ok(clips.includes(`\"${word}\"`), `missing natural shape clip: ${word}`);
+test("all shape vocabulary uses natural Mino voice in both languages", () => {
+  for (const word of [
+    "Kreis", "Quadrat", "Dreieck", "Rechteck", "Stern", "Herz", "Raute", "Oval",
+    "Daire", "Kare", "Üçgen", "Dikdörtgen", "Yıldız", "Kalp", "Eşkenar dörtgen",
+  ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural shape clip: ${word}`);
 });
 
-test("natural Mino library keeps at least 71 recorded prompts and words", () => {
+test("natural Mino library keeps at least 79 recorded prompts and words", () => {
   const urls = clips.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 71, `expected at least 71 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 79, `expected at least 79 natural clips, got ${urls.length}`);
 });
 
 test("speech prefers recorded game voice before browser synthesis", () => {
