@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowRight, Volume2 } from "lucide-react";
 import Visual from "../components/Visual.jsx";
 import { sample, choicesFor } from "../utils/random.js";
@@ -35,6 +35,8 @@ export default function StoryGame({
 }) {
   const [storyItems] = useState(() => sample(items, Math.min(3, items.length)));
   const [question, setQuestion] = useState(false);
+  const [speakingId, setSpeakingId] = useState(null);
+  const speechRun = useRef(0);
   const target = storyItems[storyItems.length - 1];
   const options = useMemo(() => choicesFor(target, items, difficulty), [target, items, difficulty]);
 
@@ -54,13 +56,29 @@ export default function StoryGame({
     `${prompt} ${target.labels[lang]}`,
   );
 
+  useEffect(() => {
+    if (!controlsDisabled && !question) return;
+    speechRun.current += 1;
+    setSpeakingId(null);
+  }, [controlsDisabled, question]);
+
+  useEffect(() => () => {
+    speechRun.current += 1;
+  }, []);
+
   function blocked() {
     return paused || interactionBlocked();
   }
 
-  function hearStoryItem(item) {
+  async function hearStoryItem(item) {
     if (blocked() || question) return;
-    speak(item.labels[lang], lang, settings);
+    const run = ++speechRun.current;
+    setSpeakingId(item.id);
+    try {
+      await speak(item.labels[lang], lang, settings);
+    } finally {
+      if (run === speechRun.current) setSpeakingId(null);
+    }
   }
 
   function handleStoryKeyDown(event, item) {
@@ -71,6 +89,8 @@ export default function StoryGame({
 
   function beginRecall() {
     if (blocked()) return;
+    speechRun.current += 1;
+    setSpeakingId(null);
     setQuestion(true);
   }
 
@@ -87,7 +107,7 @@ export default function StoryGame({
             {storyItems.map((item, index) => (
               <React.Fragment key={item.id}>
                 <section
-                  className="story-page story-page-listenable"
+                  className={`story-page story-page-listenable ${speakingId === item.id ? "speaking" : ""}`}
                   role="button"
                   tabIndex={controlsDisabled ? -1 : 0}
                   aria-disabled={controlsDisabled || undefined}
