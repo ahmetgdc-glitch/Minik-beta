@@ -36,6 +36,7 @@ const initial = files.filter(
     p.startsWith("assets/illustrations/") ||
     p.startsWith("assets/photos/") ||
     p.startsWith("assets/scenes/") ||
+    p.startsWith("assets/voice/") ||
     p === "assets/content-manifest.json",
 );
 
