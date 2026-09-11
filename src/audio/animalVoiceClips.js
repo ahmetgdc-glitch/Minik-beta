@@ -26,6 +26,12 @@ export const animalVoiceEntries = {
     "Schmetterling": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/50e4be4d-c676-4651-880c-db03fc78aea3.mp3",
     "Marienkäfer": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/9a89cd9f-6bd8-404c-a3af-ee8f808c1b06.mp3",
     "Biene": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/83b718e3-baa1-420b-81a4-39829572cfab.mp3",
+    "Oktopus": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/418398f9-8e58-400c-9376-181a37f2c067.mp3",
+    "Delfin": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/efcb8a44-e787-4ac5-a04d-3c90acbf50a9.mp3",
+    "Hai": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/fad11e37-35bd-4cec-ba50-1d56640ac177.mp3",
+    "Wal": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/51a1df35-122c-423d-8817-d2c6b2873fd6.mp3",
+    "Schnecke": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/36ffdb3f-75a2-45e1-9e87-d654d3beb179.mp3",
+    "Igel": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/8eb1e182-d941-4cbb-a38c-1cb0e17890d3.mp3",
   },
   tr: {
     "Aslan": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/4e0c9ea2-1977-4e99-9952-35cda0af9fe3.mp3",
@@ -52,6 +58,12 @@ export const animalVoiceEntries = {
     "Kelebek": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/6679b359-8c44-4ca3-b2b1-0c1c997d2beb.mp3",
     "Uğur böceği": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/c27befd3-092c-4663-b017-255a22f0da5c.mp3",
     "Arı": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/40be93ec-981b-409a-82ea-5c1bf6dd2892.mp3",
+    "Ahtapot": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/83a70a51-2cd1-4302-9a54-e0775debfd91.mp3",
+    "Yunus": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/58abb3f7-1786-4ce3-a9c5-52b8e1150f5d.mp3",
+    "Köpek balığı": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/33c842ea-64fc-4dc5-87e1-68275eea1e43.mp3",
+    "Balina": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/e0cb5e47-3ef0-44e6-bacf-41ef5a8b0c59.mp3",
+    "Salyangoz": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/a15b3098-1d51-4ca8-a6d6-206b86c25eae.mp3",
+    "Kirpi": "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/41554613-682b-4142-8297-7d8f4562b63a.mp3",
   },
 };
 
