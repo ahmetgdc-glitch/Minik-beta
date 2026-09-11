@@ -173,7 +173,7 @@ function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
   try {
     const filename = new URL(url).pathname.split("/").pop();
-    if (!filename?.endsWith(".mp3")) return "";
+    if (!/\.(?:mp3|wav)$/iu.test(filename || "")) return "";
     return new URL(`assets/voice/${filename}`, document.baseURI).href;
   } catch {
     return "";
