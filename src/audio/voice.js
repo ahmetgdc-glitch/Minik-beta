@@ -1,10 +1,10 @@
-import { preloadGameVoiceClips } from "./gameVoiceClips.js";
-import { naturalVoicePlan, preloadNaturalVoicePlans } from "./naturalVoicePlans.js";
+import { naturalVoicePlan } from "./naturalVoicePlans.js";
 
 let voices = [],
   settle = null,
   current = null,
   cloudPlayer = null,
+  voicePlayer = null,
   cloudAbort = null,
   sequence = 0;
 const subs = new Set();
@@ -15,6 +15,45 @@ const NATURAL_QUALITY = /premium|enhanced|natural|neural|siri/i;
 const COMPACT_QUALITY = /compact|espeak|festival/i;
 const FRIENDLY_VOICES = /anna|petra|helena|katja|marie|yelda|emel|cem|seda/i;
 const localeFor = (lang) => (lang === "tr" ? "tr-TR" : "de-DE");
+const SILENT_WAV =
+  "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+function naturalPlayer() {
+  if (typeof Audio === "undefined") return null;
+  if (!voicePlayer) {
+    voicePlayer = new Audio();
+    // Never eagerly fetch speech. iOS Safari is sensitive to hundreds of media
+    // elements/requests during app boot. One reusable player is enough.
+    voicePlayer.preload = "none";
+    voicePlayer.setAttribute?.("playsinline", "");
+  }
+  return voicePlayer;
+}
+
+/**
+ * Unlock exactly one reusable HTMLMediaElement from a real user gesture.
+ * No network request is made and no voice library is preloaded.
+ */
+export async function unlockVoiceAudio() {
+  const player = naturalPlayer();
+  if (!player) return false;
+  try {
+    player.pause();
+    player.onended = null;
+    player.onerror = null;
+    player.preload = "none";
+    player.src = SILENT_WAV;
+    player.currentTime = 0;
+    player.volume = 1;
+    const started = player.play();
+    if (started?.then) await started;
+    player.pause();
+    player.currentTime = 0;
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export function refreshVoices() {
   voices = synth()?.getVoices?.() || [];
@@ -51,6 +90,11 @@ export function stopSpeech() {
   synth()?.cancel();
   cloudAbort?.abort();
   cloudPlayer?.pause();
+  voicePlayer?.pause();
+  if (voicePlayer) {
+    voicePlayer.onended = null;
+    voicePlayer.onerror = null;
+  }
   cloudPlayer = null;
   current = null;
   settle?.(false);
@@ -114,31 +158,39 @@ function localizedGameClip(url) {
   }
 }
 async function speakGameClip(url, token) {
-  if (!url || typeof Audio === "undefined") return false;
+  if (!url) return false;
+  const player = naturalPlayer();
+  if (!player) return false;
   try {
-    cloudPlayer = new Audio(url);
-    cloudPlayer.preload = "auto";
+    player.pause();
+    player.onended = null;
+    player.onerror = null;
+    player.preload = "metadata";
+    player.src = url;
+    player.currentTime = 0;
+    player.load?.();
     return await new Promise((resolve) => {
       let done = false;
       const finish = (ok) => {
         if (done) return;
         done = true;
-        if (cloudPlayer) {
-          cloudPlayer.onended = null;
-          cloudPlayer.onerror = null;
-        }
+        player.onended = null;
+        player.onerror = null;
         settle = null;
         resolve(Boolean(ok && token === sequence));
       };
       settle = () => finish(false);
-      cloudPlayer.onended = () => finish(true);
-      cloudPlayer.onerror = () => finish(false);
-      Promise.resolve(cloudPlayer.play()).catch(() => finish(false));
+      player.onended = () => finish(true);
+      player.onerror = () => finish(false);
+      try {
+        const started = player.play();
+        Promise.resolve(started).catch(() => finish(false));
+      } catch {
+        finish(false);
+      }
     });
   } catch {
     return false;
-  } finally {
-    cloudPlayer = null;
   }
 }
 async function playPreferredClip(url, token) {
@@ -167,8 +219,6 @@ export async function speak(text, lang = "de", settings = {}) {
     const played = await speakNaturalPlan(plan, token);
     if (played || token !== sequence) return played;
   }
-  // Child-facing gameplay is natural-voice-only by default. Browser speech is
-  // deliberately opt-in because its quality varies widely and often sounds robotic.
   if (settings.systemVoiceFallback === true) {
     return speakSystem(text, lang, settings, token);
   }
@@ -181,23 +231,23 @@ export async function cloudTTS(text, lang, provider) {
   const blob = await provider({ text, lang, signal: cloudAbort.signal });
   if (token !== sequence) return false;
   const url = URL.createObjectURL(blob);
-  cloudPlayer = new Audio(url);
+  const player = naturalPlayer();
+  if (!player) return false;
+  player.src = url;
+  cloudPlayer = player;
   try {
-    await cloudPlayer.play();
+    await player.play();
     return await new Promise((resolve) => {
-      cloudPlayer.onended = () => resolve(true);
-      cloudPlayer.onerror = () => resolve(false);
+      player.onended = () => resolve(true);
+      player.onerror = () => resolve(false);
       settle = resolve;
     });
   } finally {
+    cloudPlayer = null;
     URL.revokeObjectURL(url);
   }
 }
 if (synth()) {
   refreshVoices();
   synth().addEventListener("voiceschanged", refreshVoices);
-}
-if (typeof Audio !== "undefined") {
-  preloadGameVoiceClips();
-  preloadNaturalVoicePlans();
 }
