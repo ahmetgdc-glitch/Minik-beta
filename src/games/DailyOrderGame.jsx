@@ -37,29 +37,35 @@ export default function DailyOrderGame({
 
   return (
     <div className="concept-game routine-order-game">
-      <div className="routine-now-card">
-        <small>{lang === "tr" ? "Önce" : "Zuerst"}</small>
-        <Visual item={prompt} lang={lang} photos={settings.photos} />
-        <b>{prompt.labels[lang]}</b>
-        <span className="routine-arrow">→</span>
-      </div>
-      <div className={`answer-grid options-${options.length}`}>
-        {options.map((item) => (
-          <button
-            key={item.id}
-            className={`answer-card ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
-            onClick={() =>
-              item.id === target.id
-                ? onSolve([prompt.id, target.id])
-                : onWrong([prompt.id, target.id])
-            }
-            aria-label={item.labels[lang]}
-          >
-            <Visual item={item} lang={lang} photos={settings.photos} />
-            <b>{item.labels[lang]}</b>
-          </button>
-        ))}
-      </div>
+      <section className="routine-journey-stage" aria-label={lang === "tr" ? "Şimdi olan" : "Was jetzt passiert"}>
+        <span className="routine-scene-label">{lang === "tr" ? "Şimdi" : "Jetzt"}</span>
+        <div className="routine-now-scene">
+          <Visual item={prompt} lang={lang} photos={settings.photos} />
+          <b>{prompt.labels[lang]}</b>
+        </div>
+        <span className="routine-path-arrow" aria-hidden="true">→</span>
+      </section>
+
+      <section className="routine-next-wrap" aria-label={lang === "tr" ? "Sonraki adımı seç" : "Wähle den nächsten Schritt"}>
+        <h2 className="routine-next-title">{lang === "tr" ? "Sonra ne olur?" : "Was passiert danach?"}</h2>
+        <div className="routine-next-scenes">
+          {options.map((item) => (
+            <button
+              key={item.id}
+              className={`routine-next-scene ${hint >= 2 && item.id === target.id ? "hint-target" : ""}`}
+              onClick={() =>
+                item.id === target.id
+                  ? onSolve([prompt.id, target.id])
+                  : onWrong([prompt.id, target.id])
+              }
+              aria-label={item.labels[lang]}
+            >
+              <Visual item={item} lang={lang} photos={settings.photos} />
+              <b>{item.labels[lang]}</b>
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
