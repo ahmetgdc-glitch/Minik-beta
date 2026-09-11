@@ -31,8 +31,10 @@ test("voice asset downloader covers prompts and modular learning vocabulary", ()
   assert.match(downloader, /dist\/assets\/voice/);
 });
 
-test("service worker precaches localized voice files", () => {
-  assert.match(worker, /p\.startsWith\("assets\/voice\/"\)/);
+test("localized voice files are packaged but cached only after use", () => {
+  assert.doesNotMatch(worker, /p\.startsWith\("assets\/voice\/"\)/);
+  assert.match(worker, /const response=await fetch\(event\.request\)/);
+  assert.match(worker, /await cache\.put\(event\.request,response\.clone\(\)\)/);
 });
 
 test("runtime prefers local recording, then remote recording, without automatic robot speech", () => {
