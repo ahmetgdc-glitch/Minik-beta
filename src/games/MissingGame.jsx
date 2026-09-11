@@ -9,6 +9,8 @@ export default function MissingGame({
   lang,
   settings,
   hint,
+  paused,
+  interactionBlocked = () => false,
   onReady,
   onWrong,
   onSolve,
@@ -31,8 +33,19 @@ export default function MissingGame({
     [target.id],
     target.labels[lang],
   );
+
+  function revealQuestion() {
+    if (paused || interactionBlocked()) return;
+    setHidden(true);
+  }
+
+  function pick(item) {
+    if (paused || interactionBlocked()) return;
+    item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
+  }
+
   return (
-    <div className="missing-stage-game">
+    <div className="missing-stage-game" aria-disabled={paused || undefined}>
       <section className="missing-stage" aria-label={text}>
         <span className="missing-stage-label">
           {hidden
@@ -55,7 +68,7 @@ export default function MissingGame({
         </div>
       </section>
       {!hidden ? (
-        <button className="primary centered missing-ready" onClick={() => setHidden(true)}>
+        <button className="primary centered missing-ready" onClick={revealQuestion} disabled={paused}>
           {lang === "tr" ? "Hatırladım!" : "Ich habe es mir gemerkt!"}
         </button>
       ) : (
@@ -66,7 +79,8 @@ export default function MissingGame({
               <button
                 key={x.id}
                 className={`missing-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
-                onClick={() => x.id === target.id ? onSolve([target.id]) : onWrong([target.id])}
+                onClick={() => pick(x)}
+                disabled={paused}
                 aria-label={x.labels[lang]}
               >
                 <Visual item={x} lang={lang} photos={settings.photos} />
