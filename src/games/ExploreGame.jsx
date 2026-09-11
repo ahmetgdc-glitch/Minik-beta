@@ -7,7 +7,9 @@ import { useLesson } from "./shared.jsx";
 
 export default function ExploreGame({ items, world, progress, difficulty, lang, settings, round, hint, paused, interactionBlocked = () => false, onReady, onSolve }) {
   const [found, setFound] = useState([]);
+  const [speakingId, setSpeakingId] = useState(null);
   const foundRef = useRef([]);
+  const speechRun = useRef(0);
   const sceneItems = useMemo(() => sample(items, explorationSize(difficulty)), [items, round, difficulty]);
   const targetCount = sceneItems.length;
   const text = lang === "tr" ? "Bak bakalım! Resme dokun." : "Schau mal! Tippe auf das Bild.";
@@ -15,17 +17,35 @@ export default function ExploreGame({ items, world, progress, difficulty, lang, 
   const controlsDisabled = paused || interactionBlocked();
   useLesson(onReady, text, () => speak(text, lang, settings), sceneItems.map(x => x.id), help);
 
+  async function speakItem(item) {
+    const run = ++speechRun.current;
+    setSpeakingId(item.id);
+    try {
+      await speak(item.labels[lang], lang, settings);
+    } finally {
+      if (run === speechRun.current) setSpeakingId(null);
+    }
+  }
+
   function discover(item) {
     if (paused || interactionBlocked()) return;
     const next = addDiscovery(foundRef.current, item.id, sceneItems.map(x => x.id));
-    if (next === foundRef.current) {
-      speak(item.labels[lang], lang, settings);
-      return;
+    if (next !== foundRef.current) {
+      foundRef.current = next;
+      setFound(next);
     }
-    foundRef.current = next;
-    setFound(next);
-    speak(item.labels[lang], lang, settings);
+    speakItem(item);
   }
+
+  useEffect(() => {
+    if (!controlsDisabled) return;
+    speechRun.current += 1;
+    setSpeakingId(null);
+  }, [controlsDisabled]);
+
+  useEffect(() => () => {
+    speechRun.current += 1;
+  }, []);
 
   useEffect(() => {
     if (controlsDisabled || found.length < targetCount) return;
@@ -35,8 +55,13 @@ export default function ExploreGame({ items, world, progress, difficulty, lang, 
     return () => clearTimeout(timer);
   }, [controlsDisabled, found, targetCount, onSolve, interactionBlocked]);
 
-  return <SceneExplorer items={sceneItems} worldId={world.id} {...{lang, settings, found, hint, paused, interactionBlocked}}
-    outfit={progress.minoOutfit} onDiscover={discover} onMino={() => { if (!controlsDisabled) speak(help, lang, settings); }}
+  return <SceneExplorer items={sceneItems} worldId={world.id} {...{lang, settings, found, speakingId, hint, paused, interactionBlocked}}
+    outfit={progress.minoOutfit} onDiscover={discover} onMino={() => {
+      if (controlsDisabled) return;
+      speechRun.current += 1;
+      setSpeakingId(null);
+      speak(help, lang, settings);
+    }}
     footer={<div className="discovery-progress" role="status" aria-label={`${found.length} / ${targetCount}`}>
       {Array.from({length: targetCount}, (_, i) => <i key={i} className={i < found.length ? "done" : ""}/>) }
     </div>} />;
