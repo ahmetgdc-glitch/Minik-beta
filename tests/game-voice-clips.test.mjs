@@ -54,9 +54,16 @@ test("all shape vocabulary uses natural Mino voice in both languages", () => {
   ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural shape clip: ${word}`);
 });
 
-test("natural Mino library keeps at least 95 recorded prompts and words", () => {
+test("beginner animals use natural Mino voice in both languages", () => {
+  for (const word of [
+    "Löwe", "Hund", "Katze", "Kuh", "Pferd", "Schaf", "Tiger", "Affe",
+    "Aslan", "Köpek", "Kedi", "İnek", "At", "Koyun", "Kaplan", "Maymun",
+  ]) assert.ok(clips.includes(`\"${word}\"`), `missing natural animal clip: ${word}`);
+});
+
+test("natural Mino library keeps at least 111 recorded prompts and words", () => {
   const urls = clips.match(/https:\/\/storage\.googleapis\.com\/adm--audio-playback[^\"]+\.mp3/g) || [];
-  assert.ok(urls.length >= 95, `expected at least 95 natural clips, got ${urls.length}`);
+  assert.ok(urls.length >= 111, `expected at least 111 natural clips, got ${urls.length}`);
 });
 
 test("speech prefers recorded game voice before browser synthesis", () => {
