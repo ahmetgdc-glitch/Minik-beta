@@ -38,19 +38,20 @@ export default function ReviewGame({
       : (lang === "tr" ? "Tekrar turu" : "Wiederholungsrunde");
 
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
+  const controlsDisabled = paused || interactionBlocked();
 
   function replayTarget() {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     speak(target.labels[lang], lang, settings);
   }
 
   function pick(item) {
-    if (paused || interactionBlocked()) return;
+    if (controlsDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   return (
-    <div className={`review-game review-island review-${state.level}`} aria-disabled={paused || undefined}>
+    <div className={`review-game review-island review-${state.level}`} aria-disabled={controlsDisabled || undefined}>
       <section className="review-island__stage" aria-label={badge}>
         <div className="review-island__focus">
           <div className="review-island__badge">{badge}</div>
@@ -58,7 +59,7 @@ export default function ReviewGame({
             type="button"
             className="review-island__orb review-island__listen"
             onClick={replayTarget}
-            disabled={paused}
+            disabled={controlsDisabled}
             aria-label={lang === "tr" ? `${target.labels.tr} kelimesini tekrar dinle` : `${target.labels.de} noch einmal anhören`}
           >
             <Volume2 size={64} aria-hidden="true" />
@@ -75,6 +76,7 @@ export default function ReviewGame({
       </section>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
+        disabled={controlsDisabled}
         onPick={pick}
       />
     </div>
