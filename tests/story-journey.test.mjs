@@ -14,9 +14,19 @@ test("story game uses large picture-book pages instead of small scene cards", ()
   assert.doesNotMatch(story, /story-strip/);
 });
 
+test("story narration handles one, two and three scene journeys without undefined labels", () => {
+  assert.match(story, /function storySentence\(labels, lang\)/);
+  assert.match(story, /if \(labels\.length <= 1\)/);
+  assert.match(story, /if \(labels\.length === 2\)/);
+  assert.match(story, /const story = storySentence\(labels, lang\)/);
+  assert.doesNotMatch(story, /labels\[2\][\s\S]*const story = lang ===/);
+});
+
 test("story journey keeps the recall question and scoring behavior", () => {
   assert.match(story, /setQuestion\(true\)/);
   assert.match(story, /<OptionGrid/);
+  assert.match(story, /disabled=\{controlsDisabled\}/);
+  assert.match(story, /storyItems\.slice\(0, -1\)\.map/);
   assert.match(story, /item\.id === target\.id \? onSolve\(\[target\.id\]\) : onWrong\(\[target\.id\]\)/);
 });
 
@@ -26,6 +36,7 @@ test("story pages replay their spoken labels only before recall begins", () => {
   assert.match(story, /speak\(item\.labels\[lang\], lang, settings\)/);
   assert.match(story, /onClick=\{\(\) => hearStoryItem\(item\)\}/);
   assert.match(story, /onKeyDown=\{\(event\) => handleStoryKeyDown\(event, item\)\}/);
+  assert.match(story, /<Volume2 size=\{18\} \/>/);
   assert.match(story, /aria-label=\{lang === "tr" \? `\$\{item\.labels\.tr\} kelimesini tekrar dinle` : `\$\{item\.labels\.de\} noch einmal anhören`\}/);
 });
 
