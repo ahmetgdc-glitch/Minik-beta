@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { unlockAudio } from "../audio/sounds.js";
-import { refreshVoices, unlockVoiceAudio } from "../audio/voice.js";
+import { unlockVoiceAudio } from "../audio/voice.js";
 
 /**
  * Prime both audio engines from the first real user gesture.
@@ -25,7 +25,6 @@ export function useAudioPrime(enabled = true) {
     };
     const prime = () => {
       if (disposed) return;
-      refreshVoices();
 
       // Both resume()/play() are invoked synchronously inside the real gesture.
       const context = unlockAudio();
