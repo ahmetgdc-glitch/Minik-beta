@@ -61,6 +61,14 @@ export function stopSpeech() {
   settle = null;
   setSpeechActive(false);
 }
+
+function isPersonalVoiceClipUrl(url) {
+  return (
+    /^assets\/personal-voice\/personal-(?:de|tr)-[a-f0-9]{20}\.mp3$/u.test(url || "") ||
+    /^https:\/\/resource2\.heygen\.ai\/text_to_speech\/[^\s]+\/id=[a-f0-9-]+\.wav$/u.test(url || "")
+  );
+}
+
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
   try {
@@ -122,7 +130,7 @@ async function playPreferredClip(url, token) {
   return speakGameClip(url, token);
 }
 async function speakNaturalPlan(plan, token) {
-  if (!plan?.length) return false;
+  if (!plan?.length || !plan.every(isPersonalVoiceClipUrl)) return false;
   for (const clip of plan) {
     if (token !== sequence) return false;
     const played = await playPreferredClip(clip, token);
@@ -136,24 +144,24 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-  // The owner's authorized MINIK voice is canonical wherever an exact
-  // personal recording exists. No device speech path is available.
-  const personalClip = personalVoiceClip(text, lang);
-  if (personalClip) {
-    const playedPersonal = await playPreferredClip(personalClip, token);
-    if (playedPersonal || token !== sequence) return playedPersonal;
-  }
+    // The owner's authorized MINIK voice is the only gameplay narrator.
+    // Exact recordings are preferred; composed plans are accepted only when
+    // every segment is also from the owner's personal voice library.
+    const personalClip = personalVoiceClip(text, lang);
+    if (personalClip) {
+      const playedPersonal = await playPreferredClip(personalClip, token);
+      if (playedPersonal || token !== sequence) return playedPersonal;
+    }
 
-  const plan = naturalVoicePlan(text, lang);
-  if (plan.length) {
-    const played = await speakNaturalPlan(plan, token);
-    if (played || token !== sequence) return played;
-  }
+    const plan = naturalVoicePlan(text, lang);
+    if (plan.length && plan.every(isPersonalVoiceClipUrl)) {
+      const played = await speakNaturalPlan(plan, token);
+      if (played || token !== sequence) return played;
+    }
 
-  // No native speech fallback exists. Missing recordings remain silent so a
-  // child never hears the iPhone/browser telephone voice in a personal-voice
-  // MINIK session.
-  return false;
+    // No native speech fallback exists.
+    // No native or legacy narrator fallback exists; missing personal recordings stay silent.
+    return false;
   } finally {
     // An older cancelled request must not raise music over its replacement.
     if (token === sequence) setSpeechActive(false);
