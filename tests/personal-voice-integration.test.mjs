@@ -16,17 +16,72 @@ const parents = readFileSync(new URL("../src/parent/Parents.jsx", import.meta.ur
 const pkg = readFileSync(new URL("../package.json", import.meta.url), "utf8");
 
 test("authorized personal voice covers the central DE/TR MINIK prompts", () => {
-  assert.equal(personalVoiceClipCount, 34);
-  assert.equal(Object.keys(personalVoiceEntries.de).length, 17);
-  assert.equal(Object.keys(personalVoiceEntries.tr).length, 17);
+  assert.equal(personalVoiceClipCount, 332);
+  assert.equal(Object.keys(personalVoiceEntries.de).length, 166);
+  assert.equal(Object.keys(personalVoiceEntries.tr).length, 166);
 
   for (const [lang, entries] of Object.entries(personalVoiceEntries)) {
     for (const [text, url] of Object.entries(entries)) {
       assert.equal(personalVoiceClip(text, lang), url);
-      assert.match(url, /^https:\/\/resource2\.heygen\.ai\/text_to_speech\//);
-      assert.match(url, /id=[a-f0-9-]+\.wav$/);
+      assert.match(
+        url,
+        /^(?:https:\/\/resource2\.heygen\.ai\/text_to_speech\/.*id=[a-f0-9-]+\.wav|assets\/personal-voice\/personal-(?:de|tr)-[a-f0-9]{20}\.mp3)$/,
+      );
     }
   }
+});
+
+test("all modular MINIK vocabulary is superseded by the personal voice", async () => {
+  const modules = [
+    "../src/audio/animalVoiceClips.js",
+    "../src/audio/bodyVoiceClips.js",
+    "../src/audio/categoryVoiceClips.js",
+    "../src/audio/foodVoiceClips.js",
+    "../src/audio/helpVoiceClips.js",
+    "../src/audio/numberVoiceClips.js",
+    "../src/audio/vehicleVoiceClips.js",
+  ];
+  for (const modulePath of modules) {
+    const imported = await import(modulePath);
+    const entries = Object.values(imported).find((value) => value?.de && value?.tr);
+    assert.ok(entries, `missing voice entries export: ${modulePath}`);
+    for (const lang of ["de", "tr"]) {
+      for (const text of Object.keys(entries[lang])) {
+        assert.ok(personalVoiceClip(text, lang), `missing personal voice: ${lang} ${text}`);
+      }
+    }
+  }
+});
+
+test("every legacy natural clip now has an exact personal replacement", () => {
+  const files = [
+    "gameVoiceClips.js",
+    "animalVoiceClips.js",
+    "numberVoiceClips.js",
+    "helpVoiceClips.js",
+    "categoryVoiceClips.js",
+    "vehicleVoiceClips.js",
+    "bodyVoiceClips.js",
+    "foodVoiceClips.js",
+    "naturalVoicePlans.js",
+  ];
+  const checked = new Set();
+  for (const filename of files) {
+    const source = readFileSync(new URL(`../src/audio/${filename}`, import.meta.url), "utf8");
+    let lang = "";
+    for (const line of source.split("\n")) {
+      const language = line.match(/^\s*(de|tr):\s*\{/);
+      if (language) lang = language[1];
+      const entry = line.match(
+        /^\s*"((?:[^"\\]|\\.)+)":\s*"https:\/\/storage\.googleapis\.com\/adm--audio-playback/,
+      );
+      if (!entry) continue;
+      const text = JSON.parse(`"${entry[1]}"`);
+      checked.add(`${lang}\0${text}`);
+      assert.ok(personalVoiceClip(text, lang), `missing personal replacement: ${lang} ${text}`);
+    }
+  }
+  assert.equal(checked.size, 332);
 });
 
 test("natural speech plans prefer the personal voice over legacy recordings", () => {

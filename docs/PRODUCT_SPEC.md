@@ -17,7 +17,7 @@ Start, 16 Lernwelten, Spielkiste mit zwölf Mechaniken und Aquarium. Auf Handys 
 
 ## Sprache und Medien
 
-DE/TR in Navigation, Inhalten, Anweisungen und Rückmeldungen. Kostenlose Systemstimmen; Eltern wählen unter den verfügbaren Stimmen. Die App garantiert keine bestimmte Stimmqualität auf jedem Gerät.
+DE/TR in Navigation, Inhalten, Anweisungen und Rückmeldungen. Alle festen Sprachbausteine verwenden zuerst die persönliche MINIK-Stimme; Eltern können weiterhin eine Systemstimme für dynamische Fallback-Sätze wählen.
 
 Illustrationen liegen lokal vor. Die Gefühlswelt ergänzt sechs KI-erzeugte, fotorealistische Erwachsene; keine echten Personenidentitäten. Weitere Fotopakete für Alltag/Körper/Berufe sind geplant.
 

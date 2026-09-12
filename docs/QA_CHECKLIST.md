@@ -1,10 +1,11 @@
 # MINIK Release-QA
 
-Stand: **2026-09-11 · 1.66.0 Beta 67**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Physische Gerätetests oder ein echtes GitHub-Deployment werden nicht vorgetäuscht.
+Stand: **2026-09-12 · 1.67.0 Beta 68**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Physische Gerätetests oder ein echtes GitHub-Deployment werden nicht vorgetäuscht.
 
 ## Automatisiert bestanden
 
-- [x] **209/216 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, Audio, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **431/431 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, persönliche Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] Alle 332 festen DE/TR-Sprachbausteine besitzen eine persönliche Aufnahme; 298 neue lokale Clips werden im Produktionsbuild vollständig verifiziert.
 - [x] `validate-content.mjs`: 25 Lernwelten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets vorhanden.
 - [x] Antwortmengen bleiben eindeutig und altersgerecht; Altersstufe 2–3 erhält maximal zwei Optionen.
 - [x] Direkte/alte Spiel-URLs können Altersfreigaben und Weltzuordnung nicht umgehen.
@@ -31,7 +32,7 @@ Stand: **2026-09-11 · 1.66.0 Beta 67**. „Bestanden“ bedeutet automatisiert 
 - [x] GitHub Actions für den ersten Szenen-Commit `9a68b23` vollständig grün: Runs `34546134828` und `34546135569`.
 - [ ] Veröffentlichte Pages-URL auf iPhone, iPad und Desktop öffnen.
 - [ ] Physisches iPhone/iPad: Touchgefühl, Hoch-/Querformat, PWA/Home-Screen und längere Sitzung.
-- [ ] Deutsche und türkische installierte Systemstimmen anhören; Tempo, Tonhöhe und schnelle Wiederholungen prüfen.
+- [ ] Persönliche deutsche und türkische Stimme auf realen Geräten anhören; Tempo, Aussprache, Schnittgrenzen und schnelle Wiederholungen prüfen.
 - [ ] Mikrofonberechtigung und SpeechRecognition auf der konkret genutzten iOS-/Browser-Version prüfen.
 - [ ] Einmal online laden, App schließen und im Flugmodus erneut starten.
 - [ ] Backup exportieren, Browserdaten getrennt testen und Backup wiederherstellen.

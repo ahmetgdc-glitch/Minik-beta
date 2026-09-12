@@ -1,6 +1,6 @@
 # MINIK Roadmap
 
-Stand **1.66.0 Beta 67 · 2026-09-11**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+Stand **1.67.0 Beta 68 · 2026-09-12**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
 
 ## Immersive Kinderwelt
 
@@ -10,7 +10,8 @@ Stand **1.66.0 Beta 67 · 2026-09-11**. Beta 66 bleibt das technische Fundament.
 - [ ] Eigenständige Szenen und Entdeckungsmomente für weitere Themenwelten
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
-- [ ] DE/TR-Sprachführung und reale iPhone-/iPad-Interaktion weiter verfeinern
+- [x] Persönliche DE/TR-Stimme für alle 332 festen Begriffe und Anweisungen lokal/offline bereitstellen
+- [ ] Persönliche Stimme und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
 
 ## Fundament und Lernkern
 
@@ -64,7 +65,7 @@ Stand **1.66.0 Beta 67 · 2026-09-11**. Beta 66 bleibt das technische Fundament.
 - [ ] Physisches iPhone: Safari + Home-Screen-PWA + Hoch/Querformat + Hintergrund/Wiederaufnahme
 - [ ] Physisches iPad: Touchflächen, Layout, Scrollen und längere Spielsitzung
 - [ ] Einmal online laden, vollständig schließen und im Flugmodus erneut starten
-- [ ] Installierte deutsche und türkische Systemstimmen anhören und schnelle Wiederholungen prüfen
+- [ ] Persönliche deutsche und türkische Stimme anhören und schnelle Wiederholungen prüfen
 - [ ] Mikrofonberechtigung/Spracherkennung auf der konkret verwendeten iOS-Version testen
 - [ ] Begriffe, Geschichten und Sicherheitssequenzen durch DE/TR-sprachige pädagogische Fachperson gegenlesen
 

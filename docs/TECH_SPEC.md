@@ -48,7 +48,7 @@ Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker l
 
 Assets werden aus dem Cache beantwortet, unbekannte gleichursprüngliche Assets bei Bedarf nachgeladen. Navigation versucht zuerst das Netz, bei Verbindungsfehler das gecachte `index.html`. Neue Worker verdrängen eine laufende Spielsession nicht automatisch. Für ein Update alle App-Tabs schließen und erneut öffnen. Große zukünftige Medienpakete benötigen eigene Auswahl/Downloadverwaltung; sie sind noch nicht implementiert.
 
-Die Stimme ist ein Gerätedienst außerhalb dieses Caches. Offline-Sprechen ist nur mit entsprechend verfügbaren Systemstimmen möglich.
+Alle 332 festen DE/TR-Sprachbausteine besitzen persönliche Audiodateien. Sie werden nach Nutzung vom Service Worker zwischengespeichert und funktionieren danach offline; die Gerätestimme bleibt nur für dynamische, nicht vorab bekannte Sätze.
 
 ## Qualitätsgates
 

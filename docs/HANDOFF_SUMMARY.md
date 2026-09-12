@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **11. September 2026 · 1.66.0 Beta 67**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **12. September 2026 · 1.67.0 Beta 68**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -11,10 +11,14 @@ Stand: **11. September 2026 · 1.66.0 Beta 67**. Der langfristige Nutzerauftrag 
 - adaptive Schwierigkeit, Mastery pro Begriff/Sprache und Spaced Repetition
 - Sterne, XP, Tagesreise, Aquarium, Achievements und Mino-Outfits
 - Elternbereich mit Rechengate/PIN, Wochenanalyse, Backup/Restore und Einstellungen
-- lokale/systembasierte DE/TR-Sprachausgabe, WebAudio und „Sprich mit Mino“
+- persönliche lokale DE/TR-Sprachausgabe für 332 feste Begriffe/Anweisungen, WebAudio und „Sprich mit Mino“
 - installierbare PWA, Offline-Service-Worker, Recovery-Speicher und Session-Checkpoints
 
 ## Zuletzt als Final-Härtung umgesetzt
+
+- 298 zusätzliche persönliche DE/TR-Clips ergänzen die 34 bisherigen Kernaufnahmen; damit besitzen alle 332 festen Sprachbausteine eine exakte persönliche Aufnahme.
+- Persönliche Clips stehen vor alten Aufnahmen und vor der iPhone-/iPad-Systemstimme; die Systemstimme bleibt nur für dynamische, nicht vorab bekannte Sätze.
+- Alle neuen Clips liegen lokal und offline-fähig in der App. Build-Verifikation und Regressionstests prüfen Anzahl, Dateien und vollständige Ablösung der alten Sprachbibliothek.
 
 - Session-/Checkpoint-Sicherheit für Safari `pagehide`, BFCache, manuelle Pause und Render-Race-Conditions
 - Wiederaufnahme pro Profil mit Sprache/Alter/Schwierigkeitskontext und Schutz gegen manipulierte Rundenzähler
@@ -40,9 +44,9 @@ Stand: **11. September 2026 · 1.66.0 Beta 67**. Der langfristige Nutzerauftrag 
 
 ## Prüfung
 
-216 Node-Tests einschließlich aller 203 bisherigen Fälle bestanden. Release-Preflight und frischer Vite-Build erfolgreich. Offline-Verifikation prüft zusätzlich den tatsächlichen Repository-Pfad `/Minik-beta/` und alle drei Landschaften. Browser-QA erfolgt mit `tests/viewport.html` gegen den aktuellen Dev-Server, nicht gegen ein altes `dist`.
+431 Node-Tests bestanden. Release-Preflight und frischer Vite-Build erfolgreich. Offline-Verifikation prüft zusätzlich den tatsächlichen Repository-Pfad `/Minik-beta/`, die Landschaften und alle persönlichen Sprachdateien. Browser-QA erfolgt mit `tests/viewport.html` gegen den aktuellen Dev-Server, nicht gegen ein altes `dist`.
 
-Beobachtet: Startwelt auf 393 × 852, Tierwelt auf 393 × 852 und 768 × 1024, Bildwechsel, Antippen/Vorlesen, Größenwechsel mit erhaltenem Bild, Spielstart und manueller Pause. Physische iOS-Geräte und akustische Qualität der Systemstimmen sind noch offen.
+Beobachtet: Startwelt auf 393 × 852, Tierwelt auf 393 × 852 und 768 × 1024, Bildwechsel, Antippen/Vorlesen, Größenwechsel mit erhaltenem Bild, Spielstart und manueller Pause. Physische iOS-Geräte und die akustische Qualität der persönlichen Stimme sind noch offen.
 
 ## Zweite Entwicklungsrunde: große Spielstufen und Ziehen
 

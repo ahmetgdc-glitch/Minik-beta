@@ -27,6 +27,10 @@ const legacyVoiceSourceFiles = [
 ];
 const legacyVoiceSources = await Promise.all(legacyVoiceSourceFiles.map((file) => fs.readFile(path.resolve(file), "utf8")));
 const personalVoiceSource = await fs.readFile(path.resolve("src/audio/personalVoiceClips.js"), "utf8");
+const generatedPersonalVoiceSource = await fs.readFile(
+  path.resolve("src/audio/generatedPersonalVoiceClips.js"),
+  "utf8",
+);
 const expectedLegacyVoiceFiles = new Set(
   legacyVoiceSources.flatMap((source) => [...source.matchAll(legacyVoiceSourcePattern)].map((match) => match[1])),
 );
@@ -53,6 +57,26 @@ const personalVoiceManifest = JSON.parse(await fs.readFile(path.join(root, "asse
 assert.equal(personalVoiceManifest.expected, expectedPersonalVoiceFiles.size);
 assert.equal(personalVoiceManifest.available, expectedPersonalVoiceFiles.size);
 assert.equal(personalVoiceManifest.missing.length, 0);
+
+const generatedPersonalFiles = new Set(
+  [...generatedPersonalVoiceSource.matchAll(/assets\/personal-voice\/(personal-(?:de|tr)-[a-f0-9]{20}\.mp3)/g)]
+    .map((match) => match[1]),
+);
+assert.equal(generatedPersonalFiles.size, 298);
+const builtPersonalVoiceFiles = (
+  await fs.readdir(path.join(root, "assets/personal-voice"))
+).filter((file) => /\.mp3$/iu.test(file));
+assert.equal(
+  builtPersonalVoiceFiles.length,
+  generatedPersonalFiles.size,
+  `Expected ${generatedPersonalFiles.size} generated personal clips, found ${builtPersonalVoiceFiles.length}`,
+);
+for (const filename of generatedPersonalFiles) {
+  assert.ok(
+    builtPersonalVoiceFiles.includes(filename),
+    `Missing generated personal voice clip: ${filename}`,
+  );
+}
 
 for (const scope of ["https://example.test/", "https://example.test/Minik-beta/", "https://example.test/Minik-2.0-/"]) {
   let offline = false;

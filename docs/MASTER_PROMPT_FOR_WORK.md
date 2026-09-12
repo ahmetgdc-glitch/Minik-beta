@@ -13,7 +13,7 @@ Baue MINIK zu einer vollwertigen Kinder-Lernwelt aus, deren Funktionsumfang und 
 5. **Mino, der Fisch:** zentrale Figur, animierter Helfer, erklärt, motiviert und gibt Hinweise.
 6. **Sterne und Belohnungen:** Sterne, Serien, Schatztruhen, Level, Aquarium, Mino-Zubehör und freischaltbare Welten.
 7. **Echte Menschen:** Neben Illustrationen auch echte, lizenzierte/selbst erzeugte Fotos von Menschen, Emotionen, Körperteilen, Berufen und Alltagssituationen.
-8. **Kostenlose natürliche Stimme zuerst:** Web Speech API / hochwertige lokal installierte Apple-Systemstimmen bevorzugen. Kein API-Key im Frontend. Architektur so bauen, dass später ein sicherer Cloud-TTS-Endpunkt ergänzt werden kann.
+8. **Persönliche Stimme zuerst:** vorhandene persönliche Offline-Clips bevorzugen; hochwertige lokal installierte Apple-Systemstimmen nur für dynamische Lücken nutzen. Kein API-Key im Frontend.
 9. **Adaptive Hilfe:** nach Inaktivität oder wiederholten Fehlern hilft Mino schrittweise.
 10. **Elternbereich:** Fortschritt, schwierige Wörter, Sitzungen, Kategorien, Sprache, Schwierigkeit, Audio, Anzahl Antwortoptionen.
 11. **Offline/PWA:** Kernspiele offline nutzbar; große Assets können später paketweise geladen werden.

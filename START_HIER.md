@@ -1,4 +1,4 @@
-# MINIK 1.66.0 Beta 67 auf GitHub testen
+# MINIK 1.67.0 Beta 68 auf GitHub testen
 
 Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelten, 503 DE/TR-Inhalten und 23 Spieltypen**.
 
@@ -8,7 +8,7 @@ Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelte
 2. Mit Node ab 22.12 `npm ci` ausführen, anschließend die vier Prüfungen aus `README.md`.
 3. In GitHub **Settings → Pages → Build and deployment → Source → GitHub Actions** auswählen.
 4. Auf `main` oder `master` speichern. Unter **Actions** startet **Build, test and publish MINIK** automatisch; alternativ kann der Workflow manuell gestartet werden.
-5. Der Workflow führt `npm ci`, **200+ automatisierte Tests**, den Release-Preflight, den Produktionsbuild und die Offline-Verifikation aus.
+5. Der Workflow führt `npm ci`, **431 automatisierte Tests**, den Release-Preflight, den Produktionsbuild und die Offline-Verifikation einschließlich aller persönlichen Sprachclips aus.
 6. Erst wenn der Workflow grün ist, die unter **Settings → Pages** angezeigte HTTPS-Adresse öffnen.
 
 Der fertige Produktionsordner wird zusätzlich im erfolgreichen Actions-Lauf als Artefakt **`minik-production-build`** für 14 Tage bereitgestellt.

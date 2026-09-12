@@ -1,3 +1,5 @@
+import { generatedPersonalVoiceEntries } from "./generatedPersonalVoiceClips.js";
+
 const normalize = (text) => String(text || "").trim();
 
 // Pre-generated from the owner's authorized HeyGen voice clone. These remote
@@ -5,6 +7,7 @@ const normalize = (text) => String(text || "").trim();
 // app keeps working offline after deployment.
 export const personalVoiceEntries = {
   de: {
+    ...generatedPersonalVoiceEntries.de,
     "Hallo! Komm, wir entdecken die Welt!": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=caf44873-c460-45bc-adea-2903588e4f77.wav",
     "Wohin möchtest du? Tippe auf ein Bild.": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=077a9262-357b-4101-99f2-a804785d9306.wav",
     "Schön, dass du da bist!": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=2e0d5253-7846-465a-88b9-a74c4f8b52e7.wav",
@@ -24,6 +27,7 @@ export const personalVoiceEntries = {
     "Als Nächstes kommt:": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=bda0d77b-8bba-4c05-8929-27630d7adefe.wav",
   },
   tr: {
+    ...generatedPersonalVoiceEntries.tr,
     "Merhaba! Haydi dünyayı keşfedelim!": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=8cdf7757-b0d9-4431-8833-f132ba238f7f.wav",
     "Nereye gidelim? Bir resme dokun.": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=d1a16929-1d0f-4572-8186-63f6b30c8fd2.wav",
     "İyi ki geldin!": "https://resource2.heygen.ai/text_to_speech/e89b078d85af4a43af086fa324e52edb/f384881fa0aa4696912b4ea2d2d4e011/id=961c06a8-6ad6-4a7a-936d-7d9e896e259e.wav",

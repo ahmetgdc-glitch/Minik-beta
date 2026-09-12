@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.67.0 Beta 68 — Persönliche MINIK-Stimme vollständig
+
+- 298 neue persönliche DE/TR-Sprachclips ergänzen die 34 vorhandenen Kernaufnahmen.
+- Alle 332 festen Begriffe und Anweisungen verwenden jetzt zuerst die persönliche Stimme; ältere Aufnahmen und die Systemstimme werden dafür nicht mehr gewählt.
+- Die rund 3 MB große Ergänzung liegt lokal in der PWA und bleibt nach der ersten Nutzung offline verfügbar.
+- Zwei neue Regressionstests und die Produktions-Buildprüfung sichern vollständige Zuordnung und alle erzeugten Dateien ab.
+
 ## 1.66.0 Beta 67 — Minos große Entdeckerwelt
 
 - Zweite Runde: echtes Drag & Drop für Sortieren und Zuordnen mit Tippalternative, Abbruch-/Mehrfinger-Schutz und sieben zusätzlichen Verhaltenstests (216 insgesamt).
