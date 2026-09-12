@@ -29,13 +29,21 @@ test("GitHub Pages workflow has deploy permissions and bounded jobs", () => {
   assert.match(workflow, /actions\/deploy-pages@v4/);
 });
 
+test("GitHub Pages deploy waits through delayed legacy-run discovery and fails closed", () => {
+  assert.match(workflow, /legacy_seen=0/);
+  assert.match(workflow, /for attempt in \{1\.\.60\}/);
+  assert.match(workflow, /elif \[ "\$attempt" -ge 12 \]; then/);
+  assert.match(workflow, /sleep 5/);
+  assert.match(workflow, /Legacy Pages run completed; safe to publish verified Vite build\./);
+  assert.match(workflow, /Legacy Pages run is still active after the drain window; refusing to deploy early/);
+  assert.match(workflow, /Unable to establish a safe Pages deployment order/);
+});
 
 test("GitHub Pages workflow uses stable Node 22 and lean npm install", () => {
   const workflow = fs.readFileSync(new URL("../.github/workflows/deploy.yml", import.meta.url), "utf8");
   assert.match(workflow, /node-version:\s*["']22["']/);
   assert.match(workflow, /npm ci --no-audit --no-fund/);
 });
-
 
 test("PWA latches an update that becomes ready before React subscribes", () => {
   assert.match(offline, /let updateReadyLatched = false/);
