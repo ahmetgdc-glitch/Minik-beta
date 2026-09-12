@@ -14,16 +14,28 @@ test("MINIK prefers iOS Voice 4 before recorded fallback", () => {
 test("Voice 4 selector never falls back to arbitrary robotic system voices", () => {
   assert.match(systemVoice4, /VOICE4_RE/);
   assert.match(systemVoice4, /SIRI_RE/);
-  assert.match(systemVoice4, /return \([\s\S]*sameLanguage\.find[\s\S]*\|\|[\s\S]*sameLanguage\.find[\s\S]*\|\|[\s\S]*null/);
+  assert.match(systemVoice4, /const available = \(voices \|\| \[\]\)\.filter\(isVoice4Candidate\)/);
+  assert.match(systemVoice4, /available\.find\(\(voice\) => VOICE4_RE/);
+  assert.match(systemVoice4, /available\.find\(\(voice\) => SIRI_RE/);
   assert.doesNotMatch(systemVoice4, /voice\?\.default/);
   assert.doesNotMatch(systemVoice4, /voice\?\.localService/);
-  assert.doesNotMatch(systemVoice4, /sameLanguage\[0\]|voices\[0\]/);
+  assert.doesNotMatch(systemVoice4, /sameLanguage\[0\]|voices\[0\]|available\[0\]/);
 });
 
-test("Voice 4 waits briefly for Safari voiceschanged", () => {
+test("Voice 4 tolerates incorrect iOS language tags without changing narrator", () => {
+  assert.match(systemVoice4, /sameLanguage\.find\(\(voice\) => VOICE4_RE/);
+  assert.match(systemVoice4, /sameLanguage\.find\(\(voice\) => SIRI_RE/);
+  assert.match(systemVoice4, /available\.find\(\(voice\) => VOICE4_RE/);
+  assert.match(systemVoice4, /available\.find\(\(voice\) => SIRI_RE/);
+});
+
+test("Voice 4 waits long enough for Safari and caches the selected narrator", () => {
+  assert.match(systemVoice4, /FIRST_VOICE_WAIT_MS = 1600/);
+  assert.match(systemVoice4, /RETRY_VOICE_WAIT_MS = 700/);
   assert.match(systemVoice4, /voiceschanged/);
-  assert.match(systemVoice4, /waitForVoice4/);
-  assert.match(systemVoice4, /setTimeout\(\(\) => finish\(null\), timeoutMs\)/);
+  assert.match(systemVoice4, /selectedVoiceCache/);
+  assert.match(systemVoice4, /pendingVoiceLookup/);
+  assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
 test("speech keeps stale-playback and cancellation guards", () => {
