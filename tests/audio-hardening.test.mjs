@@ -38,6 +38,21 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
+test("Voice 4 retries a transient Safari playback failure once", () => {
+  assert.match(systemVoice4, /PLAYBACK_RETRY_MS = 90/);
+  assert.match(systemVoice4, /const firstAttempt = await playVoice4Attempt/);
+  assert.match(systemVoice4, /const mayRetry = await retryDelay\(isCurrent\)/);
+  assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, voice, isCurrent\)/);
+});
+
+test("a known Voice 4 never switches to a personal recording after runtime failure", () => {
+  const stickyIndex = voice.indexOf("if (hasVoice4Selection(lang, settings)) return false;");
+  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
+  assert.ok(stickyIndex > 0);
+  assert.ok(personalIndex > stickyIndex);
+  assert.match(systemVoice4, /export function hasVoice4Selection/);
+});
+
 test("speech keeps stale-playback and cancellation guards", () => {
   assert.match(voice, /token === sequence/);
   assert.match(voice, /stopSystemVoice4\(\)/);
