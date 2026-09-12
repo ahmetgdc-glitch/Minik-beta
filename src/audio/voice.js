@@ -9,7 +9,6 @@ let settle = null,
   unlockPending = null,
   voiceContext = null,
   voiceSource = null,
-  systemUtterance = null,
   sequence = 0;
 const voiceBufferCache = new Map();
 const SILENT_WAV =
@@ -40,106 +39,6 @@ function ensureVoiceContext() {
   }
 }
 
-function systemSpeechEngine() {
-  return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
-}
-
-function systemSpeechAvailable() {
-  return Boolean(
-    systemSpeechEngine() &&
-      typeof globalThis !== "undefined" &&
-      typeof globalThis.SpeechSynthesisUtterance === "function",
-  );
-}
-
-function systemVoiceList() {
-  try {
-    return systemSpeechEngine()?.getVoices?.() || [];
-  } catch {
-    return [];
-  }
-}
-
-function voiceLanguageMatches(voice, lang) {
-  const prefix = lang === "tr" ? "tr" : "de";
-  return String(voice?.lang || "").toLowerCase().startsWith(prefix);
-}
-
-function isPreferredMinoSystemVoice(voice) {
-  return /(?:^|\b)(?:stimme\s*4|voice\s*4|siri)(?:\b|$)/iu.test(
-    `${voice?.name || ""} ${voice?.voiceURI || ""}`,
-  );
-}
-
-function selectMinoSystemVoice(lang, settings = {}) {
-  const voices = systemVoiceList();
-  if (!voices.length) return null;
-  const matching = voices.filter((voice) => voiceLanguageMatches(voice, lang));
-  if (!matching.length) return null;
-  const saved = String(settings?.voices?.[lang] || "").trim().toLowerCase();
-  if (saved) {
-    const exact = matching.find((voice) =>
-      [voice?.name, voice?.voiceURI].some((value) => String(value || "").toLowerCase() === saved),
-    );
-    if (exact && isPreferredMinoSystemVoice(exact)) return exact;
-  }
-  // Never substitute an arbitrary Web Speech voice. On iPhone those generic
-  // voices can sound noticeably robotic. Use Voice 4 / Siri only when WebKit
-  // actually exposes it; otherwise fall back to MINIK's recorded natural voice.
-  return matching.find(isPreferredMinoSystemVoice) || null;
-}
-
-function minoRate(settings = {}) {
-  const requested = Number(settings.rate);
-  return Math.min(1, Math.max(0.86, Number.isFinite(requested) ? requested : 0.94));
-}
-
-function minoPitch(settings = {}) {
-  const requested = Number(settings.pitch);
-  return Math.min(1.08, Math.max(0.98, Number.isFinite(requested) ? requested : 1.03));
-}
-
-async function speakSystem(text, lang, settings, token) {
-  const engine = systemSpeechEngine();
-  const Utterance = typeof globalThis !== "undefined" ? globalThis.SpeechSynthesisUtterance : null;
-  if (!engine || !Utterance || token !== sequence) return false;
-  try {
-    const voice = selectMinoSystemVoice(lang, settings);
-    if (!voice) return false;
-    const utterance = new Utterance(text);
-    utterance.lang = lang === "tr" ? "tr-TR" : "de-DE";
-    utterance.voice = voice;
-    // Keep the selected iOS voice essentially unchanged; only a tiny Mino polish.
-    utterance.rate = minoRate(settings);
-    utterance.pitch = minoPitch(settings);
-    utterance.volume = 1;
-    systemUtterance = utterance;
-    return await new Promise((resolve) => {
-      let done = false;
-      const finish = (ok) => {
-        if (done) return;
-        done = true;
-        utterance.onend = null;
-        utterance.onerror = null;
-        if (systemUtterance === utterance) systemUtterance = null;
-        settle = null;
-        resolve(Boolean(ok && token === sequence));
-      };
-      settle = () => finish(false);
-      utterance.onend = () => finish(true);
-      utterance.onerror = () => finish(false);
-      try {
-        engine.cancel();
-        engine.speak(utterance);
-      } catch {
-        finish(false);
-      }
-    });
-  } catch {
-    return false;
-  }
-}
-
 /**
  * Unlock reusable recorded-speech paths from a real user gesture. System speech
  * does not need copied voice assets; iOS chooses from voices WebKit exposes.
@@ -150,7 +49,7 @@ export async function unlockVoiceAudio() {
   if (unlockPending) return unlockPending;
   const context = ensureVoiceContext();
   const player = naturalPlayer();
-  if (!player && !context) return systemSpeechAvailable();
+  if (!player && !context) return false;
   const token = sequence;
   unlockPending = (async () => {
     let contextReady = false;
@@ -160,7 +59,7 @@ export async function unlockVoiceAudio() {
         contextReady = context.state === "running";
       } catch {}
     }
-    if (!player) return contextReady || systemSpeechAvailable();
+    if (!player) return contextReady;
     try {
       player.pause();
       player.onended = null;
@@ -177,7 +76,7 @@ export async function unlockVoiceAudio() {
       }
       return true;
     } catch {
-      return contextReady || systemSpeechAvailable();
+      return contextReady;
     }
   })();
   try { return await unlockPending; }
@@ -188,8 +87,6 @@ export function stopSpeech() {
   sequence++;
   cloudAbort?.abort();
   cloudPlayer?.pause();
-  systemSpeechEngine()?.cancel?.();
-  systemUtterance = null;
   try { voiceSource?.stop(); } catch {}
   voiceSource = null;
   voicePlayer?.pause();
@@ -343,14 +240,7 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    // Voice 4 / Siri system speech is allowed only when WebKit exposes that
-    // specific high-quality voice. Generic system voices are intentionally
-    // rejected so MINIK never regresses to the robotic fallback heard on iPhone.
-    if (systemSpeechAvailable()) {
-      const playedSystem = await speakSystem(text, lang, settings, token);
-      if (playedSystem || token !== sequence) return playedSystem;
-    }
-
+    // Only the owner's authorized recordings may narrate gameplay.
     const personalClip = personalVoiceClip(text, lang);
     if (personalClip) {
       const playedPersonal = await playPreferredClip(personalClip, token);
