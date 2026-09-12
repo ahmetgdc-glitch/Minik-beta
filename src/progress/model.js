@@ -9,6 +9,7 @@ export const MAX_REWARD_IDS = 128;
 export const defaultSettings = {
   lang: "de",
   audio: true,
+  systemVoiceFallback: false,
   sfx: true,
   autoHelp: true,
   photos: true,
@@ -178,6 +179,10 @@ export function normalizeState(raw) {
   const settings = { ...defaultSettings, voices: { ...defaultSettings.voices } };
   settings.lang = ["de", "tr"].includes(rawSettings.lang) ? rawSettings.lang : "de";
   settings.audio = boolSetting(rawSettings.audio, defaultSettings.audio);
+  settings.systemVoiceFallback = boolSetting(
+    rawSettings.systemVoiceFallback,
+    defaultSettings.systemVoiceFallback,
+  );
   settings.sfx = boolSetting(rawSettings.sfx, defaultSettings.sfx);
   settings.autoHelp = boolSetting(rawSettings.autoHelp, defaultSettings.autoHelp);
   settings.photos = boolSetting(rawSettings.photos, defaultSettings.photos);

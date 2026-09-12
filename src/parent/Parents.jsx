@@ -371,8 +371,8 @@ export default function Parents({ progress }) {
         <h2>{t("Stimme & Töne", "Konuşma ve ses")}</h2>
         <p>
           {t(
-            "MINIK verwendet zuerst die persönliche Mino-Stimme. Nur für noch nicht persönlich aufgenommene Wörter nutzt die App ersatzweise eine Stimme deines Geräts.",
-            "MINIK önce Mino'nun kişisel sesini kullanır. Yalnızca henüz kişisel olarak kaydedilmemiş kelimelerde cihazındaki bir sesi yedek olarak kullanır.",
+            "MINIK verwendet die persönliche Mino-Stimme zuerst. Eine Gerätestimme wird nur verwendet, wenn du sie unten ausdrücklich als Ersatz erlaubst.",
+            "MINIK önce Mino'nun kişisel sesini kullanır. Cihaz sesi yalnızca aşağıdan açıkça yedek olarak izin verirsen kullanılır.",
           )}
         </p>
         {toggle(
@@ -381,6 +381,14 @@ export default function Parents({ progress }) {
           t(
             "Aufgaben und Wörter vorlesen.",
             "Görevleri ve kelimeleri seslendir.",
+          ),
+        )}
+        {toggle(
+          "systemVoiceFallback",
+          t("Gerätestimme als Ersatz erlauben", "Cihaz sesini yedek olarak kullan"),
+          t(
+            "Aus: Es werden nur persönliche oder aufgenommene MINIK-Clips abgespielt.",
+            "Kapalı: Yalnızca kişisel veya kaydedilmiş MINIK klipleri çalınır.",
           ),
         )}
         {toggle(

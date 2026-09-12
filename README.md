@@ -1,6 +1,6 @@
 # MINIK · Lernen mit Mino
 
-**1.67.0 Beta 69 · 12. September 2026**
+**1.67.0 Beta 70 · 12. September 2026**
 
 MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet große visuelle Spielflächen mit Mino als Helfer, getrennten Kinderprofilen, adaptivem Lernen, Belohnungen und einem offline-fähigen PWA-Kern.
 
@@ -16,7 +16,7 @@ Die Startseite ist eine bildschirmfüllende Inselwelt mit großem Mino. Alle bes
 - Altersgerechte 2/4/6-Antwortlogik, adaptive Schwierigkeit, Mastery pro Begriff/Sprache und Spaced Repetition.
 - Sterne, XP, Tagesreise, Aquarium, Achievements und freischaltbare Mino-Outfits.
 - Elternbereich mit Rechengate/optionaler 4-stelliger PIN, Wochenstatistik, schwierigen Begriffen, Sitzungen, Backup/Restore und Einstellungen.
-- Persönliche MINIK-Stimme für alle 332 fest aufgenommenen DE/TR-Begriffe und Anweisungen; die iPhone-/iPad-Systemstimme bleibt nur als dynamischer Notfall-Fallback.
+- Persönliche MINIK-Stimme für alle 332 fest aufgenommenen DE/TR-Begriffe und Anweisungen; die iPhone-/iPad-Systemstimme bleibt standardmäßig aus und kann nur im Elternbereich ausdrücklich als Ersatz erlaubt werden.
 - Safari-/iOS-Härtung für Audio, synchrone Interaktionssperren, Pausen, BFCache, App-Unterbrechungen, Session-Checkpoints und PWA-Updates.
 - Robuste lokale Familien-Persistenz mit Recovery-Snapshot und atomar gespeicherter aktiver Profilauswahl.
 - Offline-Service-Worker, installierbare PWA und GitHub-Pages-Deployment.

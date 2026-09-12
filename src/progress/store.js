@@ -161,6 +161,7 @@ export function addProfile({name, avatar, ageGroup} = {}){
     ...progress.settings,
     lang: currentSettings.lang,
     audio: currentSettings.audio,
+    systemVoiceFallback: currentSettings.systemVoiceFallback,
     sfx: currentSettings.sfx,
     rate: currentSettings.rate,
     pitch: currentSettings.pitch,

@@ -170,6 +170,12 @@ function shouldPreferNativeSystem(text, lang, settings = {}) {
   return false;
 }
 
+function systemVoiceEnabled(settings = {}) {
+  // The personal/recorded MINIK voice is the default. A device voice is an
+  // explicit parent opt-in, never an implicit fallback after a media error.
+  return settings.systemVoiceFallback === true;
+}
+
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
   try {
@@ -260,19 +266,19 @@ export async function speak(text, lang = "de", settings = {}) {
     if (played || token !== sequence) return played;
   }
 
-  // A composed personal/recorded plan must get the same priority as an exact
-  // clip. In particular, Turkish questions and short labels are otherwise
-  // classified as pronunciation-sensitive and jump straight to iOS's voice.
-  const preferNative = shouldPreferNativeSystem(text, lang, settings);
-  if (preferNative) {
-    const native = await speakSystem(text, lang, settings, token);
-    if (native || token !== sequence) return native;
-  }
+  if (systemVoiceEnabled(settings)) {
+    // A composed personal/recorded plan must get the same priority as an
+    // exact clip. In particular, Turkish questions and short labels are
+    // otherwise classified as pronunciation-sensitive and jump straight to
+    // iOS's voice.
+    const preferNative = shouldPreferNativeSystem(text, lang, settings);
+    if (preferNative) {
+      const native = await speakSystem(text, lang, settings, token);
+      if (native || token !== sequence) return native;
+    }
 
-  // Never leave a child-facing instruction silent. Recorded Mino speech remains
-  // first choice, while the best native de-DE / tr-TR device voice covers any
-  // sentence or vocabulary item that has not been recorded yet.
-  if (settings.systemVoiceFallback !== false) {
+    // This is intentionally opt-in. A failed or not-yet-recorded personal
+    // clip must never be presented to a child as the owner's voice.
     return speakSystem(text, lang, settings, token);
   }
   return false;

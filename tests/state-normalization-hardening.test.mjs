@@ -24,6 +24,7 @@ test("corrupt persisted settings cannot turn string booleans into enabled featur
   });
   assert.equal(state.settings.lang, "tr");
   assert.equal(state.settings.audio, true);
+  assert.equal(state.settings.systemVoiceFallback, false);
   assert.equal(state.settings.sfx, true);
   assert.equal(state.settings.autoHelp, true);
   assert.equal(state.settings.photos, true);
@@ -31,6 +32,20 @@ test("corrupt persisted settings cannot turn string booleans into enabled featur
   assert.equal(state.settings.reducedMotion, false);
   assert.equal(state.settings.voices.de, "");
   assert.equal(state.settings.voices.tr, "voice-tr");
+});
+
+test("device voice fallback stays off unless a parent explicitly enables it", () => {
+  assert.equal(normalizeState({ version: 3 }).settings.systemVoiceFallback, false);
+  assert.equal(
+    normalizeState({ version: 3, settings: { systemVoiceFallback: "true" } }).settings
+      .systemVoiceFallback,
+    false,
+  );
+  assert.equal(
+    normalizeState({ version: 3, settings: { systemVoiceFallback: true } }).settings
+      .systemVoiceFallback,
+    true,
+  );
 });
 
 test("corrupt world and mastery counters are normalized before future arithmetic", () => {
