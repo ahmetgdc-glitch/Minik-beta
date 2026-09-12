@@ -20,14 +20,30 @@ import { difficultyFor } from "../progress/model.js";
 import { gameById } from "./registry.js";
 import { worldById, uniqueVisuals } from "../data/content.js";
 import { speak, stopSpeech } from "../audio/voice.js";
-import { playSound, stopSounds, unlockAudio } from "../audio/sounds.js";
+import {
+  pauseBackgroundMusic,
+  playSound,
+  resumeBackgroundMusic,
+  stopSounds,
+  unlockAudio,
+} from "../audio/sounds.js";
 import FishGuide from "../components/FishGuide.jsx";
 import { Mino, Art, assetUrl } from "../components/Visual.jsx";
 import { sceneForWorld } from "../worlds/scenes.js";
 import { recommendedActivities } from "../learning/recommendations.js";
 import { maxOptionsForAge } from "../learning/age.js";
-import { shouldAcceptWrongTap, shouldBlockGameInteraction } from "./inputGuard.js";
-import { loadCheckpoint, saveCheckpoint, clearCheckpoint, checkpointMatchesProfile, checkpointForGame, checkpointDifficulty } from "./sessionCheckpoint.js";
+import {
+  shouldAcceptWrongTap,
+  shouldBlockGameInteraction,
+} from "./inputGuard.js";
+import {
+  loadCheckpoint,
+  saveCheckpoint,
+  clearCheckpoint,
+  checkpointMatchesProfile,
+  checkpointForGame,
+  checkpointDifficulty,
+} from "./sessionCheckpoint.js";
 import ListenGame from "./ListenGame.jsx";
 import MemoryGame from "./MemoryGame.jsx";
 import MatchGame from "./MatchGame.jsx";
@@ -92,24 +108,46 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     totalRounds = Math.max(1, Number(spec?.rounds) || 1);
   const checkpoint = useMemo(() => {
       try {
-        const saved = loadCheckpoint(window.localStorage, progress.activeProfileId, gameId, worldId);
-        const matching = checkpointMatchesProfile(saved, progress.settings.lang, progress.activeProfile?.ageGroup) ? saved : null;
+        const saved = loadCheckpoint(
+          window.localStorage,
+          progress.activeProfileId,
+          gameId,
+          worldId,
+        );
+        const matching = checkpointMatchesProfile(
+          saved,
+          progress.settings.lang,
+          progress.activeProfile?.ageGroup,
+        )
+          ? saved
+          : null;
         return checkpointForGame(matching, totalRounds);
       } catch {
         return null;
       }
-    }, [progress.activeProfileId, progress.activeProfile?.ageGroup, progress.settings.lang, gameId, worldId, totalRounds]);
-  const [difficulty] = useState(() =>
+    }, [
+      progress.activeProfileId,
+      progress.activeProfile?.ageGroup,
+      progress.settings.lang,
+      gameId,
+      worldId,
+      totalRounds,
+    ]),
+    [difficulty] = useState(() =>
       checkpointDifficulty(
         checkpoint,
         difficultyFor(progress, worldId),
         maxOptionsForAge(progress.activeProfile?.ageGroup),
       ),
     ),
-    [round, setRound] = useState(() => Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1))),
+    [round, setRound] = useState(() =>
+      Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)),
+    ),
     [phase, setPhase] = useState(() => checkpoint?.phase || "active"),
     [paused, setPaused] = useState(false),
-    [hint, setHint] = useState(() => checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0)),
+    [hint, setHint] = useState(
+      () => checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0),
+    ),
     [lesson, setLesson] = useState({ text: "", ids: [] }),
     [message, setMessage] = useState(""),
     [activity, setActivity] = useState(0),
@@ -119,7 +157,9 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   const lifecyclePauseRef = useRef(false);
   const pausedRef = useRef(false);
   const phaseRef = useRef(checkpoint?.phase || "active");
-  const roundRef = useRef(Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)));
+  const roundRef = useRef(
+    Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)),
+  );
 
   useModalSafety(paused, () => {
     manualPauseRef.current = false;
@@ -127,36 +167,53 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     pausedRef.current = false;
     setPaused(false);
     unlockAudio();
+    resumeBackgroundMusic("game-pause");
   });
 
-  const locked = useRef(checkpoint?.phase === "success" || checkpoint?.phase === "demo"),
+  const locked = useRef(
+      checkpoint?.phase === "success" || checkpoint?.phase === "demo",
+    ),
     mistakes = useRef(checkpoint?.mistakes || 0),
     attempt = useRef(checkpoint?.attempts || 0),
     earnedRef = useRef(checkpoint?.earned || 0),
     playedRef = useRef(checkpoint?.played || 0),
     saved = useRef(false),
-    hintRef = useRef(checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0)),
+    hintRef = useRef(
+      checkpoint?.hint || (checkpoint?.phase === "demo" ? 3 : 0),
+    ),
     activeSeconds = useRef(checkpoint?.activeSeconds || 0),
     lastWrongTap = useRef(null);
 
-  const interactionBlocked = useCallback(() => shouldBlockGameInteraction({
-    locked: locked.current,
-    paused: pausedRef.current || paused,
-    manualPaused: manualPauseRef.current,
-    lifecyclePaused: lifecyclePauseRef.current,
-    phase: phaseRef.current,
-    hidden: typeof document !== "undefined" && document.hidden,
-  }), [paused]);
+  const interactionBlocked = useCallback(
+    () =>
+      shouldBlockGameInteraction({
+        locked: locked.current,
+        paused: pausedRef.current || paused,
+        manualPaused: manualPauseRef.current,
+        lifecyclePaused: lifecyclePauseRef.current,
+        phase: phaseRef.current,
+        hidden: typeof document !== "undefined" && document.hidden,
+      }),
+    [paused],
+  );
 
   const [sessionId] = useState(
-      () => checkpoint?.sessionId || `minik-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      () =>
+        checkpoint?.sessionId ||
+        `minik-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     ),
     started = useRef(checkpoint?.started || Date.now());
   const items = useMemo(() => uniqueVisuals(world?.items || []), [world]);
   const Component = components[gameId];
   const nextActivity = useMemo(() => {
     const choices = recommendedActivities(progress, lang, 3);
-    return choices.find(({ world: w, game: g }) => w.id !== worldId || g.id !== gameId) || choices[0] || null;
+    return (
+      choices.find(
+        ({ world: w, game: g }) => w.id !== worldId || g.id !== gameId,
+      ) ||
+      choices[0] ||
+      null
+    );
   }, [progress, lang, worldId, gameId]);
 
   const saveSession = useCallback(
@@ -203,16 +260,27 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         difficulty,
       });
     } catch {}
-  }, [progress.activeProfileId, progress.activeProfile?.ageGroup, gameId, worldId, sessionId, lang, difficulty]);
+  }, [
+    progress.activeProfileId,
+    progress.activeProfile?.ageGroup,
+    gameId,
+    worldId,
+    sessionId,
+    lang,
+    difficulty,
+  ]);
 
   const removeCheckpoint = useCallback(() => {
-    try { clearCheckpoint(window.localStorage, progress.activeProfileId); } catch {}
+    try {
+      clearCheckpoint(window.localStorage, progress.activeProfileId);
+    } catch {}
   }, [progress.activeProfileId]);
 
   useEffect(
     () => () => {
       stopSpeech();
       stopSounds();
+      resumeBackgroundMusic("game-pause");
     },
     [],
   );
@@ -226,17 +294,24 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       if (!manualPauseRef.current) lifecyclePauseRef.current = true;
       pausedRef.current = true;
       setPaused(true);
+      pauseBackgroundMusic("game-pause");
       stopSpeech();
       stopSounds();
       persistCheckpoint();
       if (!event.persisted) saveSession(false);
     };
     const onPageShow = (event) => {
-      if (!event.persisted || manualPauseRef.current || !lifecyclePauseRef.current) return;
+      if (
+        !event.persisted ||
+        manualPauseRef.current ||
+        !lifecyclePauseRef.current
+      )
+        return;
       lifecyclePauseRef.current = false;
       pausedRef.current = false;
       setPaused(false);
       unlockAudio();
+      resumeBackgroundMusic("game-pause");
     };
     window.addEventListener("pagehide", onPageHide);
     window.addEventListener("pageshow", onPageShow);
@@ -262,6 +337,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         if (!manualPauseRef.current) lifecyclePauseRef.current = true;
         pausedRef.current = true;
         setPaused(true);
+        pauseBackgroundMusic("game-pause");
         stopSpeech();
         stopSounds();
         persistCheckpoint();
@@ -272,6 +348,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         pausedRef.current = false;
         setPaused(false);
         unlockAudio();
+        resumeBackgroundMusic("game-pause");
       }
     };
     document.addEventListener("visibilitychange", visibility);
@@ -279,6 +356,8 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   }, [persistCheckpoint]);
 
   useEffect(() => {
+    if (paused) pauseBackgroundMusic("game-pause");
+    else resumeBackgroundMusic("game-pause");
     if (paused || phase === "done") {
       stopSpeech();
       stopSounds();
@@ -317,7 +396,8 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         manualPauseRef.current ||
         lifecyclePauseRef.current ||
         (typeof document !== "undefined" && document.hidden)
-      ) return;
+      )
+        return;
       lesson.repeat?.();
     }, 200);
     return () => clearTimeout(t);
@@ -352,7 +432,15 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       clearTimeout(move);
       clearTimeout(help);
     };
-  }, [round, activity, paused, phase, settings.autoHelp, settings.audio, lang]);
+  }, [
+    round,
+    activity,
+    paused,
+    phase,
+    settings.autoHelp,
+    settings.audio,
+    lang,
+  ]);
 
   function record(correct, ids, meta = {}) {
     const id = `${sessionId}:${round}:${++attempt.current}`;
@@ -455,7 +543,14 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       phase === "demo" ? 3800 : 1300,
     );
     return () => clearTimeout(t);
-  }, [phase, paused, round, totalRounds, saveSession, removeCheckpoint]);
+  }, [
+    phase,
+    paused,
+    round,
+    totalRounds,
+    saveSession,
+    removeCheckpoint,
+  ]);
 
   function help() {
     if (interactionBlocked()) return;
@@ -470,6 +565,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     manualPauseRef.current = true;
     lifecyclePauseRef.current = false;
     pausedRef.current = true;
+    pauseBackgroundMusic("game-pause");
     stopSpeech();
     stopSounds();
     persistCheckpoint();
@@ -479,6 +575,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   function exit() {
     saveSession(false);
     removeCheckpoint();
+    resumeBackgroundMusic("game-pause");
     onNavigate(`/world/${worldId}`);
   }
 
@@ -493,7 +590,9 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
           <Art name="star" />
         </div>
         <Mino />
-        <h1>{lang === "tr" ? "Birlikte başardık!" : "Zusammen geschafft!"}</h1>
+        <h1>
+          {lang === "tr" ? "Birlikte başardık!" : "Zusammen geschafft!"}
+        </h1>
         <p>
           {lang === "tr"
             ? "Mino ile harika çalıştın."
@@ -508,19 +607,28 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
             className="primary next-adventure-button"
             onClick={() => {
               unlockAudio();
-              onNavigate(`/play/${nextActivity.game.id}/${nextActivity.world.id}`);
+              onNavigate(
+                `/play/${nextActivity.game.id}/${nextActivity.world.id}`,
+              );
             }}
           >
             <Play size={21} fill="currentColor" />
             <span>
-              <small>{lang === "tr" ? "Mino’nun sıradaki önerisi" : "Minos nächster Tipp"}</small>
+              <small>
+                {lang === "tr"
+                  ? "Mino’nun sıradaki önerisi"
+                  : "Minos nächster Tipp"}
+              </small>
               {nextActivity.world.labels[lang]} · {nextActivity.game[lang]}
             </span>
             <ArrowRight size={20} />
           </button>
         )}
         <div className="finish-actions">
-          <button className="secondary" onClick={() => onNavigate("/aquarium")}>
+          <button
+            className="secondary"
+            onClick={() => onNavigate("/aquarium")}
+          >
             <Art name="wrapped-gift" />
             {lang === "tr" ? "Ödüllerim" : "Meine Schätze"}
           </button>
@@ -544,13 +652,17 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       className={`game-session game-${gameId} phase-${phase}`}
       data-age={progress.activeProfile?.ageGroup || "4-5"}
       data-world={worldId}
-      style={{ "--scene-background": `url("${assetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`)}")` }}
+      style={{
+        "--scene-background": `url("${assetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`)}")`,
+      }}
     >
       <header className="game-header" inert={paused ? true : undefined}>
         <button
           className="icon-button game-back-button"
           onClick={exit}
-          aria-label={lang === "tr" ? "Öğrenme dünyasına dön" : "Zurück zur Lernwelt"}
+          aria-label={
+            lang === "tr" ? "Öğrenme dünyasına dön" : "Zurück zur Lernwelt"
+          }
         >
           <ArrowLeft />
         </button>
@@ -618,6 +730,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
               pausedRef.current = false;
               setPaused(false);
               unlockAudio();
+              resumeBackgroundMusic("game-pause");
             }}
           >
             <Play size={20} /> {lang === "tr" ? "Devam et" : "Weiterspielen"}
