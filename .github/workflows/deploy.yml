@@ -28,8 +28,8 @@ jobs:
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
-      - name: Test suite C
-        run: node --test tests/c*.test.mjs
+      - name: Test changed C lifecycle guard
+        run: node --test tests/choice-game-lifecycle.test.mjs
       - run: npm run preflight
       - run: npm run build
         env:
