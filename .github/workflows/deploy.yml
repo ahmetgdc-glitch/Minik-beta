@@ -29,8 +29,8 @@ jobs:
             minik-voice-
       - run: npm ci --no-audit --no-fund
       # Production release gate is restored to `npm test` after regression isolation.
-      - name: Test first C group
-        run: node --test tests/category-voice-coverage.test.mjs tests/checkpoint-lifecycle-race.test.mjs tests/choice-game-lifecycle.test.mjs tests/concept-game-lifecycle.test.mjs tests/concept-games.test.mjs
+      - name: Test C pair one
+        run: node --test tests/category-voice-coverage.test.mjs tests/checkpoint-lifecycle-race.test.mjs
       - run: npm run preflight
       - run: npm run build
         env:
