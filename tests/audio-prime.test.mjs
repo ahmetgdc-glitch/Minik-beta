@@ -3,6 +3,29 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
+const voiceSourceForHarness = () => read("src/audio/voice.js")
+  .replace(/^import .*;\n/gm, "")
+  .replace(/import \{[\s\S]*?\} from "\.\/systemVoice4\.js";\n/u, "")
+  .replace(/export /g, "");
+const voiceHarness = (Audio, personalVoiceClip, naturalVoicePlan, setSpeechActive) =>
+  new Function(
+    "Audio",
+    "personalVoiceClip",
+    "naturalVoicePlan",
+    "setSpeechActive",
+    "speakWithVoice4",
+    "stopSystemVoice4",
+    "systemVoice4Available",
+    `${voiceSourceForHarness()}; return {speak, stopSpeech, unlockVoiceAudio};`,
+  )(
+    Audio,
+    personalVoiceClip,
+    naturalVoicePlan,
+    setSpeechActive,
+    async () => false,
+    () => {},
+    () => false,
+  );
 
 test("late audio unlock cannot pause a new narration or replace its handlers", async () => {
   let player, finishUnlock, plays = 0, pauses = 0;
@@ -16,8 +39,7 @@ test("late audio unlock cannot pause a new narration or replace its handlers", a
       return plays === 1 ? new Promise((resolve) => { finishUnlock = resolve; }) : Promise.resolve();
     }
   }
-  const source = read("src/audio/voice.js").replace(/^import .*;\n/gm, "").replace(/export /g, "");
-  const api = new Function("Audio", "personalVoiceClip", "naturalVoicePlan", "setSpeechActive", `${source}; return {speak, unlockVoiceAudio};`)(Audio, () => "clip.mp3", () => [], () => {});
+  const api = voiceHarness(Audio, () => "clip.mp3", () => [], () => {});
   const unlock = api.unlockVoiceAudio();
   const duplicate = api.unlockVoiceAudio();
   assert.equal(plays, 1);
@@ -47,8 +69,7 @@ test("speech ducking survives cancellation and ends on completion or audio off",
     load() {}
     play() { return Promise.resolve(); }
   }
-  const source = read("src/audio/voice.js").replace(/^import .*;\n/gm, "").replace(/export /g, "");
-  const api = new Function("Audio", "personalVoiceClip", "naturalVoicePlan", "setSpeechActive", `${source}; return {speak, stopSpeech};`)(Audio, () => "clip.mp3", () => [], (active) => levels.push(active));
+  const api = voiceHarness(Audio, () => "clip.mp3", () => [], (active) => levels.push(active));
   const first = api.speak("eins");
   assert.equal(levels.at(-1), true);
   const second = api.speak("zwei");
