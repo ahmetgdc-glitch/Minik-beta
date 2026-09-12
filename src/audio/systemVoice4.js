@@ -52,7 +52,7 @@ let voicesObserved = false;
 
 function syncVoiceEngine() {
   const synth = engine();
-  if (cacheSynth && synth && cacheSynth !== synth) {
+  if (cacheSynth !== synth) {
     selectedVoiceCache.clear();
     pendingVoiceLookup.clear();
     voicesObserved = false;
