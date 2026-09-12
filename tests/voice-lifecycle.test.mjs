@@ -13,6 +13,22 @@ test("MINIK stops every narrator when the page leaves the foreground", () => {
   assert.match(voice, /bindSpeechLifecycle\(\)/);
 });
 
+test("hidden MINIK cannot start a delayed narrator after lifecycle cancellation", () => {
+  assert.match(voice, /function speechForegroundAllowed\(\)/);
+  assert.match(voice, /return !document\.hidden && document\.visibilityState !== "hidden"/);
+  assert.match(voice, /if \(!text \|\| settings\.audio === false \|\| !speechForegroundAllowed\(\)\) return false/);
+  assert.match(voice, /\(\) => token === sequence && speechForegroundAllowed\(\)/);
+  assert.match(voice, /if \(!speechForegroundAllowed\(\)\) return false;\n\s*const personalClip/);
+  assert.match(voice, /export async function cloudTTS[\s\S]*?if \(!speechForegroundAllowed\(\)\) return false/);
+  assert.match(voice, /if \(token !== sequence \|\| !speechForegroundAllowed\(\)\) return false/);
+});
+
+test("audio priming and recorded playback stay blocked while hidden", () => {
+  assert.match(voice, /export async function unlockVoiceAudio\(\) \{\n\s*if \(!speechForegroundAllowed\(\)\) return false/);
+  assert.match(voice, /async function speakMediaClip\(url, token\) \{\n\s*if \(!url \|\| !speechForegroundAllowed\(\)\) return false/);
+  assert.match(voice, /async function speakGameClip\(url, token\) \{\n\s*if \(!url \|\| !speechForegroundAllowed\(\)\) return false/);
+});
+
 test("global lifecycle cancellation reaches Voice 4 and recorded fallbacks", () => {
   const stopStart = voice.indexOf("export function stopSpeech()");
   const lifecycleStart = voice.indexOf("function bindSpeechLifecycle()");
