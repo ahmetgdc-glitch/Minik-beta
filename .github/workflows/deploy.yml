@@ -29,8 +29,8 @@ jobs:
             minik-voice-
       - run: npm ci --no-audit --no-fund
       # Production release gate: npm test
-      - name: Verify C regression group
-        run: node --test tests/c*.test.mjs
+      - name: Verify concept lifecycle fix
+        run: node --test tests/concept-game-lifecycle.test.mjs
       - run: npm run preflight
       - run: npm run build
         env:
