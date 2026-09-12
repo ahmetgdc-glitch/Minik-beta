@@ -122,7 +122,7 @@ export default function App() {
         ? ["worlds", "world"].includes(route)
         : path === `/${route}`;
   }
-  if (!profileReady && progress.profiles.length > 1 && route !== "profiles" && !playing)
+  if (!profileReady && progress.profiles.length > 1 && route !== "profiles")
     return (
       <main className="profile-launch-shell">
         <Profiles progress={progress} onChoose={confirmProfile} chooserOnly />
