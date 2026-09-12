@@ -8,12 +8,16 @@ test("app primes WebAudio and one lazy voice player on the first direct user ges
   const app = read("src/App.jsx");
   const hook = read("src/app/useAudioPrime.js");
   const voice = read("src/audio/voice.js");
-  assert.match(app, /useAudioPrime\(progress\.settings\.audio \|\| progress\.settings\.sfx\)/);
+  assert.match(
+    app,
+    /useAudioPrime\([\s\S]*progress\.settings\.audio \|\| progress\.settings\.sfx,[\s\S]*progress\.settings\.audio,[\s\S]*\)/,
+  );
   assert.match(hook, /addEventListener\("pointerdown", prime, true\)/);
   assert.match(hook, /addEventListener\("touchstart", prime, true\)/);
   assert.match(hook, /addEventListener\("keydown", prime, true\)/);
   assert.match(hook, /unlockAudio\(\)/);
   assert.match(hook, /unlockVoiceAudio\(\)/);
+  assert.match(hook, /startMusicAfterGesture\(\)/);
   assert.match(voice, /voicePlayer = new Audio\(\)/);
   assert.match(voice, /voicePlayer\.preload = "none"/);
 });
@@ -22,8 +26,12 @@ test("audio priming re-arms after returning from the background without autoplay
   const hook = read("src/app/useAudioPrime.js");
   assert.match(hook, /visibilitychange/);
   assert.match(hook, /document\.visibilityState !== "visible"/);
+  assert.match(hook, /pauseBackgroundMusic\("visibility"\)/);
   assert.match(hook, /webAudioReady = false/);
-  assert.doesNotMatch(hook, /resumeAfterBackground[\s\S]*unlockVoiceAudio\(\)/);
+  assert.doesNotMatch(
+    hook,
+    /resumeAfterBackground[\s\S]*unlockVoiceAudio\(\)/,
+  );
 });
 
 test("voice module never eagerly preloads the complete library during boot", () => {
