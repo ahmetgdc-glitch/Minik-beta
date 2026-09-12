@@ -7,7 +7,11 @@ let context = null,
   musicBus = null,
   speechActive = false;
 export function setSpeechActive(active) {
-  speechActive = Boolean(active);
+  const next = Boolean(active);
+  // The personal MINIK narrator always has priority over game effects. If a
+  // success/tap effect has just started, stop it before narration begins.
+  if (next && !speechActive) stopSounds();
+  speechActive = next;
   if (!musicBus || !context) return;
   const level = speechActive ? 0.18 : 1;
   if (musicBus.gain.setTargetAtTime) {
@@ -144,7 +148,9 @@ function noise(start, duration, filter = "lowpass", freq = 700, volume = 0.12) {
 }
 export function playSound(kind, { sfx = true } = {}) {
   stopSounds();
-  if (!sfx || !unlockAudio()) return 0;
+  // Effects must never compete with the personal narrator. They resume on the
+  // next interaction after speech has finished.
+  if (!sfx || speechActive || !unlockAudio()) return 0;
   if (kind === "success") {
     [523, 659, 784].forEach((f, i) => tone(f, i * 0.11, 0.24, "sine", 0.05));
     return 500;
