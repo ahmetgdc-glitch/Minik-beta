@@ -83,12 +83,24 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
 
   const live = voices.find((voice) => isVoice4Candidate(voice) && sameVoice(voice, cached));
   if (live) {
+    iosVoice4MissingSince = 0;
     selectedVoiceCache.set(lang, live);
     return live;
   }
 
-  // Once iOS exposes a populated list that no longer contains the cached
-  // narrator, the cache is genuinely stale. Do not keep retrying a dead voice.
+  const replacementVoice4 = voices.some(isVoice4Candidate);
+  if (replacementVoice4) {
+    iosVoice4MissingSince = 0;
+  } else if (isIOSSpeechEnvironment()) {
+    const now = Date.now();
+    if (!iosVoice4MissingSince) iosVoice4MissingSince = now;
+    if (now - iosVoice4MissingSince < IOS_ABSENCE_GRACE_MS) return cached;
+  }
+
+  // A populated iOS inventory can still be transiently incomplete while
+  // Safari resumes. Only invalidate a known narrator after the same grace
+  // period used by the fallback guard. A different exposed Voice 4 is safe to
+  // select immediately because the narrator family is still available.
   selectedVoiceCache.delete(lang);
   return null;
 }
