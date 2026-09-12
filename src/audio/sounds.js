@@ -3,7 +3,17 @@ let context = null,
   activeTimers = [],
   musicTimer = null,
   musicNodes = [],
-  musicPaused = false;
+  musicPaused = false,
+  musicBus = null,
+  speechActive = false;
+export function setSpeechActive(active) {
+  speechActive = Boolean(active);
+  if (!musicBus || !context) return;
+  const level = speechActive ? 0.18 : 1;
+  if (musicBus.gain.setTargetAtTime) {
+    musicBus.gain.setTargetAtTime(level, context.currentTime, speechActive ? 0.03 : 0.2);
+  } else musicBus.gain.value = level;
+}
 export function setMusicPaused(paused) {
   musicPaused = Boolean(paused);
   if (musicPaused) stopMusic();
@@ -38,6 +48,11 @@ export function stopSounds() {
 /** Start a very quiet, deterministic child-friendly loop after a real gesture. */
 export function startMusic({ enabled = true } = {}) {
   if (!enabled || musicPaused || musicTimer || !unlockAudio()) return false;
+  if (!musicBus) {
+    musicBus = context.createGain();
+    musicBus.gain.value = speechActive ? 0.18 : 1;
+    musicBus.connect(context.destination);
+  }
   const notes = [261.6, 329.6, 392, 329.6, 293.7, 349.2, 440, 349.2];
   let index = 0;
   const playBar = () => {
@@ -50,7 +65,7 @@ export function startMusic({ enabled = true } = {}) {
     g.gain.setValueAtTime(0.0001, now);
     g.gain.exponentialRampToValueAtTime(0.018, now + 0.04);
     g.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
-    o.connect(g); g.connect(context.destination); o.start(now); o.stop(now + 0.66);
+    o.connect(g); g.connect(musicBus); o.start(now); o.stop(now + 0.66);
     musicNodes.push(o);
     o.onended = () => { o.disconnect(); g.disconnect(); musicNodes = musicNodes.filter((n) => n !== o); };
   };
