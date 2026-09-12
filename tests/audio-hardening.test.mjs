@@ -38,13 +38,16 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
-test("an unresolved Safari voice inventory cannot trigger the personal narrator", () => {
+test("an unresolved or transient Safari voice inventory cannot trigger the personal narrator", () => {
   const inventoryGuard = voice.indexOf("if (!voice4InventoryReady()) return false;");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   assert.ok(inventoryGuard > 0);
   assert.ok(personalIndex > inventoryGuard);
   assert.match(systemVoice4, /export function voice4InventoryReady\(\)/);
-  assert.match(systemVoice4, /return exposedSystemVoices\(\)\.length > 0/);
+  assert.match(systemVoice4, /if \(!voices\.length\) \{/);
+  assert.match(systemVoice4, /if \(!isIOSSpeechEnvironment\(\)\) return true/);
+  assert.match(systemVoice4, /IOS_ABSENCE_GRACE_MS = 5000/);
+  assert.match(systemVoice4, /return now - iosVoice4MissingSince >= IOS_ABSENCE_GRACE_MS/);
   assert.doesNotMatch(systemVoice4, /voicesObserved \|\| exposedSystemVoices\(\)\.length > 0/);
 });
 
