@@ -10,6 +10,7 @@ import {
 import { naturalVoicePlan } from "../src/audio/naturalVoicePlans.js";
 
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
+const systemVoice4 = readFileSync(new URL("../src/audio/systemVoice4.js", import.meta.url), "utf8");
 const natural = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
 const downloader = readFileSync(new URL("../scripts/fetch-personal-voice-assets.mjs", import.meta.url), "utf8");
 const parents = readFileSync(new URL("../src/parent/Parents.jsx", import.meta.url), "utf8");
@@ -97,12 +98,15 @@ test("natural speech plans retain the personal voice over legacy recordings", ()
   );
 });
 
-test("runtime keeps personal recordings primary with no system narrator", () => {
+test("runtime prefers Voice 4 and keeps personal recordings as the safe fallback", () => {
+  const systemIndex = voice.indexOf("speakWithVoice4(");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
-  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|speakSystem/);
-  assert.ok(personalIndex > 0);
+  assert.ok(systemIndex > 0);
+  assert.ok(personalIndex > systemIndex);
   assert.ok(planIndex > personalIndex);
+  assert.match(systemVoice4, /VOICE4_RE/);
+  assert.doesNotMatch(systemVoice4, /voice\?\.default|voice\?\.localService|sameLanguage\[0\]|voices\[0\]/);
 });
 
 test("recorded fallback still accepts only personal voice clips", () => {
