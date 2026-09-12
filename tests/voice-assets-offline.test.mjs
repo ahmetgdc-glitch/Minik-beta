@@ -7,6 +7,7 @@ const workflow = readFileSync(new URL("../.github/workflows/deploy.yml", import.
 const worker = readFileSync(new URL("../scripts/build-sw.mjs", import.meta.url), "utf8");
 const downloader = readFileSync(new URL("../scripts/fetch-voice-assets.mjs", import.meta.url), "utf8");
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
+const systemVoice4 = readFileSync(new URL("../src/audio/systemVoice4.js", import.meta.url), "utf8");
 
 test("production build localizes natural voice files before generating the service worker", () => {
   const downloadIndex = pkg.indexOf("fetch-voice-assets.mjs");
@@ -38,11 +39,14 @@ test("localized voice files are packaged but cached only after use", () => {
   assert.match(worker, /await cache\.put\(event\.request,response\.clone\(\)\)/);
 });
 
-test("runtime uses personal offline narration without a system fallback", () => {
+test("runtime prefers Voice 4 while preserving personal offline fallback", () => {
+  const systemIndex = voice.indexOf("speakWithVoice4(");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("naturalVoicePlan(text, lang)");
-  assert.ok(personalIndex > 0, "personal narrator must be attempted");
+  assert.ok(systemIndex > 0, "Voice 4 must be attempted first");
+  assert.ok(personalIndex > systemIndex, "personal offline narrator must remain the first fallback");
   assert.ok(planIndex > personalIndex, "recorded natural plans must remain available after exact fallback");
-  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|getVoices/);
+  assert.match(systemVoice4, /VOICE4_RE/);
+  assert.doesNotMatch(systemVoice4, /voice\?\.default|voice\?\.localService|sameLanguage\[0\]|voices\[0\]/);
   assert.match(voice, /assets\/voice\/\$\{filename\}/);
 });
