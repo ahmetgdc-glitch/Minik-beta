@@ -1,5 +1,6 @@
 import { naturalVoicePlan } from "./naturalVoicePlans.js";
 import { personalVoiceClip } from "./personalVoiceClips.js";
+import { setSpeechActive } from "./sounds.js";
 
 let settle = null,
   cloudPlayer = null,
@@ -58,6 +59,7 @@ export function stopSpeech() {
   cloudPlayer = null;
   settle?.(false);
   settle = null;
+  setSpeechActive(false);
 }
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
@@ -132,7 +134,8 @@ export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   if (!text || settings.audio === false) return false;
   const token = sequence;
-
+  setSpeechActive(true);
+  try {
   // The owner's authorized MINIK voice is canonical wherever an exact
   // personal recording exists. No device speech path is available.
   const personalClip = personalVoiceClip(text, lang);
@@ -151,6 +154,10 @@ export async function speak(text, lang = "de", settings = {}) {
   // child never hears the iPhone/browser telephone voice in a personal-voice
   // MINIK session.
   return false;
+  } finally {
+    // An older cancelled request must not raise music over its replacement.
+    if (token === sequence) setSpeechActive(false);
+  }
 }
 export async function cloudTTS(text, lang, provider) {
   stopSpeech();
