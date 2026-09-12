@@ -28,8 +28,9 @@ jobs:
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
-      - name: Test changed C lifecycle guard
-        run: node --test tests/choice-game-lifecycle.test.mjs
+      # Production release gate is restored to `npm test` after regression isolation.
+      - name: Test first C group
+        run: node --test tests/category-voice-coverage.test.mjs tests/checkpoint-lifecycle-race.test.mjs tests/choice-game-lifecycle.test.mjs tests/concept-game-lifecycle.test.mjs tests/concept-games.test.mjs
       - run: npm run preflight
       - run: npm run build
         env:
