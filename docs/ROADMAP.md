@@ -1,6 +1,6 @@
 # MINIK Roadmap
 
-Stand **1.67.0 Beta 68 · 2026-09-12**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+Stand **1.67.0 Beta 69 · 2026-09-12**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
 
 ## Immersive Kinderwelt
 

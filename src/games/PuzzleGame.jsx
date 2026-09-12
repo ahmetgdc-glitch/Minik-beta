@@ -55,7 +55,7 @@ export default function PuzzleGame({
     text,
     () => speak(text, lang, settings),
     [target.id],
-    lang === "tr" ? "Küçük resme bak. Parçaları tek tek yerleştir." : "Schau auf das Vorbild und setze die Teile nacheinander ein.",
+    lang === "tr" ? "Küçük resme bak." : "Schau auf das kleine Vorbild.",
   );
   const url = assetUrl(
     settings.photos && target.variants.photo

@@ -1,6 +1,6 @@
 # MINIK Release-QA
 
-Stand: **2026-09-12 · 1.67.0 Beta 68**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Physische Gerätetests oder ein echtes GitHub-Deployment werden nicht vorgetäuscht.
+Stand: **2026-09-12 · 1.67.0 Beta 69**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Physische Gerätetests oder ein echtes GitHub-Deployment werden nicht vorgetäuscht.
 
 ## Automatisiert bestanden
 

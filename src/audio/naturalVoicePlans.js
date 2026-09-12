@@ -101,8 +101,36 @@ export function naturalVoicePlan(text, lang = "de") {
   const exact = recordedClip(value, lang);
   if (exact) return [exact];
 
+  // A few newer UI labels have the same child-facing intent as an existing
+  // personal recording. Keep the source wording precise while routing their
+  // audio through the owner's clip until a dedicated take is available.
+  const aliases = {
+    de: {
+      "Schau genau auf die Form.": "Schau dir die Bilder gut an.",
+    },
+    tr: {
+      "Şekle dikkatlice bak.": "Resimlere dikkatle bak.",
+    },
+  };
+  const alias = aliases[lang]?.[value];
+  if (alias) {
+    const clip = recordedClip(alias, lang);
+    if (clip) return [clip];
+  }
+
   let match;
   if (lang === "tr") {
+    // Story narration is assembled at runtime from one, two, or three labels.
+    // Keep every spoken word on the owner's recorded track whenever those
+    // labels are available, instead of sending the whole sentence to iOS.
+    match = value.match(/^Mino\s+önce\s+(.+?),\s*sonra\s+(.+?)\s+ve en son\s+(.+?)\s+görüyor\.$/u);
+    if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
+    match = value.match(/^Mino\s+önce\s+(.+?)\s+ve sonra\s+(.+?)\s+görüyor\.$/u);
+    if (match) return resolve([stripEnd(match[1]), stripEnd(match[2])], lang);
+    match = value.match(/^Mino\s+(.+?)\s+görüyor\.$/u);
+    if (match) return resolve([stripEnd(match[1])], lang);
+    match = value.match(/^Mino en son ne görüyor\?\s*(.+?)\.?$/u);
+    if (match) return resolve(["Mino en son ne görüyor?", stripEnd(match[1])], lang);
     match = value.match(/^(.+?)\s+nerede\?$/u);
     if (match) return resolve(["Bu resmi bul.", stripEnd(match[1])], lang);
     match = value.match(/^(.+?)\s+nerede\?\s+Bir kez daha hatırlayalım\.$/u);
@@ -125,6 +153,17 @@ export function naturalVoicePlan(text, lang = "de") {
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
     if (/Yeşil noktadan başla\.?$/u.test(value)) return resolve(["İzi takip et. Yeşil noktadan başla."], lang);
   } else {
+    // Story narration is assembled at runtime from one, two, or three labels.
+    // Resolve the labels separately so available personal recordings remain
+    // the first choice even when the sentence itself is dynamic.
+    match = value.match(/^Mino sieht zuerst\s+(.+?),\s*dann\s+(.+?)\s+und zum Schluss\s+(.+?)\.$/u);
+    if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
+    match = value.match(/^Mino sieht zuerst\s+(.+?)\s+und dann\s+(.+?)\.$/u);
+    if (match) return resolve([stripEnd(match[1]), stripEnd(match[2])], lang);
+    match = value.match(/^Mino sieht\s+(.+?)\.$/u);
+    if (match) return resolve([stripEnd(match[1])], lang);
+    match = value.match(/^Was sieht Mino zum Schluss\?\s*(.+?)\.?$/u);
+    if (match) return resolve(["Was sieht Mino zum Schluss?", stripEnd(match[1])], lang);
     match = value.match(/^Finde:\s*(.+?)\.?$/u);
     if (match) return resolve(["Finde dieses Bild.", stripEnd(match[1])], lang);
     match = value.match(/^Wo ist\s+(.+?)\?\s+Das wiederholen wir noch einmal\.$/u);

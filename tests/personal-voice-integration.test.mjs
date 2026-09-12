@@ -100,8 +100,11 @@ test("natural speech plans prefer the personal voice over legacy recordings", ()
 test("runtime tries an exact personal clip before any native system voice", () => {
   assert.match(voice, /import \{ personalVoiceClip \} from "\.\/personalVoiceClips\.js";/);
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
+  const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
   const nativeIndex = voice.indexOf("const preferNative = shouldPreferNativeSystem(text, lang, settings)");
   assert.ok(personalIndex > 0, "runtime must look up the exact authorized personal clip");
+  assert.ok(planIndex > personalIndex, "composed recorded plans must follow the exact personal clip");
+  assert.ok(nativeIndex > planIndex, "native system speech must not bypass a recorded plan");
   assert.ok(nativeIndex > personalIndex, "native system speech must not bypass an available personal clip");
   assert.match(voice, /await playPreferredClip\(personalClip, token\)/);
 });
@@ -121,6 +124,20 @@ test("personal wav clips are localized before service worker generation", () => 
 test("runtime can resolve both legacy mp3 and personal wav files locally", () => {
   assert.ok(voice.includes("(?:mp3|wav)"));
   assert.ok(voice.includes("assets/voice/${filename}"));
+  assert.match(voice, /assets\\\/personal-voice/);
+});
+
+test("dynamic story narration keeps available labels on personal recordings", () => {
+  for (const [text, lang, expected] of [
+    ["Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de", 3],
+    ["Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr", 3],
+    ["Was sieht Mino zum Schluss? Löwe", "de", 2],
+    ["Mino en son ne görüyor? Aslan", "tr", 2],
+  ]) {
+    const plan = naturalVoicePlan(text, lang);
+    assert.equal(plan.length, expected, `unexpected story plan: ${lang} ${text}`);
+    assert.ok(plan.every((url) => /(?:assets\/personal-voice|resource2\.heygen\.ai)/u.test(url)));
+  }
 });
 
 test("the parent voice preview always uses exact personal MINIK recordings", () => {

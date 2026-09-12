@@ -1,6 +1,6 @@
 # MINIK · Lernen mit Mino
 
-**1.67.0 Beta 68 · 12. September 2026**
+**1.67.0 Beta 69 · 12. September 2026**
 
 MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet große visuelle Spielflächen mit Mino als Helfer, getrennten Kinderprofilen, adaptivem Lernen, Belohnungen und einem offline-fähigen PWA-Kern.
 

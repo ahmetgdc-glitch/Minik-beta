@@ -173,6 +173,12 @@ function shouldPreferNativeSystem(text, lang, settings = {}) {
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
   try {
+    // Generated personal clips are already relative to the app root. Resolve
+    // them against the current document so GitHub Pages' `/Minik-beta/` base
+    // path is preserved instead of treating them as browser-root URLs.
+    if (/^assets\/personal-voice\//u.test(url)) {
+      return new URL(url, document.baseURI).href;
+    }
     const filename = new URL(url).pathname.split("/").pop();
     if (!/\.(?:mp3|wav)$/iu.test(filename || "")) return "";
     return new URL(`assets/voice/${filename}`, document.baseURI).href;
@@ -248,16 +254,19 @@ export async function speak(text, lang = "de", settings = {}) {
     if (playedPersonal || token !== sequence) return playedPersonal;
   }
 
-  const preferNative = shouldPreferNativeSystem(text, lang, settings);
-  if (preferNative) {
-    const native = await speakSystem(text, lang, settings, token);
-    if (native || token !== sequence) return native;
-  }
-
   const plan = naturalVoicePlan(text, lang);
   if (plan.length) {
     const played = await speakNaturalPlan(plan, token);
     if (played || token !== sequence) return played;
+  }
+
+  // A composed personal/recorded plan must get the same priority as an exact
+  // clip. In particular, Turkish questions and short labels are otherwise
+  // classified as pronunciation-sensitive and jump straight to iOS's voice.
+  const preferNative = shouldPreferNativeSystem(text, lang, settings);
+  if (preferNative) {
+    const native = await speakSystem(text, lang, settings, token);
+    if (native || token !== sequence) return native;
   }
 
   // Never leave a child-facing instruction silent. Recorded Mino speech remains

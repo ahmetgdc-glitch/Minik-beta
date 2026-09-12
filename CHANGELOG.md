@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.67.0 Beta 69 — Persönliche Stimme in jedem Audiopfad zuerst
+
+- Der Audioplayer versucht jetzt nach einem exakten persönlichen Clip auch zusammengesetzte persönliche/aufgezeichnete Pläne, bevor iOS oder Android die Systemstimme übernimmt.
+- Lokale persönliche MP3-Dateien werden unter dem GitHub-Pages-Basispfad korrekt aufgelöst und bleiben offline nutzbar.
+- Story-Sätze können ihre Bildbegriffe als persönliche Einzelclips wiedergeben; dynamische Rückfragen bleiben mit dem persönlichen Mino-Clip verbunden.
+- Zeichen-, Puzzle-, Schatten- und Ausmal-Hilfen verwenden die vorhandenen persönlichen Aufnahmen, ohne die Bedienlogik zu verändern.
+
 ## 1.67.0 Beta 68 — Persönliche MINIK-Stimme vollständig
 
 - 298 neue persönliche DE/TR-Sprachclips ergänzen die 34 vorhandenen Kernaufnahmen.

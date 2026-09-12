@@ -58,7 +58,11 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
   const blocked = () => paused || interactionBlocked();
 
   const text = lang === "tr" ? "Büyük tuvalde boya, çiz ve hayal et." : "Male, zeichne und erfinde etwas auf der großen Fläche.";
-  const help = lang === "tr" ? "Bir boyama resmi seç. Taşırmadan boya seçeneği dokunduğun bölgeyi temizce doğru renkle doldurur." : "Wähle eine Malvorlage. Zauber-Ausmalen füllt den berührten Bereich sauber mit der richtigen Farbe.";
+  // Keep spoken help on the owner's existing recording. The visual UI still
+  // explains the newer Zauber-Ausmalen behavior beside the button.
+  const help = lang === "tr"
+    ? "Bir renk seç. İstersen bir boyama resmi seç."
+    : "Wähle eine Farbe. Du kannst auch eine Malvorlage wählen.";
   useLesson(onReady, text, () => speak(text, lang, settings), [template?.id || "creative.draw"], help);
 
   function buildGuide(url = guideUrlRef.current) {
