@@ -21,15 +21,17 @@ test("counting keeps one-tap-per-object progression and natural number speech", 
 
 test("counting blocks answers until every object has been counted", () => {
   assert.match(game, /count-answer-stage \$\{allCounted \? "ready" : "locked"\}/);
-  assert.match(game, /aria-disabled=\{!allCounted \|\| paused \|\| undefined\}/);
-  assert.match(game, /if \(!allCounted \|\| paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /aria-disabled=\{!allCounted \|\| controlsDisabled \|\| undefined\}/);
+  assert.match(game, /disabled=\{!allCounted \|\| controlsDisabled\}/);
+  assert.match(game, /if \(!allCounted \|\| controlsDisabled\) return/);
   assert.match(css, /\.count-answer-stage\.locked \.number-options \{ pointer-events:none/);
 });
 
-test("counting blocks object and answer interactions while paused", () => {
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
-  assert.match(game, /disabled=\{paused\}/);
-  assert.match(game, /onPick=\{\(item\) => \{[\s\S]*if \(!allCounted \|\| paused \|\| interactionBlocked\(\)\) return/);
+test("counting blocks object and answer interactions while paused or lifecycle-blocked", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
+  assert.match(game, /if \(controlsDisabled\) return/);
+  assert.match(game, /onPick=\{\(item\) => \{[\s\S]*if \(!allCounted \|\| controlsDisabled\) return/);
 });
 
 test("count meadow keeps large responsive touch targets", () => {
