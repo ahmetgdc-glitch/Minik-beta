@@ -2,6 +2,7 @@ import { naturalVoicePlan } from "./naturalVoicePlans.js";
 import { personalVoiceClip } from "./personalVoiceClips.js";
 import { setSpeechActive } from "./sounds.js";
 import {
+  hasVoice4Selection,
   speakWithVoice4,
   stopSystemVoice4,
   systemVoice4Available,
@@ -23,8 +24,6 @@ function naturalPlayer() {
   if (typeof Audio === "undefined") return null;
   if (!voicePlayer) {
     voicePlayer = new Audio();
-    // Never eagerly fetch speech. iOS Safari is sensitive to hundreds of media
-    // elements/requests during app boot. One reusable player is enough.
     voicePlayer.preload = "none";
     voicePlayer.setAttribute?.("playsinline", "");
   }
@@ -44,12 +43,7 @@ function ensureVoiceContext() {
   }
 }
 
-/**
- * Unlock reusable recorded-speech paths from a real user gesture. Voice 4 uses
- * iOS Web Speech when WebKit exposes that exact high-quality voice.
- */
 export async function unlockVoiceAudio() {
-  // Never replace a narration source/handlers with the silent unlock clip.
   if (settle) return true;
   if (unlockPending) return unlockPending;
   const context = ensureVoiceContext();
@@ -248,8 +242,6 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    // iOS Voice 4 is MINIK's first choice. The system module accepts only
-    // Voice 4 / Siri-labelled candidates and never an arbitrary default voice.
     if (systemVoice4Available()) {
       const playedSystem = await speakWithVoice4(
         text,
@@ -258,10 +250,15 @@ export async function speak(text, lang = "de", settings = {}) {
         () => token === sequence,
       );
       if (playedSystem || token !== sequence) return playedSystem;
+
+      // A selected Voice 4 must remain the narrator. Safari occasionally
+      // rejects an individual speechSynthesis call even though the voice is
+      // still available; changing to a recorded person for only that sentence
+      // sounds like a different character. Only use recordings when Voice 4
+      // is genuinely unavailable.
+      if (hasVoice4Selection(lang, settings)) return false;
     }
 
-    // If WebKit does not expose Voice 4, keep the existing natural MINIK
-    // recordings as the safe fallback instead of using robotic Web Speech.
     const personalClip = personalVoiceClip(text, lang);
     if (personalClip) {
       const playedPersonal = await playPreferredClip(personalClip, token);
