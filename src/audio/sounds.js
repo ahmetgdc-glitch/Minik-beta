@@ -1,6 +1,8 @@
 let context = null,
   nodes = [],
-  activeTimers = [];
+  activeTimers = [],
+  musicTimer = null,
+  musicNodes = [];
 export function unlockAudio() {
   try {
     context ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -27,6 +29,34 @@ export function stopSounds() {
   nodes = [];
   activeTimers.forEach(clearTimeout);
   activeTimers = [];
+}
+/** Start a very quiet, deterministic child-friendly loop after a real gesture. */
+export function startMusic({ enabled = true } = {}) {
+  if (!enabled || musicTimer || !unlockAudio()) return false;
+  const notes = [261.6, 329.6, 392, 329.6, 293.7, 349.2, 440, 349.2];
+  let index = 0;
+  const playBar = () => {
+    if (!context || context.state !== "running") return;
+    const frequency = notes[index++ % notes.length];
+    const o = context.createOscillator(), g = context.createGain();
+    const now = context.currentTime;
+    o.type = "triangle";
+    o.frequency.setValueAtTime(frequency, now);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.018, now + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
+    o.connect(g); g.connect(context.destination); o.start(now); o.stop(now + 0.66);
+    musicNodes.push(o);
+    o.onended = () => { o.disconnect(); g.disconnect(); musicNodes = musicNodes.filter((n) => n !== o); };
+  };
+  playBar();
+  musicTimer = window.setInterval(playBar, 720);
+  return true;
+}
+export function stopMusic() {
+  if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  musicNodes.forEach((n) => { try { n.stop(); } catch {} });
+  musicNodes = [];
 }
 function tone(
   frequency,
