@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { unlockAudio } from "../audio/sounds.js";
+import { unlockAudio, startMusic, stopMusic } from "../audio/sounds.js";
 import { unlockVoiceAudio } from "../audio/voice.js";
 
 /**
@@ -7,7 +7,7 @@ import { unlockVoiceAudio } from "../audio/voice.js";
  * Important: this unlocks ONE reusable media element only. It must never
  * preload the whole voice library during boot.
  */
-export function useAudioPrime(enabled = true) {
+export function useAudioPrime(enabled = true, musicEnabled = enabled) {
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
 
@@ -28,6 +28,7 @@ export function useAudioPrime(enabled = true) {
 
       // Both resume()/play() are invoked synchronously inside the real gesture.
       const context = unlockAudio();
+      startMusic({ enabled: musicEnabled });
       if (context?.state === "running") {
         webAudioReady = true;
       } else if (context?.resume) {
@@ -62,8 +63,9 @@ export function useAudioPrime(enabled = true) {
 
     return () => {
       disposed = true;
+      stopMusic();
       cleanupGestureListeners();
       document.removeEventListener("visibilitychange", resumeAfterBackground);
     };
-  }, [enabled]);
+  }, [enabled, musicEnabled]);
 }
