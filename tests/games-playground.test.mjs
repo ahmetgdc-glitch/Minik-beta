@@ -35,6 +35,15 @@ test("Mino's featured activity is a real personalized one-tap recommendation", (
   assert.match(screen, /worldLabel\(recommendation\.world, lang\)/);
 });
 
+test("profile age changes cannot keep or launch a stale age-inappropriate game selection", () => {
+  assert.match(screen, /import React, \{ useEffect, useMemo, useState \} from "react";/);
+  assert.match(screen, /const stillAllowed = visibleGames\.some\(\(game\) => game\.id === selected\.id\)/);
+  assert.match(screen, /if \(!stillAllowed\) setSelected\(null\)/);
+  assert.match(screen, /\[progress\.activeProfile\?\.id, progress\.activeProfile\?\.ageGroup\]/);
+  assert.match(screen, /if \(!visibleGames\.some\(\(allowed\) => allowed\.id === game\.id\)\) return/);
+  assert.match(screen, /if \(!selected \|\| !visibleGames\.some\(\(allowed\) => allowed\.id === selected\.id\)\)/);
+});
+
 test("world choice stays immersive after selecting a game", () => {
   assert.match(screen, /className="world-islands"/);
   assert.match(screen, /className="world-island"/);
