@@ -4,6 +4,39 @@ import fs from "node:fs";
 
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
+test("manual music pause blocks gesture restarts until explicit resume", () => {
+  let starts = 0, stops = 0, cleared = 0;
+  const param = { setValueAtTime() {}, exponentialRampToValueAtTime() {} };
+  const window = {
+    AudioContext: class {
+      state = "running";
+      currentTime = 0;
+      createOscillator() { return { frequency: param, connect() {}, disconnect() {}, start() { starts++; }, stop() { stops++; } }; }
+      createGain() { return { gain: param, connect() {}, disconnect() {} }; }
+    },
+    setInterval() { return 1; },
+  };
+  const api = new Function("window", "clearInterval", read("src/audio/sounds.js").replace(/export /g, "") + "; return {startMusic, stopMusic, setMusicPaused};")(window, () => { cleared++; });
+  assert.equal(api.startMusic(), true);
+  api.setMusicPaused(true);
+  assert.equal(cleared, 1);
+  assert.ok(stops >= 2);
+  assert.equal(api.startMusic(), false);
+  assert.equal(starts, 1);
+  api.setMusicPaused(false);
+  assert.equal(api.startMusic({enabled: false}), false);
+  assert.equal(api.startMusic(), true);
+  assert.equal(starts, 2);
+  api.stopMusic();
+});
+
+test("game manual pause sets the music lock and both resume paths honor audio", () => {
+  const game = read("src/games/GameSession.jsx");
+  assert.match(game, /const pauseManually[\s\S]*?setMusicPaused\(true\)/);
+  assert.equal((game.match(/startMusic\(\{ enabled: settings.audio \}\)/g) || []).length, 2);
+  assert.match(game, /stopMusic\(\);\s*setMusicPaused\(false\)/);
+});
+
 test("music stops on background and pagehide and resumes only after a visible gesture", () => {
   const listeners = new Map();
   const target = {
