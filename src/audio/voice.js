@@ -144,7 +144,7 @@ async function decodeVoiceBuffer(url, context) {
 }
 
 async function speakWebAudioClip(url, token) {
-  const context = ensureVoiceContext();
+  const context = voiceContext;
   if (!context || context.state !== "running") return false;
   const buffer = await decodeVoiceBuffer(url, context);
   if (!buffer || token !== sequence || context.state !== "running") return false;
@@ -214,10 +214,13 @@ async function speakMediaClip(url, token) {
 
 async function speakGameClip(url, token) {
   if (!url) return false;
-  // Prefer WebAudio for every gameplay narration after it has been unlocked.
-  // This keeps automatic round/help/success speech working on iPhone Safari.
-  const playedWebAudio = await speakWebAudioClip(url, token);
-  if (playedWebAudio || token !== sequence) return playedWebAudio;
+  // Only take the async WebAudio path after a real gesture has already left
+  // the speech context running. Otherwise initialize the existing media path
+  // synchronously so a late unlock cannot slip into narration setup.
+  if (voiceContext?.state === "running") {
+    const playedWebAudio = await speakWebAudioClip(url, token);
+    if (playedWebAudio || token !== sequence) return playedWebAudio;
+  }
   return speakMediaClip(url, token);
 }
 
