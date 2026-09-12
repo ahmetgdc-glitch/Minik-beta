@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Volume2, Check } from "lucide-react";
 import Visual from "../components/Visual.jsx";
-import { speak } from "../audio/voice.js";
+import { speak, stopSpeech } from "../audio/voice.js";
 import { sample } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 import { recognitionIssue, speechMatches, speechRecognitionCtor } from "./pronunciation.js";
@@ -18,7 +18,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
   const blocked = interactionBlocked();
 
   function repeat() {
-    if (paused || blocked) return;
+    if (paused || blocked || listening) return;
     speak(expected, lang, settings);
   }
   useLesson(onReady, prompt, repeat, [target?.id].filter(Boolean), expected);
@@ -47,6 +47,13 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
     setHeard("");
     const Ctor = speechRecognitionCtor(window);
     if (!Ctor) return;
+
+    // Do not let iOS SpeechRecognition hear Mino's own Voice 4 narration.
+    // Starting the microphone while speechSynthesis is still talking can
+    // produce false matches or immediate wrong answers, especially when the
+    // child taps the mic before the prompt has fully finished.
+    stopSpeech();
+
     const rec = new Ctor();
     recognitionRef.current = rec;
     rec.lang = lang === "tr" ? "tr-TR" : "de-DE";
@@ -96,7 +103,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
       <div className="speak-hero">
         <Visual item={target} lang={lang} photos={settings.photos} />
         <strong>{expected}</strong>
-        <button className="speak-repeat" onClick={repeat} disabled={paused || blocked} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
+        <button className="speak-repeat" onClick={repeat} disabled={listening || paused || blocked} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
           <Volume2 size={28} />
         </button>
       </div>
