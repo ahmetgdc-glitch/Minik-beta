@@ -28,9 +28,14 @@ test("audio priming re-arms after returning from the background without autoplay
   assert.match(hook, /document\.visibilityState !== "visible"/);
   assert.match(hook, /pauseBackgroundMusic\("visibility"\)/);
   assert.match(hook, /webAudioReady = false/);
+
+  const handlerStart = hook.indexOf("const resumeAfterBackground = () => {");
+  const handlerEnd = hook.indexOf("\n    };", handlerStart);
+  assert.ok(handlerStart >= 0 && handlerEnd > handlerStart);
+  const backgroundHandler = hook.slice(handlerStart, handlerEnd);
   assert.doesNotMatch(
-    hook,
-    /resumeAfterBackground[\s\S]*unlockVoiceAudio\(\)/,
+    backgroundHandler,
+    /unlockVoiceAudio\(\)|startBackgroundMusic\(\)|\.play\(\)/,
   );
 });
 
