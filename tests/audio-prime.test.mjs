@@ -4,6 +4,39 @@ import fs from "node:fs";
 
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
+test("speech ducking survives cancellation and ends on completion or audio off", async () => {
+  const levels = [];
+  let player;
+  class Audio {
+    constructor() { player = this; }
+    setAttribute() {}
+    pause() {}
+    load() {}
+    play() { return Promise.resolve(); }
+  }
+  const source = read("src/audio/voice.js").replace(/^import .*;\n/gm, "").replace(/export /g, "");
+  const api = new Function("Audio", "personalVoiceClip", "naturalVoicePlan", "setSpeechActive", `${source}; return {speak, stopSpeech};`)(Audio, () => "clip.mp3", () => [], (active) => levels.push(active));
+  const first = api.speak("eins");
+  assert.equal(levels.at(-1), true);
+  const second = api.speak("zwei");
+  assert.equal(await first, false);
+  assert.equal(levels.at(-1), true);
+  player.onended();
+  assert.equal(await second, true);
+  assert.equal(levels.at(-1), false);
+  const third = api.speak("drei");
+  assert.equal(await api.speak("stumm", "de", {audio: false}), false);
+  assert.equal(await third, false);
+  assert.equal(levels.at(-1), false);
+});
+
+test("music output is attenuated without altering speech volume", () => {
+  const source = read("src/audio/sounds.js");
+  assert.match(source, /g.connect\(musicBus\)/);
+  assert.match(source, /speechActive \? 0.18 : 1/);
+  assert.match(source, /setTargetAtTime/);
+});
+
 test("manual music pause blocks gesture restarts until explicit resume", () => {
   let starts = 0, stops = 0, cleared = 0;
   const param = { setValueAtTime() {}, exponentialRampToValueAtTime() {} };
