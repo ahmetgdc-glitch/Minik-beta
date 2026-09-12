@@ -93,10 +93,51 @@ test("Voice 4 cache survives unknown Safari inventory but invalidates against a 
   }
 });
 
+test("Voice 4 playback has a bounded Safari watchdog", async () => {
+  const mod = await import(`../src/audio/systemVoice4.js?watchdog=${Date.now()}`);
+  assert.equal(mod.voice4PlaybackWatchdogMs("Hi"), 5000);
+  assert.equal(mod.voice4PlaybackWatchdogMs("x".repeat(1000)), 18000);
+  assert.match(systemVoice4, /watchdog = setTimeout\(\(\) => finish\(false\), voice4PlaybackWatchdogMs\(text\)\)/);
+});
+
+test("stopping Voice 4 resolves a Safari utterance that never emits end or error", async () => {
+  const previousSynth = globalThis.speechSynthesis;
+  const previousUtterance = globalThis.SpeechSynthesisUtterance;
+  const voice4 = { name: "Stimme 4", voiceURI: "com.apple.voice4", lang: "de-DE" };
+  globalThis.speechSynthesis = {
+    getVoices: () => [voice4],
+    addEventListener() {},
+    removeEventListener() {},
+    cancel() {},
+    speak() {},
+  };
+  globalThis.SpeechSynthesisUtterance = class {
+    constructor(text) { this.text = text; }
+  };
+
+  try {
+    const mod = await import(`../src/audio/systemVoice4.js?stalled-stop=${Date.now()}`);
+    const pending = mod.speakWithVoice4("Hallo Mino", "de");
+    await Promise.resolve();
+    mod.stopSystemVoice4();
+    const result = await Promise.race([
+      pending,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("stalled Voice 4 did not resolve on stop")), 250)),
+    ]);
+    assert.equal(result, false);
+  } finally {
+    if (previousSynth === undefined) delete globalThis.speechSynthesis;
+    else globalThis.speechSynthesis = previousSynth;
+    if (previousUtterance === undefined) delete globalThis.SpeechSynthesisUtterance;
+    else globalThis.SpeechSynthesisUtterance = previousUtterance;
+  }
+});
+
 test("speech keeps stale-playback and cancellation guards", () => {
   assert.match(voice, /token === sequence/);
   assert.match(voice, /stopSystemVoice4\(\)/);
   assert.match(systemVoice4, /synth\.cancel\(\)/);
+  assert.match(systemVoice4, /activeAttemptFinish/);
 });
 
 test("recorded fallback still uses one lazy media player", () => {
