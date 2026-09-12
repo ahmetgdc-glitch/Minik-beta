@@ -9,6 +9,7 @@ let settle = null,
   unlockPending = null,
   voiceContext = null,
   voiceSource = null,
+  systemUtterance = null,
   sequence = 0;
 const voiceBufferCache = new Map();
 const SILENT_WAV =
@@ -39,10 +40,107 @@ function ensureVoiceContext() {
   }
 }
 
+function systemSpeechEngine() {
+  return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
+}
+
+function systemSpeechAvailable() {
+  return Boolean(
+    systemSpeechEngine() &&
+      typeof globalThis !== "undefined" &&
+      typeof globalThis.SpeechSynthesisUtterance === "function",
+  );
+}
+
+function systemVoiceList() {
+  try {
+    return systemSpeechEngine()?.getVoices?.() || [];
+  } catch {
+    return [];
+  }
+}
+
+function voiceLanguageMatches(voice, lang) {
+  const prefix = lang === "tr" ? "tr" : "de";
+  return String(voice?.lang || "").toLowerCase().startsWith(prefix);
+}
+
+function selectMinoSystemVoice(lang, settings = {}) {
+  const voices = systemVoiceList();
+  if (!voices.length) return null;
+  const matching = voices.filter((voice) => voiceLanguageMatches(voice, lang));
+  const pool = matching.length ? matching : voices;
+  const saved = String(settings?.voices?.[lang] || "").trim().toLowerCase();
+  if (saved) {
+    const exact = pool.find((voice) =>
+      [voice?.name, voice?.voiceURI].some((value) => String(value || "").toLowerCase() === saved),
+    );
+    if (exact) return exact;
+  }
+  // Prefer the iOS voice the parent selected/downloaded when WebKit exposes it.
+  // Apple may publish the label as "Stimme 4", "Voice 4" or a Siri-labelled voice.
+  const preferred = pool.find((voice) =>
+    /(?:^|\b)(?:stimme\s*4|voice\s*4|siri)(?:\b|$)/iu.test(
+      `${voice?.name || ""} ${voice?.voiceURI || ""}`,
+    ),
+  );
+  if (preferred) return preferred;
+  return pool.find((voice) => voice?.default) || pool.find((voice) => voice?.localService) || pool[0];
+}
+
+function minoRate(settings = {}) {
+  const requested = Number(settings.rate);
+  return Math.min(1, Math.max(0.86, Number.isFinite(requested) ? requested : 0.94));
+}
+
+function minoPitch(settings = {}) {
+  const requested = Number(settings.pitch);
+  return Math.min(1.08, Math.max(0.98, Number.isFinite(requested) ? requested : 1.03));
+}
+
+async function speakSystem(text, lang, settings, token) {
+  const engine = systemSpeechEngine();
+  const Utterance = typeof globalThis !== "undefined" ? globalThis.SpeechSynthesisUtterance : null;
+  if (!engine || !Utterance || token !== sequence) return false;
+  try {
+    const utterance = new Utterance(text);
+    utterance.lang = lang === "tr" ? "tr-TR" : "de-DE";
+    const voice = selectMinoSystemVoice(lang, settings);
+    if (voice) utterance.voice = voice;
+    // Keep the selected iOS voice essentially unchanged; only a tiny Mino polish.
+    utterance.rate = minoRate(settings);
+    utterance.pitch = minoPitch(settings);
+    utterance.volume = 1;
+    systemUtterance = utterance;
+    return await new Promise((resolve) => {
+      let done = false;
+      const finish = (ok) => {
+        if (done) return;
+        done = true;
+        utterance.onend = null;
+        utterance.onerror = null;
+        if (systemUtterance === utterance) systemUtterance = null;
+        settle = null;
+        resolve(Boolean(ok && token === sequence));
+      };
+      settle = () => finish(false);
+      utterance.onend = () => finish(true);
+      utterance.onerror = () => finish(false);
+      try {
+        engine.cancel();
+        engine.speak(utterance);
+      } catch {
+        finish(false);
+      }
+    });
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Unlock both reusable speech paths from a real user gesture.
- * WebAudio is the persistent gameplay path because iOS may reject a later
- * HTMLMediaElement play() that is no longer directly inside a tap handler.
+ * Unlock reusable recorded-speech paths from a real user gesture. System speech
+ * does not need copied voice assets; iOS chooses from voices WebKit exposes.
  */
 export async function unlockVoiceAudio() {
   // Never replace a narration source/handlers with the silent unlock clip.
@@ -50,7 +148,7 @@ export async function unlockVoiceAudio() {
   if (unlockPending) return unlockPending;
   const context = ensureVoiceContext();
   const player = naturalPlayer();
-  if (!player && !context) return false;
+  if (!player && !context) return systemSpeechAvailable();
   const token = sequence;
   unlockPending = (async () => {
     let contextReady = false;
@@ -60,7 +158,7 @@ export async function unlockVoiceAudio() {
         contextReady = context.state === "running";
       } catch {}
     }
-    if (!player) return contextReady;
+    if (!player) return contextReady || systemSpeechAvailable();
     try {
       player.pause();
       player.onended = null;
@@ -77,7 +175,7 @@ export async function unlockVoiceAudio() {
       }
       return true;
     } catch {
-      return contextReady;
+      return contextReady || systemSpeechAvailable();
     }
   })();
   try { return await unlockPending; }
@@ -88,6 +186,8 @@ export function stopSpeech() {
   sequence++;
   cloudAbort?.abort();
   cloudPlayer?.pause();
+  systemSpeechEngine()?.cancel?.();
+  systemUtterance = null;
   try { voiceSource?.stop(); } catch {}
   voiceSource = null;
   voicePlayer?.pause();
@@ -111,9 +211,6 @@ function isPersonalVoiceClipUrl(url) {
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
   try {
-    // Generated personal clips are already relative to the app root. Resolve
-    // them against the current document so GitHub Pages' `/Minik-beta/` base
-    // path is preserved instead of treating them as browser-root URLs.
     if (/^assets\/personal-voice\//u.test(url)) {
       return new URL(url, document.baseURI).href;
     }
@@ -214,9 +311,6 @@ async function speakMediaClip(url, token) {
 
 async function speakGameClip(url, token) {
   if (!url) return false;
-  // Only take the async WebAudio path after a real gesture has already left
-  // the speech context running. Otherwise initialize the existing media path
-  // synchronously so a late unlock cannot slip into narration setup.
   if (voiceContext?.state === "running") {
     const playedWebAudio = await speakWebAudioClip(url, token);
     if (playedWebAudio || token !== sequence) return playedWebAudio;
@@ -247,9 +341,14 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    // The owner's authorized MINIK voice is the only gameplay narrator.
-    // Exact recordings are preferred; composed plans are accepted only when
-    // every segment is also from the owner's personal voice library.
+    // Voice 4 / Siri-style system speech is now MINIK's primary narrator.
+    // Only enter the async system path when Web Speech is actually available;
+    // otherwise preserve the synchronous recorded-player setup used by Safari.
+    if (systemSpeechAvailable()) {
+      const playedSystem = await speakSystem(text, lang, settings, token);
+      if (playedSystem || token !== sequence) return playedSystem;
+    }
+
     const personalClip = personalVoiceClip(text, lang);
     if (personalClip) {
       const playedPersonal = await playPreferredClip(personalClip, token);
@@ -261,12 +360,8 @@ export async function speak(text, lang = "de", settings = {}) {
       const played = await speakNaturalPlan(plan, token);
       if (played || token !== sequence) return played;
     }
-
-    // No native speech fallback exists.
-    // No native or legacy narrator fallback exists; missing personal recordings stay silent.
     return false;
   } finally {
-    // An older cancelled request must not raise music over its replacement.
     if (token === sequence) setSpeechActive(false);
   }
 }
