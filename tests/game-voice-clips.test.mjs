@@ -157,15 +157,19 @@ test("natural Mino library keeps at least 218 recorded prompts and words", () =>
   assert.ok(urls.length >= 218, `expected at least 218 natural clips, got ${urls.length}`);
 });
 
-test("fixed Mino speech keeps recorded plans without a native speech path", () => {
+test("fixed Mino speech uses system narration first and keeps recorded plans as fallback", () => {
+  assert.match(voice, /speakSystem\(text, lang, settings, token\)/);
   assert.match(voice, /naturalVoicePlan\(text, lang\)/);
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
-  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance/);
+  const systemIndex = voice.indexOf("await speakSystem(text, lang, settings, token)");
+  const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
+  assert.ok(systemIndex > 0 && planIndex > systemIndex);
 });
 
-test("device speech cannot turn missing recordings into a phone voice", () => {
-  assert.doesNotMatch(voice, /systemVoiceEnabled|speakSystem|shouldPreferNativeSystem/);
-  assert.match(voice, /No native speech fallback exists/);
+test("Voice 4 selection prefers the requested iOS voice when WebKit exposes it", () => {
+  assert.match(voice, /stimme\\s\*4\|voice\\s\*4\|siri/iu);
+  assert.match(voice, /getVoices/);
+  assert.match(voice, /voiceLanguageMatches/);
 });
 
 test("game praise only uses phrases with natural clip coverage", () => {
