@@ -47,17 +47,14 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
-  deploy:
+
+  drain-legacy-pages:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 7
     permissions:
       actions: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      contents: read
     steps:
       - name: Wait for legacy Pages deployment for this commit
         env:
@@ -89,6 +86,19 @@ jobs:
 
           echo "::error::Unable to establish a safe Pages deployment order."
           exit 1
+
+  deploy:
+    needs: [build, drain-legacy-pages]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
