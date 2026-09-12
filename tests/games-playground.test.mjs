@@ -25,6 +25,16 @@ test("game playground starts with a small choice set and keeps every game reacha
   assert.match(screen, /\$\{hiddenGameCount\} oyun daha/);
 });
 
+test("Mino's featured activity is a real personalized one-tap recommendation", () => {
+  assert.match(screen, /import \{ recommendedActivities \} from "\.\.\/learning\/recommendations\.js";/);
+  assert.match(screen, /recommendedActivities\(progress, lang, 1\)\[0\] \|\| null/);
+  assert.match(screen, /rest = visibleGames\.filter\(\(game\) => game\.id !== featured\?\.id\)/);
+  assert.match(screen, /function startFeatured\(\)/);
+  assert.match(screen, /onNavigate\(`\/play\/\$\{featured\.id\}\/\$\{world\.id\}`\)/);
+  assert.match(screen, /onClick=\{startFeatured\}/);
+  assert.match(screen, /worldLabel\(recommendation\.world, lang\)/);
+});
+
 test("world choice stays immersive after selecting a game", () => {
   assert.match(screen, /className="world-islands"/);
   assert.match(screen, /className="world-island"/);

@@ -5,6 +5,7 @@ import { worlds } from "../data/content.js";
 import { Art } from "../components/Visual.jsx";
 import { unlockAudio } from "../audio/sounds.js";
 import { gamesForAge } from "../learning/age.js";
+import { recommendedActivities } from "../learning/recommendations.js";
 
 function worldLabel(world, lang) {
   return world?.labels?.[lang] || world?.[lang] || world?.id || "";
@@ -15,8 +16,11 @@ export default function GamesScreen({ progress, onNavigate }) {
     [selected, setSelected] = useState(null),
     [showAll, setShowAll] = useState(false),
     visibleGames = gamesForAge(gameCatalog, progress.activeProfile?.ageGroup),
-    featured = visibleGames[0] || null,
-    rest = visibleGames.slice(1),
+    recommendation = useMemo(() => recommendedActivities(progress, lang, 1)[0] || null, [progress, lang]),
+    featured = recommendation?.game && visibleGames.some((game) => game.id === recommendation.game.id)
+      ? recommendation.game
+      : visibleGames[0] || null,
+    rest = visibleGames.filter((game) => game.id !== featured?.id),
     previewGames = showAll ? rest : rest.slice(0, 4),
     hiddenGameCount = Math.max(0, rest.length - previewGames.length);
 
@@ -33,6 +37,17 @@ export default function GamesScreen({ progress, onNavigate }) {
       unlockAudio();
       onNavigate(`/play/${game.id}/${game.worlds[0]}`);
     } else setSelected(game);
+  }
+
+  function startFeatured() {
+    if (!featured) return;
+    const world = recommendation?.game?.id === featured.id ? recommendation.world : null;
+    if (!world) {
+      choose(featured);
+      return;
+    }
+    unlockAudio();
+    onNavigate(`/play/${featured.id}/${world.id}`);
   }
 
   function openWorld(world) {
@@ -123,8 +138,8 @@ export default function GamesScreen({ progress, onNavigate }) {
         <button
           className="playground-feature"
           style={{ "--game-color": featured.color }}
-          onClick={() => choose(featured)}
-          aria-label={`${featured[lang]} · ${featured.description[lang]}`}
+          onClick={startFeatured}
+          aria-label={`${featured[lang]} · ${recommendation?.world ? worldLabel(recommendation.world, lang) : featured.description[lang]}`}
         >
           <div className="playground-feature-art">
             <Art name={featured.asset} />
@@ -132,7 +147,11 @@ export default function GamesScreen({ progress, onNavigate }) {
           <div className="playground-feature-copy">
             <small>{lang === "tr" ? "Mino bugün bunu seçti" : "Minos Tipp für heute"}</small>
             <h2>{featured[lang]}</h2>
-            <p>{featured.description[lang]}</p>
+            <p>
+              {recommendation?.world && recommendation?.game?.id === featured.id
+                ? `${worldLabel(recommendation.world, lang)} · ${featured.description[lang]}`
+                : featured.description[lang]}
+            </p>
             <span className="playground-play" aria-hidden="true">
               <Play size={30} fill="currentColor" />
             </span>
