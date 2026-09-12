@@ -13,9 +13,12 @@ function worldLabel(world, lang) {
 export default function GamesScreen({ progress, onNavigate }) {
   const lang = progress.settings.lang,
     [selected, setSelected] = useState(null),
+    [showAll, setShowAll] = useState(false),
     visibleGames = gamesForAge(gameCatalog, progress.activeProfile?.ageGroup),
     featured = visibleGames[0] || null,
-    rest = visibleGames.slice(1);
+    rest = visibleGames.slice(1),
+    previewGames = showAll ? rest : rest.slice(0, 4),
+    hiddenGameCount = Math.max(0, rest.length - previewGames.length);
 
   const selectedWorlds = useMemo(
     () => selected
@@ -140,11 +143,17 @@ export default function GamesScreen({ progress, onNavigate }) {
       {rest.length > 0 && (
         <>
           <div className="playground-path-title">
-            <h2>{lang === "tr" ? "Keşfet" : "Entdecke mehr"}</h2>
-            <span>{visibleGames.length} {lang === "tr" ? "oyun" : "Spiele"}</span>
+            <h2>{lang === "tr" ? "Bir oyun seç" : "Such dir ein Spiel aus"}</h2>
+            <span>
+              {showAll
+                ? `${visibleGames.length} ${lang === "tr" ? "oyun" : "Spiele"}`
+                : lang === "tr"
+                  ? "Önce birkaç favori"
+                  : "Erst ein paar Favoriten"}
+            </span>
           </div>
-          <section className="playground-river" aria-label={lang === "tr" ? "Tüm oyunlar" : "Alle Spiele"}>
-            {rest.map((game) => (
+          <section className="playground-river" aria-label={lang === "tr" ? "Oyun seçimi" : "Spielauswahl"}>
+            {previewGames.map((game) => (
               <button
                 className="playground-island"
                 key={game.id}
@@ -162,6 +171,19 @@ export default function GamesScreen({ progress, onNavigate }) {
               </button>
             ))}
           </section>
+          {rest.length > 4 && (
+            <button
+              type="button"
+              className="back-link"
+              aria-expanded={showAll}
+              onClick={() => setShowAll((value) => !value)}
+            >
+              <Sparkles size={20} />
+              {showAll
+                ? lang === "tr" ? "Daha az oyun göster" : "Weniger Spiele zeigen"
+                : lang === "tr" ? `${hiddenGameCount} oyun daha` : `Noch ${hiddenGameCount} Spiele`}
+            </button>
+          )}
         </>
       )}
     </main>
