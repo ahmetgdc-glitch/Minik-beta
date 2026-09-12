@@ -47,9 +47,22 @@ export function isVoice4Candidate(voice) {
 const selectedVoiceCache = new Map();
 const pendingVoiceLookup = new Map();
 let observedSynth = null;
+let cacheSynth = null;
 let voicesObserved = false;
 
+function syncVoiceEngine() {
+  const synth = engine();
+  if (cacheSynth && synth && cacheSynth !== synth) {
+    selectedVoiceCache.clear();
+    pendingVoiceLookup.clear();
+    voicesObserved = false;
+  }
+  cacheSynth = synth;
+  return synth;
+}
+
 function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
+  syncVoiceEngine();
   const cached = selectedVoiceCache.get(lang);
   if (!cached || !isVoice4Candidate(cached)) return null;
 
@@ -70,6 +83,7 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
 }
 
 function refreshVoiceCache() {
+  syncVoiceEngine();
   const voices = exposedSystemVoices();
   for (const lang of ["de", "tr"]) {
     const selected = selectVoice4(voices, lang);
@@ -80,10 +94,11 @@ function refreshVoiceCache() {
 }
 
 function observeVoiceChanges() {
-  const synth = engine();
+  const synth = syncVoiceEngine();
   if (!synth || observedSynth === synth || typeof synth.addEventListener !== "function") return;
   observedSynth = synth;
   synth.addEventListener("voiceschanged", () => {
+    if (engine() !== synth) return;
     voicesObserved = true;
     refreshVoiceCache();
   });
@@ -91,6 +106,7 @@ function observeVoiceChanges() {
 
 export function voice4InventoryReady() {
   if (!systemVoice4Available()) return true;
+  syncVoiceEngine();
   // Safari may emit voiceschanged before getVoices() is actually populated.
   // A real non-empty inventory is the only safe evidence that Voice 4 was
   // checked and is genuinely absent. Until then, never switch narrator.
@@ -122,6 +138,7 @@ export function selectVoice4(voices, lang, settings = {}) {
 }
 
 export function hasVoice4Selection(lang = "de", settings = {}) {
+  syncVoiceEngine();
   const voices = exposedSystemVoices();
   const cached = cachedVoiceFor(lang, voices);
   if (cached) return true;
@@ -135,6 +152,7 @@ export function hasVoice4Selection(lang = "de", settings = {}) {
 
 async function waitForVoice4(lang, settings, timeoutMs) {
   observeVoiceChanges();
+  const lookupSynth = syncVoiceEngine();
   const initialVoices = exposedSystemVoices();
   const cached = cachedVoiceFor(lang, initialVoices);
   if (cached) return cached;
@@ -146,7 +164,7 @@ async function waitForVoice4(lang, settings, timeoutMs) {
   }
 
   if (pendingVoiceLookup.has(lang)) return pendingVoiceLookup.get(lang);
-  const synth = engine();
+  const synth = lookupSynth;
   if (!synth || typeof synth.addEventListener !== "function") return null;
 
   const waitMs = Number.isFinite(timeoutMs)
@@ -160,21 +178,32 @@ async function waitForVoice4(lang, settings, timeoutMs) {
       finished = true;
       clearTimeout(timer);
       synth.removeEventListener?.("voiceschanged", onVoicesChanged);
-      if (voice) selectedVoiceCache.set(lang, voice);
-      resolve(voice || null);
+      const liveVoice = engine() === synth ? voice : null;
+      if (liveVoice) selectedVoiceCache.set(lang, liveVoice);
+      resolve(liveVoice || null);
     };
     const onVoicesChanged = () => {
+      if (engine() !== synth) {
+        finish(null);
+        return;
+      }
       voicesObserved = true;
       const voice = selectVoice4(refreshVoiceCache(), lang, settings);
       if (voice) finish(voice);
     };
     const timer = setTimeout(() => {
+      if (engine() !== synth) {
+        finish(null);
+        return;
+      }
       const finalVoice = selectVoice4(refreshVoiceCache(), lang, settings);
       finish(finalVoice);
     }, waitMs);
     synth.addEventListener("voiceschanged", onVoicesChanged);
     onVoicesChanged();
-  }).finally(() => pendingVoiceLookup.delete(lang));
+  }).finally(() => {
+    if (pendingVoiceLookup.get(lang) === pending) pendingVoiceLookup.delete(lang);
+  });
 
   pendingVoiceLookup.set(lang, pending);
   return pending;
@@ -209,7 +238,7 @@ export function stopSystemVoice4() {
 }
 
 function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
-  const synth = engine();
+  const synth = syncVoiceEngine();
   const Utterance = UtteranceClass();
   if (!synth || !Utterance || !voice || !isCurrent()) return Promise.resolve(false);
 
@@ -227,7 +256,7 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       }
       if (activeUtterance === utterance) activeUtterance = null;
       if (activeAttemptFinish === finish) activeAttemptFinish = null;
-      resolve(Boolean(ok && isCurrent()));
+      resolve(Boolean(ok && isCurrent() && engine() === synth));
     };
 
     try {
@@ -259,6 +288,7 @@ function retryDelay(isCurrent) {
 
 export async function speakWithVoice4(text, lang = "de", settings = {}, isCurrent = () => true) {
   if (!text || !systemVoice4Available() || !isCurrent()) return false;
+  syncVoiceEngine();
   const runSequence = voice4Sequence;
   const stillCurrent = () => runSequence === voice4Sequence && isCurrent();
   const voice = await waitForVoice4(lang, settings);
