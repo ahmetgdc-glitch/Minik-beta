@@ -293,6 +293,16 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   }, [paused, phase]);
 
   useEffect(() => {
+    if (phase !== "done" || !settings.audio) return;
+    const finishText = lang === "tr" ? "Harika!" : "Super gemacht!";
+    const t = setTimeout(() => {
+      if (phaseRef.current !== "done" || document.hidden) return;
+      speak(finishText, lang, settings);
+    }, 120);
+    return () => clearTimeout(t);
+  }, [phase, lang, settings]);
+
+  useEffect(() => {
     if (phase === "done") return;
     persistCheckpoint();
     const t = setInterval(persistCheckpoint, 5000);
