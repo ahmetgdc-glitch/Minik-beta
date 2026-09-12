@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -20,10 +21,6 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      - name: Use GitHub Actions as the only Pages publisher
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api --method PUT "/repos/${GITHUB_REPOSITORY}/pages" -f build_type=workflow
       - name: Restore generated voice asset cache
         uses: actions/cache@v4
         with:
@@ -55,14 +52,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
+      actions: read
       pages: write
       id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Drain legacy Pages deployment during migration
-        run: sleep 30
+      - name: Wait for legacy Pages deployment for this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          for attempt in {1..36}; do
+            legacy_status="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=20" --jq '.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment") | .status' | head -n 1)"
+            if [ -z "$legacy_status" ] || [ "$legacy_status" = "completed" ]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::warning::Legacy Pages run did not finish within the drain window; deploying verified Vite build now."
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
