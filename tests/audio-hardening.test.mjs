@@ -63,6 +63,36 @@ test("a known Voice 4 never switches to a personal recording after runtime failu
   assert.match(systemVoice4, /export function hasVoice4Selection/);
 });
 
+test("Voice 4 cache survives unknown Safari inventory but invalidates against a populated changed inventory", async () => {
+  const previousSynth = globalThis.speechSynthesis;
+  const previousUtterance = globalThis.SpeechSynthesisUtterance;
+  let voices = [{ name: "Stimme 4", voiceURI: "com.apple.voice4", lang: "de-DE" }];
+  globalThis.speechSynthesis = {
+    getVoices: () => voices,
+    addEventListener() {},
+    removeEventListener() {},
+    cancel() {},
+    speak() {},
+  };
+  globalThis.SpeechSynthesisUtterance = class {};
+
+  try {
+    const mod = await import(`../src/audio/systemVoice4.js?cache-lifecycle=${Date.now()}`);
+    assert.equal(mod.hasVoice4Selection("de"), true);
+
+    voices = [];
+    assert.equal(mod.hasVoice4Selection("de"), true, "empty Safari inventory must preserve the known narrator");
+
+    voices = [{ name: "Anna", voiceURI: "com.apple.anna", lang: "de-DE" }];
+    assert.equal(mod.hasVoice4Selection("de"), false, "populated inventory without Voice 4 must invalidate stale cache");
+  } finally {
+    if (previousSynth === undefined) delete globalThis.speechSynthesis;
+    else globalThis.speechSynthesis = previousSynth;
+    if (previousUtterance === undefined) delete globalThis.SpeechSynthesisUtterance;
+    else globalThis.SpeechSynthesisUtterance = previousUtterance;
+  }
+});
+
 test("speech keeps stale-playback and cancellation guards", () => {
   assert.match(voice, /token === sequence/);
   assert.match(voice, /stopSystemVoice4\(\)/);
