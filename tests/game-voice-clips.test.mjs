@@ -8,6 +8,7 @@ const animals = readFileSync(new URL("../src/audio/animalVoiceClips.js", import.
 const food = readFileSync(new URL("../src/audio/foodVoiceClips.js", import.meta.url), "utf8");
 const help = readFileSync(new URL("../src/audio/helpVoiceClips.js", import.meta.url), "utf8");
 const plans = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
+const systemVoice4 = readFileSync(new URL("../src/audio/systemVoice4.js", import.meta.url), "utf8");
 const voiceLibrary = `${clips}\n${animals}\n${food}\n${help}\n${plans}`;
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const session = readFileSync(new URL("../src/games/GameSession.jsx", import.meta.url), "utf8");
@@ -157,17 +158,21 @@ test("natural Mino library keeps at least 218 recorded prompts and words", () =>
   assert.ok(urls.length >= 218, `expected at least 218 natural clips, got ${urls.length}`);
 });
 
-test("fixed Mino speech uses personal recordings and personal plans only", () => {
-  assert.doesNotMatch(voice, /speakSystem|speechSynthesis/);
+test("fixed Mino speech prefers Voice 4 and retains personal fallback plans", () => {
+  assert.match(voice, /speakWithVoice4\(/);
   assert.match(voice, /naturalVoicePlan\(text, lang\)/);
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
+  const systemIndex = voice.indexOf("speakWithVoice4(");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
-  assert.ok(personalIndex > 0 && planIndex > personalIndex);
+  assert.ok(systemIndex > 0 && personalIndex > systemIndex && planIndex > personalIndex);
 });
 
-test("iOS cannot inject Voice 4 or another system narrator", () => {
-  assert.doesNotMatch(voice, /stimme\\s\*4|voice\\s\*4|siri|SpeechSynthesisUtterance|getVoices/iu);
+test("iOS Voice 4 is allowed but arbitrary robotic system voices are rejected", () => {
+  assert.match(systemVoice4, /VOICE4_RE/);
+  assert.match(systemVoice4, /SIRI_RE/);
+  assert.doesNotMatch(systemVoice4, /voice\?\.default|voice\?\.localService/);
+  assert.doesNotMatch(systemVoice4, /sameLanguage\[0\]|voices\[0\]/);
 });
 
 test("game praise only uses phrases with natural clip coverage", () => {
