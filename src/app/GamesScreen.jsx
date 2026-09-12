@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Play, ArrowLeft, Sparkles } from "lucide-react";
 import { gameCatalog } from "../games/registry.js";
 import { worlds } from "../data/content.js";
@@ -24,6 +24,16 @@ export default function GamesScreen({ progress, onNavigate }) {
     previewGames = showAll ? rest : rest.slice(0, 4),
     hiddenGameCount = Math.max(0, rest.length - previewGames.length);
 
+  useEffect(() => {
+    if (!selected) return;
+    const stillAllowed = visibleGames.some((game) => game.id === selected.id);
+    if (!stillAllowed) setSelected(null);
+  }, [selected, visibleGames]);
+
+  useEffect(() => {
+    setShowAll(false);
+  }, [progress.activeProfile?.id, progress.activeProfile?.ageGroup]);
+
   const selectedWorlds = useMemo(
     () => selected
       ? worlds.filter((world) => selected.allWorlds || selected.worlds.includes(world.id))
@@ -33,6 +43,7 @@ export default function GamesScreen({ progress, onNavigate }) {
 
   function choose(game) {
     if (!game) return;
+    if (!visibleGames.some((allowed) => allowed.id === game.id)) return;
     if (game.worlds?.length === 1) {
       unlockAudio();
       onNavigate(`/play/${game.id}/${game.worlds[0]}`);
@@ -51,6 +62,10 @@ export default function GamesScreen({ progress, onNavigate }) {
   }
 
   function openWorld(world) {
+    if (!selected || !visibleGames.some((allowed) => allowed.id === selected.id)) {
+      setSelected(null);
+      return;
+    }
     unlockAudio();
     onNavigate(`/play/${selected.id}/${world.id}`);
   }
