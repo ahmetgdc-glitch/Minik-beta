@@ -28,9 +28,7 @@ jobs:
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
-      # Production release gate is restored to `npm test` after regression isolation.
-      - name: Test concept lifecycle
-        run: node --test tests/concept-game-lifecycle.test.mjs
+      - run: npm test
       - run: npm run preflight
       - run: npm run build
         env:
