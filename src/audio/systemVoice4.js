@@ -33,6 +33,10 @@ function voiceIdentity(voice) {
   return `${voice?.name || ""} ${voice?.voiceURI || ""}`.trim();
 }
 
+function sameVoice(a, b) {
+  return Boolean(a && b && voiceIdentity(a) === voiceIdentity(b));
+}
+
 export function isVoice4Candidate(voice) {
   const id = voiceIdentity(voice);
   return VOICE4_RE.test(id) || SIRI_RE.test(id);
@@ -43,11 +47,32 @@ const pendingVoiceLookup = new Map();
 let observedSynth = null;
 let voicesObserved = false;
 
+function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
+  const cached = selectedVoiceCache.get(lang);
+  if (!cached || !isVoice4Candidate(cached)) return null;
+
+  // An empty list on Safari means "inventory not ready", not "voice removed".
+  // Preserve the last known narrator until iOS exposes a real inventory.
+  if (!voices.length) return cached;
+
+  const live = voices.find((voice) => isVoice4Candidate(voice) && sameVoice(voice, cached));
+  if (live) {
+    selectedVoiceCache.set(lang, live);
+    return live;
+  }
+
+  // Once iOS exposes a populated list that no longer contains the cached
+  // narrator, the cache is genuinely stale. Do not keep retrying a dead voice.
+  selectedVoiceCache.delete(lang);
+  return null;
+}
+
 function refreshVoiceCache() {
   const voices = exposedSystemVoices();
   for (const lang of ["de", "tr"]) {
     const selected = selectVoice4(voices, lang);
     if (selected) selectedVoiceCache.set(lang, selected);
+    else if (voices.length) cachedVoiceFor(lang, voices);
   }
   return voices;
 }
@@ -95,9 +120,10 @@ export function selectVoice4(voices, lang, settings = {}) {
 }
 
 export function hasVoice4Selection(lang = "de", settings = {}) {
-  const cached = selectedVoiceCache.get(lang);
-  if (cached && isVoice4Candidate(cached)) return true;
-  const selected = selectVoice4(exposedSystemVoices(), lang, settings);
+  const voices = exposedSystemVoices();
+  const cached = cachedVoiceFor(lang, voices);
+  if (cached) return true;
+  const selected = selectVoice4(voices, lang, settings);
   if (selected) {
     selectedVoiceCache.set(lang, selected);
     return true;
@@ -107,8 +133,9 @@ export function hasVoice4Selection(lang = "de", settings = {}) {
 
 async function waitForVoice4(lang, settings, timeoutMs) {
   observeVoiceChanges();
-  const cached = selectedVoiceCache.get(lang);
-  if (cached && isVoice4Candidate(cached)) return cached;
+  const initialVoices = exposedSystemVoices();
+  const cached = cachedVoiceFor(lang, initialVoices);
+  if (cached) return cached;
 
   let selected = selectVoice4(refreshVoiceCache(), lang, settings);
   if (selected || !systemVoice4Available()) {
