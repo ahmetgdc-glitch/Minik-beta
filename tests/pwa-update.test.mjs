@@ -29,14 +29,18 @@ test("GitHub Pages workflow has deploy permissions and bounded jobs", () => {
   assert.match(workflow, /actions\/deploy-pages@v4/);
 });
 
-test("GitHub Pages deploy waits through delayed legacy-run discovery and fails closed", () => {
+test("GitHub Pages deploy waits for the legacy deploy job, not status-only tail work", () => {
   assert.match(workflow, /drain-legacy-pages:/);
   assert.match(workflow, /legacy_seen=0/);
   assert.match(workflow, /for attempt in \{1\.\.60\}/);
+  assert.match(workflow, /legacy_run_id=.*dynamic\/pages\/pages-build-deployment/);
+  assert.match(workflow, /actions\/runs\/\$\{legacy_run_id\}\/jobs\?per_page=100/);
+  assert.match(workflow, /select\(\.name == "deploy"\) \| \.status/);
+  assert.match(workflow, /if \[ "\$legacy_deploy_status" = "completed" \]; then/);
+  assert.match(workflow, /without waiting for status-only jobs/);
   assert.match(workflow, /elif \[ "\$attempt" -ge 12 \]; then/);
   assert.match(workflow, /sleep 5/);
-  assert.match(workflow, /Legacy Pages run completed; safe to publish verified Vite build\./);
-  assert.match(workflow, /Legacy Pages run is still active after the drain window; refusing to deploy early/);
+  assert.match(workflow, /Legacy Pages deploy is still active after the drain window; refusing to deploy early/);
   assert.match(workflow, /Unable to establish a safe Pages deployment order/);
 });
 
