@@ -21,3 +21,4 @@ jobs:
         env:
           MINIK_REQUIRE_LOCAL_VOICE: "1"
       - run: npm run verify:build
+      - run: echo "Personal voice verification complete"
