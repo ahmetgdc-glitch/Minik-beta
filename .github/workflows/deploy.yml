@@ -28,9 +28,7 @@ jobs:
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
-      # Production release gate: npm test
-      - name: Test second remaining C half
-        run: node --test tests/count-meadow.test.mjs tests/count-natural-voice-coverage.test.mjs tests/crash-recovery-bilingual.test.mjs
+      - run: npm test
       - run: npm run preflight
       - run: npm run build
         env:
