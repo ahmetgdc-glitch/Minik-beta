@@ -63,12 +63,20 @@ jobs:
         run: |
           legacy_seen=0
           for attempt in {1..60}; do
+            legacy_run_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=20" --jq '.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment") | .id' | head -n 1)"
             legacy_status="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=20" --jq '.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment") | .status' | head -n 1)"
 
-            if [ -n "$legacy_status" ]; then
+            if [ -n "$legacy_run_id" ]; then
               legacy_seen=1
+              legacy_deploy_status="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${legacy_run_id}/jobs?per_page=100" --jq '.jobs[] | select(.name == "deploy") | .status' | head -n 1)"
+
+              if [ "$legacy_deploy_status" = "completed" ]; then
+                echo "Legacy Pages deploy job completed; safe to publish verified Vite build without waiting for status-only jobs."
+                exit 0
+              fi
+
               if [ "$legacy_status" = "completed" ]; then
-                echo "Legacy Pages run completed; safe to publish verified Vite build."
+                echo "Legacy Pages run completed without an active deploy; safe to publish verified Vite build."
                 exit 0
               fi
             elif [ "$attempt" -ge 12 ]; then
@@ -80,7 +88,7 @@ jobs:
           done
 
           if [ "$legacy_seen" -eq 1 ]; then
-            echo "::error::Legacy Pages run is still active after the drain window; refusing to deploy early because it could overwrite MINIK."
+            echo "::error::Legacy Pages deploy is still active after the drain window; refusing to deploy early because it could overwrite MINIK."
             exit 1
           fi
 
