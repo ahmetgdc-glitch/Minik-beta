@@ -36,7 +36,7 @@ Die optionale Eltern-PIN ist eine lokale Kindersperre, keine Kontenauthentifizie
 
 ## Audio
 
-`audio/voice.js` kapselt SpeechSynthesis, cached die Stimmenliste und reagiert auf `voiceschanged`. Präferenz: gespeicherte passende Voice-URI, sonst lokale Stimme mit Sprach-/Namensbewertung. Vor neuem Sprechen wird abgebrochen; aktuelle Utterance bleibt referenziert. Ohne passende Browserstimme bleibt die sichtbare Aufgabe bedienbar.
+`audio/voice.js` kapselt den gemeinsamen Audioplayer und hält die alte SpeechSynthesis-Kompatibilität nur für sichere Zustands-/Abbruchpfade vor. Im Spiel werden ausschließlich persönliche oder lokal ausgelieferte MINIK-Aufnahmen abgespielt. Die iPhone-/Browser-Systemstimme ist hart deaktiviert, auch wenn ein älteres Profil noch das frühere Fallback-Flag enthält. Vor neuem Sprechen wird abgebrochen; aktuelle Audiojobs bleiben referenziert. Fehlt eine Aufnahme, bleibt die sichtbare Aufgabe bedienbar und wird nicht mit einer Telefonstimme ersetzt.
 
 `cloudTTS(text, lang, provider)` ist nur eine Erweiterungsschnittstelle für einen späteren sicheren Provider, der ein Audio-Blob liefert. Kein Endpoint, Secret, Cloud-Aufruf oder kostenpflichtiger Dienst ist vorkonfiguriert.
 
@@ -48,7 +48,7 @@ Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker l
 
 Assets werden aus dem Cache beantwortet, unbekannte gleichursprüngliche Assets bei Bedarf nachgeladen. Navigation versucht zuerst das Netz, bei Verbindungsfehler das gecachte `index.html`. Neue Worker verdrängen eine laufende Spielsession nicht automatisch. Für ein Update alle App-Tabs schließen und erneut öffnen. Große zukünftige Medienpakete benötigen eigene Auswahl/Downloadverwaltung; sie sind noch nicht implementiert.
 
-Alle 332 festen DE/TR-Sprachbausteine besitzen persönliche Audiodateien. Sie werden nach Nutzung vom Service Worker zwischengespeichert und funktionieren danach offline; die Gerätestimme bleibt nur für dynamische, nicht vorab bekannte Sätze.
+Alle 332 festen DE/TR-Sprachbausteine besitzen persönliche Audiodateien. Sie werden nach Nutzung vom Service Worker zwischengespeichert und funktionieren danach offline. Für weitere dynamische Lernobjekte werden fehlende Aufnahmen nicht durch die Gerätestimme ersetzt; die persönliche Clip-Abdeckung wird als nächste Audio-Roadmap erweitert.
 
 ## Qualitätsgates
 
