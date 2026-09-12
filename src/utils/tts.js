@@ -1,1 +1,1 @@
-export { speak, refreshVoices, chooseVoice } from "../audio/voice.js";
+export { speak } from "../audio/voice.js";
