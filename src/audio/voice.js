@@ -171,9 +171,13 @@ function shouldPreferNativeSystem(text, lang, settings = {}) {
 }
 
 function systemVoiceEnabled(settings = {}) {
-  // The personal/recorded MINIK voice is the default. A device voice is an
-  // explicit parent opt-in, never an implicit fallback after a media error.
-  return settings.systemVoiceFallback === true;
+  // MINIK is currently a personal-voice-only product. Keep this hard guard
+  // even when an older profile still contains the former fallback setting:
+  // missing/failed recordings must never turn into an iPhone telephone voice.
+  // The parameter stays in place so old state remains safely readable while
+  // future releases can add a separately reviewed fallback policy.
+  void settings;
+  return false;
 }
 
 function localizedGameClip(url) {
