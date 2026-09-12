@@ -5,6 +5,7 @@ Stand: **2026-09-12 · 1.67.0 Beta 70**. „Bestanden“ bedeutet automatisiert 
 ## Automatisiert bestanden
 
 - [x] **433/433 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, persönliche Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] Der ehemalige System-/Telefonstimmen-Fallback ist auch für alte gespeicherte Einstellungen hart blockiert; der Elternbereich bietet keine Gerätestimmen-Auswahl mehr.
 - [x] Alle 332 festen DE/TR-Sprachbausteine besitzen eine persönliche Aufnahme; 298 neue lokale Clips werden im Produktionsbuild vollständig verifiziert.
 - [x] `validate-content.mjs`: 25 Lernwelten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets vorhanden.
 - [x] Antwortmengen bleiben eindeutig und altersgerecht; Altersstufe 2–3 erhält maximal zwei Optionen.
