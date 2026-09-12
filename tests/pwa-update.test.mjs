@@ -30,6 +30,7 @@ test("GitHub Pages workflow has deploy permissions and bounded jobs", () => {
 });
 
 test("GitHub Pages deploy waits through delayed legacy-run discovery and fails closed", () => {
+  assert.match(workflow, /drain-legacy-pages:/);
   assert.match(workflow, /legacy_seen=0/);
   assert.match(workflow, /for attempt in \{1\.\.60\}/);
   assert.match(workflow, /elif \[ "\$attempt" -ge 12 \]; then/);
@@ -37,6 +38,18 @@ test("GitHub Pages deploy waits through delayed legacy-run discovery and fails c
   assert.match(workflow, /Legacy Pages run completed; safe to publish verified Vite build\./);
   assert.match(workflow, /Legacy Pages run is still active after the drain window; refusing to deploy early/);
   assert.match(workflow, /Unable to establish a safe Pages deployment order/);
+});
+
+test("legacy Pages drain does not reserve the github-pages environment", () => {
+  const drainStart = workflow.indexOf("  drain-legacy-pages:");
+  const deployStart = workflow.indexOf("  deploy:");
+  assert.ok(drainStart > 0 && deployStart > drainStart);
+  const drainBlock = workflow.slice(drainStart, deployStart);
+  const deployBlock = workflow.slice(deployStart);
+  assert.doesNotMatch(drainBlock, /environment:\s*[\s\S]*name:\s*github-pages/);
+  assert.match(deployBlock, /needs: \[build, drain-legacy-pages\]/);
+  assert.match(deployBlock, /environment:\s*[\s\S]*name:\s*github-pages/);
+  assert.doesNotMatch(deployBlock, /Wait for legacy Pages deployment/);
 });
 
 test("GitHub Pages workflow uses stable Node 22 and lean npm install", () => {
