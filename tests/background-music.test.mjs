@@ -19,9 +19,14 @@ test("background music uses a separate quiet WebAudio lifecycle", () => {
   assert.match(sounds, /export function resumeBackgroundMusic/);
   assert.match(sounds, /context\?\.state === "running"/);
   assert.match(sounds, /0\.011/);
+
+  const stopStart = sounds.indexOf("export function stopSounds()");
+  const stopEnd = sounds.indexOf("\nfunction tone", stopStart);
+  assert.ok(stopStart >= 0 && stopEnd > stopStart);
+  const stopSoundsBody = sounds.slice(stopStart, stopEnd);
   assert.doesNotMatch(
-    sounds,
-    /export function stopSounds\(\)[\s\S]*musicNodes[\s\S]*function tone/,
+    stopSoundsBody,
+    /musicNodes|musicTimers|stopBackgroundMusic|clearBackgroundPlayback/,
   );
 });
 
