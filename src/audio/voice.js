@@ -44,7 +44,13 @@ function ensureVoiceContext() {
   }
 }
 
+function speechForegroundAllowed() {
+  if (typeof document === "undefined") return true;
+  return !document.hidden && document.visibilityState !== "hidden";
+}
+
 export async function unlockVoiceAudio() {
+  if (!speechForegroundAllowed()) return false;
   if (settle) return true;
   if (unlockPending) return unlockPending;
   const context = ensureVoiceContext();
@@ -154,9 +160,9 @@ async function decodeVoiceBuffer(url, context) {
 
 async function speakWebAudioClip(url, token) {
   const context = voiceContext;
-  if (!context || context.state !== "running") return false;
+  if (!context || context.state !== "running" || !speechForegroundAllowed()) return false;
   const buffer = await decodeVoiceBuffer(url, context);
-  if (!buffer || token !== sequence || context.state !== "running") return false;
+  if (!buffer || token !== sequence || context.state !== "running" || !speechForegroundAllowed()) return false;
   return new Promise((resolve) => {
     let done = false;
     const source = context.createBufferSource();
@@ -185,7 +191,7 @@ async function speakWebAudioClip(url, token) {
 }
 
 async function speakMediaClip(url, token) {
-  if (!url) return false;
+  if (!url || !speechForegroundAllowed()) return false;
   const player = naturalPlayer();
   if (!player) return false;
   try {
@@ -210,6 +216,10 @@ async function speakMediaClip(url, token) {
       player.onended = () => finish(true);
       player.onerror = () => finish(false);
       try {
+        if (!speechForegroundAllowed()) {
+          finish(false);
+          return;
+        }
         const started = player.play();
         Promise.resolve(started).catch(() => finish(false));
       } catch {
@@ -222,7 +232,7 @@ async function speakMediaClip(url, token) {
 }
 
 async function speakGameClip(url, token) {
-  if (!url) return false;
+  if (!url || !speechForegroundAllowed()) return false;
   if (voiceContext?.state === "running") {
     const playedWebAudio = await speakWebAudioClip(url, token);
     if (playedWebAudio || token !== sequence) return playedWebAudio;
@@ -242,16 +252,16 @@ async function playPreferredClip(url, token) {
 async function speakNaturalPlan(plan, token) {
   if (!plan?.length || !plan.every(isPersonalVoiceClipUrl)) return false;
   for (const clip of plan) {
-    if (token !== sequence) return false;
+    if (token !== sequence || !speechForegroundAllowed()) return false;
     const played = await playPreferredClip(clip, token);
     if (!played) return false;
   }
-  return token === sequence;
+  return token === sequence && speechForegroundAllowed();
 }
 
 export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
-  if (!text || settings.audio === false) return false;
+  if (!text || settings.audio === false || !speechForegroundAllowed()) return false;
   const token = sequence;
   setSpeechActive(true);
   try {
@@ -260,7 +270,7 @@ export async function speak(text, lang = "de", settings = {}) {
         text,
         lang,
         settings,
-        () => token === sequence,
+        () => token === sequence && speechForegroundAllowed(),
       );
       if (playedSystem || token !== sequence) return playedSystem;
 
@@ -279,6 +289,7 @@ export async function speak(text, lang = "de", settings = {}) {
       if (!voice4InventoryReady()) return false;
     }
 
+    if (!speechForegroundAllowed()) return false;
     const personalClip = personalVoiceClip(text, lang);
     if (personalClip) {
       const playedPersonal = await playPreferredClip(personalClip, token);
@@ -298,16 +309,18 @@ export async function speak(text, lang = "de", settings = {}) {
 
 export async function cloudTTS(text, lang, provider) {
   stopSpeech();
+  if (!speechForegroundAllowed()) return false;
   const token = sequence;
   cloudAbort = new AbortController();
   const blob = await provider({ text, lang, signal: cloudAbort.signal });
-  if (token !== sequence) return false;
+  if (token !== sequence || !speechForegroundAllowed()) return false;
   const url = URL.createObjectURL(blob);
   const player = naturalPlayer();
   if (!player) return false;
   player.src = url;
   cloudPlayer = player;
   try {
+    if (!speechForegroundAllowed()) return false;
     await player.play();
     return await new Promise((resolve) => {
       player.onended = () => resolve(true);
