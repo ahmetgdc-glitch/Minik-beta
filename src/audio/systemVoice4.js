@@ -3,6 +3,8 @@ const SIRI_RE = /(?:^|\b)siri(?:\b|$)/iu;
 const FIRST_VOICE_WAIT_MS = 1600;
 const RETRY_VOICE_WAIT_MS = 700;
 const PLAYBACK_RETRY_MS = 90;
+const PLAYBACK_WATCHDOG_MIN_MS = 5000;
+const PLAYBACK_WATCHDOG_MAX_MS = 18000;
 
 function engine() {
   return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
@@ -188,9 +190,18 @@ function minoPitch(settings = {}) {
   return Math.min(1.05, Math.max(0.98, Number.isFinite(requested) ? requested : 1.01));
 }
 
+export function voice4PlaybackWatchdogMs(text) {
+  const estimated = String(text || "").trim().length * 180;
+  return Math.min(PLAYBACK_WATCHDOG_MAX_MS, Math.max(PLAYBACK_WATCHDOG_MIN_MS, estimated));
+}
+
 let activeUtterance = null;
+let activeAttemptFinish = null;
 
 export function stopSystemVoice4() {
+  const finish = activeAttemptFinish;
+  activeAttemptFinish = null;
+  finish?.(false);
   try { engine()?.cancel?.(); } catch {}
   activeUtterance = null;
 }
@@ -203,14 +214,17 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
   return new Promise((resolve) => {
     let done = false;
     let utterance;
+    let watchdog = null;
     const finish = (ok) => {
       if (done) return;
       done = true;
+      if (watchdog !== null) clearTimeout(watchdog);
       if (utterance) {
         utterance.onend = null;
         utterance.onerror = null;
       }
       if (activeUtterance === utterance) activeUtterance = null;
+      if (activeAttemptFinish === finish) activeAttemptFinish = null;
       resolve(Boolean(ok && isCurrent()));
     };
 
@@ -223,8 +237,11 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       utterance.volume = 1;
       utterance.onend = () => finish(true);
       utterance.onerror = () => finish(false);
+      activeAttemptFinish?.(false);
+      activeAttemptFinish = finish;
       activeUtterance = utterance;
       synth.cancel();
+      watchdog = setTimeout(() => finish(false), voice4PlaybackWatchdogMs(text));
       synth.speak(utterance);
     } catch {
       finish(false);
