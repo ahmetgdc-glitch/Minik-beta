@@ -44,6 +44,14 @@ function systemSpeechEngine() {
   return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
 }
 
+function systemSpeechAvailable() {
+  return Boolean(
+    systemSpeechEngine() &&
+      typeof globalThis !== "undefined" &&
+      typeof globalThis.SpeechSynthesisUtterance === "function",
+  );
+}
+
 function systemVoiceList() {
   try {
     return systemSpeechEngine()?.getVoices?.() || [];
@@ -140,7 +148,7 @@ export async function unlockVoiceAudio() {
   if (unlockPending) return unlockPending;
   const context = ensureVoiceContext();
   const player = naturalPlayer();
-  if (!player && !context) return Boolean(systemSpeechEngine());
+  if (!player && !context) return systemSpeechAvailable();
   const token = sequence;
   unlockPending = (async () => {
     let contextReady = false;
@@ -150,7 +158,7 @@ export async function unlockVoiceAudio() {
         contextReady = context.state === "running";
       } catch {}
     }
-    if (!player) return contextReady || Boolean(systemSpeechEngine());
+    if (!player) return contextReady || systemSpeechAvailable();
     try {
       player.pause();
       player.onended = null;
@@ -167,7 +175,7 @@ export async function unlockVoiceAudio() {
       }
       return true;
     } catch {
-      return contextReady || Boolean(systemSpeechEngine());
+      return contextReady || systemSpeechAvailable();
     }
   })();
   try { return await unlockPending; }
@@ -334,10 +342,12 @@ export async function speak(text, lang = "de", settings = {}) {
   setSpeechActive(true);
   try {
     // Voice 4 / Siri-style system speech is now MINIK's primary narrator.
-    // If WebKit does not expose that downloaded voice, use the best local
-    // language voice and keep recorded MINIK speech as an offline safety net.
-    const playedSystem = await speakSystem(text, lang, settings, token);
-    if (playedSystem || token !== sequence) return playedSystem;
+    // Only enter the async system path when Web Speech is actually available;
+    // otherwise preserve the synchronous recorded-player setup used by Safari.
+    if (systemSpeechAvailable()) {
+      const playedSystem = await speakSystem(text, lang, settings, token);
+      if (playedSystem || token !== sequence) return playedSystem;
+    }
 
     const personalClip = personalVoiceClip(text, lang);
     if (personalClip) {
