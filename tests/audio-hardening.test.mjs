@@ -93,6 +93,45 @@ test("Voice 4 cache survives unknown Safari inventory but invalidates against a 
   }
 });
 
+test("Voice 4 cache resets when Safari speech synthesis disappears and returns", async () => {
+  const previousSynth = globalThis.speechSynthesis;
+  const previousUtterance = globalThis.SpeechSynthesisUtterance;
+  const oldVoice4 = { name: "Stimme 4", voiceURI: "com.apple.voice4.old", lang: "de-DE" };
+  const replacementVoice4 = { name: "Stimme 4", voiceURI: "com.apple.voice4.new", lang: "de-DE" };
+  let synth = {
+    getVoices: () => [oldVoice4],
+    addEventListener() {},
+    removeEventListener() {},
+    cancel() {},
+    speak() {},
+  };
+  Object.defineProperty(globalThis, "speechSynthesis", { configurable: true, get: () => synth });
+  globalThis.SpeechSynthesisUtterance = class {};
+
+  try {
+    const mod = await import(`../src/audio/systemVoice4.js?engine-gap=${Date.now()}`);
+    assert.equal(mod.hasVoice4Selection("de"), true);
+
+    synth = null;
+    assert.equal(mod.systemVoice4Available(), false);
+    assert.equal(mod.hasVoice4Selection("de"), false, "missing engine must clear the old Voice 4 cache");
+
+    synth = {
+      getVoices: () => [replacementVoice4],
+      addEventListener() {},
+      removeEventListener() {},
+      cancel() {},
+      speak() {},
+    };
+    assert.equal(mod.hasVoice4Selection("de"), true, "returning Safari engine must select its own Voice 4");
+  } finally {
+    if (previousSynth === undefined) delete globalThis.speechSynthesis;
+    else Object.defineProperty(globalThis, "speechSynthesis", { configurable: true, writable: true, value: previousSynth });
+    if (previousUtterance === undefined) delete globalThis.SpeechSynthesisUtterance;
+    else globalThis.SpeechSynthesisUtterance = previousUtterance;
+  }
+});
+
 test("Voice 4 playback has a bounded Safari watchdog", async () => {
   const mod = await import(`../src/audio/systemVoice4.js?watchdog=${Date.now()}`);
   assert.equal(mod.voice4PlaybackWatchdogMs("Hi"), 5000);
