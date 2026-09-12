@@ -64,14 +64,31 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          for attempt in {1..36}; do
+          legacy_seen=0
+          for attempt in {1..60}; do
             legacy_status="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=20" --jq '.workflow_runs[] | select(.path == "dynamic/pages/pages-build-deployment") | .status' | head -n 1)"
-            if [ -z "$legacy_status" ] || [ "$legacy_status" = "completed" ]; then
+
+            if [ -n "$legacy_status" ]; then
+              legacy_seen=1
+              if [ "$legacy_status" = "completed" ]; then
+                echo "Legacy Pages run completed; safe to publish verified Vite build."
+                exit 0
+              fi
+            elif [ "$attempt" -ge 12 ]; then
+              echo "No legacy Pages run appeared during the 60-second discovery window; continuing."
               exit 0
             fi
+
             sleep 5
           done
-          echo "::warning::Legacy Pages run did not finish within the drain window; deploying verified Vite build now."
+
+          if [ "$legacy_seen" -eq 1 ]; then
+            echo "::error::Legacy Pages run is still active after the drain window; refusing to deploy early because it could overwrite MINIK."
+            exit 1
+          fi
+
+          echo "::error::Unable to establish a safe Pages deployment order."
+          exit 1
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
