@@ -64,7 +64,10 @@ function observeVoiceChanges() {
 
 export function voice4InventoryReady() {
   if (!systemVoice4Available()) return true;
-  return voicesObserved || exposedSystemVoices().length > 0;
+  // Safari may emit voiceschanged before getVoices() is actually populated.
+  // A real non-empty inventory is the only safe evidence that Voice 4 was
+  // checked and is genuinely absent. Until then, never switch narrator.
+  return exposedSystemVoices().length > 0;
 }
 
 export function selectVoice4(voices, lang, settings = {}) {
