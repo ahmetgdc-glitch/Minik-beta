@@ -157,19 +157,17 @@ test("natural Mino library keeps at least 218 recorded prompts and words", () =>
   assert.ok(urls.length >= 218, `expected at least 218 natural clips, got ${urls.length}`);
 });
 
-test("fixed Mino speech uses system narration first and keeps recorded plans as fallback", () => {
-  assert.match(voice, /speakSystem\(text, lang, settings, token\)/);
+test("fixed Mino speech uses personal recordings and personal plans only", () => {
+  assert.doesNotMatch(voice, /speakSystem|speechSynthesis/);
   assert.match(voice, /naturalVoicePlan\(text, lang\)/);
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
-  const systemIndex = voice.indexOf("await speakSystem(text, lang, settings, token)");
+  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
-  assert.ok(systemIndex > 0 && planIndex > systemIndex);
+  assert.ok(personalIndex > 0 && planIndex > personalIndex);
 });
 
-test("Voice 4 selection prefers the requested iOS voice when WebKit exposes it", () => {
-  assert.match(voice, /stimme\\s\*4\|voice\\s\*4\|siri/iu);
-  assert.match(voice, /getVoices/);
-  assert.match(voice, /voiceLanguageMatches/);
+test("iOS cannot inject Voice 4 or another system narrator", () => {
+  assert.doesNotMatch(voice, /stimme\\s\*4|voice\\s\*4|siri|SpeechSynthesisUtterance|getVoices/iu);
 });
 
 test("game praise only uses phrases with natural clip coverage", () => {
