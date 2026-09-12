@@ -7,7 +7,10 @@ let settle = null,
   voicePlayer = null,
   cloudAbort = null,
   unlockPending = null,
+  voiceContext = null,
+  voiceSource = null,
   sequence = 0;
+const voiceBufferCache = new Map();
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -23,36 +26,59 @@ function naturalPlayer() {
   return voicePlayer;
 }
 
+function ensureVoiceContext() {
+  if (typeof window === "undefined") return null;
+  try {
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) return null;
+    voiceContext ||= new Context();
+    if (voiceContext.state === "suspended") voiceContext.resume().catch(() => {});
+    return voiceContext;
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Unlock exactly one reusable HTMLMediaElement from a real user gesture.
- * No network request is made and no voice library is preloaded.
+ * Unlock both reusable speech paths from a real user gesture.
+ * WebAudio is the persistent gameplay path because iOS may reject a later
+ * HTMLMediaElement play() that is no longer directly inside a tap handler.
  */
 export async function unlockVoiceAudio() {
   // Never replace a narration source/handlers with the silent unlock clip.
   if (settle) return true;
   if (unlockPending) return unlockPending;
+  const context = ensureVoiceContext();
   const player = naturalPlayer();
-  if (!player) return false;
+  if (!player && !context) return false;
   const token = sequence;
   unlockPending = (async () => {
-  try {
-    player.pause();
-    player.onended = null;
-    player.onerror = null;
-    player.preload = "none";
-    player.src = SILENT_WAV;
-    player.currentTime = 0;
-    player.volume = 1;
-    const started = player.play();
-    if (started?.then) await started;
-    if (token === sequence) {
-      player.pause();
-      player.currentTime = 0;
+    let contextReady = false;
+    if (context) {
+      try {
+        if (context.state !== "running") await context.resume();
+        contextReady = context.state === "running";
+      } catch {}
     }
-    return true;
-  } catch {
-    return false;
-  }
+    if (!player) return contextReady;
+    try {
+      player.pause();
+      player.onended = null;
+      player.onerror = null;
+      player.preload = "none";
+      player.src = SILENT_WAV;
+      player.currentTime = 0;
+      player.volume = 1;
+      const started = player.play();
+      if (started?.then) await started;
+      if (token === sequence) {
+        player.pause();
+        player.currentTime = 0;
+      }
+      return true;
+    } catch {
+      return contextReady;
+    }
   })();
   try { return await unlockPending; }
   finally { unlockPending = null; }
@@ -62,6 +88,8 @@ export function stopSpeech() {
   sequence++;
   cloudAbort?.abort();
   cloudPlayer?.pause();
+  try { voiceSource?.stop(); } catch {}
+  voiceSource = null;
   voicePlayer?.pause();
   if (voicePlayer) {
     voicePlayer.onended = null;
@@ -96,7 +124,58 @@ function localizedGameClip(url) {
     return "";
   }
 }
-async function speakGameClip(url, token) {
+
+async function decodeVoiceBuffer(url, context) {
+  if (!url || !context || typeof fetch === "undefined") return null;
+  if (voiceBufferCache.has(url)) return voiceBufferCache.get(url);
+  const pending = (async () => {
+    const response = await fetch(url, { cache: "force-cache" });
+    if (!response.ok) throw new Error(`voice HTTP ${response.status}`);
+    const bytes = await response.arrayBuffer();
+    return context.decodeAudioData(bytes.slice(0));
+  })();
+  voiceBufferCache.set(url, pending);
+  try {
+    return await pending;
+  } catch {
+    voiceBufferCache.delete(url);
+    return null;
+  }
+}
+
+async function speakWebAudioClip(url, token) {
+  const context = voiceContext;
+  if (!context || context.state !== "running") return false;
+  const buffer = await decodeVoiceBuffer(url, context);
+  if (!buffer || token !== sequence || context.state !== "running") return false;
+  return new Promise((resolve) => {
+    let done = false;
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(context.destination);
+    voiceSource = source;
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      try { source.disconnect(); } catch {}
+      if (voiceSource === source) voiceSource = null;
+      settle = null;
+      resolve(Boolean(ok && token === sequence));
+    };
+    settle = () => {
+      try { source.stop(); } catch {}
+      finish(false);
+    };
+    source.onended = () => finish(true);
+    try {
+      source.start(0);
+    } catch {
+      finish(false);
+    }
+  });
+}
+
+async function speakMediaClip(url, token) {
   if (!url) return false;
   const player = naturalPlayer();
   if (!player) return false;
@@ -132,6 +211,19 @@ async function speakGameClip(url, token) {
     return false;
   }
 }
+
+async function speakGameClip(url, token) {
+  if (!url) return false;
+  // Only take the async WebAudio path after a real gesture has already left
+  // the speech context running. Otherwise initialize the existing media path
+  // synchronously so a late unlock cannot slip into narration setup.
+  if (voiceContext?.state === "running") {
+    const playedWebAudio = await speakWebAudioClip(url, token);
+    if (playedWebAudio || token !== sequence) return playedWebAudio;
+  }
+  return speakMediaClip(url, token);
+}
+
 async function playPreferredClip(url, token) {
   const localClip = localizedGameClip(url);
   if (localClip) {
