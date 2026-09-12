@@ -51,8 +51,8 @@ test("an unresolved Safari voice inventory cannot trigger the personal narrator"
 test("Voice 4 retries a transient Safari playback failure once", () => {
   assert.match(systemVoice4, /PLAYBACK_RETRY_MS = 90/);
   assert.match(systemVoice4, /const firstAttempt = await playVoice4Attempt/);
-  assert.match(systemVoice4, /const mayRetry = await retryDelay\(isCurrent\)/);
-  assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, voice, isCurrent\)/);
+  assert.match(systemVoice4, /const mayRetry = await retryDelay\(stillCurrent\)/);
+  assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, voice, stillCurrent\)/);
 });
 
 test("a known Voice 4 never switches to a personal recording after runtime failure", () => {
@@ -143,6 +143,8 @@ test("speech keeps stale-playback and cancellation guards", () => {
   assert.match(voice, /stopSystemVoice4\(\)/);
   assert.match(systemVoice4, /synth\.cancel\(\)/);
   assert.match(systemVoice4, /activeAttemptFinish/);
+  assert.match(systemVoice4, /voice4Sequence \+= 1/);
+  assert.match(systemVoice4, /runSequence === voice4Sequence && isCurrent\(\)/);
 });
 
 test("recorded fallback still uses one lazy media player", () => {
