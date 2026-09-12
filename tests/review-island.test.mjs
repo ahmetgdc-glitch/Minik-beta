@@ -16,8 +16,9 @@ test("review rounds use an immersive Mino training island without revealing the 
 });
 
 test("review target can be replayed as speech without leaking visual answer", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
   assert.match(game, /function replayTarget\(\)/);
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /if \(controlsDisabled\) return/);
   assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onClick=\{replayTarget\}/);
   assert.match(game, /kelimesini tekrar dinle|noch einmal anhören/);

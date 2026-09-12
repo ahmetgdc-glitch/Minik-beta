@@ -18,11 +18,12 @@ test("listening game uses an immersive Mino listening station", () => {
 });
 
 test("listening replay speaks only the target word and keeps lifecycle safety", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
   assert.match(game, /function repeatWord\(\)/);
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /if \(controlsDisabled\) return/);
   assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onClick=\{repeatWord\}/);
-  assert.match(game, /disabled=\{paused\}/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
 });
 
 test("listening playground keeps large choices on phones", () => {

@@ -15,12 +15,13 @@ test("daily order uses an immersive routine scene instead of the legacy answer c
 });
 
 test("routine prompt can replay the current step without bypassing lifecycle guards", () => {
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
   assert.match(game, /function replayPrompt\(\)/);
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /if \(controlsDisabled\) return/);
   assert.match(game, /speak\(prompt\.labels\[lang\], lang, settings\)/);
   assert.match(game, /className="routine-now-scene"/);
   assert.match(game, /onClick=\{replayPrompt\}/);
-  assert.match(game, /disabled=\{paused\}/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
 });
 
 test("routine journey keeps large child-first scenes with phone adaptation", () => {

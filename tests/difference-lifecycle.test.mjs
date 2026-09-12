@@ -7,6 +7,7 @@ const game = readFileSync(new URL("../src/games/DifferentGame.jsx", import.meta.
 test("difference game blocks paused and lifecycle-stale taps", () => {
   assert.match(game, /paused/);
   assert.match(game, /interactionBlocked = \(\) => false/);
-  assert.match(game, /if \(paused \|\| interactionBlocked\(\)\) return/);
-  assert.match(game, /disabled=\{paused\}/);
+  assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
+  assert.match(game, /if \(controlsDisabled\) return/);
+  assert.match(game, /disabled=\{controlsDisabled\}/);
 });
