@@ -24,7 +24,7 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
       if (webAudioReady && voiceReady) cleanupGestureListeners();
     };
     const prime = () => {
-      if (disposed) return;
+      if (disposed || document.visibilityState !== "visible") return;
 
       // Both resume()/play() are invoked synchronously inside the real gesture.
       const context = unlockAudio();
@@ -47,6 +47,7 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
       maybeFinish();
     };
     const resumeAfterBackground = () => {
+      stopMusic();
       if (document.visibilityState !== "visible") return;
       // Safari may suspend WebAudio after backgrounding. Re-arm the next tap;
       // never try to auto-play media from visibilitychange itself.
@@ -60,12 +61,14 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
     window.addEventListener("touchstart", prime, true);
     window.addEventListener("keydown", prime, true);
     document.addEventListener("visibilitychange", resumeAfterBackground);
+    window.addEventListener("pagehide", stopMusic);
 
     return () => {
       disposed = true;
       stopMusic();
       cleanupGestureListeners();
       document.removeEventListener("visibilitychange", resumeAfterBackground);
+      window.removeEventListener("pagehide", stopMusic);
     };
   }, [enabled, musicEnabled]);
 }
