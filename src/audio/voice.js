@@ -101,6 +101,18 @@ export function stopSpeech() {
   setSpeechActive(false);
 }
 
+function bindSpeechLifecycle() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  const stopOnPageHide = () => stopSpeech();
+  const stopWhenHidden = () => {
+    if (document.hidden) stopSpeech();
+  };
+  window.addEventListener("pagehide", stopOnPageHide);
+  document.addEventListener("visibilitychange", stopWhenHidden);
+}
+
+bindSpeechLifecycle();
+
 function isPersonalVoiceClipUrl(url) {
   return (
     /^assets\/personal-voice\/personal-(?:de|tr)-[a-f0-9]{20}\.mp3$/u.test(url || "") ||
