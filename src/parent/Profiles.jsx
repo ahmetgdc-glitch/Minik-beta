@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import { Plus, Trash2, Check, Pencil, Star, Gamepad2, Sparkles } from "lucide-react";
 import { addProfile, deleteProfile, switchProfile, updateProfile } from "../progress/store.js";
 import { AGE_GROUPS } from "../learning/age.js";
+import { stopSpeech } from "../audio/voice.js";
+import { stopSounds, stopMusic } from "../audio/sounds.js";
 import { Mino } from "../components/Visual.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import { useModalSafety } from "../app/useModalSafety.js";
@@ -12,8 +14,9 @@ export default function Profiles({progress,onNavigate,onChoose,chooserOnly=false
   const [avatar,setAvatar]=useState("🐠"), [ageGroup,setAgeGroup]=useState("4-5"), [editing,setEditing]=useState(null), [editName,setEditName]=useState(""), [editAvatar,setEditAvatar]=useState("🐠"), [editAgeGroup,setEditAgeGroup]=useState("4-5");
   const full=progress.profiles.length>=progress.maxProfiles;
   useModalSafety(creating, ()=>setCreating(false));
-  function choose(id){switchProfile(id);onChoose?.(id);if(!onChoose)onNavigate?.("/")}
-  function create(){ const id=addProfile({name,avatar,ageGroup}); if(id){setCreating(false);setName("");onChoose?.(id);if(!onChoose)onNavigate?.("/");} }
+  function stopProfileAudio(){stopSpeech();stopSounds();stopMusic()}
+  function choose(id){stopProfileAudio();switchProfile(id);onChoose?.(id);if(!onChoose)onNavigate?.("/")}
+  function create(){ stopProfileAudio(); const id=addProfile({name,avatar,ageGroup}); if(id){setCreating(false);setName("");onChoose?.(id);if(!onChoose)onNavigate?.("/");} }
   function beginEdit(p){setEditing(p.id);setEditName(p.name);setEditAvatar(p.avatar);setEditAgeGroup(p.ageGroup||"4-5")}
   function saveEdit(e,p){e.preventDefault();updateProfile(p.id,{name:editName,avatar:editAvatar,ageGroup:editAgeGroup});setEditing(null)}
   return <section className={`profiles-screen ${chooserOnly?"chooser-only":""}`}>
@@ -52,11 +55,11 @@ export default function Profiles({progress,onNavigate,onChoose,chooserOnly=false
       open={Boolean(deleteTarget)}
       title={t("Profil löschen?","Profil silinsin mi?")}
       message={deleteTarget ? t(`${deleteTarget.name} wirklich löschen? Der Lernfortschritt dieses Profils wird dauerhaft gelöscht.`, `${deleteTarget.name} silinsin mi? Bu profilin ilerlemesi kalıcı olarak silinecek.`) : ""}
-      confirmLabel={t("Profil löschen","Profili sil")}
+      confirmLabel={t("Profil löschen","Profil sil")}
       cancelLabel={t("Abbrechen","İptal")}
       danger
       onCancel={()=>setDeleteTarget(null)}
-      onConfirm={()=>{ if(deleteTarget){ deleteProfile(deleteTarget.id); setDeleteTarget(null); } }}
+      onConfirm={()=>{ if(deleteTarget){ stopProfileAudio(); deleteProfile(deleteTarget.id); setDeleteTarget(null); } }}
     />}
     {!chooserOnly&&<p className="profile-limit">{progress.profiles.length} / {progress.maxProfiles} {t("Profile","profil")}</p>}
   </section>
