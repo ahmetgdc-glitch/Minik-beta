@@ -97,6 +97,14 @@ test("natural speech plans prefer the personal voice over legacy recordings", ()
   );
 });
 
+test("runtime accepts only personal voice clips for gameplay narration", () => {
+  assert.match(voice, /function isPersonalVoiceClipUrl\(url\)/);
+  assert.match(voice, /plan\.every\(isPersonalVoiceClipUrl\)/);
+  assert.match(voice, /owner's authorized MINIK voice is the only gameplay narrator/);
+  assert.match(voice, /No native or legacy narrator fallback exists/);
+  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|speakSystem/);
+});
+
 test("runtime tries an exact personal clip and never invokes native system voice", () => {
   assert.match(voice, /import \{ personalVoiceClip \} from "\.\/personalVoiceClips\.js";/);
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
