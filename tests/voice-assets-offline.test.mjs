@@ -38,13 +38,14 @@ test("localized voice files are packaged but cached only after use", () => {
   assert.match(worker, /await cache\.put\(event\.request,response\.clone\(\)\)/);
 });
 
-test("runtime keeps recordings first and blocks the former device-voice fallback", () => {
-  const localIndex = voice.indexOf("speakGameClip(localClip, token)");
-  const remoteIndex = voice.indexOf("return speakGameClip(url, token)");
+test("runtime prefers system narration and retains recorded offline fallback", () => {
+  const systemIndex = voice.indexOf("await speakSystem(text, lang, settings, token)");
+  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("naturalVoicePlan(text, lang)");
-  assert.ok(localIndex > 0, "local natural clip must be attempted first inside a recording plan");
-  assert.ok(remoteIndex > localIndex, "remote recording must remain the recording fallback");
-  assert.ok(planIndex > 0, "recorded natural plans must remain available");
-  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|systemVoiceEnabled|speakSystem/);
+  assert.ok(systemIndex > 0, "system narrator must be attempted");
+  assert.ok(personalIndex > systemIndex, "recorded personal voice must remain a fallback");
+  assert.ok(planIndex > personalIndex, "recorded natural plans must remain available after exact fallback");
+  assert.match(voice, /speechSynthesis/);
+  assert.match(voice, /getVoices/);
   assert.match(voice, /assets\/voice\/\$\{filename\}/);
 });
