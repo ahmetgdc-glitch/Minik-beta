@@ -159,8 +159,8 @@ export async function speak(text, lang = "de", settings = {}) {
       if (played || token !== sequence) return played;
     }
 
-    // No native or legacy narrator fallback exists. Missing personal
-    // recordings stay silent so the child's narrator never changes voice.
+    // No native speech fallback exists, and no legacy narrator fallback is allowed.
+    // Missing personal recordings stay silent so the child's narrator never changes voice.
     return false;
   } finally {
     // An older cancelled request must not raise music over its replacement.
