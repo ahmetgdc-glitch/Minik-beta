@@ -13,6 +13,14 @@ test("MINIK uses system speech as the primary narrator", () => {
   assert.ok(systemIndex > 0 && personalIndex > systemIndex, "system voice must run before recorded fallback");
 });
 
+test("system narration rejects generic robotic fallback voices", () => {
+  assert.match(voice, /function isPreferredMinoSystemVoice\(voice\)/);
+  assert.match(voice, /return matching\.find\(isPreferredMinoSystemVoice\) \|\| null/);
+  assert.match(voice, /if \(!voice\) return false/);
+  assert.doesNotMatch(voice, /pool\.find\(\(voice\) => voice\?\.default\)/);
+  assert.doesNotMatch(voice, /pool\[0\]/);
+});
+
 test("system voice keeps only small Mino adjustments", () => {
   assert.match(voice, /Math\.min\(1, Math\.max\(0\.86/);
   assert.match(voice, /0\.94/);
