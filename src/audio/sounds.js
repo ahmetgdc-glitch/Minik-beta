@@ -2,7 +2,12 @@ let context = null,
   nodes = [],
   activeTimers = [],
   musicTimer = null,
-  musicNodes = [];
+  musicNodes = [],
+  musicPaused = false;
+export function setMusicPaused(paused) {
+  musicPaused = Boolean(paused);
+  if (musicPaused) stopMusic();
+}
 export function unlockAudio() {
   try {
     context ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -32,7 +37,7 @@ export function stopSounds() {
 }
 /** Start a very quiet, deterministic child-friendly loop after a real gesture. */
 export function startMusic({ enabled = true } = {}) {
-  if (!enabled || musicTimer || !unlockAudio()) return false;
+  if (!enabled || musicPaused || musicTimer || !unlockAudio()) return false;
   const notes = [261.6, 329.6, 392, 329.6, 293.7, 349.2, 440, 349.2];
   let index = 0;
   const playBar = () => {
