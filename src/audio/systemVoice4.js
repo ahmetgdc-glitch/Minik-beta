@@ -1,5 +1,6 @@
 const VOICE4_RE = /(?:^|\b)(?:stimme\s*4|voice\s*4)(?:\b|$)/iu;
-const SIRI_RE = /(?:^|\b)siri\s*(?:stimme|voice)?\s*4(?:\b|$)/iu;
+const TURKISH_VOICE4_RE = /(?:^|\b)ses\s*4(?:\b|$)/iu;
+const SIRI_RE = /(?:^|\b)siri\s*(?:stimme|voice|ses)?\s*4(?:\b|$)/iu;
 const FIRST_VOICE_WAIT_MS = 1600;
 const RETRY_VOICE_WAIT_MS = 700;
 const PLAYBACK_RETRY_MS = 90;
@@ -42,7 +43,7 @@ function sameVoice(a, b) {
 
 export function isVoice4Candidate(voice) {
   const id = voiceIdentity(voice);
-  return VOICE4_RE.test(id) || SIRI_RE.test(id);
+  return VOICE4_RE.test(id) || TURKISH_VOICE4_RE.test(id) || SIRI_RE.test(id);
 }
 
 function isIOSSpeechEnvironment() {
@@ -175,8 +176,10 @@ export function selectVoice4(voices, lang, settings = {}) {
 
   return (
     sameLanguage.find((voice) => VOICE4_RE.test(voiceIdentity(voice))) ||
+    sameLanguage.find((voice) => TURKISH_VOICE4_RE.test(voiceIdentity(voice))) ||
     sameLanguage.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
     available.find((voice) => VOICE4_RE.test(voiceIdentity(voice))) ||
+    available.find((voice) => TURKISH_VOICE4_RE.test(voiceIdentity(voice))) ||
     available.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
     null
   );
