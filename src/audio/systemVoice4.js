@@ -197,8 +197,10 @@ export function voice4PlaybackWatchdogMs(text) {
 
 let activeUtterance = null;
 let activeAttemptFinish = null;
+let voice4Sequence = 0;
 
 export function stopSystemVoice4() {
+  voice4Sequence += 1;
   const finish = activeAttemptFinish;
   activeAttemptFinish = null;
   finish?.(false);
@@ -257,16 +259,19 @@ function retryDelay(isCurrent) {
 
 export async function speakWithVoice4(text, lang = "de", settings = {}, isCurrent = () => true) {
   if (!text || !systemVoice4Available() || !isCurrent()) return false;
+  const runSequence = voice4Sequence;
+  const stillCurrent = () => runSequence === voice4Sequence && isCurrent();
   const voice = await waitForVoice4(lang, settings);
-  if (!voice || !isCurrent()) return false;
+  if (!voice || !stillCurrent()) return false;
 
-  const firstAttempt = await playVoice4Attempt(text, lang, settings, voice, isCurrent);
-  if (firstAttempt || !isCurrent()) return firstAttempt;
+  const firstAttempt = await playVoice4Attempt(text, lang, settings, voice, stillCurrent);
+  if (firstAttempt || !stillCurrent()) return firstAttempt;
 
   // Safari can transiently reject/interupt one speechSynthesis call while the
   // selected voice itself is still valid. Retry Voice 4 once instead of
-  // immediately changing narrator to a recorded fallback.
-  const mayRetry = await retryDelay(isCurrent);
+  // immediately changing narrator to a recorded fallback. An explicit stop
+  // invalidates this run sequence so the retry cannot resurrect old speech.
+  const mayRetry = await retryDelay(stillCurrent);
   if (!mayRetry) return false;
-  return playVoice4Attempt(text, lang, settings, voice, isCurrent);
+  return playVoice4Attempt(text, lang, settings, voice, stillCurrent);
 }
