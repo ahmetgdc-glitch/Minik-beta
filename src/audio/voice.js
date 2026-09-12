@@ -6,6 +6,7 @@ import {
   speakWithVoice4,
   stopSystemVoice4,
   systemVoice4Available,
+  voice4InventoryReady,
 } from "./systemVoice4.js";
 
 let settle = null,
@@ -257,6 +258,13 @@ export async function speak(text, lang = "de", settings = {}) {
       // sounds like a different character. Only use recordings when Voice 4
       // is genuinely unavailable.
       if (hasVoice4Selection(lang, settings)) return false;
+
+      // An empty Safari voice inventory is not proof that Voice 4 is absent.
+      // Some iOS launches populate getVoices() late and never fire the event
+      // within the first wait window. Staying silent for this one request is
+      // preferable to switching Mino to a different recorded speaker; the next
+      // request will retry Voice 4 once the inventory appears.
+      if (!voice4InventoryReady()) return false;
     }
 
     const personalClip = personalVoiceClip(text, lang);
