@@ -65,27 +65,28 @@ function voiceLanguageMatches(voice, lang) {
   return String(voice?.lang || "").toLowerCase().startsWith(prefix);
 }
 
+function isPreferredMinoSystemVoice(voice) {
+  return /(?:^|\b)(?:stimme\s*4|voice\s*4|siri)(?:\b|$)/iu.test(
+    `${voice?.name || ""} ${voice?.voiceURI || ""}`,
+  );
+}
+
 function selectMinoSystemVoice(lang, settings = {}) {
   const voices = systemVoiceList();
   if (!voices.length) return null;
   const matching = voices.filter((voice) => voiceLanguageMatches(voice, lang));
-  const pool = matching.length ? matching : voices;
+  if (!matching.length) return null;
   const saved = String(settings?.voices?.[lang] || "").trim().toLowerCase();
   if (saved) {
-    const exact = pool.find((voice) =>
+    const exact = matching.find((voice) =>
       [voice?.name, voice?.voiceURI].some((value) => String(value || "").toLowerCase() === saved),
     );
-    if (exact) return exact;
+    if (exact && isPreferredMinoSystemVoice(exact)) return exact;
   }
-  // Prefer the iOS voice the parent selected/downloaded when WebKit exposes it.
-  // Apple may publish the label as "Stimme 4", "Voice 4" or a Siri-labelled voice.
-  const preferred = pool.find((voice) =>
-    /(?:^|\b)(?:stimme\s*4|voice\s*4|siri)(?:\b|$)/iu.test(
-      `${voice?.name || ""} ${voice?.voiceURI || ""}`,
-    ),
-  );
-  if (preferred) return preferred;
-  return pool.find((voice) => voice?.default) || pool.find((voice) => voice?.localService) || pool[0];
+  // Never substitute an arbitrary Web Speech voice. On iPhone those generic
+  // voices can sound noticeably robotic. Use Voice 4 / Siri only when WebKit
+  // actually exposes it; otherwise fall back to MINIK's recorded natural voice.
+  return matching.find(isPreferredMinoSystemVoice) || null;
 }
 
 function minoRate(settings = {}) {
@@ -103,10 +104,11 @@ async function speakSystem(text, lang, settings, token) {
   const Utterance = typeof globalThis !== "undefined" ? globalThis.SpeechSynthesisUtterance : null;
   if (!engine || !Utterance || token !== sequence) return false;
   try {
+    const voice = selectMinoSystemVoice(lang, settings);
+    if (!voice) return false;
     const utterance = new Utterance(text);
     utterance.lang = lang === "tr" ? "tr-TR" : "de-DE";
-    const voice = selectMinoSystemVoice(lang, settings);
-    if (voice) utterance.voice = voice;
+    utterance.voice = voice;
     // Keep the selected iOS voice essentially unchanged; only a tiny Mino polish.
     utterance.rate = minoRate(settings);
     utterance.pitch = minoPitch(settings);
@@ -341,9 +343,9 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    // Voice 4 / Siri-style system speech is now MINIK's primary narrator.
-    // Only enter the async system path when Web Speech is actually available;
-    // otherwise preserve the synchronous recorded-player setup used by Safari.
+    // Voice 4 / Siri system speech is allowed only when WebKit exposes that
+    // specific high-quality voice. Generic system voices are intentionally
+    // rejected so MINIK never regresses to the robotic fallback heard on iPhone.
     if (systemSpeechAvailable()) {
       const playedSystem = await speakSystem(text, lang, settings, token);
       if (playedSystem || token !== sequence) return playedSystem;
