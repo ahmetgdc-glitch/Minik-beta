@@ -38,6 +38,15 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
+test("an unresolved Safari voice inventory cannot trigger the personal narrator", () => {
+  const inventoryGuard = voice.indexOf("if (!voice4InventoryReady()) return false;");
+  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
+  assert.ok(inventoryGuard > 0);
+  assert.ok(personalIndex > inventoryGuard);
+  assert.match(systemVoice4, /export function voice4InventoryReady\(\)/);
+  assert.match(systemVoice4, /voicesObserved \|\| exposedSystemVoices\(\)\.length > 0/);
+});
+
 test("Voice 4 retries a transient Safari playback failure once", () => {
   assert.match(systemVoice4, /PLAYBACK_RETRY_MS = 90/);
   assert.match(systemVoice4, /const firstAttempt = await playVoice4Attempt/);
