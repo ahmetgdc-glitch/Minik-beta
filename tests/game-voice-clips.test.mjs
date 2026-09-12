@@ -166,7 +166,7 @@ test("fixed Mino speech keeps recorded plans while pronunciation-sensitive speec
 
 test("device speech is opt-in so personal MINIK audio never silently becomes a phone voice", () => {
   assert.match(voice, /if \(systemVoiceEnabled\(settings\)\)/);
-  assert.match(voice, /return settings\.systemVoiceFallback === true/);
+  assert.match(voice, /void settings/);\n  assert.match(voice, /return false/);
   assert.match(voice, /return speakSystem\(text, lang, settings, token\)/);
   assert.match(voice, /settings\.preferNativeSystem === true/);
   assert.match(voice, /settings\.preferNativeSystem === false/);
