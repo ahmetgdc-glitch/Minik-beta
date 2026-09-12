@@ -6,6 +6,7 @@ let settle = null,
   cloudPlayer = null,
   voicePlayer = null,
   cloudAbort = null,
+  unlockPending = null,
   sequence = 0;
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
@@ -27,8 +28,13 @@ function naturalPlayer() {
  * No network request is made and no voice library is preloaded.
  */
 export async function unlockVoiceAudio() {
+  // Never replace a narration source/handlers with the silent unlock clip.
+  if (settle) return true;
+  if (unlockPending) return unlockPending;
   const player = naturalPlayer();
   if (!player) return false;
+  const token = sequence;
+  unlockPending = (async () => {
   try {
     player.pause();
     player.onended = null;
@@ -39,12 +45,17 @@ export async function unlockVoiceAudio() {
     player.volume = 1;
     const started = player.play();
     if (started?.then) await started;
-    player.pause();
-    player.currentTime = 0;
+    if (token === sequence) {
+      player.pause();
+      player.currentTime = 0;
+    }
     return true;
   } catch {
     return false;
   }
+  })();
+  try { return await unlockPending; }
+  finally { unlockPending = null; }
 }
 
 export function stopSpeech() {
