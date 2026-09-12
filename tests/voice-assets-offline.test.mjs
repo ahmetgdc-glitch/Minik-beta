@@ -49,6 +49,7 @@ test("runtime keeps recordings first and blocks the former device-voice fallback
   assert.ok(fallbackIndex > planIndex, "native device speech should cover only after a missing/failed recording plan");
   assert.match(voice, /shouldPreferNativeSystem\(text, lang, settings\)/);
   assert.match(voice, /localeFor = \(lang\) => \(lang === "tr" \? "tr-TR" : "de-DE"\)/);
-  assert.match(voice, /void settings/);\n  assert.match(voice, /return false/);
+  assert.match(voice, /void settings/);
+  assert.match(voice, /return false/);
   assert.match(voice, /assets\/voice\/\$\{filename\}/);
 });
