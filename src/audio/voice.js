@@ -1,6 +1,11 @@
 import { naturalVoicePlan } from "./naturalVoicePlans.js";
 import { personalVoiceClip } from "./personalVoiceClips.js";
 import { setSpeechActive } from "./sounds.js";
+import {
+  speakWithVoice4,
+  stopSystemVoice4,
+  systemVoice4Available,
+} from "./systemVoice4.js";
 
 let settle = null,
   cloudPlayer = null,
@@ -40,8 +45,8 @@ function ensureVoiceContext() {
 }
 
 /**
- * Unlock reusable recorded-speech paths from a real user gesture. System speech
- * does not need copied voice assets; iOS chooses from voices WebKit exposes.
+ * Unlock reusable recorded-speech paths from a real user gesture. Voice 4 uses
+ * iOS Web Speech when WebKit exposes that exact high-quality voice.
  */
 export async function unlockVoiceAudio() {
   // Never replace a narration source/handlers with the silent unlock clip.
@@ -49,7 +54,7 @@ export async function unlockVoiceAudio() {
   if (unlockPending) return unlockPending;
   const context = ensureVoiceContext();
   const player = naturalPlayer();
-  if (!player && !context) return false;
+  if (!player && !context) return systemVoice4Available();
   const token = sequence;
   unlockPending = (async () => {
     let contextReady = false;
@@ -59,7 +64,7 @@ export async function unlockVoiceAudio() {
         contextReady = context.state === "running";
       } catch {}
     }
-    if (!player) return contextReady;
+    if (!player) return contextReady || systemVoice4Available();
     try {
       player.pause();
       player.onended = null;
@@ -76,7 +81,7 @@ export async function unlockVoiceAudio() {
       }
       return true;
     } catch {
-      return contextReady;
+      return contextReady || systemVoice4Available();
     }
   })();
   try { return await unlockPending; }
@@ -87,6 +92,7 @@ export function stopSpeech() {
   sequence++;
   cloudAbort?.abort();
   cloudPlayer?.pause();
+  stopSystemVoice4();
   try { voiceSource?.stop(); } catch {}
   voiceSource = null;
   voicePlayer?.pause();
@@ -225,6 +231,7 @@ async function playPreferredClip(url, token) {
   }
   return speakGameClip(url, token);
 }
+
 async function speakNaturalPlan(plan, token) {
   if (!plan?.length || !plan.every(isPersonalVoiceClipUrl)) return false;
   for (const clip of plan) {
@@ -234,13 +241,27 @@ async function speakNaturalPlan(plan, token) {
   }
   return token === sequence;
 }
+
 export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   if (!text || settings.audio === false) return false;
   const token = sequence;
   setSpeechActive(true);
   try {
-    // Only the owner's authorized recordings may narrate gameplay.
+    // iOS Voice 4 is MINIK's first choice. The system module accepts only
+    // Voice 4 / Siri-labelled candidates and never an arbitrary default voice.
+    if (systemVoice4Available()) {
+      const playedSystem = await speakWithVoice4(
+        text,
+        lang,
+        settings,
+        () => token === sequence,
+      );
+      if (playedSystem || token !== sequence) return playedSystem;
+    }
+
+    // If WebKit does not expose Voice 4, keep the existing natural MINIK
+    // recordings as the safe fallback instead of using robotic Web Speech.
     const personalClip = personalVoiceClip(text, lang);
     if (personalClip) {
       const playedPersonal = await playPreferredClip(personalClip, token);
@@ -257,6 +278,7 @@ export async function speak(text, lang = "de", settings = {}) {
     if (token === sequence) setSpeechActive(false);
   }
 }
+
 export async function cloudTTS(text, lang, provider) {
   stopSpeech();
   const token = sequence;
