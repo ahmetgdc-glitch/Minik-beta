@@ -13,9 +13,6 @@ import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import { getInstallState, requestInstall, subscribeInstallState } from "../app/install.js";
 import { useModalSafety } from "../app/useModalSafety.js";
 import {
-  refreshVoices,
-  getVoices,
-  subscribeVoices,
   speak,
 } from "../audio/voice.js";
 export default function Parents({ progress }) {
@@ -29,7 +26,6 @@ export default function Parents({ progress }) {
       7 + Math.floor(Math.random() * 5),
       4 + Math.floor(Math.random() * 5),
     ]),
-    [voiceVersion, setVoiceVersion] = useState(0),
     [reset, setReset] = useState(false),
     [pin, setPin] = useState(s.pin),
     [backupStatus, setBackupStatus] = useState(null),
@@ -39,10 +35,6 @@ export default function Parents({ progress }) {
     [installState, setInstallState] = useState(() => getInstallState()),
     [installStatus, setInstallStatus] = useState(null);
   useModalSafety(reset, () => setReset(false));
-  useEffect(() => {
-    refreshVoices();
-    return subscribeVoices(() => setVoiceVersion((v) => v + 1));
-  }, []);
   useEffect(() => subscribeInstallState(setInstallState), []);
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -371,8 +363,8 @@ export default function Parents({ progress }) {
         <h2>{t("Stimme & Töne", "Konuşma ve ses")}</h2>
         <p>
           {t(
-            "MINIK verwendet die persönliche Mino-Stimme zuerst. Eine Gerätestimme wird nur verwendet, wenn du sie unten ausdrücklich als Ersatz erlaubst.",
-            "MINIK önce Mino'nun kişisel sesini kullanır. Cihaz sesi yalnızca aşağıdan açıkça yedek olarak izin verirsen kullanılır.",
+            "MINIK verwendet im ganzen Spiel die persönliche Mino-Stimme oder lokale MINIK-Aufnahmen. Die iPhone-/Browserstimme wird nicht als Ersatz abgespielt.",
+            "MINIK tüm oyunda kişisel Mino sesini veya yerel MINIK kayıtlarını kullanır. iPhone/tarayıcı sesi yedek olarak çalınmaz.",
           )}
         </p>
         {toggle(
@@ -384,14 +376,6 @@ export default function Parents({ progress }) {
           ),
         )}
         {toggle(
-          "systemVoiceFallback",
-          t("Gerätestimme als Ersatz erlauben", "Cihaz sesini yedek olarak kullan"),
-          t(
-            "Aus: Es werden nur persönliche oder aufgenommene MINIK-Clips abgespielt.",
-            "Kapalı: Yalnızca kişisel veya kaydedilmiş MINIK klipleri çalınır.",
-          ),
-        )}
-        {toggle(
           "sfx",
           t("Belohnungstöne", "Ödül sesleri"),
           t(
@@ -400,37 +384,6 @@ export default function Parents({ progress }) {
           ),
         )}
         <div className="settings-grid">
-          {["de", "tr"].map((l) => (
-            <label key={l}>
-              {l === "de"
-                ? t("Deutsche Stimme", "Almanca ses")
-                : t("Türkische Stimme", "Türkçe ses")}
-              <select
-                value={s.voices[l]}
-                onChange={(e) =>
-                  setSettings({ voices: { [l]: e.target.value } })
-                }
-              >
-                <option value="">
-                  {t("Beste verfügbare Stimme", "Mevcut en iyi ses")}
-                </option>
-                {getVoices(l).map((v) => (
-                  <option key={v.voiceURI} value={v.voiceURI}>
-                    {v.name}
-                    {v.localService ? ` · ${t("lokal", "yerel")}` : ""}
-                  </option>
-                ))}
-              </select>
-              {!getVoices(l).length && (
-                <small>
-                  {t(
-                    "Der Browser meldet noch keine passende Stimme.",
-                    "Tarayıcı henüz uygun bir ses bildirmedi.",
-                  )}
-                </small>
-              )}
-            </label>
-          ))}
           <label>
             {t("Sprechtempo", "Konuşma hızı")} · {s.rate.toFixed(2)}
             <input
