@@ -1,5 +1,5 @@
 const VOICE4_RE = /(?:^|\b)(?:stimme\s*4|voice\s*4)(?:\b|$)/iu;
-const SIRI_RE = /(?:^|\b)siri(?:\b|$)/iu;
+const SIRI_RE = /(?:^|\b)siri\s*(?:stimme|voice)?\s*4(?:\b|$)/iu;
 const FIRST_VOICE_WAIT_MS = 1600;
 const RETRY_VOICE_WAIT_MS = 700;
 const PLAYBACK_RETRY_MS = 90;
