@@ -104,12 +104,14 @@ test("stopping Voice 4 resolves a Safari utterance that never emits end or error
   const previousSynth = globalThis.speechSynthesis;
   const previousUtterance = globalThis.SpeechSynthesisUtterance;
   const voice4 = { name: "Stimme 4", voiceURI: "com.apple.voice4", lang: "de-DE" };
+  let markStarted;
+  const started = new Promise((resolve) => { markStarted = resolve; });
   globalThis.speechSynthesis = {
     getVoices: () => [voice4],
     addEventListener() {},
     removeEventListener() {},
     cancel() {},
-    speak() {},
+    speak() { markStarted(); },
   };
   globalThis.SpeechSynthesisUtterance = class {
     constructor(text) { this.text = text; }
@@ -118,7 +120,10 @@ test("stopping Voice 4 resolves a Safari utterance that never emits end or error
   try {
     const mod = await import(`../src/audio/systemVoice4.js?stalled-stop=${Date.now()}`);
     const pending = mod.speakWithVoice4("Hallo Mino", "de");
-    await Promise.resolve();
+    await Promise.race([
+      started,
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Voice 4 attempt did not start")), 250)),
+    ]);
     mod.stopSystemVoice4();
     const result = await Promise.race([
       pending,
