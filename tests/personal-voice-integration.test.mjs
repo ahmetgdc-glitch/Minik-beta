@@ -31,7 +31,7 @@ test("authorized personal voice covers the central DE/TR MINIK prompts", () => {
   }
 });
 
-test("all modular MINIK vocabulary is superseded by the personal voice", async () => {
+test("all modular MINIK vocabulary retains a personal recording fallback", async () => {
   const modules = [
     "../src/audio/animalVoiceClips.js",
     "../src/audio/bodyVoiceClips.js",
@@ -53,7 +53,7 @@ test("all modular MINIK vocabulary is superseded by the personal voice", async (
   }
 });
 
-test("every legacy natural clip now has an exact personal replacement", () => {
+test("every legacy natural clip still has an exact personal replacement", () => {
   const files = [
     "gameVoiceClips.js",
     "animalVoiceClips.js",
@@ -84,7 +84,7 @@ test("every legacy natural clip now has an exact personal replacement", () => {
   assert.equal(checked.size, 332);
 });
 
-test("natural speech plans prefer the personal voice over legacy recordings", () => {
+test("natural speech plans retain the personal voice over legacy recordings", () => {
   const de = naturalVoicePlan("Hallo! Komm, wir entdecken die Welt!", "de");
   const tr = naturalVoicePlan("Merhaba! Haydi dünyayı keşfedelim!", "tr");
   assert.equal(de.length, 1);
@@ -93,26 +93,26 @@ test("natural speech plans prefer the personal voice over legacy recordings", ()
   assert.match(tr[0], /resource2\.heygen\.ai/);
   assert.ok(
     natural.indexOf("personalVoiceClip(text, lang)") < natural.indexOf("naturalPhraseClip(text, lang)"),
-    "personal voice must be checked before the legacy natural recording library",
+    "personal voice must remain ahead of legacy recorded clips inside fallback plans",
   );
 });
 
-test("runtime accepts only personal voice clips for gameplay narration", () => {
-  assert.match(voice, /function isPersonalVoiceClipUrl\(url\)/);
-  assert.match(voice, /plan\.every\(isPersonalVoiceClipUrl\)/);
-  assert.match(voice, /owner's authorized MINIK voice is the only gameplay narrator/);
-  assert.match(voice, /No native or legacy narrator fallback exists/);
-  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|speakSystem/);
-});
-
-test("runtime tries an exact personal clip and never invokes native system voice", () => {
-  assert.match(voice, /import \{ personalVoiceClip \} from "\.\/personalVoiceClips\.js";/);
+test("runtime makes system Voice 4 primary and personal recordings fallback", () => {
+  assert.match(voice, /function selectMinoSystemVoice\(lang, settings = \{\}\)/);
+  assert.match(voice, /stimme\\s\*4\|voice\\s\*4\|siri/iu);
+  assert.match(voice, /SpeechSynthesisUtterance/);
+  const systemIndex = voice.indexOf("await speakSystem(text, lang, settings, token)");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
-  assert.ok(personalIndex > 0, "runtime must look up the exact authorized personal clip");
-  assert.ok(planIndex > personalIndex, "composed recorded plans must follow the exact personal clip");
+  assert.ok(systemIndex > 0);
+  assert.ok(personalIndex > systemIndex);
+  assert.ok(planIndex > personalIndex);
+});
+
+test("recorded fallback still accepts only personal voice clips", () => {
+  assert.match(voice, /function isPersonalVoiceClipUrl\(url\)/);
+  assert.match(voice, /plan\.every\(isPersonalVoiceClipUrl\)/);
   assert.match(voice, /await playPreferredClip\(personalClip, token\)/);
-  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|speakSystem/);
 });
 
 test("personal wav clips are localized before service worker generation", () => {
@@ -133,7 +133,7 @@ test("runtime can resolve both legacy mp3 and personal wav files locally", () =>
   assert.match(voice, /assets\\\/personal-voice/);
 });
 
-test("dynamic story narration keeps available labels on personal recordings", () => {
+test("dynamic story narration keeps available fallback labels on personal recordings", () => {
   for (const [text, lang, expected] of [
     ["Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de", 3],
     ["Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr", 3],
@@ -146,7 +146,7 @@ test("dynamic story narration keeps available labels on personal recordings", ()
   }
 });
 
-test("the parent voice preview always uses exact personal MINIK recordings", () => {
+test("the parent voice preview keeps exact recorded fallback phrases", () => {
   assert.match(parents, /"Hallo! Komm, wir entdecken die Welt!"/);
   assert.match(parents, /"Merhaba! Haydi dünyayı keşfedelim!"/);
   assert.doesNotMatch(parents, /Hallo! Ich bin Mino\. Wir entdecken heute die Tiere\./);
