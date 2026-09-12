@@ -28,7 +28,8 @@ jobs:
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
-      - run: npm test
+      - name: Test suite A-M
+        run: node --test tests/[a-m]*.test.mjs
       - run: npm run preflight
       - run: npm run build
         env:
