@@ -1,11 +1,11 @@
 # Changelog
 
-## 1.67.0 Beta 70 — Telefonstimme standardmäßig abgeschaltet
+## 1.67.0 Beta 70 — Telefonstimme vollständig aus dem Spielpfad entfernt
 
-- Persönliche und aufgezeichnete MINIK-Clips bleiben der einzige Standard-Audiopfad.
-- Die iPhone-/iPad-Systemstimme wird nicht mehr automatisch aktiviert, wenn ein persönlicher Clip fehlt oder Safari die Wiedergabe ablehnt.
-- Erwachsene können eine Gerätestimme im Elternbereich ausdrücklich als Ersatz erlauben; die Voreinstellung bleibt aus.
-- Einstellungen, Profile und Backups übernehmen diese sichere Voreinstellung, ohne bestehende Lernstände zu verändern.
+- Persönliche und aufgezeichnete MINIK-Clips sind jetzt der einzige Audiopfad im Spiel.
+- Die iPhone-/iPad-Systemstimme wird auch bei alten gespeicherten Einstellungen niemals als Ersatz abgespielt.
+- Die irreführende Gerätestimmen-Auswahl wurde aus dem Elternbereich entfernt; Tempo, Tonhöhe, Audio und Belohnungstöne bleiben erhalten.
+- Fehlende persönliche Clips bleiben bewusst stumm, statt die Telefonstimme einzuschalten.
 
 ## 1.67.0 Beta 69 — Persönliche Stimme in jedem Audiopfad zuerst
 
