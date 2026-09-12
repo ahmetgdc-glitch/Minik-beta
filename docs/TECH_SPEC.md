@@ -36,7 +36,9 @@ Die optionale Eltern-PIN ist eine lokale Kindersperre, keine Kontenauthentifizie
 
 ## Audio
 
-`audio/voice.js` kapselt den gemeinsamen Audioplayer und hält die alte SpeechSynthesis-Kompatibilität nur für sichere Zustands-/Abbruchpfade vor. Im Spiel werden ausschließlich persönliche oder lokal ausgelieferte MINIK-Aufnahmen abgespielt. Die iPhone-/Browser-Systemstimme ist hart deaktiviert, auch wenn ein älteres Profil noch das frühere Fallback-Flag enthält. Vor neuem Sprechen wird abgebrochen; aktuelle Audiojobs bleiben referenziert. Fehlt eine Aufnahme, bleibt die sichtbare Aufgabe bedienbar und wird nicht mit einer Telefonstimme ersetzt.
+`audio/voice.js` kapselt die Sprachausgabe und erzwingt auf unterstützten iPhone-/iPad-Safari-Umgebungen **iOS Stimme 4 als primären Erzähler**. Die Voice-Liste wird bei Bedarf mit einem längeren Safari-Bereitschaftsfenster geladen; eine einmal gefundene Stimme 4 wird gecacht und über nachfolgende Ausgaben hinweg sticky gehalten. Ein transienter `speechSynthesis`-Wiedergabefehler löst einen kontrollierten Voice-4-Retry aus und darf keinen Sprecherwechsel verursachen.
+
+Die 332 persönlichen lokalen DE/TR-Aufnahmen sind ein definierter Fallback für den Fall, dass Stimme 4 auf dem Gerät tatsächlich nicht auflösbar ist. Sie dürfen nicht nach einem bloßen Laufzeitfehler einer bereits ausgewählten Stimme 4 übernehmen. Beliebige Default-, Browser- oder Roboterstimmen werden nicht als Ersatz gewählt. Vor neuem Sprechen werden laufende Jobs sauber abgebrochen; Audiojobs bleiben referenziert, damit Pause, Navigation, BFCache und Hintergrundwechsel sicher aufräumen können.
 
 `cloudTTS(text, lang, provider)` ist nur eine Erweiterungsschnittstelle für einen späteren sicheren Provider, der ein Audio-Blob liefert. Kein Endpoint, Secret, Cloud-Aufruf oder kostenpflichtiger Dienst ist vorkonfiguriert.
 
@@ -48,10 +50,10 @@ Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker l
 
 Assets werden aus dem Cache beantwortet, unbekannte gleichursprüngliche Assets bei Bedarf nachgeladen. Navigation versucht zuerst das Netz, bei Verbindungsfehler das gecachte `index.html`. Neue Worker verdrängen eine laufende Spielsession nicht automatisch. Für ein Update alle App-Tabs schließen und erneut öffnen. Große zukünftige Medienpakete benötigen eigene Auswahl/Downloadverwaltung; sie sind noch nicht implementiert.
 
-Alle 332 festen DE/TR-Sprachbausteine besitzen persönliche Audiodateien. Sie werden nach Nutzung vom Service Worker zwischengespeichert und funktionieren danach offline. Für weitere dynamische Lernobjekte werden fehlende Aufnahmen nicht durch die Gerätestimme ersetzt; die persönliche Clip-Abdeckung wird als nächste Audio-Roadmap erweitert.
+Alle 332 festen DE/TR-Sprachbausteine besitzen persönliche Audiodateien und stehen als lokaler Fallback zur Verfügung. Die primäre Ausgabe bleibt jedoch Stimme 4, sobald sie auf dem Gerät erfolgreich ausgewählt wurde. Offline-/PWA-Gerätetests müssen deshalb sowohl Voice-4-Verhalten als auch den Fallback ohne Netz prüfen.
 
 ## Qualitätsgates
 
-`npm test`: 21 Content-/Progress-Tests. `npm run build`: Contentprüfung, Vite und SW. `npm run verify:build`: echte Builddateien für Root-/Unterordner prüfen, Workerinstallation simulieren, Offline-HTML/Mino lesen, Cacheisolation prüfen, fremde Origins und POST ignorieren. Kein Ersatz für den finalen Safari-Gerätetest.
+`npm test`: automatisierte Content-, Progress-, Audio-, UX- und Regressionstests. `npm run build`: Contentprüfung, Vite und SW. `npm run verify:build`: echte Builddateien für Root-/Unterordner prüfen, Workerinstallation simulieren, Offline-HTML/Mino lesen, Cacheisolation prüfen, fremde Origins und POST ignorieren. Kein Ersatz für den finalen Safari-Gerätetest.
 
 `tests/viewport.html` dient nur der lokalen Layoutprüfung des zuvor gebauten `dist/index.html` bei 320/393/768/1024 Pixeln. Sie gehört nicht zum veröffentlichten Build.

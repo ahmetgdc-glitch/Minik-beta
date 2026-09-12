@@ -13,7 +13,7 @@ Baue MINIK zu einer vollwertigen Kinder-Lernwelt aus, deren Funktionsumfang und 
 5. **Mino, der Fisch:** zentrale Figur, animierter Helfer, erklärt, motiviert und gibt Hinweise.
 6. **Sterne und Belohnungen:** Sterne, Serien, Schatztruhen, Level, Aquarium, Mino-Zubehör und freischaltbare Welten.
 7. **Echte Menschen:** Neben Illustrationen auch echte, lizenzierte/selbst erzeugte Fotos von Menschen, Emotionen, Körperteilen, Berufen und Alltagssituationen.
-8. **Persönliche Stimme zuerst:** vorhandene persönliche Offline-Clips bevorzugen; hochwertige lokal installierte Apple-Systemstimmen nur für dynamische Lücken nutzen. Kein API-Key im Frontend.
+8. **Voice 4 zuerst:** iOS Stimme 4 ist die primäre MINIK-Stimme. Wenn sie einmal erfolgreich ausgewählt wurde, muss sie sticky bleiben; transiente Safari-Fehler dürfen keinen Sprecherwechsel auslösen. Persönliche Offline-Clips sind nur Fallback, wenn Stimme 4 tatsächlich nicht verfügbar ist. Beliebige Default-/Roboterstimmen sind kein zulässiger Ersatz. Kein API-Key im Frontend.
 9. **Adaptive Hilfe:** nach Inaktivität oder wiederholten Fehlern hilft Mino schrittweise.
 10. **Elternbereich:** Fortschritt, schwierige Wörter, Sitzungen, Kategorien, Sprache, Schwierigkeit, Audio, Anzahl Antwortoptionen.
 11. **Offline/PWA:** Kernspiele offline nutzbar; große Assets können später paketweise geladen werden.
@@ -74,14 +74,16 @@ Tiere, Farben, Formen, Zahlen, Buchstaben, Körper, Gefühle, Menschen, Familie,
 - Richtige Antwort: positives Feedback, Sternanimation, kurze Variation der Lobtexte.
 
 ## Stimme
-Implementiere einen Voice-Service mit:
-- kostenlose lokale Web-Speech-Stimmen als Default
-- bevorzugte DE/TR-Stimmen anhand Sprache, localService und Namen
-- Voice-Auswahl im Elternbereich
-- Rate/Pitch steuerbar
-- keine überlappende Sprachausgabe
-- Cache/Preload der Voice-Liste
-- optionales Interface `cloudTTS(text, lang)` ohne Secret im Client
+Implementiere und erhalte einen Voice-Service mit:
+- iOS Stimme 4 als primäre Stimme auf unterstützten Apple-Geräten
+- stabiler Voice-Listen-Bereitschaft und gecachter Auswahl
+- sticky Voice-4-Zustand über einzelne Wiedergabefehler hinweg
+- genau einem kontrollierten Retry bei transientem Safari-Fehler
+- persönlichen lokalen DE/TR-Clips nur als Fallback, wenn Stimme 4 nicht auflösbar ist
+- keinem Wechsel auf beliebige Browser-/Default-/Roboterstimmen
+- keiner überlappenden Sprachausgabe
+- sauberem Abbruch bei Pause, Navigation, BFCache und Hintergrundwechsel
+- optionalem Interface `cloudTTS(text, lang)` ohne Secret im Client
 
 ## Visuelles Design
 - eigene MINIK-Identität

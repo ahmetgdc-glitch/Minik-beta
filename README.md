@@ -16,7 +16,7 @@ Die Startseite ist eine bildschirmfüllende Inselwelt mit großem Mino. Alle bes
 - Altersgerechte 2/4/6-Antwortlogik, adaptive Schwierigkeit, Mastery pro Begriff/Sprache und Spaced Repetition.
 - Sterne, XP, Tagesreise, Aquarium, Achievements und freischaltbare Mino-Outfits.
 - Elternbereich mit Rechengate/optionaler 4-stelliger PIN, Wochenstatistik, schwierigen Begriffen, Sitzungen, Backup/Restore und Einstellungen.
-- Persönliche MINIK-Stimme für alle 332 fest aufgenommenen DE/TR-Begriffe und Anweisungen; die iPhone-/iPad-Systemstimme bleibt standardmäßig aus und kann nur im Elternbereich ausdrücklich als Ersatz erlaubt werden.
+- **iOS Stimme 4 ist die primäre MINIK-Erzählstimme.** Die Auswahl wird auf Safari stabil gecacht und bleibt nach transienten Wiedergabefehlern sticky. Die 332 persönlichen lokalen DE/TR-Clips dienen nur als kontrollierter Fallback, wenn Stimme 4 auf dem Gerät tatsächlich nicht verfügbar ist. Beliebige Browser-/Roboterstimmen werden nicht als Ersatz akzeptiert.
 - Safari-/iOS-Härtung für Audio, synchrone Interaktionssperren, Pausen, BFCache, App-Unterbrechungen, Session-Checkpoints und PWA-Updates.
 - Robuste lokale Familien-Persistenz mit Recovery-Snapshot und atomar gespeicherter aktiver Profilauswahl.
 - Offline-Service-Worker, installierbare PWA und GitHub-Pages-Deployment.
@@ -51,6 +51,6 @@ Die Weiterentwicklung erfolgt im bestehenden Repository `ahmetgdc-glitch/Minik-b
 
 ## Noch nötige Geräteprüfung
 
-Automatisierte Tests ersetzen keinen echten Gerätetest. Vor einer als „final“ bezeichneten Version müssen insbesondere iPhone/iPad-Touchgefühl, Home-Screen-PWA, Flugmodus, die persönliche deutsche/türkische Stimme und Mikrofonberechtigungen auf realer Hardware geprüft werden. Die persönliche Stimme liegt als lokale App-Audiodatei vor; MINIK überträgt beim Spielen keinen Text und enthält keinen TTS-API-Schlüssel im Client.
+Automatisierte Tests ersetzen keinen echten Gerätetest. Vor einer als „final“ bezeichneten Version müssen insbesondere iPhone/iPad-Touchgefühl, Home-Screen-PWA, Flugmodus, **iOS Stimme 4 in Deutsch und Türkisch**, schnelle Wiederholungen und Mikrofonberechtigungen auf realer Hardware geprüft werden. Die persönlichen Sprachclips liegen lokal als Fallback vor; MINIK enthält keinen TTS-API-Schlüssel im Client.
 
 Weitere Details: [Startanleitung](START_HIER.md) · [Roadmap](docs/ROADMAP.md) · [QA](docs/QA_CHECKLIST.md) · [Technik](docs/TECH_SPEC.md) · [Übergabe](docs/HANDOFF_SUMMARY.md) · [Änderungen](CHANGELOG.md).
