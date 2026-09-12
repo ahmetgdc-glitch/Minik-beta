@@ -5,6 +5,7 @@ const RETRY_VOICE_WAIT_MS = 700;
 const PLAYBACK_RETRY_MS = 90;
 const PLAYBACK_WATCHDOG_MIN_MS = 5000;
 const PLAYBACK_WATCHDOG_MAX_MS = 18000;
+const IOS_ABSENCE_GRACE_MS = 5000;
 
 function engine() {
   return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
@@ -44,11 +45,20 @@ export function isVoice4Candidate(voice) {
   return VOICE4_RE.test(id) || SIRI_RE.test(id);
 }
 
+function isIOSSpeechEnvironment() {
+  if (typeof navigator === "undefined") return false;
+  const ua = String(navigator.userAgent || "");
+  const platform = String(navigator.platform || "");
+  const touchPoints = Number(navigator.maxTouchPoints || 0);
+  return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
+}
+
 const selectedVoiceCache = new Map();
 const pendingVoiceLookup = new Map();
 let observedSynth = null;
 let cacheSynth = null;
 let voicesObserved = false;
+let iosVoice4MissingSince = 0;
 
 function syncVoiceEngine() {
   const synth = engine();
@@ -56,6 +66,7 @@ function syncVoiceEngine() {
     selectedVoiceCache.clear();
     pendingVoiceLookup.clear();
     voicesObserved = false;
+    iosVoice4MissingSince = 0;
   }
   cacheSynth = synth;
   return synth;
@@ -85,6 +96,7 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
 function refreshVoiceCache() {
   syncVoiceEngine();
   const voices = exposedSystemVoices();
+  if (voices.some(isVoice4Candidate)) iosVoice4MissingSince = 0;
   for (const lang of ["de", "tr"]) {
     const selected = selectVoice4(voices, lang);
     if (selected) selectedVoiceCache.set(lang, selected);
@@ -107,10 +119,31 @@ function observeVoiceChanges() {
 export function voice4InventoryReady() {
   if (!systemVoice4Available()) return true;
   syncVoiceEngine();
+  const voices = exposedSystemVoices();
   // Safari may emit voiceschanged before getVoices() is actually populated.
   // A real non-empty inventory is the only safe evidence that Voice 4 was
-  // checked and is genuinely absent. Until then, never switch narrator.
-  return exposedSystemVoices().length > 0;
+  // checked. Until then, never switch narrator.
+  if (!voices.length) {
+    iosVoice4MissingSince = 0;
+    return false;
+  }
+  if (voices.some(isVoice4Candidate)) {
+    iosVoice4MissingSince = 0;
+    return true;
+  }
+  if (!isIOSSpeechEnvironment()) return true;
+
+  // iOS can briefly expose a populated but incomplete inventory while Safari
+  // resumes or refreshes voices. Treating that single snapshot as proof that
+  // Voice 4 disappeared made MINIK switch to a personal recording mid-session.
+  // Require the absence to remain stable across a short grace period. A later
+  // request will still permit the recorded fallback if Voice 4 is truly gone.
+  const now = Date.now();
+  if (!iosVoice4MissingSince) {
+    iosVoice4MissingSince = now;
+    return false;
+  }
+  return now - iosVoice4MissingSince >= IOS_ABSENCE_GRACE_MS;
 }
 
 export function selectVoice4(voices, lang, settings = {}) {
