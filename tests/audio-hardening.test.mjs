@@ -44,7 +44,8 @@ test("an unresolved Safari voice inventory cannot trigger the personal narrator"
   assert.ok(inventoryGuard > 0);
   assert.ok(personalIndex > inventoryGuard);
   assert.match(systemVoice4, /export function voice4InventoryReady\(\)/);
-  assert.match(systemVoice4, /voicesObserved \|\| exposedSystemVoices\(\)\.length > 0/);
+  assert.match(systemVoice4, /return exposedSystemVoices\(\)\.length > 0/);
+  assert.doesNotMatch(systemVoice4, /voicesObserved \|\| exposedSystemVoices\(\)\.length > 0/);
 });
 
 test("Voice 4 retries a transient Safari playback failure once", () => {
