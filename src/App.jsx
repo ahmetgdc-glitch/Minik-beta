@@ -48,7 +48,10 @@ export default function App() {
       : "full";
   }, [lang, progress.settings.reducedMotion]);
   const gameRoute = route === "play" || route === "replay";
-  useAudioPrime(progress.settings.audio || progress.settings.sfx);
+  useAudioPrime(
+    progress.settings.audio || progress.settings.sfx,
+    progress.settings.audio,
+  );
   const online = useOnlineStatus();
   const [updateReady, setUpdateReady] = useState(false);
   const [updating, setUpdating] = useState(false);
