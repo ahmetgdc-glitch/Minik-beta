@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { unlockAudio } from "../audio/sounds.js";
+import {
+  pauseBackgroundMusic,
+  resumeBackgroundMusic,
+  setBackgroundMusicEnabled,
+  startBackgroundMusic,
+  unlockAudio,
+} from "../audio/sounds.js";
 import { unlockVoiceAudio } from "../audio/voice.js";
 
 /**
@@ -7,7 +13,11 @@ import { unlockVoiceAudio } from "../audio/voice.js";
  * Important: this unlocks ONE reusable media element only. It must never
  * preload the whole voice library during boot.
  */
-export function useAudioPrime(enabled = true) {
+export function useAudioPrime(enabled = true, backgroundMusic = false) {
+  useEffect(() => {
+    setBackgroundMusicEnabled(backgroundMusic);
+  }, [backgroundMusic]);
+
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
 
@@ -23,6 +33,11 @@ export function useAudioPrime(enabled = true) {
     const maybeFinish = () => {
       if (webAudioReady && voiceReady) cleanupGestureListeners();
     };
+    const startMusicAfterGesture = () => {
+      if (!backgroundMusic || disposed) return;
+      resumeBackgroundMusic("visibility");
+      startBackgroundMusic();
+    };
     const prime = () => {
       if (disposed) return;
 
@@ -30,23 +45,33 @@ export function useAudioPrime(enabled = true) {
       const context = unlockAudio();
       if (context?.state === "running") {
         webAudioReady = true;
+        startMusicAfterGesture();
       } else if (context?.resume) {
-        context.resume().then(() => {
-          if (disposed) return;
-          webAudioReady = context.state === "running";
-          maybeFinish();
-        }).catch(() => {});
+        context
+          .resume()
+          .then(() => {
+            if (disposed) return;
+            webAudioReady = context.state === "running";
+            if (webAudioReady) startMusicAfterGesture();
+            maybeFinish();
+          })
+          .catch(() => {});
       }
 
-      unlockVoiceAudio().then((ok) => {
-        if (disposed) return;
-        voiceReady ||= ok;
-        maybeFinish();
-      }).catch(() => {});
+      unlockVoiceAudio()
+        .then((ok) => {
+          if (disposed) return;
+          voiceReady ||= ok;
+          maybeFinish();
+        })
+        .catch(() => {});
       maybeFinish();
     };
     const resumeAfterBackground = () => {
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible") {
+        pauseBackgroundMusic("visibility");
+        return;
+      }
       // Safari may suspend WebAudio after backgrounding. Re-arm the next tap;
       // never try to auto-play media from visibilitychange itself.
       webAudioReady = false;
@@ -65,5 +90,5 @@ export function useAudioPrime(enabled = true) {
       cleanupGestureListeners();
       document.removeEventListener("visibilitychange", resumeAfterBackground);
     };
-  }, [enabled]);
+  }, [enabled, backgroundMusic]);
 }
