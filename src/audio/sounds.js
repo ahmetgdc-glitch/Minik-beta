@@ -1,6 +1,19 @@
 let context = null,
   nodes = [],
-  activeTimers = [];
+  activeTimers = [],
+  musicNodes = [],
+  musicTimers = [],
+  musicEnabled = false,
+  musicPlaying = false,
+  musicPhrase = 0;
+const musicPauseReasons = new Set();
+
+const MUSIC_PATTERNS = [
+  [261.63, 329.63, 392, 523.25, 392, 329.63],
+  [293.66, 369.99, 440, 587.33, 440, 369.99],
+  [246.94, 329.63, 392, 493.88, 392, 329.63],
+];
+
 export function unlockAudio() {
   try {
     context ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -92,6 +105,101 @@ function noise(start, duration, filter = "lowpass", freq = 700, volume = 0.12) {
     nodes = nodes.filter((n) => n !== source);
   };
 }
+
+function clearBackgroundPlayback() {
+  for (const n of musicNodes) {
+    try {
+      n.stop();
+    } catch {}
+  }
+  musicNodes = [];
+  musicTimers.forEach(clearTimeout);
+  musicTimers = [];
+  musicPlaying = false;
+}
+
+function backgroundMusicAllowed() {
+  return Boolean(
+    musicEnabled &&
+      !musicPauseReasons.size &&
+      context?.state === "running" &&
+      !(typeof document !== "undefined" && document.visibilityState === "hidden"),
+  );
+}
+
+function musicTone(frequency, start, duration, volume = 0.012, type = "triangle") {
+  const c = context;
+  if (!c) return;
+  const oscillator = c.createOscillator(),
+    gain = c.createGain(),
+    when = c.currentTime + start;
+  oscillator.type = type;
+  oscillator.frequency.setValueAtTime(frequency, when);
+  gain.gain.setValueAtTime(0.0001, when);
+  gain.gain.exponentialRampToValueAtTime(volume, when + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.0001, when + duration);
+  oscillator.connect(gain);
+  gain.connect(c.destination);
+  oscillator.start(when);
+  oscillator.stop(when + duration + 0.04);
+  musicNodes.push(oscillator);
+  oscillator.onended = () => {
+    oscillator.disconnect();
+    gain.disconnect();
+    musicNodes = musicNodes.filter((node) => node !== oscillator);
+  };
+}
+
+function queueBackgroundPhrase() {
+  if (!backgroundMusicAllowed() || musicPlaying) return false;
+  musicPlaying = true;
+  const pattern = MUSIC_PATTERNS[musicPhrase % MUSIC_PATTERNS.length];
+  musicPhrase++;
+  pattern.forEach((frequency, index) => {
+    musicTone(frequency, index * 0.72, 0.58, 0.011);
+  });
+  [0, 1.44, 2.88].forEach((start, index) => {
+    musicTone(pattern[index * 2] / 2, start, 1.2, 0.0065, "sine");
+  });
+  const timer = setTimeout(() => {
+    musicTimers = musicTimers.filter((entry) => entry !== timer);
+    musicPlaying = false;
+    if (backgroundMusicAllowed()) queueBackgroundPhrase();
+  }, 5600);
+  musicTimers.push(timer);
+  return true;
+}
+
+export function startBackgroundMusic() {
+  if (!backgroundMusicAllowed()) return false;
+  return musicPlaying || queueBackgroundPhrase();
+}
+
+export function setBackgroundMusicEnabled(enabled) {
+  musicEnabled = Boolean(enabled);
+  if (!musicEnabled) {
+    clearBackgroundPlayback();
+    return false;
+  }
+  return startBackgroundMusic();
+}
+
+export function pauseBackgroundMusic(reason = "app") {
+  musicPauseReasons.add(reason);
+  clearBackgroundPlayback();
+}
+
+export function resumeBackgroundMusic(reason = "app") {
+  musicPauseReasons.delete(reason);
+  return startBackgroundMusic();
+}
+
+export function stopBackgroundMusic() {
+  musicEnabled = false;
+  musicPauseReasons.clear();
+  clearBackgroundPlayback();
+}
+
 export function playSound(kind, { sfx = true } = {}) {
   stopSounds();
   if (!sfx || !unlockAudio()) return 0;
@@ -136,7 +244,9 @@ export function playSound(kind, { sfx = true } = {}) {
     return 2100;
   }
   if (kind === "water") {
-    [0, 0.45, 0.9, 1.25].forEach((t) => tone(950, t, 0.19, "sine", 0.12, 300));
+    [0, 0.45, 0.9, 1.25].forEach((t) =>
+      tone(950, t, 0.19, "sine", 0.12, 300),
+    );
     return 1500;
   }
   if (kind === "drum") {
@@ -167,7 +277,14 @@ export function playSound(kind, { sfx = true } = {}) {
   }
   if (kind === "siren") {
     for (let i = 0; i < 4; i++)
-      tone(i % 2 ? 900 : 450, i * 0.4, 0.4, "sine", 0.085, i % 2 ? 450 : 900);
+      tone(
+        i % 2 ? 900 : 450,
+        i * 0.4,
+        0.4,
+        "sine",
+        0.085,
+        i % 2 ? 450 : 900,
+      );
     return 1700;
   }
   return 0;
