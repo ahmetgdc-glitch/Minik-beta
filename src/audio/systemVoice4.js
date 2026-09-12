@@ -2,6 +2,7 @@ const VOICE4_RE = /(?:^|\b)(?:stimme\s*4|voice\s*4)(?:\b|$)/iu;
 const SIRI_RE = /(?:^|\b)siri(?:\b|$)/iu;
 const FIRST_VOICE_WAIT_MS = 1600;
 const RETRY_VOICE_WAIT_MS = 700;
+const PLAYBACK_RETRY_MS = 90;
 
 function engine() {
   return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
@@ -76,9 +77,6 @@ export function selectVoice4(voices, lang, settings = {}) {
     if (exact) return exact;
   }
 
-  // Prefer an exact Voice 4 in the requested language, then Siri in that
-  // language. If iOS exposes only one downloaded Voice 4 without the expected
-  // language tag, keep that exact Voice 4 instead of switching narrator.
   return (
     sameLanguage.find((voice) => VOICE4_RE.test(voiceIdentity(voice))) ||
     sameLanguage.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
@@ -86,6 +84,17 @@ export function selectVoice4(voices, lang, settings = {}) {
     available.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
     null
   );
+}
+
+export function hasVoice4Selection(lang = "de", settings = {}) {
+  const cached = selectedVoiceCache.get(lang);
+  if (cached && isVoice4Candidate(cached)) return true;
+  const selected = selectVoice4(exposedSystemVoices(), lang, settings);
+  if (selected) {
+    selectedVoiceCache.set(lang, selected);
+    return true;
+  }
+  return false;
 }
 
 async function waitForVoice4(lang, settings, timeoutMs) {
@@ -151,42 +160,61 @@ export function stopSystemVoice4() {
   activeUtterance = null;
 }
 
-export async function speakWithVoice4(text, lang = "de", settings = {}, isCurrent = () => true) {
-  if (!text || !systemVoice4Available() || !isCurrent()) return false;
+function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
   const synth = engine();
   const Utterance = UtteranceClass();
+  if (!synth || !Utterance || !voice || !isCurrent()) return Promise.resolve(false);
+
+  return new Promise((resolve) => {
+    let done = false;
+    let utterance;
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      if (utterance) {
+        utterance.onend = null;
+        utterance.onerror = null;
+      }
+      if (activeUtterance === utterance) activeUtterance = null;
+      resolve(Boolean(ok && isCurrent()));
+    };
+
+    try {
+      utterance = new Utterance(text);
+      utterance.lang = lang === "tr" ? "tr-TR" : "de-DE";
+      utterance.voice = voice;
+      utterance.rate = minoRate(settings);
+      utterance.pitch = minoPitch(settings);
+      utterance.volume = 1;
+      utterance.onend = () => finish(true);
+      utterance.onerror = () => finish(false);
+      activeUtterance = utterance;
+      synth.cancel();
+      synth.speak(utterance);
+    } catch {
+      finish(false);
+    }
+  });
+}
+
+function retryDelay(isCurrent) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(isCurrent()), PLAYBACK_RETRY_MS);
+  });
+}
+
+export async function speakWithVoice4(text, lang = "de", settings = {}, isCurrent = () => true) {
+  if (!text || !systemVoice4Available() || !isCurrent()) return false;
   const voice = await waitForVoice4(lang, settings);
   if (!voice || !isCurrent()) return false;
 
-  try {
-    const utterance = new Utterance(text);
-    utterance.lang = lang === "tr" ? "tr-TR" : "de-DE";
-    utterance.voice = voice;
-    utterance.rate = minoRate(settings);
-    utterance.pitch = minoPitch(settings);
-    utterance.volume = 1;
-    activeUtterance = utterance;
+  const firstAttempt = await playVoice4Attempt(text, lang, settings, voice, isCurrent);
+  if (firstAttempt || !isCurrent()) return firstAttempt;
 
-    return await new Promise((resolve) => {
-      let done = false;
-      const finish = (ok) => {
-        if (done) return;
-        done = true;
-        utterance.onend = null;
-        utterance.onerror = null;
-        if (activeUtterance === utterance) activeUtterance = null;
-        resolve(Boolean(ok && isCurrent()));
-      };
-      utterance.onend = () => finish(true);
-      utterance.onerror = () => finish(false);
-      try {
-        synth.cancel();
-        synth.speak(utterance);
-      } catch {
-        finish(false);
-      }
-    });
-  } catch {
-    return false;
-  }
+  // Safari can transiently reject/interupt one speechSynthesis call while the
+  // selected voice itself is still valid. Retry Voice 4 once instead of
+  // immediately changing narrator to a recorded fallback.
+  const mayRetry = await retryDelay(isCurrent);
+  if (!mayRetry) return false;
+  return playVoice4Attempt(text, lang, settings, voice, isCurrent);
 }
