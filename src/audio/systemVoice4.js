@@ -62,6 +62,11 @@ function observeVoiceChanges() {
   });
 }
 
+export function voice4InventoryReady() {
+  if (!systemVoice4Available()) return true;
+  return voicesObserved || exposedSystemVoices().length > 0;
+}
+
 export function selectVoice4(voices, lang, settings = {}) {
   const available = (voices || []).filter(isVoice4Candidate);
   if (!available.length) return null;
