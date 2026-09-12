@@ -20,10 +20,19 @@ import { useRoute, navigate } from "./app/router.js";
 import { worlds, worldById } from "./data/content.js";
 import { gameById } from "./games/registry.js";
 import { stopSpeech } from "./audio/voice.js";
-import { stopSounds } from "./audio/sounds.js";
+import {
+  pauseBackgroundMusic,
+  resumeBackgroundMusic,
+  setBackgroundMusicEnabled,
+  stopSounds,
+} from "./audio/sounds.js";
 import { useGameWakeLock } from "./app/useGameWakeLock.js";
 import { useOnlineStatus } from "./app/useOnlineStatus.js";
-import { applyOfflineUpdate, consumeOfflineReloadRequest, onOfflineUpdateReady } from "./app/offline.js";
+import {
+  applyOfflineUpdate,
+  consumeOfflineReloadRequest,
+  onOfflineUpdateReady,
+} from "./app/offline.js";
 import { useAudioPrime } from "./app/useAudioPrime.js";
 import { gameFitsAge } from "./learning/age.js";
 import { Mino } from "./components/Visual.jsx";
@@ -48,7 +57,10 @@ export default function App() {
       : "full";
   }, [lang, progress.settings.reducedMotion]);
   const gameRoute = route === "play" || route === "replay";
-  useAudioPrime(progress.settings.audio || progress.settings.sfx);
+  useAudioPrime(
+    progress.settings.audio || progress.settings.sfx,
+    progress.settings.audio,
+  );
   const online = useOnlineStatus();
   const [updateReady, setUpdateReady] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -65,7 +77,8 @@ export default function App() {
       window.location.reload();
     };
     navigator.serviceWorker.addEventListener("controllerchange", changed);
-    return () => navigator.serviceWorker.removeEventListener("controllerchange", changed);
+    return () =>
+      navigator.serviceWorker.removeEventListener("controllerchange", changed);
   }, []);
   useEffect(() => {
     if (!updating) return undefined;
@@ -83,17 +96,24 @@ export default function App() {
     return () => clearTimeout(fallback);
   }, [updating]);
   const [profileReady, setProfileReady] = useState(() => {
-    try { return sessionStorage.getItem("minik_profile_ready") === "1"; }
-    catch { return false; }
+    try {
+      return sessionStorage.getItem("minik_profile_ready") === "1";
+    } catch {
+      return false;
+    }
   });
   useEffect(() => {
     if (progress.profiles.length <= 1 && !profileReady) setProfileReady(true);
   }, [progress.profiles.length, profileReady]);
   function confirmProfile() {
-    try { sessionStorage.setItem("minik_profile_ready", "1"); } catch {}
+    try {
+      sessionStorage.setItem("minik_profile_ready", "1");
+    } catch {}
     setProfileReady(true);
   }
   function go(path) {
+    stopSpeech();
+    stopSounds();
     if (path.startsWith("/replay/")) path = path + `/${Date.now()}`;
     navigate(path);
   }
@@ -119,7 +139,12 @@ export default function App() {
         ? ["worlds", "world"].includes(route)
         : path === `/${route}`;
   }
-  if (!profileReady && progress.profiles.length > 1 && route !== "profiles" && !playing)
+  if (
+    !profileReady &&
+    progress.profiles.length > 1 &&
+    route !== "profiles" &&
+    !playing
+  )
     return (
       <main className="profile-launch-shell">
         <Profiles progress={progress} onChoose={confirmProfile} chooserOnly />
@@ -137,7 +162,10 @@ export default function App() {
       </main>
     );
   return (
-    <div className={`app-shell ${!["parents", "profiles"].includes(route) ? "child-world-shell" : ""}`} data-age={progress.activeProfile?.ageGroup || "4-5"}>
+    <div
+      className={`app-shell ${!["parents", "profiles"].includes(route) ? "child-world-shell" : ""}`}
+      data-age={progress.activeProfile?.ageGroup || "4-5"}
+    >
       <aside className="sidebar">
         <button
           className="brand"
@@ -207,7 +235,9 @@ export default function App() {
             <button
               className="audio-toggle"
               onClick={() => {
-                setSettings({ audio: !progress.settings.audio });
+                const nextAudio = !progress.settings.audio;
+                setBackgroundMusicEnabled(nextAudio);
+                setSettings({ audio: nextAudio });
                 stopSpeech();
                 stopSounds();
               }}
@@ -226,8 +256,13 @@ export default function App() {
             <button
               className="language-switch"
               onClick={() => {
+                pauseBackgroundMusic("language-switch");
                 stopSpeech();
                 setSettings({ lang: lang === "de" ? "tr" : "de" });
+                window.setTimeout(
+                  () => resumeBackgroundMusic("language-switch"),
+                  220,
+                );
               }}
               aria-label={t("Zu Türkisch wechseln", "Almancaya geç")}
             >
@@ -310,7 +345,10 @@ export default function App() {
           {!route ? (
             <Home progress={progress} onNavigate={go} />
           ) : route === "worlds" ? (
-            <WorldAtlas progress={progress} onOpen={world => go(`/world/${world.id}`)} />
+            <WorldAtlas
+              progress={progress}
+              onOpen={(world) => go(`/world/${world.id}`)}
+            />
           ) : route === "world" && worldById[arg] ? (
             <WorldScreen
               key={arg}
@@ -352,7 +390,10 @@ export default function App() {
           </span>
         </footer>
       </div>
-      <nav className="bottom-nav" aria-label={t("Hauptnavigation", "Ana menü")}>
+      <nav
+        className="bottom-nav"
+        aria-label={t("Hauptnavigation", "Ana menü")}
+      >
         {nav.map(([path, Icon, name]) => (
           <button
             key={path}
