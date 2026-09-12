@@ -1,5 +1,9 @@
 import { naturalVoicePlan } from "./naturalVoicePlans.js";
 import { personalVoiceClip } from "./personalVoiceClips.js";
+import {
+  pauseBackgroundMusic,
+  resumeBackgroundMusic,
+} from "./sounds.js";
 
 let settle = null,
   cloudPlayer = null,
@@ -58,6 +62,7 @@ export function stopSpeech() {
   cloudPlayer = null;
   settle?.(false);
   settle = null;
+  resumeBackgroundMusic("speech");
 }
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
@@ -132,38 +137,45 @@ export async function speak(text, lang = "de", settings = {}) {
   stopSpeech();
   if (!text || settings.audio === false) return false;
   const token = sequence;
+  pauseBackgroundMusic("speech");
 
-  // The owner's authorized MINIK voice is canonical wherever an exact
-  // personal recording exists. No device speech path is available.
-  const personalClip = personalVoiceClip(text, lang);
-  if (personalClip) {
-    const playedPersonal = await playPreferredClip(personalClip, token);
-    if (playedPersonal || token !== sequence) return playedPersonal;
+  try {
+    // The owner's authorized MINIK voice is canonical wherever an exact
+    // personal recording exists. No device speech path is available.
+    const personalClip = personalVoiceClip(text, lang);
+    if (personalClip) {
+      const playedPersonal = await playPreferredClip(personalClip, token);
+      if (playedPersonal || token !== sequence) return playedPersonal;
+    }
+
+    const plan = naturalVoicePlan(text, lang);
+    if (plan.length) {
+      const played = await speakNaturalPlan(plan, token);
+      if (played || token !== sequence) return played;
+    }
+
+    // No native speech fallback exists. Missing recordings remain silent so a
+    // child never hears the iPhone/browser telephone voice in a personal-voice
+    // MINIK session.
+    return false;
+  } finally {
+    if (token === sequence) resumeBackgroundMusic("speech");
   }
-
-  const plan = naturalVoicePlan(text, lang);
-  if (plan.length) {
-    const played = await speakNaturalPlan(plan, token);
-    if (played || token !== sequence) return played;
-  }
-
-  // No native speech fallback exists. Missing recordings remain silent so a
-  // child never hears the iPhone/browser telephone voice in a personal-voice
-  // MINIK session.
-  return false;
 }
 export async function cloudTTS(text, lang, provider) {
   stopSpeech();
   const token = sequence;
   cloudAbort = new AbortController();
-  const blob = await provider({ text, lang, signal: cloudAbort.signal });
-  if (token !== sequence) return false;
-  const url = URL.createObjectURL(blob);
-  const player = naturalPlayer();
-  if (!player) return false;
-  player.src = url;
-  cloudPlayer = player;
+  pauseBackgroundMusic("speech");
+  let url = "";
   try {
+    const blob = await provider({ text, lang, signal: cloudAbort.signal });
+    if (token !== sequence) return false;
+    url = URL.createObjectURL(blob);
+    const player = naturalPlayer();
+    if (!player) return false;
+    player.src = url;
+    cloudPlayer = player;
     await player.play();
     return await new Promise((resolve) => {
       player.onended = () => resolve(true);
@@ -171,7 +183,9 @@ export async function cloudTTS(text, lang, provider) {
       settle = resolve;
     });
   } finally {
+    cloudAbort = null;
     cloudPlayer = null;
-    URL.revokeObjectURL(url);
+    if (url) URL.revokeObjectURL(url);
+    if (token === sequence) resumeBackgroundMusic("speech");
   }
 }
