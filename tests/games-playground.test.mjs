@@ -15,6 +15,16 @@ test("games screen uses the immersive playground instead of the legacy card grid
   assert.doesNotMatch(screen, /className="game-card"/);
 });
 
+test("game playground starts with a small choice set and keeps every game reachable", () => {
+  assert.match(screen, /\[showAll, setShowAll\] = useState\(false\)/);
+  assert.match(screen, /previewGames = showAll \? rest : rest\.slice\(0, 4\)/);
+  assert.match(screen, /hiddenGameCount = Math\.max\(0, rest\.length - previewGames\.length\)/);
+  assert.match(screen, /aria-expanded=\{showAll\}/);
+  assert.match(screen, /setShowAll\(\(value\) => !value\)/);
+  assert.match(screen, /Noch \$\{hiddenGameCount\} Spiele/);
+  assert.match(screen, /\$\{hiddenGameCount\} oyun daha/);
+});
+
 test("world choice stays immersive after selecting a game", () => {
   assert.match(screen, /className="world-islands"/);
   assert.match(screen, /className="world-island"/);
