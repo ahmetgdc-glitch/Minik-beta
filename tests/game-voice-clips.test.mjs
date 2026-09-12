@@ -157,20 +157,15 @@ test("natural Mino library keeps at least 218 recorded prompts and words", () =>
   assert.ok(urls.length >= 218, `expected at least 218 natural clips, got ${urls.length}`);
 });
 
-test("fixed Mino speech keeps recorded plans while pronunciation-sensitive speech can use native locale", () => {
+test("fixed Mino speech keeps recorded plans without a native speech path", () => {
   assert.match(voice, /naturalVoicePlan\(text, lang\)/);
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
-  assert.match(voice, /shouldPreferNativeSystem\(text, lang, settings\)/);
-  assert.match(voice, /lang === "tr" \? "tr-TR" : "de-DE"/);
+  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance/);
 });
 
-test("device speech is opt-in so personal MINIK audio never silently becomes a phone voice", () => {
-  assert.match(voice, /if \(systemVoiceEnabled\(settings\)\)/);
-  assert.match(voice, /void settings/);
-  assert.match(voice, /return false/);
-  assert.match(voice, /return speakSystem\(text, lang, settings, token\)/);
-  assert.match(voice, /settings\.preferNativeSystem === true/);
-  assert.match(voice, /settings\.preferNativeSystem === false/);
+test("device speech cannot turn missing recordings into a phone voice", () => {
+  assert.doesNotMatch(voice, /systemVoiceEnabled|speakSystem|shouldPreferNativeSystem/);
+  assert.match(voice, /No native speech fallback exists/);
 });
 
 test("game praise only uses phrases with natural clip coverage", () => {
