@@ -20,7 +20,7 @@ import { difficultyFor } from "../progress/model.js";
 import { gameById } from "./registry.js";
 import { worldById, uniqueVisuals } from "../data/content.js";
 import { speak, stopSpeech } from "../audio/voice.js";
-import { playSound, stopSounds, unlockAudio } from "../audio/sounds.js";
+import { playSound, stopSounds, unlockAudio, startMusic, stopMusic, setMusicPaused } from "../audio/sounds.js";
 import FishGuide from "../components/FishGuide.jsx";
 import { Mino, Art, assetUrl } from "../components/Visual.jsx";
 import { sceneForWorld } from "../worlds/scenes.js";
@@ -127,6 +127,8 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     pausedRef.current = false;
     setPaused(false);
     unlockAudio();
+    setMusicPaused(false);
+    startMusic({ enabled: settings.audio });
   });
 
   const locked = useRef(checkpoint?.phase === "success" || checkpoint?.phase === "demo"),
@@ -213,6 +215,8 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     () => () => {
       stopSpeech();
       stopSounds();
+      stopMusic();
+      setMusicPaused(false);
     },
     [],
   );
@@ -472,6 +476,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     pausedRef.current = true;
     stopSpeech();
     stopSounds();
+    setMusicPaused(true);
     persistCheckpoint();
     setPaused(true);
   }, [persistCheckpoint]);
@@ -618,6 +623,8 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
               pausedRef.current = false;
               setPaused(false);
               unlockAudio();
+              setMusicPaused(false);
+              startMusic({ enabled: settings.audio });
             }}
           >
             <Play size={20} /> {lang === "tr" ? "Devam et" : "Weiterspielen"}
