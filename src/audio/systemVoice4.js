@@ -226,14 +226,21 @@ export function voice4PlaybackWatchdogMs(text) {
 
 let activeUtterance = null;
 let activeAttemptFinish = null;
+let activeSynth = null;
 let voice4Sequence = 0;
 
 export function stopSystemVoice4() {
   voice4Sequence += 1;
+  const synth = activeSynth;
   const finish = activeAttemptFinish;
+  activeSynth = null;
   activeAttemptFinish = null;
   finish?.(false);
-  try { engine()?.cancel?.(); } catch {}
+  try { synth?.cancel?.(); } catch {}
+  const currentSynth = engine();
+  if (currentSynth && currentSynth !== synth) {
+    try { currentSynth.cancel?.(); } catch {}
+  }
   activeUtterance = null;
 }
 
@@ -255,6 +262,7 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
         utterance.onerror = null;
       }
       if (activeUtterance === utterance) activeUtterance = null;
+      if (activeSynth === synth) activeSynth = null;
       if (activeAttemptFinish === finish) activeAttemptFinish = null;
       resolve(Boolean(ok && isCurrent() && engine() === synth));
     };
@@ -266,11 +274,14 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       utterance.rate = minoRate(settings);
       utterance.pitch = minoPitch(settings);
       utterance.volume = 1;
-      utterance.onend = () => finish(true);
-      utterance.onerror = () => finish(false);
+      const previousSynth = activeSynth;
       activeAttemptFinish?.(false);
+      try { previousSynth?.cancel?.(); } catch {}
       activeAttemptFinish = finish;
       activeUtterance = utterance;
+      activeSynth = synth;
+      utterance.onend = () => finish(true);
+      utterance.onerror = () => finish(false);
       synth.cancel();
       watchdog = setTimeout(() => finish(false), voice4PlaybackWatchdogMs(text));
       synth.speak(utterance);
