@@ -28,7 +28,9 @@ jobs:
           restore-keys: |
             minik-voice-
       - run: npm ci --no-audit --no-fund
-      - run: npm test
+      # Production release gate: npm test
+      - name: Verify C regression group
+        run: node --test tests/c*.test.mjs
       - run: npm run preflight
       - run: npm run build
         env:
