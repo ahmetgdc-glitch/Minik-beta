@@ -17,7 +17,7 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 ## Zuletzt als Final-Härtung umgesetzt
 
 - 298 zusätzliche persönliche DE/TR-Clips ergänzen die 34 bisherigen Kernaufnahmen; damit besitzen alle 332 festen Sprachbausteine eine exakte persönliche Aufnahme.
-- Persönliche Clips stehen vor alten Aufnahmen und vor der iPhone-/iPad-Systemstimme; die Systemstimme bleibt nur für dynamische, nicht vorab bekannte Sätze.
+- Persönliche Clips stehen vor alten Aufnahmen. Die iPhone-/iPad-Systemstimme ist im Spiel hart deaktiviert; fehlende Aufnahmen bleiben stumm und werden nicht als Telefonstimme ersetzt.
 - Alle neuen Clips liegen lokal und offline-fähig in der App. Build-Verifikation und Regressionstests prüfen Anzahl, Dateien und vollständige Ablösung der alten Sprachbibliothek.
 
 - Session-/Checkpoint-Sicherheit für Safari `pagehide`, BFCache, manuelle Pause und Render-Race-Conditions
