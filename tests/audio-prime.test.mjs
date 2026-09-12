@@ -4,6 +4,39 @@ import fs from "node:fs";
 
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
+test("late audio unlock cannot pause a new narration or replace its handlers", async () => {
+  let player, finishUnlock, plays = 0, pauses = 0;
+  class Audio {
+    constructor() { player = this; }
+    setAttribute() {}
+    pause() { pauses++; }
+    load() {}
+    play() {
+      plays++;
+      return plays === 1 ? new Promise((resolve) => { finishUnlock = resolve; }) : Promise.resolve();
+    }
+  }
+  const source = read("src/audio/voice.js").replace(/^import .*;\n/gm, "").replace(/export /g, "");
+  const api = new Function("Audio", "personalVoiceClip", "naturalVoicePlan", "setSpeechActive", `${source}; return {speak, unlockVoiceAudio};`)(Audio, () => "clip.mp3", () => [], () => {});
+  const unlock = api.unlockVoiceAudio();
+  const duplicate = api.unlockVoiceAudio();
+  assert.equal(plays, 1);
+  const narration = api.speak("Hallo");
+  const handler = player.onended;
+  const pauseCount = pauses;
+  finishUnlock();
+  assert.equal(await unlock, true);
+  await duplicate;
+  assert.equal(pauses, pauseCount);
+  assert.equal(player.onended, handler);
+  assert.equal(await api.unlockVoiceAudio(), true);
+  assert.equal(player.src, "clip.mp3");
+  assert.equal(player.onended, handler);
+  assert.equal(plays, 2);
+  player.onended();
+  assert.equal(await narration, true);
+});
+
 test("speech ducking survives cancellation and ends on completion or audio off", async () => {
   const levels = [];
   let player;
