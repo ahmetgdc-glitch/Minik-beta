@@ -42,14 +42,9 @@ test("runtime keeps recordings first and blocks the former device-voice fallback
   const localIndex = voice.indexOf("speakGameClip(localClip, token)");
   const remoteIndex = voice.indexOf("return speakGameClip(url, token)");
   const planIndex = voice.indexOf("naturalVoicePlan(text, lang)");
-  const fallbackIndex = voice.indexOf("if (systemVoiceEnabled(settings))");
   assert.ok(localIndex > 0, "local natural clip must be attempted first inside a recording plan");
   assert.ok(remoteIndex > localIndex, "remote recording must remain the recording fallback");
   assert.ok(planIndex > 0, "recorded natural plans must remain available");
-  assert.ok(fallbackIndex > planIndex, "native device speech should cover only after a missing/failed recording plan");
-  assert.match(voice, /shouldPreferNativeSystem\(text, lang, settings\)/);
-  assert.match(voice, /localeFor = \(lang\) => \(lang === "tr" \? "tr-TR" : "de-DE"\)/);
-  assert.match(voice, /void settings/);
-  assert.match(voice, /return false/);
+  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|systemVoiceEnabled|speakSystem/);
   assert.match(voice, /assets\/voice\/\$\{filename\}/);
 });
