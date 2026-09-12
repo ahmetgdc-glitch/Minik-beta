@@ -97,15 +97,11 @@ test("natural speech plans retain the personal voice over legacy recordings", ()
   );
 });
 
-test("runtime makes system Voice 4 primary and personal recordings fallback", () => {
-  assert.match(voice, /function selectMinoSystemVoice\(lang, settings = \{\}\)/);
-  assert.match(voice, /stimme\\s\*4\|voice\\s\*4\|siri/iu);
-  assert.match(voice, /SpeechSynthesisUtterance/);
-  const systemIndex = voice.indexOf("await speakSystem(text, lang, settings, token)");
+test("runtime keeps personal recordings primary with no system narrator", () => {
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
-  assert.ok(systemIndex > 0);
-  assert.ok(personalIndex > systemIndex);
+  assert.doesNotMatch(voice, /speechSynthesis|SpeechSynthesisUtterance|speakSystem/);
+  assert.ok(personalIndex > 0);
   assert.ok(planIndex > personalIndex);
 });
 
