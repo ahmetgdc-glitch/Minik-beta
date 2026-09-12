@@ -371,8 +371,8 @@ export default function Parents({ progress }) {
         <h2>{t("Stimme & Töne", "Konuşma ve ses")}</h2>
         <p>
           {t(
-            "MINIK nutzt die Stimmen deines Geräts ohne API-Schlüssel. Wie natürlich sie klingen und ob sie offline funktionieren, hängt von den installierten Stimmen ab.",
-            "MINIK, API anahtarı olmadan cihazındaki sesleri kullanır. Doğallık ve çevrimdışı kullanım, yüklü seslere bağlıdır.",
+            "MINIK verwendet zuerst die persönliche Mino-Stimme. Nur für noch nicht persönlich aufgenommene Wörter nutzt die App ersatzweise eine Stimme deines Geräts.",
+            "MINIK önce Mino'nun kişisel sesini kullanır. Yalnızca henüz kişisel olarak kaydedilmemiş kelimelerde cihazındaki bir sesi yedek olarak kullanır.",
           )}
         </p>
         {toggle(
@@ -451,8 +451,8 @@ export default function Parents({ progress }) {
           onClick={() =>
             speak(
               t(
-                "Hallo! Ich bin Mino. Wir entdecken heute die Tiere.",
-                "Merhaba! Ben Mino. Bugün hayvanları keşfediyoruz.",
+                "Hallo! Komm, wir entdecken die Welt!",
+                "Merhaba! Haydi dünyayı keşfedelim!",
               ),
               lang,
               { ...s, audio: true },

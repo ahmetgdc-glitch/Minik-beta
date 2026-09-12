@@ -12,6 +12,7 @@ import { naturalVoicePlan } from "../src/audio/naturalVoicePlans.js";
 const voice = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const natural = readFileSync(new URL("../src/audio/naturalVoicePlans.js", import.meta.url), "utf8");
 const downloader = readFileSync(new URL("../scripts/fetch-personal-voice-assets.mjs", import.meta.url), "utf8");
+const parents = readFileSync(new URL("../src/parent/Parents.jsx", import.meta.url), "utf8");
 const pkg = readFileSync(new URL("../package.json", import.meta.url), "utf8");
 
 test("authorized personal voice covers the central DE/TR MINIK prompts", () => {
@@ -65,4 +66,11 @@ test("personal wav clips are localized before service worker generation", () => 
 test("runtime can resolve both legacy mp3 and personal wav files locally", () => {
   assert.ok(voice.includes("(?:mp3|wav)"));
   assert.ok(voice.includes("assets/voice/${filename}"));
+});
+
+test("the parent voice preview always uses exact personal MINIK recordings", () => {
+  assert.match(parents, /"Hallo! Komm, wir entdecken die Welt!"/);
+  assert.match(parents, /"Merhaba! Haydi dünyayı keşfedelim!"/);
+  assert.doesNotMatch(parents, /Hallo! Ich bin Mino\. Wir entdecken heute die Tiere\./);
+  assert.doesNotMatch(parents, /Merhaba! Ben Mino\. Bugün hayvanları keşfediyoruz\./);
 });

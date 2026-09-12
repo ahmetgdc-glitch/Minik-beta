@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.voice-cache/
 .DS_Store
 test-results/
 *.local
