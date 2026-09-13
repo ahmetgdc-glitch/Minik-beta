@@ -7,6 +7,7 @@ const PLAYBACK_RETRY_MS = 90;
 const PLAYBACK_WATCHDOG_MIN_MS = 5000;
 const PLAYBACK_WATCHDOG_MAX_MS = 18000;
 const IOS_ABSENCE_GRACE_MS = 5000;
+const IOS_RECORDED_FALLBACK_ALLOWED = false;
 
 function engine() {
   return typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
@@ -157,18 +158,17 @@ export function voice4InventoryReady(lang = "de") {
   }
   if (!isIOSSpeechEnvironment()) return true;
 
-  // Before Voice 4 has ever been selected, iOS can briefly expose a populated
-  // but incomplete inventory while Safari resumes or refreshes voices. Track
-  // that grace independently for each language so a German request cannot
-  // exhaust the Turkish narrator's protection (or vice versa). Once a Voice 4
-  // selection exists, cachedVoiceFor() keeps that narrator sticky.
+  // iOS narrator identity is strict: even a long-lived populated inventory
+  // without Voice 4 is not permission to switch Mino to a personal recording.
+  // Keep the historical timer only as diagnostic state; fallback is disabled
+  // on iOS so a delayed/partial Safari inventory can never change narrator.
   const now = Date.now();
   const missingSince = iosVoice4MissingSince.get(lang);
   if (!missingSince) {
     iosVoice4MissingSince.set(lang, now);
     return false;
   }
-  return now - missingSince >= IOS_ABSENCE_GRACE_MS;
+  return now - missingSince >= IOS_ABSENCE_GRACE_MS && IOS_RECORDED_FALLBACK_ALLOWED;
 }
 
 export function selectVoice4(voices, lang, settings = {}) {
