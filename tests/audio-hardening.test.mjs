@@ -40,14 +40,13 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
-test("an unresolved Safari voice inventory cannot switch to the personal narrator", () => {
-  const iosGuard = voice.indexOf("if (isIOSSpeechEnvironment()) return false;");
+test("an unresolved Safari voice inventory keeps Voice 4 first but cannot silence local audio", () => {
+  const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(iosGuard > 0);
-  assert.ok(personalIndex > iosGuard);
-  assert.match(voice, /const selectedVoice4 = hasVoice4Selection\(lang, settings\)/);
+  assert.ok(selectionIndex > 0);
+  assert.ok(personalIndex > selectionIndex);
   assert.match(voice, /else if \(voice4InventoryReady\(lang, settings\)\) clearVoice4Continuity\(lang\)/);
-  assert.match(systemVoice4, /IOS_RECORDED_FALLBACK_ALLOWED = false/);
+  assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
 });
 
 test("Voice 4 retries a transient Safari playback failure once", () => {
@@ -59,15 +58,14 @@ test("Voice 4 retries a transient Safari playback failure once", () => {
   assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, retryVoice, stillCurrent\)/);
 });
 
-test("a known iOS Voice 4 never falls through to bundled personal audio after runtime failure", () => {
+test("a known iOS Voice 4 falls back only after its guarded runtime attempt fails", () => {
   const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
-  const iosGuard = voice.indexOf("if (isIOSSpeechEnvironment()) return false;");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   assert.ok(selectionIndex > 0);
-  assert.ok(iosGuard > selectionIndex);
-  assert.ok(personalIndex > iosGuard);
+  assert.ok(personalIndex > selectionIndex);
   assert.match(voice, /if \(selectedVoice4\) markVoice4Established\(lang\)/);
   assert.match(systemVoice4, /export function hasVoice4Selection/);
+  assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
 });
 
 test("Voice 4 cache survives unknown Safari inventory but invalidates against a populated changed inventory", async () => {
