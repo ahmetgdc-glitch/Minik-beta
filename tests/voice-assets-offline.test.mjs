@@ -39,13 +39,13 @@ test("localized voice files are packaged but cached only after use", () => {
   assert.match(worker, /await cache\.put\(event\.request,response\.clone\(\)\)/);
 });
 
-test("runtime tries Voice 4 first and keeps fixed natural narration as offline fallback", () => {
-  const systemIndex = voice.indexOf("speakWithVoice4(");
+test("runtime uses fixed natural narration first and keeps Voice 4 as emergency fallback", () => {
   const planIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
-  assert.ok(systemIndex > 0, "Voice 4 must remain the primary narrator");
-  assert.ok(planIndex > systemIndex, "fixed natural narrator must remain reachable after Voice 4");
-  assert.ok(playbackIndex > planIndex, "fixed natural fallback must remain playable");
+  const systemIndex = voice.indexOf("speakWithVoice4(");
+  assert.ok(planIndex > 0, "fixed natural narrator must be resolved first");
+  assert.ok(playbackIndex > planIndex, "fixed natural narrator must be playable before system fallback");
+  assert.ok(systemIndex > playbackIndex, "Voice 4 must remain reachable only after fixed narration cannot play");
   assert.doesNotMatch(voice, /personalVoiceClip/);
   assert.match(systemVoice4, /VOICE4_RE/);
   assert.doesNotMatch(systemVoice4, /voice\?\.default|voice\?\.localService|sameLanguage\[0\]|voices\[0\]/);
