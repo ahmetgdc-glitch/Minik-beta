@@ -13,37 +13,36 @@ const docs = Object.fromEntries(
   files.map((file) => [file, fs.readFileSync(new URL(`../${file}`, import.meta.url), "utf8")]),
 );
 
-test("core documentation preserves Voice 4 as the primary narrator contract", () => {
-  for (const [file, text] of Object.entries(docs)) {
-    assert.match(text, /(?:Voice 4|Stimme 4)/i, `${file} must mention Voice 4`);
-  }
-  assert.match(docs["docs/MASTER_PROMPT_FOR_WORK.md"], /Voice 4 zuerst/i);
-  assert.match(docs["docs/TECH_SPEC.md"], /primären Erzähler/i);
-  assert.match(docs["docs/HANDOFF_SUMMARY.md"], /(?:primäre MINIK-Erzählstimme|primäre(?:r|n)? Sprecher)/i);
+const voice = fs.readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
+
+test("core documentation preserves the fixed natural MINIK narrator as primary", () => {
+  assert.match(docs["README.md"], /feste natürliche MINIK-Stimme ist der primäre DE\/TR-Erzähler/i);
+  assert.match(docs["docs/TECH_SPEC.md"], /feste natürliche MINIK-Stimme als primären Erzähler/i);
+  assert.match(docs["docs/HANDOFF_SUMMARY.md"], /feste natürliche DE\/TR-MINIK-Stimme als primäre Erzählstimme/i);
+  assert.match(docs["docs/MASTER_PROMPT_FOR_WORK.md"], /Feste natürliche MINIK-Stimme zuerst/i);
 });
 
-test("core documentation does not reintroduce obsolete personal-first or system-voice-disabled guidance", () => {
+test("core documentation keeps Voice 4 secondary and forbids automatic personal narration", () => {
   const combined = Object.values(docs).join("\n");
+  assert.match(combined, /Voice 4[^\n]*(?:Notfall-Fallback|Notfallpfad)/i);
+  assert.match(combined, /persönliche\/gekloonte Nutzerstimme[^\n]*nicht automatisch/i);
+  assert.doesNotMatch(combined, /Voice 4 zuerst/i);
+  assert.doesNotMatch(combined, /Stimme 4 als primäre/i);
   assert.doesNotMatch(combined, /Persönliche Stimme zuerst/i);
-  assert.doesNotMatch(combined, /Systemstimme ist hart deaktiviert/i);
-  assert.doesNotMatch(combined, /Systemstimme bleibt standardmäßig aus/i);
 });
 
-test("Voice 4 fallback contract excludes arbitrary robotic voices", () => {
+test("fallback contract excludes arbitrary robotic system voices", () => {
   assert.match(docs["README.md"], /Roboterstimmen werden nicht als Ersatz akzeptiert/i);
   assert.match(docs["docs/TECH_SPEC.md"], /Roboterstimmen werden nicht als Ersatz gewählt/i);
-  assert.match(
-    docs["docs/MASTER_PROMPT_FOR_WORK.md"],
-    /(?:Roboterstimmen[^\n]*(?:kein zulässiger Ersatz|verboten)|keinem Wechsel auf beliebige Browser-\/Default-\/Roboterstimmen)/i,
-  );
+  assert.match(docs["docs/MASTER_PROMPT_FOR_WORK.md"], /Default-\/Browser-\/Roboterstimmen sind verboten/i);
 });
 
-test("Voice 4 documentation keeps an audible local emergency path", () => {
-  const master = docs["docs/MASTER_PROMPT_FOR_WORK.md"];
-  const handoff = docs["docs/HANDOFF_SUMMARY.md"];
-
-  assert.match(master, /komplette Stille ist kein zulässiger Dauer-Fallback/i);
-  assert.match(master, /DE\/TR-Clips als hörbarem Notfall-Fallback/i);
-  assert.match(handoff, /Kein Dauer-Stumm-Fallback/i);
-  assert.match(handoff, /lokale(?:r)? DE\/TR-(?:Notfallclip|Clip)/i);
+test("runtime source enforces fixed natural narration before Voice 4", () => {
+  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+  const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const systemIndex = voice.indexOf("speakWithVoice4(");
+  assert.ok(naturalIndex > 0);
+  assert.ok(playbackIndex > naturalIndex);
+  assert.ok(systemIndex > playbackIndex);
+  assert.doesNotMatch(voice, /personalVoiceClip/);
 });
