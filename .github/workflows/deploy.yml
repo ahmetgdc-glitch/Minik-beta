@@ -106,7 +106,45 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+  smoke-published-pages:
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify published Vite entry and core assets
+        env:
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$PAGE_URL" ]; then
+            echo "::error::Pages deployment did not expose a page URL."
+            exit 1
+          fi
+
+          page="${PAGE_URL}?minik_sha=${GITHUB_SHA}"
+          html="$(curl --fail --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 5 "$page")"
+
+          if echo "$html" | grep -qE 'src=["'"']/src/main\.jsx'; then
+            echo "::error::Published Pages site is serving the Vite source entry instead of the production build."
+            exit 1
+          fi
+
+          asset="$(echo "$html" | grep -oE 'src="\./assets/index-[^"]+\.js"' | head -n 1 | sed -E 's/^src="\.\///; s/"$//')"
+          if [ -z "$asset" ]; then
+            echo "::error::Published Pages HTML does not reference the expected hashed Vite JavaScript entry."
+            exit 1
+          fi
+
+          base="${PAGE_URL%/}/"
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}${asset}" >/dev/null
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}manifest.webmanifest" >/dev/null
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}sw.js" >/dev/null
+          echo "Published MINIK Pages smoke test passed: ${PAGE_URL}"
