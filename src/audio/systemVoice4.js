@@ -4,6 +4,7 @@ const SIRI_RE = /(?:^|\b)siri\s*(?:stimme|voice|ses)?\s*4(?:\b|$)/iu;
 const FIRST_VOICE_WAIT_MS = 1600;
 const RETRY_VOICE_WAIT_MS = 700;
 const PLAYBACK_RETRY_MS = 90;
+const PLAYBACK_START_WATCHDOG_MS = 1500;
 const PLAYBACK_WATCHDOG_MIN_MS = 5000;
 const PLAYBACK_WATCHDOG_MAX_MS = 18000;
 const IOS_ABSENCE_GRACE_MS = 5000;
@@ -365,13 +366,21 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
 
   return new Promise((resolve) => {
     let done = false;
+    let started = false;
     let utterance;
+    let startWatchdog = null;
     let watchdog = null;
+    const clearStartWatchdog = () => {
+      if (startWatchdog !== null) clearTimeout(startWatchdog);
+      startWatchdog = null;
+    };
     const finish = (ok) => {
       if (done) return;
       done = true;
+      clearStartWatchdog();
       if (watchdog !== null) clearTimeout(watchdog);
       if (utterance) {
+        utterance.onstart = null;
         utterance.onend = null;
         utterance.onerror = null;
       }
@@ -394,11 +403,30 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       activeAttemptFinish = finish;
       activeUtterance = utterance;
       activeSynth = synth;
+      utterance.onstart = () => {
+        started = true;
+        clearStartWatchdog();
+      };
       utterance.onend = () => finish(true);
       utterance.onerror = () => finish(false);
       synth.cancel();
-      watchdog = setTimeout(() => finish(false), voice4PlaybackWatchdogMs(text));
+      watchdog = setTimeout(() => {
+        try { synth.cancel(); } catch {}
+        finish(false);
+      }, voice4PlaybackWatchdogMs(text));
       synth.speak(utterance);
+      if (!started) {
+        startWatchdog = setTimeout(() => {
+          if (done || started) return;
+          // Some Safari versions omit the start event while correctly marking
+          // the engine as speaking/pending. In that case keep the normal long
+          // watchdog. Fail fast only when WebKit accepted speak() but exposes
+          // no evidence that the utterance ever entered its speech queue.
+          if (synth.speaking === true || synth.pending === true) return;
+          try { synth.cancel(); } catch {}
+          finish(false);
+        }, PLAYBACK_START_WATCHDOG_MS);
+      }
     } catch {
       finish(false);
     }
