@@ -18,6 +18,9 @@ let settle = null,
   voiceSource = null,
   sequence = 0;
 const voiceBufferCache = new Map();
+const establishedVoice4Languages = new Set();
+const voice4EngineMissingSince = new Map();
+const VOICE4_ENGINE_GRACE_MS = 5000;
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -47,6 +50,34 @@ function ensureVoiceContext() {
 function speechForegroundAllowed() {
   if (typeof document === "undefined") return true;
   return !document.hidden && document.visibilityState !== "hidden";
+}
+
+function isIOSSpeechEnvironment() {
+  if (typeof navigator === "undefined") return false;
+  const ua = String(navigator.userAgent || "");
+  const platform = String(navigator.platform || "");
+  const touchPoints = Number(navigator.maxTouchPoints || 0);
+  return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
+}
+
+export function holdVoice4DuringEngineGap(lang = "de", now = Date.now()) {
+  if (!isIOSSpeechEnvironment() || !establishedVoice4Languages.has(lang)) return false;
+  const missingSince = voice4EngineMissingSince.get(lang);
+  if (!missingSince) {
+    voice4EngineMissingSince.set(lang, now);
+    return true;
+  }
+  return now - missingSince < VOICE4_ENGINE_GRACE_MS;
+}
+
+function markVoice4Established(lang) {
+  establishedVoice4Languages.add(lang);
+  voice4EngineMissingSince.delete(lang);
+}
+
+function clearVoice4Continuity(lang) {
+  establishedVoice4Languages.delete(lang);
+  voice4EngineMissingSince.delete(lang);
 }
 
 export async function unlockVoiceAudio() {
@@ -265,21 +296,32 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    if (systemVoice4Available()) {
+    const voice4Available = systemVoice4Available();
+    if (!voice4Available && holdVoice4DuringEngineGap(lang)) return false;
+
+    if (voice4Available) {
+      voice4EngineMissingSince.delete(lang);
       const playedSystem = await speakWithVoice4(
         text,
         lang,
         settings,
         () => token === sequence && speechForegroundAllowed(),
       );
-      if (playedSystem || token !== sequence) return playedSystem;
+      if (playedSystem) {
+        markVoice4Established(lang);
+        return true;
+      }
+      if (token !== sequence) return false;
 
       // A selected Voice 4 must remain the narrator. Safari occasionally
       // rejects an individual speechSynthesis call even though the voice is
       // still available; changing to a recorded person for only that sentence
       // sounds like a different character. Only use recordings when Voice 4
       // is genuinely unavailable.
-      if (hasVoice4Selection(lang, settings)) return false;
+      if (hasVoice4Selection(lang, settings)) {
+        markVoice4Established(lang);
+        return false;
+      }
 
       // An empty Safari voice inventory is not proof that Voice 4 is absent.
       // Some iOS launches populate getVoices() late and never fire the event
@@ -287,6 +329,11 @@ export async function speak(text, lang = "de", settings = {}) {
       // preferable to switching Mino to a different recorded speaker; the next
       // request will retry Voice 4 once the inventory appears.
       if (!voice4InventoryReady()) return false;
+
+      // Voice 4 is conclusively unavailable on a populated, stable inventory.
+      // Forget the continuity hold so a later genuine engine loss cannot keep
+      // blocking the intended recorded fallback indefinitely.
+      clearVoice4Continuity(lang);
     }
 
     if (!speechForegroundAllowed()) return false;
