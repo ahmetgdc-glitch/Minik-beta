@@ -138,10 +138,9 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices(), settings = {}) {
   if (isIOSSpeechEnvironment()) {
     // Safari can publish a partial inventory containing a different Voice 4
     // variant while the selected narrator is temporarily absent. Keep the
-    // remembered identity so a settings-aware caller can resume that exact
-    // narrator when it returns, but never return the stale object for playback.
-    // The caller may still select a live replacement when no explicit saved
-    // preference exists; an explicit preference remains strict in selectVoice4.
+    // remembered identity, but never return the stale object for playback.
+    // Selection may use a live same-language Voice 4 so a stale preference
+    // cannot make MINIK silent or force it away from Voice 4 altogether.
     if (replacementVoice4) iosVoice4MissingSince.delete(lang);
     else if (!iosVoice4MissingSince.has(lang)) iosVoice4MissingSince.set(lang, Date.now());
     return null;
@@ -208,10 +207,9 @@ export function voice4InventoryReady(lang = "de", settings = {}) {
   }
   if (!isIOSSpeechEnvironment()) return true;
 
-  // iOS narrator identity is strict: an opposite-language Voice 4 or a
-  // different same-language Voice 4 variant is not evidence that the requested
-  // narrator is available. Treat that partial inventory like a missing Voice 4
-  // rather than switching voices or falling through to a personal recording.
+  // This readiness flag tracks whether the exact saved narrator identity is
+  // visible again. It no longer blocks selection of another live same-language
+  // Voice 4 or the audible local emergency path in voice.js.
   const now = Date.now();
   const missingSince = iosVoice4MissingSince.get(lang);
   if (!missingSince) {
@@ -232,11 +230,11 @@ export function selectVoice4(voices, lang, settings = {}) {
   if (saved) {
     const exact = eligible.find((voice) => matchesSavedVoice(voice, saved));
     if (exact) return exact;
-    // An explicitly selected iOS Voice 4 variant is part of Mino's narrator
-    // identity. Safari often publishes partial inventories during launch and
-    // resume; choosing another Voice 4 here would make the character change
-    // voice mid-session. Stay silent until the requested variant returns.
-    if (isIOSSpeechEnvironment()) return null;
+    // The saved variant stays first choice, but Safari voice identifiers can
+    // disappear or change across iOS updates and inventory refreshes. If that
+    // happens, prefer another live Voice 4 in the requested language rather
+    // than returning null. We still never broaden to an arbitrary/default
+    // system voice because `eligible` contains Voice 4 candidates only.
   }
 
   return (
