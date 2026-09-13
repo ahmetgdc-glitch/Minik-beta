@@ -37,7 +37,7 @@ test("dynamic narration is composed only from the fixed natural library", () => 
 test("runtime tries fixed natural narration before iOS Voice 4 fallback", () => {
   const fixedPlanIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const naturalPlaybackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
-  const voice4Index = voice.indexOf("speakWithVoice4(");
+  const voice4Index = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(fixedPlanIndex > 0);
   assert.ok(naturalPlaybackIndex > fixedPlanIndex);
   assert.ok(voice4Index > naturalPlaybackIndex);
