@@ -9,7 +9,14 @@ test("speech fallback is recorded as assisted instead of independent mastery", (
   assert.match(source, /if \(paused \|\| blocked\) return;/);
   assert.match(source, /onSolve\(\[target\.id\], \{ assisted: true \}\);/);
   const assistedButtons = source.match(/onClick=\{assistedSolve\}/g) || [];
-  assert.ok(assistedButtons.length >= 2, "unsupported and permission-blocked speech paths must use the guarded assisted solve helper");
+  assert.ok(assistedButtons.length >= 2, "unsupported and recognition-failure paths must use the guarded assisted solve helper");
+});
+
+test("recognition service failures cannot trap a child in SpeakGame", () => {
+  const source = fs.readFileSync(new URL("../src/games/SpeakGame.jsx", import.meta.url), "utf8");
+  assert.match(source, /const showAssistedFallback = Boolean\(issue && issue\.kind !== "silence"\);/);
+  assert.match(source, /\{showAssistedFallback && \(/);
+  assert.doesNotMatch(source, /issue\?\.kind === "permission" &&/);
 });
 
 test("game session accepts an explicit assisted solve flag", () => {
