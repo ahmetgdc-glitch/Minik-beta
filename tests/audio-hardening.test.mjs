@@ -41,11 +41,11 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
 });
 
 test("an unresolved or transient Safari voice inventory cannot trigger the personal narrator", () => {
-  const inventoryGuard = voice.indexOf("if (!voice4InventoryReady(lang)) return false;");
+  const inventoryGuard = voice.indexOf("if (!voice4InventoryReady(lang, settings)) return false;");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   assert.ok(inventoryGuard > 0);
   assert.ok(personalIndex > inventoryGuard);
-  assert.match(systemVoice4, /export function voice4InventoryReady\(lang = "de"\)/);
+  assert.match(systemVoice4, /export function voice4InventoryReady\(lang = "de", settings = \{\}\)/);
   assert.match(systemVoice4, /if \(!voices\.length\) \{/);
   assert.match(systemVoice4, /if \(!isIOSSpeechEnvironment\(\)\) return true/);
   assert.match(systemVoice4, /IOS_ABSENCE_GRACE_MS = 5000/);
