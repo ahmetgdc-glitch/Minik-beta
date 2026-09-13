@@ -55,6 +55,12 @@ function isIOSSpeechEnvironment() {
   return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
 }
 
+function voiceIsSafeForPlayback(voice) {
+  const voices = exposedSystemVoices();
+  if (!voices.length) return !isIOSSpeechEnvironment();
+  return voices.some((candidate) => isVoice4Candidate(candidate) && sameVoice(candidate, voice));
+}
+
 const selectedVoiceCache = new Map();
 const pendingVoiceLookup = new Map();
 let observedSynth = null;
@@ -306,7 +312,9 @@ export function stopSystemVoice4() {
 function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
   const synth = syncVoiceEngine();
   const Utterance = UtteranceClass();
-  if (!synth || !Utterance || !voice || !isCurrent()) return Promise.resolve(false);
+  if (!synth || !Utterance || !voice || !isCurrent() || !voiceIsSafeForPlayback(voice)) {
+    return Promise.resolve(false);
+  }
 
   return new Promise((resolve) => {
     let done = false;
