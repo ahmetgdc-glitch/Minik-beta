@@ -6,7 +6,7 @@ function restoreGlobal(name, descriptor) {
   else delete globalThis[name];
 }
 
-test("iOS does not treat one populated inventory without Voice 4 as proof the narrator disappeared", async () => {
+test("iOS never treats a populated inventory without Voice 4 as permission to change narrator", async () => {
   const synthDescriptor = Object.getOwnPropertyDescriptor(globalThis, "speechSynthesis");
   const utteranceDescriptor = Object.getOwnPropertyDescriptor(globalThis, "SpeechSynthesisUtterance");
   const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, "navigator");
@@ -43,16 +43,19 @@ test("iOS does not treat one populated inventory without Voice 4 as proof the na
     assert.equal(mod.voice4InventoryReady(), false, "first incomplete iOS inventory must keep Voice 4 sticky");
 
     now += 4_999;
-    assert.equal(mod.voice4InventoryReady(), false, "personal fallback must stay blocked during the grace window");
+    assert.equal(mod.voice4InventoryReady(), false, "personal fallback must stay blocked during the former grace window");
+
+    now += 60_000;
+    assert.equal(mod.voice4InventoryReady(), false, "even a long-lived iOS inventory gap must not change Mino's narrator");
 
     voices = [{ name: "Stimme 4", voiceURI: "com.apple.voice4", lang: "de-DE" }];
     assert.equal(mod.voice4InventoryReady(), true, "Voice 4 reappearing must immediately restore a ready inventory");
 
     voices = [{ name: "Anna", voiceURI: "com.apple.anna", lang: "de-DE" }];
-    assert.equal(mod.voice4InventoryReady(), false, "a later transient gap must start a fresh grace window");
+    assert.equal(mod.voice4InventoryReady(), false, "a later transient gap must keep the same narrator policy");
 
-    now += 5_001;
-    assert.equal(mod.voice4InventoryReady(), true, "a stable absence may eventually allow the recorded fallback");
+    now += 120_000;
+    assert.equal(mod.voice4InventoryReady(), false, "iOS must remain Voice 4-only after repeated long inventory gaps");
   } finally {
     Date.now = originalNow;
     restoreGlobal("speechSynthesis", synthDescriptor);
