@@ -18,12 +18,11 @@ test("Voice 4 still establishes continuity after successful or live selected pla
   assert.match(voice, /const selectedVoice4 = hasVoice4Selection\(lang, settings\);\s*if \(selectedVoice4\) markVoice4Established\(lang\);/s);
 });
 
-test("failed iOS Voice 4 playback stays on Voice 4 instead of switching narrator", () => {
+test("failed iOS Voice 4 playback keeps bundled audio reachable", () => {
   const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
-  const iosGuard = voice.indexOf("if (isIOSSpeechEnvironment()) return false;");
   const personalFallback = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
 
   assert.ok(selectionIndex > 0, "Voice 4 selection state must be checked after playback failure");
-  assert.ok(iosGuard > selectionIndex, "iOS sticky narrator guard must run after Voice 4 selection bookkeeping");
-  assert.ok(personalFallback > iosGuard, "personal recording must stay unreachable for the same iOS request while speechSynthesis exists");
+  assert.ok(personalFallback > selectionIndex, "bundled fallback must remain reachable after Voice 4 fails");
+  assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
 });
