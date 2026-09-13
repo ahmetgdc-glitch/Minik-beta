@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 
 function restoreGlobal(name, descriptor) {
   if (descriptor) Object.defineProperty(globalThis, name, descriptor);
@@ -56,8 +57,7 @@ test("iOS Voice 4 cache honors a changed explicit narrator preference", async ()
   }
 });
 
-test("pending Voice 4 lookups are isolated by explicit narrator preference", async () => {
-  const fs = await import("node:fs");
+test("pending Voice 4 lookups are isolated by explicit narrator preference", () => {
   const source = fs.readFileSync(new URL("../src/audio/systemVoice4.js", import.meta.url), "utf8");
   assert.match(source, /const lookupKey = voiceLookupKey\(lang, settings\)/);
   assert.match(source, /pendingVoiceLookup\.has\(lookupKey\)/);
