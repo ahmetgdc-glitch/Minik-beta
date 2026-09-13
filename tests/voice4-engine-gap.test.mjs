@@ -4,27 +4,27 @@ import fs from "node:fs";
 
 const voice = fs.readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 
-test("an established iOS Voice 4 blocks recorded fallback during a speech engine gap", () => {
-  assert.match(voice, /const establishedVoice4Languages = new Set\(\)/);
-  assert.match(voice, /const VOICE4_ENGINE_GRACE_MS = Number\.POSITIVE_INFINITY/);
-  assert.match(voice, /export function holdVoice4DuringEngineGap/);
-  assert.match(voice, /isIOSSpeechEnvironment\(\)/);
+test("an iOS Voice 4 engine gap cannot permanently silence recorded fallback", () => {
+  assert.match(voice, /export function holdVoice4DuringEngineGap\(\) \{[\s\S]*return false;\s*\}/);
 
   const gapGuard = voice.indexOf("if (!voice4Available && holdVoice4DuringEngineGap(lang)) return false;");
   const personalFallback = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(gapGuard > 0, "engine-gap guard must exist");
-  assert.ok(personalFallback > gapGuard, "recorded fallback must stay behind the Voice 4 engine-gap guard");
+  assert.ok(gapGuard > 0, "engine-gap guard call must remain explicit");
+  assert.ok(personalFallback > gapGuard, "recorded fallback remains behind the Voice 4 attempt");
 });
 
-test("Voice 4 continuity is established only after a real selection and cleared after confirmed absence", () => {
+test("Voice 4 still establishes continuity after successful playback", () => {
   assert.match(voice, /if \(playedSystem\) \{\s*markVoice4Established\(lang\);\s*return true;/s);
-  assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s);
-  assert.match(voice, /if \(!voice4InventoryReady\(lang, settings\)\) return false;\s*[\s\S]*clearVoice4Continuity\(lang\);/);
+  assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*\}/s);
 });
 
-test("the engine-gap hold cannot expire into a different narrator once Voice 4 was established", () => {
-  assert.match(voice, /voice4EngineMissingSince\.set\(lang, now\)/);
-  assert.match(voice, /return now - missingSince < VOICE4_ENGINE_GRACE_MS/);
-  assert.match(voice, /VOICE4_ENGINE_GRACE_MS = Number\.POSITIVE_INFINITY/);
-  assert.doesNotMatch(voice, /VOICE4_ENGINE_GRACE_MS = 5000/);
+test("failed Voice 4 playback falls through to the bundled MINIK narrator", () => {
+  const stickyIndex = voice.indexOf("if (hasVoice4Selection(lang, settings)) {");
+  const personalFallback = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
+  assert.ok(stickyIndex > 0);
+  assert.ok(personalFallback > stickyIndex);
+  assert.doesNotMatch(
+    voice,
+    /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s,
+  );
 });
