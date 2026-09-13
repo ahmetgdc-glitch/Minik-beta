@@ -11,19 +11,19 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 - adaptive Schwierigkeit, Mastery pro Begriff/Sprache und Spaced Repetition
 - Sterne, XP, Tagesreise, Aquarium, Achievements und Mino-Outfits
 - Elternbereich mit Rechengate/PIN, Wochenanalyse, Backup/Restore und Einstellungen
-- iOS Stimme 4 als primäre MINIK-Erzählstimme; beliebige Browser-/Default-/Roboterstimmen bleiben verboten, ein lokaler DE/TR-Notfallclip verhindert aber komplette Stille, wenn Voice 4 nach Retry nicht abspielbar ist
+- feste natürliche DE/TR-MINIK-Stimme als primäre Erzählstimme; Apple Voice 4 bleibt kontrollierter Notfall-Fallback, beliebige Browser-/Default-/Roboterstimmen bleiben verboten und die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet
 - installierbare PWA, Offline-Service-Worker, Recovery-Speicher und Session-Checkpoints
 
-## Voice-4-Härtung
+## Sprach- und Audio-Härtung
 
-- iOS Stimme 4 ist der primäre Sprecher auf unterstützten Apple-Geräten und wird für jeden Satz zuerst versucht.
-- Safari bekommt ein längeres Bereitschaftsfenster für `speechSynthesis.getVoices()`; eine erfolgreich gefundene Stimme 4 wird gecacht.
-- Bei transienten Wiedergabefehlern wird Stimme 4 genau einmal kontrolliert erneut versucht.
-- **Kein Dauer-Stumm-Fallback:** wenn Safari Voice 4 danach nicht auflösen oder abspielen kann, bleibt der gebündelte lokale DE/TR-Clip erreichbar. Beim nächsten Satz wird Stimme 4 erneut zuerst versucht.
+- Die gebündelte feste natürliche MINIK-Stimme ist der primäre Sprecher in Deutsch und Türkisch und wird für bekannte Begriffe, Anweisungen und zusammensetzbare Sätze zuerst versucht.
+- Die 332 bekannten Sprachbausteine werden beim Produktionsbuild lokalisiert; sie werden zur Laufzeit bedarfsgerecht geladen und gecacht, nicht vollständig beim Service-Worker-Install vorab geladen.
+- Apple Voice 4 bleibt als sekundärer Notfall-Fallback erreichbar, wenn kein fester Sprachplan vorhanden ist oder der feste Clip nicht abspielbar ist.
+- Safari behält für diesen Fallback die längere Voice-Listen-Bereitschaft, gecachte Voice-4-Auswahl, Sprachfilter, Watchdogs und den kontrollierten Retry.
+- **Kein Personal-/Roboter-Fallback:** Die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet; beliebige Browser-/Default-/Roboterstimmen bleiben ausgeschlossen.
 - Ein fehlgeschlagener stiller iOS-Media-Unlock darf nicht als erfolgreich gelten; die Gesture-Listener bleiben bis zu einer echten Audiofreigabe aktiv.
 - Nach Background/Resume werden WebAudio und Voice-Media-Unlock beide neu bewaffnet.
-- Beliebige Browser-/Default-/Roboterstimmen bleiben ausgeschlossen.
-- Regressionstests sichern Voice-Auswahl, Retry, Audio-Unlock, Background/Resume und Fallback-Reihenfolge ab.
+- Regressionstests sichern feste Erzählpriorität, Voice-4-Notfallpfad, Audio-Unlock, Background/Resume und Sprachgrenzen ab.
 
 ## Neue Entdeckerwelt — Beta 67
 
@@ -66,4 +66,4 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
-Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der Voice-4-Pfad dürfen nicht verloren gehen. Voice 4 bleibt primär, aber ein Safari-Fehler darf MINIK nicht komplett stummschalten. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.
+Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der feste natürliche Erzähler dürfen nicht verloren gehen. Die feste DE/TR-MINIK-Stimme bleibt primär, Voice 4 ist nur der kontrollierte Notfallpfad. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.
