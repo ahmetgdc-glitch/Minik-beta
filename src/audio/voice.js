@@ -54,8 +54,8 @@ function speechForegroundAllowed() {
 }
 
 export function holdVoice4DuringEngineGap() {
-  // Fixed bundled narration is the primary MINIK voice. Voice 4 is only an
-  // emergency fallback, so an iOS speech-engine gap must never block audio.
+  // A transient iOS speech-engine gap must never block the authorized bundled
+  // MINIK fallback. Every new utterance still tries Voice 4 first when live.
   return false;
 }
 
@@ -287,18 +287,8 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    // The bundled natural MINIK narrator is now the primary voice everywhere.
-    // This keeps German and Turkish consistent across Safari, PWA, iPad and
-    // other browsers instead of depending on Apple's changing voice inventory.
-    const plan = fixedNaturalVoicePlan(text, lang);
-    if (plan.length) {
-      const playedNatural = await speakNaturalPlan(plan, token);
-      if (playedNatural || token !== sequence) return playedNatural;
-    }
-
-    // Voice 4 is retained only as an emergency fallback for an unmapped or
-    // temporarily unplayable bundled clip. Arbitrary/default system voices are
-    // still rejected inside systemVoice4.js.
+    // Voice 4 is the primary MINIK narrator. A failed or temporarily missing
+    // WebKit Voice 4 must never switch to an arbitrary/default system voice.
     const voice4Available = systemVoice4Available();
     if (!voice4Available && holdVoice4DuringEngineGap(lang)) return false;
 
@@ -323,9 +313,15 @@ export async function speak(text, lang = "de", settings = {}) {
       clearVoice4Continuity(lang);
     }
 
-    // Personal recordings are intentionally not an automatic narrator any
-    // more. If both the fixed natural library and Voice 4 fail, return false
-    // rather than unexpectedly changing to the owner's recorded voice.
+    // If Voice 4 cannot speak this utterance, keep MINIK audible with the
+    // authorized fixed DE/TR narrator. Every next utterance tries Voice 4 first.
+    if (!speechForegroundAllowed()) return false;
+    const plan = fixedNaturalVoicePlan(text, lang);
+    if (plan.length) {
+      const playedNatural = await speakNaturalPlan(plan, token);
+      if (playedNatural || token !== sequence) return playedNatural;
+    }
+
     return false;
   } finally {
     if (token === sequence) setSpeechActive(false);
