@@ -4,13 +4,13 @@ import fs from "node:fs";
 const voice = fs.readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const systemVoice4 = fs.readFileSync(new URL("../src/audio/systemVoice4.js", import.meta.url), "utf8");
 
-test("MINIK prefers the fixed natural narrator before optional iOS Voice 4", () => {
+test("MINIK tries iOS Voice 4 before fixed natural fallback", () => {
+  const systemIndex = voice.indexOf("speakWithVoice4(");
   const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const naturalPlaybackIndex = voice.indexOf("const playedNatural = await speakNaturalPlan(plan, token);");
-  const systemIndex = voice.indexOf("speakWithVoice4(");
-  assert.ok(naturalIndex > 0);
+  assert.ok(systemIndex > 0);
+  assert.ok(naturalIndex > systemIndex);
   assert.ok(naturalPlaybackIndex > naturalIndex);
-  assert.ok(systemIndex > naturalPlaybackIndex);
   assert.doesNotMatch(voice, /personalVoiceClip/);
 });
 
@@ -43,11 +43,11 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
-test("an unresolved Safari voice inventory cannot block fixed local narration", () => {
-  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+test("an unresolved Safari voice inventory cannot block fixed local fallback", () => {
   const systemIndex = voice.indexOf("speakWithVoice4(");
-  assert.ok(naturalIndex > 0);
-  assert.ok(systemIndex > naturalIndex);
+  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+  assert.ok(systemIndex > 0);
+  assert.ok(naturalIndex > systemIndex);
   assert.match(voice, /else if \(voice4InventoryReady\(lang, settings\)\) clearVoice4Continuity\(lang\)/);
   assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
 });
@@ -63,11 +63,11 @@ test("Voice 4 retries a transient Safari playback error but not a queue-only sta
   assert.match(systemVoice4, /return retryAttempt === true/);
 });
 
-test("a known iOS Voice 4 remains a guarded fallback only after fixed narration", () => {
-  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+test("a known iOS Voice 4 stays primary and fixed narration remains its audible fallback", () => {
   const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
-  assert.ok(naturalIndex > 0);
-  assert.ok(selectionIndex > naturalIndex);
+  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+  assert.ok(selectionIndex > 0);
+  assert.ok(naturalIndex > selectionIndex);
   assert.match(voice, /if \(selectedVoice4\) markVoice4Established\(lang\)/);
   assert.match(systemVoice4, /export function hasVoice4Selection/);
   assert.doesNotMatch(voice, /personalVoiceClip/);
