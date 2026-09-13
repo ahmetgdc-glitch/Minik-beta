@@ -9,7 +9,7 @@ test("an iOS Voice 4 engine gap cannot block fixed bundled narration", () => {
 
   const naturalPlan = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const naturalPlayback = voice.indexOf("speakNaturalPlan(plan, token)");
-  const systemIndex = voice.indexOf("speakWithVoice4(");
+  const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(naturalPlan > 0, "fixed narrator plan must be the primary narrator path");
   assert.ok(naturalPlayback > naturalPlan, "fixed narrator must be attempted before Voice 4");
   assert.ok(systemIndex > naturalPlayback, "Voice 4 must remain a secondary emergency fallback");
