@@ -137,11 +137,14 @@ test("Voice 4 cache resets when Safari speech synthesis disappears and returns",
   }
 });
 
-test("Voice 4 playback has a bounded Safari watchdog", async () => {
+test("Voice 4 playback has bounded Safari start and completion watchdogs", async () => {
   const mod = await import(`../src/audio/systemVoice4.js?watchdog=${Date.now()}`);
   assert.equal(mod.voice4PlaybackWatchdogMs("Hi"), 5000);
   assert.equal(mod.voice4PlaybackWatchdogMs("x".repeat(1000)), 18000);
-  assert.match(systemVoice4, /watchdog = setTimeout\(\(\) => finish\(false\), voice4PlaybackWatchdogMs\(text\)\)/);
+  assert.match(systemVoice4, /PLAYBACK_START_WATCHDOG_MS = 1500/);
+  assert.match(systemVoice4, /utterance\.onstart = \(\) => \{[\s\S]*started = true;[\s\S]*clearStartWatchdog\(\)/);
+  assert.match(systemVoice4, /startWatchdog = setTimeout\([\s\S]*synth\.speaking === true \|\| synth\.pending === true/);
+  assert.match(systemVoice4, /watchdog = setTimeout\([\s\S]*synth\.cancel\(\)[\s\S]*finish\(false\)[\s\S]*voice4PlaybackWatchdogMs\(text\)/);
 });
 
 test("stopping Voice 4 resolves a Safari utterance that never emits end or error", async () => {
