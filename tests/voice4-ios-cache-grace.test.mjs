@@ -1,13 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-test("iOS keeps a known Voice 4 sticky for the speechSynthesis session", async () => {
+test("iOS preserves Voice 4 identity without submitting a stale voice object", async () => {
   const previousSynth = globalThis.speechSynthesis;
   const previousUtterance = globalThis.SpeechSynthesisUtterance;
   const previousNavigator = globalThis.navigator;
   const previousNow = Date.now;
   let now = 1000;
-  let voices = [{ name: "Stimme 4", voiceURI: "com.apple.voice4", lang: "de-DE" }];
+  const voice4 = { name: "Stimme 4", voiceURI: "com.apple.voice4", lang: "de-DE" };
+  let voices = [voice4];
 
   const synth = {
     getVoices: () => voices,
@@ -29,11 +30,27 @@ test("iOS keeps a known Voice 4 sticky for the speechSynthesis session", async (
     assert.equal(mod.hasVoice4Selection("de"), true);
 
     voices = [{ name: "Anna", voiceURI: "com.apple.anna", lang: "de-DE" }];
-    assert.equal(mod.hasVoice4Selection("de"), true, "cached Voice 4 must survive the first incomplete iOS inventory");
+    assert.equal(
+      mod.hasVoice4Selection("de"),
+      false,
+      "a populated iOS inventory without Voice 4 must not expose the stale cached object for playback",
+    );
 
     now += 30000;
-    assert.equal(mod.hasVoice4Selection("de"), true, "known Voice 4 must remain the narrator even after a long incomplete iOS inventory");
+    assert.equal(
+      mod.hasVoice4Selection("de"),
+      false,
+      "a long incomplete iOS inventory must remain silent instead of falling through to a default system voice",
+    );
 
+    voices = [voice4];
+    assert.equal(
+      mod.hasVoice4Selection("de"),
+      true,
+      "the remembered Voice 4 identity should become usable again when Safari republishes it",
+    );
+
+    voices = [{ name: "Anna", voiceURI: "com.apple.anna", lang: "de-DE" }];
     globalThis.speechSynthesis = {
       getVoices: () => voices,
       addEventListener() {},
