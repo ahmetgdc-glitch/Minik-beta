@@ -109,7 +109,11 @@ export async function unlockVoiceAudio() {
       }
       return true;
     } catch {
-      return contextReady || systemVoice4Available();
+      // A working speechSynthesis object does not prove that recorded fallback
+      // is unlocked. If the silent media prime failed and WebAudio is not
+      // running, report false so useAudioPrime keeps listening for the next
+      // real user gesture instead of leaving the fallback permanently blocked.
+      return contextReady;
     }
   })();
   try { return await unlockPending; }
