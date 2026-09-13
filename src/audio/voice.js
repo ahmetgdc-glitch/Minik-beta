@@ -313,20 +313,16 @@ export async function speak(text, lang = "de", settings = {}) {
       }
       if (token !== sequence) return false;
 
-      // Voice 4 remains the first choice, but a WebKit playback failure must
-      // not turn the app silent. After the Voice 4 retry has failed, continue
-      // to the bundled MINIK recording rather than switching to an arbitrary
-      // system voice.
-      if (hasVoice4Selection(lang, settings)) {
-        markVoice4Established(lang);
-      }
+      const selectedVoice4 = hasVoice4Selection(lang, settings);
+      if (selectedVoice4) markVoice4Established(lang);
+      else if (voice4InventoryReady(lang, settings)) clearVoice4Continuity(lang);
 
-      // Safari may still expose an empty or partial inventory after the Voice 4
-      // wait window. Keep the continuity bookkeeping when it is unresolved,
-      // but do not block audible local fallback for the current request.
-      if (voice4InventoryReady(lang, settings)) {
-        clearVoice4Continuity(lang);
-      }
+      // On iOS, speechSynthesis being present means Voice 4 remains Mino's
+      // narrator for this request even if WebKit transiently rejects playback,
+      // exposes a partial inventory, or stalls. Never change character mid-
+      // session by falling through to a personal recording, and never submit
+      // an arbitrary system voice. A later user action will retry Voice 4.
+      if (isIOSSpeechEnvironment()) return false;
     } else {
       clearVoice4Continuity(lang);
     }
