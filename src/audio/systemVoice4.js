@@ -135,22 +135,20 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices(), settings = {}) {
   }
 
   const replacementVoice4 = voices.some((voice) => voiceIsEligibleForLanguage(voice, lang));
-  if (replacementVoice4) {
-    iosVoice4MissingSince.delete(lang);
-  } else if (isIOSSpeechEnvironment()) {
-    // Keep the remembered narrator identity across Safari's partial inventory,
-    // but never hand a stale Voice 4 object to speechSynthesis. Safari may
-    // ignore a voice object that is absent from the current non-empty
-    // inventory and silently speak with its default robotic voice. Returning
-    // null here makes this request wait/fail silently while preserving the
-    // cache for the next inventory refresh.
-    if (!iosVoice4MissingSince.has(lang)) iosVoice4MissingSince.set(lang, Date.now());
+  if (isIOSSpeechEnvironment()) {
+    // Safari can publish a partial inventory containing a different Voice 4
+    // variant while the selected narrator is temporarily absent. Keep the
+    // remembered identity so a settings-aware caller can resume that exact
+    // narrator when it returns, but never return the stale object for playback.
+    // The caller may still select a live replacement when no explicit saved
+    // preference exists; an explicit preference remains strict in selectVoice4.
+    if (replacementVoice4) iosVoice4MissingSince.delete(lang);
+    else if (!iosVoice4MissingSince.has(lang)) iosVoice4MissingSince.set(lang, Date.now());
     return null;
   }
 
-  // Outside iOS, or when iOS exposes another explicit same-language Voice 4
-  // candidate, invalidate the stale identity so selection can move to the
-  // live voice without ever crossing German/Turkish narrator identities.
+  // Non-iOS inventories are treated as authoritative. If the cached identity
+  // disappeared there, invalidate it and let selection use a live Voice 4.
   selectedVoiceCache.delete(lang);
   iosVoice4MissingSince.delete(lang);
   return null;
