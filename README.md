@@ -1,6 +1,6 @@
 # MINIK · Lernen mit Mino
 
-**1.67.0 Beta 70 · 12. September 2026**
+**1.68.0 Beta 71 · 13. September 2026**
 
 MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet große visuelle Spielflächen mit Mino als Helfer, getrennten Kinderprofilen, adaptivem Lernen, Belohnungen und einem offline-fähigen PWA-Kern.
 
@@ -22,6 +22,10 @@ Die Startseite ist eine bildschirmfüllende Inselwelt mit großem Mino. Alle bes
 - Offline-Service-Worker, installierbare PWA und GitHub-Pages-Deployment.
 
 ## Entwickeln und prüfen
+
+Beta 71 behebt verspätete iOS-Audiofreigaben, hängende Audiojobs und unbegrenzten Audio-Pufferspeicher. PWA-Updates warten wieder auf den vorgesehenen Wechsel. Die 368 vorhandenen Audioquelldateien sind im Repository enthalten; die Sprach-Buildschritte benötigen dafür keine externen Downloads mehr.
+
+Die vorhandenen 332 Sprachbausteine decken noch nicht alle 503 Lernobjekte ab. Die genaue [Sprachabdeckung](docs/VOICE_COVERAGE.md) trennt vorhandene Aufnahmen von den noch offenen Wortaufnahmen.
 
 Voraussetzung: **Node.js ab 22.12**. GitHub Actions verwendet Node 22.
 

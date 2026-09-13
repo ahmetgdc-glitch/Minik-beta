@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **13. September 2026 · 1.68.0 Beta 71**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -65,5 +65,14 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 71: im aktuellen Work-Lauf behoben
+
+- CI-Ausgangsfehler auf `6eaaf3f`: sieben Source-Checks verwechselten Funktionsdefinition und Aufruf; ein weiterer Check verlangte entfernten Personal-Voice-Code. Reparatur `5412e0a`, Actions-Run `34787323737` vollständig grün einschließlich Pages-Deploy und veröffentlichtem HTTP-Smoke-Test.
+- Reale Audio-Races: verspätetes Unlock nach neuem Wort, hängende Media-/Download-/Decode-Jobs, fehlendes WebAudio-Ende und unbeschränkter Decoder-Cache. Neun neue Verhaltenstests nutzen den tatsächlichen Voice-Service.
+- Service-Worker-Updates überspringen die Wartephase nur bei Erstinstallation oder expliziter Update-Anforderung. Cache-Schreibfehler lassen erfolgreiche Netzwerkantworten durch.
+- 368 unveränderte Sprachquelldateien sind unter `public/assets/voice/` versioniert; ursprüngliche Quellzuordnungen bleiben in den Audio-Modulen erhalten. Die Build-Verifikation vergleicht Quelldatei und Ausgabe byteweise.
+- Die Sprachabdeckung ist für alle 503 Items erhoben: 127 DE- und 128 TR-Items haben derzeit einen festen Wort-Sprachplan. Alle übrigen benötigen entsprechende feste Aufnahmen oder einen verfügbaren Voice-4-Notfallpfad; siehe `VOICE_COVERAGE.md`.
+- Visuelle Live-Prüfung in dieser Umgebung blockiert: lokale Vorschau nicht erreichbar, öffentlicher Pages-Aufruf lief in ein Verbindungs-Timeout. Die Veröffentlichung selbst wurde durch den GitHub-Actions-Smoke-Test bestätigt. Keine neuen physischen iOS-Prüfungen behaupten.
 
 Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der feste natürliche Erzähler dürfen nicht verloren gehen. Die feste DE/TR-MINIK-Stimme bleibt primär, Voice 4 ist nur der kontrollierte Notfallpfad. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.

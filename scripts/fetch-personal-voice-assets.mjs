@@ -4,6 +4,7 @@ import path from "node:path";
 const sourceFile = path.resolve("src/audio/personalVoiceClips.js");
 const cacheDir = path.resolve(".voice-cache/personal");
 const outDir = path.resolve("dist/assets/voice");
+const bundledDir = path.resolve("public/assets/voice");
 const requireComplete = process.env.MINIK_REQUIRE_LOCAL_VOICE === "1";
 const urlPattern = /https:\/\/resource2\.heygen\.ai\/text_to_speech\/[^"'\s]+\/(id=[a-f0-9-]+\.wav)/g;
 
@@ -44,6 +45,7 @@ const queue = [...clips.entries()];
 const failures = [];
 let copied = 0;
 let downloaded = 0;
+let bundled = 0;
 let index = 0;
 
 async function worker() {
@@ -54,6 +56,13 @@ async function worker() {
     const cached = path.join(cacheDir, filename);
     const output = path.join(outDir, filename);
     try {
+      const source = path.join(bundledDir, filename);
+      if (await exists(source)) {
+        await fs.copyFile(source, output);
+        bundled++;
+        copied++;
+        continue;
+      }
       if (!(await exists(cached))) {
         const bytes = await fetchWithRetry(url);
         const temp = `${cached}.tmp-${process.pid}-${Date.now()}`;
@@ -84,7 +93,7 @@ await fs.writeFile(
 );
 
 console.log(
-  `Personal voice assets: ${copied}/${clips.size} available (${downloaded} downloaded, ${copied - downloaded} restored from cache)`,
+  `Personal voice assets: ${copied}/${clips.size} available (${bundled} bundled, ${downloaded} downloaded, ${copied - downloaded - bundled} restored from cache)`,
 );
 if (failures.length) {
   console.warn(`Personal voice assets unavailable: ${failures.map((item) => item.filename).join(", ")}`);

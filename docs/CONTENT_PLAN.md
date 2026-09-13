@@ -1,4 +1,4 @@
-# Contentbibliothek 0.3.0
+# Contentbibliothek — MINIK 1.68.0 Beta 71
 
 ## Vorhandene Welten
 
@@ -19,18 +19,27 @@
 | Bewegung | Hareketler | 16 |
 | Berufe | Meslekler | 16 |
 | Geräusche | Sesler | 12 |
+| Schule | Okul | 25 |
+| Sport | Spor | 25 |
+| Musik | Müzik | 25 |
+| Weltraum | Uzay | 25 |
+| Wetter | Hava durumu | 25 |
+| Mein Tag | Günüm | 25 |
+| Sicher unterwegs | Güvenlik | 25 |
+| Orte | Yerler | 25 |
+| Buchstaben | Harfler | 25 |
 | Spielzeug | Oyuncaklar | 14 |
-| **Gesamt** | | **278** |
+| **Gesamt** | | **503** |
 
 Jeder Begriff hat eine stabile ID, eigene DE/TR-Bezeichnung, Kategorie, Tags, Schwierigkeitsmetadaten und Darstellung. Zahlen gehen bis 20. Nachfahren verwendet aktuell die Zahlen 1–5.
 
 ## Assetmodell
 
-- 250 ausgewählte, lokale Noto-SVGs einschließlich Welt-, Bedien- und Belohnungsbildern. Diese Zahl ist nicht die Zahl der Lernobjekte: Zahlen, Formen und Farben sind datenbasierte eigene Darstellungen; manche Welten verwenden passende Motive erneut.
+- Ausgewählte, lokale Noto-SVGs einschließlich Welt-, Bedien- und Belohnungsbildern. Diese Zahl ist nicht die Zahl der Lernobjekte: Zahlen, Formen und Farben sind datenbasierte eigene Darstellungen; manche Welten verwenden passende Motive erneut.
 - Eigener Mino als transparentes WebP; PNG-Appicons.
 - Sechs 512-Pixel-WebP-Fotomotive: fröhlich, traurig, überrascht, wütend, müde und entspannt. Originale KI-generierte Erwachsene, keine realen Personen. Fotos sind optional im Elternbereich.
 - Herkunft und Lizenzen unter `public/licenses/NOTICE.txt`, Fotometadaten in `content.js`.
-- Zwölf Web-Audio-Geräusche. Keine aufgezeichneten Tierstimmen und keine Cloud-TTS-Dateien.
+- Zwölf synthetische Web-Audio-Lernklänge. Die vorhandenen generierten festen Sprachaufnahmen sind lokal gebündelt; die exakte Wortabdeckung steht in `VOICE_COVERAGE.md`.
 
 ## Neue Inhalte ergänzen
 
@@ -46,6 +55,6 @@ Jeder Begriff hat eine stabile ID, eigene DE/TR-Bezeichnung, Kategorie, Tags, Sc
 
 Bezeichnungen und Motive mit einer DE/TR-sprachigen pädagogischen Fachperson prüfen. Einzelne Handlungen nutzen derzeit Symbole wie ein Mikrofon für Singen; eigene Handlungsszenen wären anschaulicher. Bild-Merkspiele und Memory zeigen dieselben Motive, keine schriftsprachlichen Aufgaben für Kleinkinder.
 
-Ausbau auf 500+: eigenständige Weltpakete für Wetter, Küche, Bad, Familie, Buchstaben, Gegensätze, Spielplatz, Geschichten und soziale Abläufe. Weitere Fotos sollen konkrete Körperteile, Tätigkeiten und Alltagssituationen zeigen. Tiergeräusche benötigen eindeutige eigene/lizenzierte Aufnahmen.
+Die 503 Lernobjekte verteilen sich bereits auf 25 Welten. Als nächster Inhaltsschritt fehlen feste DE/TR-Wortaufnahmen und eigene Fotos für konkrete Körperteile, Tätigkeiten und Alltagssituationen. Tiergeräusche benötigen eindeutige eigene/lizenzierte Aufnahmen.
 
-Größere Pakete erst bei Auswahl laden. Aktuell ist der gesamte Kern klein genug für Vorab-Cache; ein mehrgigabytegroßer Pflichtdownload wäre hier unnötig.
+Größere Pakete erst bei Auswahl laden. Der Service Worker installiert nur den kleinen Startkern vorab; weitere Illustrationen, Fotos und Sprachclips werden bei Nutzung gecacht.

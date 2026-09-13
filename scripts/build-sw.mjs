@@ -49,9 +49,9 @@ const code = `const PREFIX='minik:'+self.registration.scope+':';
 const CACHE=PREFIX+${JSON.stringify(cache)};
 const CORE=${JSON.stringify(initial.map((p) => "./" + p))};
 const NAV_TIMEOUT_MS=3500;
-self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()))});
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>{if(!self.registration.active)return self.skipWaiting()}))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
+self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')event.waitUntil(self.skipWaiting())});
 self.addEventListener('fetch',event=>{
  if(event.request.method!=='GET')return;
  const url=new URL(event.request.url);if(url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;
@@ -65,14 +65,14 @@ self.addEventListener('fetch',event=>{
    const timer=controller?setTimeout(()=>controller.abort(),NAV_TIMEOUT_MS):null;
    try{
     const response=await fetch(event.request,controller?{signal:controller.signal}:undefined);
-    if(response?.ok){await cache.put(new URL('./index.html',self.registration.scope).href,response.clone());return response}
+    if(response?.ok){try{await cache.put(new URL('./index.html',self.registration.scope).href,response.clone())}catch{}return response}
     const cached=await fallback();
     return cached||response;
    }catch(error){const cached=await fallback();if(cached)return cached;throw error}
    finally{if(timer)clearTimeout(timer)}
   })());return
  }
- event.respondWith(caches.open(CACHE).then(async cache=>{const hit=await cache.match(event.request);if(hit)return hit;const response=await fetch(event.request);if(response.ok&&response.type==='basic')await cache.put(event.request,response.clone());return response}));
+ event.respondWith(caches.open(CACHE).then(async cache=>{const hit=await cache.match(event.request);if(hit)return hit;const response=await fetch(event.request);if(response.ok&&response.type==='basic'){try{await cache.put(event.request,response.clone())}catch{}}return response}));
 });
 `;
 await fs.writeFile(path.join(root, "sw.js"), code);

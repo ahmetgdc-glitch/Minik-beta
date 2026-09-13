@@ -1,8 +1,18 @@
 # MINIK Roadmap
 
-Stand **1.67.0 Beta 70 · 2026-09-12**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+Stand **1.68.0 Beta 71 · 2026-09-13**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
 
 ## Immersive Kinderwelt
+
+### P0/P1 nach der CI-Reparatur
+
+- [x] Vollständige CI-Pipeline einschließlich Pages nach Testfehler wieder grün (`5412e0a`, Run `34787323737`)
+- [x] PWA-Update-Wartephase im tatsächlich erzeugten Worker prüfen und reparieren
+- [x] Netzwerkantworten trotz voller Runtime-Caches nutzbar halten
+- [x] Audio-Unlock, Download, Decoder und Wiedergabe gegen Hänger/Abbrüche absichern
+- [x] Dekodierten Audio-Speicher begrenzen und vorhandene Audioquellen versionieren
+- [ ] Feste Wortaufnahmen ergänzen: 376 DE- und 375 TR-Items haben noch keinen passenden festen Sprachplan (siehe `VOICE_COVERAGE.md`)
+- [ ] Visuelle/akustische Abnahme auf iPhone und iPad; der Browserzugriff des aktuellen Work-Laufs ist blockiert
 
 - [x] Bildschirmfüllende Startlandschaft mit großem Mino
 - [x] Alle bestehenden Welten über fünf wischbare Themenreisen erreichbar
@@ -10,8 +20,8 @@ Stand **1.67.0 Beta 70 · 2026-09-12**. Beta 66 bleibt das technische Fundament.
 - [ ] Eigenständige Szenen und Entdeckungsmomente für weitere Themenwelten
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
-- [x] Persönliche DE/TR-Stimme für alle 332 festen Begriffe und Anweisungen lokal/offline bereitstellen
-- [ ] iOS Stimme 4 und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen; auf iOS darf dabei kein Sprecherwechsel zu persönlichen Aufnahmen oder Roboterstimmen auftreten
+- [x] Feste natürliche DE/TR-Stimme für die 332 vorhandenen Sprachbausteine lokal bereitstellen
+- [ ] Feste natürliche MINIK-Stimme, kontrollierten Voice-4-Notfallpfad und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
 
 ## Fundament und Lernkern
 
@@ -65,7 +75,7 @@ Stand **1.67.0 Beta 70 · 2026-09-12**. Beta 66 bleibt das technische Fundament.
 - [ ] Physisches iPhone: Safari + Home-Screen-PWA + Hoch/Querformat + Hintergrund/Wiederaufnahme
 - [ ] Physisches iPad: Touchflächen, Layout, Scrollen und längere Spielsitzung
 - [ ] Einmal online laden, vollständig schließen und im Flugmodus erneut starten
-- [ ] iOS Stimme 4 in Deutsch und Türkisch anhören, schnelle Wiederholungen prüfen und bestätigen, dass kein Wechsel zu persönlichen Aufnahmen/Roboterstimmen erfolgt
+- [ ] Feste natürliche MINIK-Stimme und Voice-4-Notfallpfad in DE/TR anhören; schnelle Wiederholungen und Sprecherkonstanz prüfen
 - [ ] Mikrofonberechtigung/Spracherkennung auf der konkret verwendeten iOS-Version testen
 - [ ] Begriffe, Geschichten und Sicherheitssequenzen durch DE/TR-sprachige pädagogische Fachperson gegenlesen
 

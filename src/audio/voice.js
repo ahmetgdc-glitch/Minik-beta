@@ -16,10 +16,16 @@ let settle = null,
   voicePlayer = null,
   cloudAbort = null,
   unlockPending = null,
+  cancelUnlock = null,
   voiceContext = null,
   voiceSource = null,
   sequence = 0;
 const voiceBufferCache = new Map();
+const pendingVoiceLoads = new Set();
+const VOICE_START_TIMEOUT_MS = 4000;
+const VOICE_PLAYBACK_LIMIT_MS = 45000;
+const VOICE_BUFFER_LIMIT_BYTES = 16 * 1024 * 1024;
+const VOICE_BUFFER_LIMIT_COUNT = 32;
 const establishedVoice4Languages = new Set();
 const voice4EngineMissingSince = new Map();
 const SILENT_WAV =
@@ -40,8 +46,7 @@ function ensureVoiceContext() {
   try {
     const Context = window.AudioContext || window.webkitAudioContext;
     if (!Context) return null;
-    voiceContext ||= new Context();
-    if (voiceContext.state === "suspended") voiceContext.resume().catch(() => {});
+    if (!voiceContext || voiceContext.state === "closed") voiceContext = new Context();
     return voiceContext;
   } catch {
     return null;
@@ -77,43 +82,65 @@ export async function unlockVoiceAudio() {
   const player = naturalPlayer();
   if (!player && !context) return systemVoice4Available();
   const token = sequence;
-  unlockPending = (async () => {
-    let contextReady = false;
-    if (context) {
+  let done = false;
+  let timer;
+  let cancel;
+  const pending = new Promise((resolve) => {
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (cancelUnlock === cancel) cancelUnlock = null;
+      resolve(Boolean(ok && token === sequence && speechForegroundAllowed()));
+    };
+    cancel = () => finish(false);
+    cancelUnlock = cancel;
+    timer = setTimeout(cancel, VOICE_START_TIMEOUT_MS);
+    const current = () => !done && token === sequence && speechForegroundAllowed();
+    void (async () => {
+      let contextReady = false;
+      if (context) {
+        try {
+          if (context.state !== "running") await context.resume();
+          contextReady = context.state === "running";
+        } catch {}
+      }
+      // A delayed Safari resume belongs to the gesture that started it. It
+      // must never replace a newer word with the silent unlock clip.
+      if (!current()) return finish(false);
+      if (!player) return finish(contextReady || systemVoice4Available());
       try {
-        if (context.state !== "running") await context.resume();
-        contextReady = context.state === "running";
-      } catch {}
-    }
-    if (!player) return contextReady || systemVoice4Available();
-    try {
-      player.pause();
-      player.onended = null;
-      player.onerror = null;
-      player.preload = "none";
-      player.src = SILENT_WAV;
-      player.currentTime = 0;
-      player.volume = 1;
-      const started = player.play();
-      if (started?.then) await started;
-      if (token === sequence) {
+        player.pause();
+        player.onended = null;
+        player.onerror = null;
+        player.preload = "none";
+        player.src = SILENT_WAV;
+        player.currentTime = 0;
+        player.volume = 1;
+        const started = player.play();
+        if (started?.then) await started;
+        if (!current()) return finish(false);
         player.pause();
         player.currentTime = 0;
+        finish(true);
+      } catch {
+        finish(contextReady);
       }
-      return true;
-    } catch {
-      return contextReady;
-    }
-  })();
+    })();
+  });
+  unlockPending = pending;
   try {
-    return await unlockPending;
+    return await pending;
   } finally {
-    unlockPending = null;
+    if (unlockPending === pending) unlockPending = null;
   }
 }
 
 export function stopSpeech() {
   sequence++;
+  cancelUnlock?.();
+  unlockPending = null;
+  for (const cancel of pendingVoiceLoads) cancel();
   cloudAbort?.abort();
   cloudPlayer?.pause();
   stopSystemVoice4();
@@ -158,31 +185,65 @@ function localizedGameClip(url) {
   }
 }
 
-async function decodeVoiceBuffer(url, context) {
-  if (!url || !context || typeof fetch === "undefined") return null;
-  if (voiceBufferCache.has(url)) return voiceBufferCache.get(url);
-  const pending = (async () => {
-    const response = await fetch(url, { cache: "force-cache" });
-    if (!response.ok) throw new Error(`voice HTTP ${response.status}`);
-    const bytes = await response.arrayBuffer();
-    return context.decodeAudioData(bytes.slice(0));
-  })();
-  voiceBufferCache.set(url, pending);
-  try {
-    return await pending;
-  } catch {
-    voiceBufferCache.delete(url);
-    return null;
+function cacheVoiceBuffer(url, buffer) {
+  const bytes = (value) => (value.length || 0) * (value.numberOfChannels || 1) * 4;
+  if (bytes(buffer) > VOICE_BUFFER_LIMIT_BYTES) return;
+  voiceBufferCache.set(url, buffer);
+  let total = [...voiceBufferCache.values()].reduce((sum, value) => sum + bytes(value), 0);
+  while (voiceBufferCache.size > VOICE_BUFFER_LIMIT_COUNT || total > VOICE_BUFFER_LIMIT_BYTES) {
+    const oldest = voiceBufferCache.keys().next().value;
+    total -= bytes(voiceBufferCache.get(oldest));
+    voiceBufferCache.delete(oldest);
   }
+}
+
+function playbackTimeout(duration) {
+  if (!Number.isFinite(duration) || duration <= 0) return 20000;
+  return Math.min(VOICE_PLAYBACK_LIMIT_MS, Math.max(5000, duration * 1000 + 2000));
+}
+
+async function decodeVoiceBuffer(url, context, token) {
+  if (!url || !context || typeof fetch === "undefined") return null;
+  if (voiceBufferCache.has(url)) {
+    const buffer = voiceBufferCache.get(url);
+    voiceBufferCache.delete(url);
+    voiceBufferCache.set(url, buffer);
+    return buffer;
+  }
+  return new Promise((resolve) => {
+    const controller = new AbortController();
+    let done = false;
+    const finish = (buffer) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      pendingVoiceLoads.delete(cancel);
+      if (buffer) cacheVoiceBuffer(url, buffer);
+      resolve(buffer);
+    };
+    const cancel = () => { controller.abort(); finish(null); };
+    const timer = setTimeout(cancel, VOICE_START_TIMEOUT_MS);
+    pendingVoiceLoads.add(cancel);
+    void (async () => {
+      const response = await fetch(url, { cache: "force-cache", signal: controller.signal });
+      if (!response.ok) throw new Error(`voice HTTP ${response.status}`);
+      const bytes = await response.arrayBuffer();
+      if (done || token !== sequence) return finish(null);
+      const buffer = await context.decodeAudioData(bytes.slice(0));
+      if (done || token !== sequence) return finish(null);
+      finish(buffer);
+    })().catch(() => finish(null));
+  });
 }
 
 async function speakWebAudioClip(url, token) {
   const context = voiceContext;
   if (!context || context.state !== "running" || !speechForegroundAllowed()) return false;
-  const buffer = await decodeVoiceBuffer(url, context);
+  const buffer = await decodeVoiceBuffer(url, context, token);
   if (!buffer || token !== sequence || context.state !== "running" || !speechForegroundAllowed()) return false;
   return new Promise((resolve) => {
     let done = false;
+    let timer;
     const source = context.createBufferSource();
     source.buffer = buffer;
     source.connect(context.destination);
@@ -190,20 +251,20 @@ async function speakWebAudioClip(url, token) {
     const finish = (ok) => {
       if (done) return;
       done = true;
+      clearTimeout(timer);
+      source.onended = null;
+      if (!ok) { try { source.stop(); } catch {} }
       try {
         source.disconnect();
       } catch {}
       if (voiceSource === source) voiceSource = null;
-      settle = null;
+      if (settle === cancel) settle = null;
       resolve(Boolean(ok && token === sequence));
     };
-    settle = () => {
-      try {
-        source.stop();
-      } catch {}
-      finish(false);
-    };
+    const cancel = () => finish(false);
+    settle = cancel;
     source.onended = () => finish(true);
+    timer = setTimeout(cancel, playbackTimeout(buffer.duration));
     try {
       source.start(0);
     } catch {
@@ -214,6 +275,7 @@ async function speakWebAudioClip(url, token) {
 
 async function speakMediaClip(url, token) {
   if (!url || !speechForegroundAllowed()) return false;
+  if (token !== sequence) return false;
   const player = naturalPlayer();
   if (!player) return false;
   try {
@@ -226,24 +288,40 @@ async function speakMediaClip(url, token) {
     player.load?.();
     return await new Promise((resolve) => {
       let done = false;
+      let startTimer;
+      let endTimer;
       const finish = (ok) => {
         if (done) return;
         done = true;
+        clearTimeout(startTimer);
+        clearTimeout(endTimer);
         player.onended = null;
         player.onerror = null;
-        settle = null;
+        player.onplaying = null;
+        if (!ok) { try { player.pause(); } catch {} }
+        if (settle === cancel) settle = null;
         resolve(Boolean(ok && token === sequence));
       };
-      settle = () => finish(false);
+      const cancel = () => finish(false);
+      const startedPlaying = () => {
+        if (done) return;
+        if (token !== sequence || !speechForegroundAllowed()) return finish(false);
+        clearTimeout(startTimer);
+        if (endTimer) return;
+        endTimer = setTimeout(cancel, playbackTimeout(player.duration));
+      };
+      settle = cancel;
       player.onended = () => finish(true);
       player.onerror = () => finish(false);
+      player.onplaying = startedPlaying;
+      startTimer = setTimeout(cancel, VOICE_START_TIMEOUT_MS);
       try {
         if (!speechForegroundAllowed()) {
           finish(false);
           return;
         }
         const started = player.play();
-        Promise.resolve(started).catch(() => finish(false));
+        Promise.resolve(started).then(startedPlaying, () => finish(false));
       } catch {
         finish(false);
       }
@@ -256,7 +334,7 @@ async function speakMediaClip(url, token) {
 async function speakGameClip(url, token) {
   if (!url || !speechForegroundAllowed()) return false;
   if (voiceContext?.state === "running") {
-    const playedWebAudio = await speakWebAudioClip(url, token);
+    const playedWebAudio = await speakWebAudioClip(url, token).catch(() => false);
     if (playedWebAudio || token !== sequence) return playedWebAudio;
   }
   return speakMediaClip(url, token);

@@ -1,7 +1,7 @@
 {
   "name": "minik-learning-world",
   "private": true,
-  "version": "1.67.0-beta.70",
+  "version": "1.68.0-beta.71",
   "type": "module",
   "scripts": {
     "dev": "vite",

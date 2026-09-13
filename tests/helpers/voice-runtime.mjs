@@ -17,7 +17,11 @@ export async function voiceRuntime(t, overrides = {}) {
   const saved = new Map();
   for (const [key, value] of Object.entries(values)) {
     saved.set(key, Object.getOwnPropertyDescriptor(globalThis, key));
-    Object.defineProperty(globalThis, key, { configurable: true, writable: true, value });
+    Object.defineProperty(globalThis, key, {
+      configurable: true,
+      writable: true,
+      value,
+    });
   }
   let voice;
   t.after(() => {

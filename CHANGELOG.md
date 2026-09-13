@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.68.0 Beta 71 — Audio-Unterbrechungen und sichere PWA-Updates
+
+- Audio-Unlock ist an die auslösende Geste gebunden. Ein später Safari-Resume kann kein inzwischen gestartetes Wort mehr mit dem stillen Unlock-Clip überschreiben.
+- Sprache wird auch während Download/Decodierung sofort abbrechbar. Start-, Download- und Wiedergabe-Watchdogs verhindern dauerhaft hängende Audiojobs; ein gestörter WebAudio-Pfad kann denselben festen Clip über HTML Audio abspielen.
+- Der Cache dekodierter Sprachpuffer ist auf 16 MiB und 32 zuletzt genutzte Clips begrenzt. Abgebrochene Lade-Promises blockieren keinen späteren Wiederholungsversuch.
+- Updates mit bereits aktivem Service Worker warten auf die bestehende Update-Aktion oder das Schließen alter Tabs. Nur eine Erstinstallation darf sofort aktivieren; alte Caches bleiben bis zur Aktivierung erhalten.
+- Ein voller Cache verwirft keine erfolgreich vom Netzwerk gelieferten Audiodateien oder HTML-Seiten mehr.
+- 368 vorhandene Audioquelldateien sind jetzt fest im Repository gebündelt (334 MP3 und 34 WAV; rund 7,15 MB). Beide Sprach-Buildschritte funktionieren ohne Netzwerk oder Actions-Cache. Der Build prüft die bitgenaue Übernahme.
+- Neun zusätzliche Audio-Verhaltenstests; echte Worker-Tests für Update-Wartephase, explizite Aktivierung, Erstinstallation und volle Caches unter drei Installationspfaden.
+- Sprachabdeckung der 503 Lernobjekte neu erhoben; fehlende feste Wortaufnahmen stehen in `docs/VOICE_COVERAGE.md` und werden nicht als vollständig vertont ausgegeben.
+
 ## 1.67.0 Beta 70 — CI-Reparatur vom 13. September 2026
 
 - Sieben Sprachtests unterscheiden jetzt den tatsächlichen `await`-Aufruf von der davor stehenden Funktionsdefinition. Die feste natürliche MINIK-Stimme bleibt primär, Voice 4 bleibt Notfall-Fallback.

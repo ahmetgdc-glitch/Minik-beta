@@ -46,6 +46,9 @@ assert.equal(
 );
 for (const filename of expectedVoiceFiles) {
   assert.ok(builtVoiceFiles.includes(filename), `Missing localized voice clip: ${filename}`);
+  const source = await fs.readFile(path.resolve("public/assets/voice", filename));
+  const output = await fs.readFile(path.join(root, "assets/voice", filename));
+  assert.ok(source.byteLength > 100 && source.equals(output), `Bundled voice bytes must survive the build unchanged: ${filename}`);
 }
 
 const voiceManifest = JSON.parse(await fs.readFile(path.join(root, "assets/voice/manifest.json"), "utf8"));
@@ -81,6 +84,11 @@ for (const filename of generatedPersonalFiles) {
 for (const scope of ["https://example.test/", "https://example.test/Minik-beta/", "https://example.test/Minik-2.0-/"]) {
   let offline = false;
   let serverFailure = false;
+  let failCacheWrites = false;
+  let lastNetworkResponse;
+  let skipWaitingCalls = 0;
+  let claimCalls = 0;
+  const registration = { scope, active: {} };
   const listeners = new Map();
   const stores = new Map();
   const prefix = `minik:${scope}:`;
@@ -98,7 +106,8 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
     const file = path.resolve(root, relative);
     assert.ok(file.startsWith(root + path.sep));
     const body = await fs.readFile(file);
-    return { ok: true, type: "basic", body, clone() { return this; } };
+    lastNetworkResponse = { ok: true, type: "basic", body, clone() { return this; } };
+    return lastNetworkResponse;
   }
   const caches = {
     async open(name) {
@@ -107,7 +116,10 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
       return {
         async addAll(files) { for (const file of files) store.set(key(file), await fetchFile(file)); },
         async match(request) { return store.get(key(request)); },
-        async put(request, response) { store.set(key(request), response); },
+        async put(request, response) {
+          if (failCacheWrites) throw new Error("Simulated QuotaExceededError");
+          store.set(key(request), response);
+        },
       };
     },
     async keys() { return [...stores.keys()]; },
@@ -116,17 +128,27 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   vm.runInNewContext(worker, {
     URL, caches, fetch: fetchFile, AbortController, setTimeout, clearTimeout,
     self: {
-      location: { origin: "https://example.test" }, registration: { scope }, clients: { claim: async () => {} }, skipWaiting() {},
+      location: { origin: "https://example.test" }, registration,
+      clients: { claim: async () => { claimCalls++; } },
+      async skipWaiting() { skipWaitingCalls++; },
       addEventListener(type, callback) { listeners.set(type, callback); },
     },
   });
-  async function lifecycle(type) {
+  async function lifecycle(type, details = {}) {
     let pending;
-    listeners.get(type)({ waitUntil(promise) { pending = promise; } });
+    listeners.get(type)({ ...details, waitUntil(promise) { pending = promise; } });
     await pending;
   }
   await lifecycle("install");
+  assert.equal(skipWaitingCalls, 0, "An update must wait while the previous MINIK worker is active");
+  assert.equal(claimCalls, 0, "Installing an update cannot take over a child's live page");
+  assert.ok(stores.has(old), "A waiting update must preserve the running version's cache");
+  await lifecycle("message", { data: { type: "UNRELATED" } });
+  assert.equal(skipWaitingCalls, 0);
+  await lifecycle("message", { data: { type: "SKIP_WAITING" } });
+  assert.equal(skipWaitingCalls, 1, "Only an explicit update request may skip the waiting phase");
   await lifecycle("activate");
+  assert.equal(claimCalls, 1);
   assert.ok(!stores.has(old), "Old cache for this app must be removed");
   assert.ok(stores.has(other), "Another app's cache must remain untouched");
   const active = [...stores.entries()].find(([name]) => name.startsWith(prefix));
@@ -143,6 +165,12 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
     return response;
   }
   assert.equal(request(scope + "reset.html", "navigate"), undefined, "Recovery page must bypass the service worker");
+  failCacheWrites = true;
+  const uncachedVoice = await request(scope + `assets/voice/${builtVoiceFiles[0]}`);
+  assert.equal(uncachedVoice, lastNetworkResponse, "Full storage must not discard successfully downloaded audio");
+  const uncachedPage = await request(scope, "navigate");
+  assert.equal(uncachedPage, lastNetworkResponse, "Full storage must not replace fresh HTML with an older cached page");
+  failCacheWrites = false;
   serverFailure = true;
   const degradedPage = await request(scope, "navigate");
   assert.match(degradedPage.body.toString(), /MINIK/, "A temporary 5xx navigation must fall back to the cached app shell");
@@ -169,5 +197,9 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
 
   assert.equal(request("https://unrelated.test/asset.svg"), undefined);
   assert.equal(request(scope, "cors", "POST"), undefined);
+  registration.active = null;
+  offline = false;
+  await lifecycle("install");
+  assert.equal(skipWaitingCalls, 2, "A first install may activate immediately without replacing a running worker");
   console.log(`Build + offline contract passed: ${scope} (${active[1].size} boot files, ${builtVoiceFiles.length} localized voice clips)`);
 }

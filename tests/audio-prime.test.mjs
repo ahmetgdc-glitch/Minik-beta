@@ -52,8 +52,8 @@ test("late audio unlock cannot pause a new narration or replace its handlers", a
   const handler = player.onended;
   const pauseCount = pauses;
   finishUnlock();
-  assert.equal(await unlock, true);
-  await duplicate;
+  assert.equal(await unlock, false, "a superseded unlock must not report readiness for its old gesture");
+  assert.equal(await duplicate, false);
   assert.equal(pauses, pauseCount);
   assert.equal(player.onended, handler);
   assert.equal(await api.unlockVoiceAudio(), true);
