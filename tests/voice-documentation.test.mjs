@@ -19,7 +19,7 @@ test("core documentation preserves Voice 4 as the primary narrator contract", ()
   }
   assert.match(docs["docs/MASTER_PROMPT_FOR_WORK.md"], /Voice 4 zuerst/i);
   assert.match(docs["docs/TECH_SPEC.md"], /primären Erzähler/i);
-  assert.match(docs["docs/HANDOFF_SUMMARY.md"], /feste primäre Sprecher/i);
+  assert.match(docs["docs/HANDOFF_SUMMARY.md"], /(?:primäre MINIK-Erzählstimme|primäre(?:r|n)? Sprecher)/i);
 });
 
 test("core documentation does not reintroduce obsolete personal-first or system-voice-disabled guidance", () => {
@@ -32,5 +32,18 @@ test("core documentation does not reintroduce obsolete personal-first or system-
 test("Voice 4 fallback contract excludes arbitrary robotic voices", () => {
   assert.match(docs["README.md"], /Roboterstimmen werden nicht als Ersatz akzeptiert/i);
   assert.match(docs["docs/TECH_SPEC.md"], /Roboterstimmen werden nicht als Ersatz gewählt/i);
-  assert.match(docs["docs/MASTER_PROMPT_FOR_WORK.md"], /Roboterstimmen sind kein zulässiger Ersatz/i);
+  assert.match(
+    docs["docs/MASTER_PROMPT_FOR_WORK.md"],
+    /(?:Roboterstimmen[^\n]*(?:kein zulässiger Ersatz|verboten)|keinem Wechsel auf beliebige Browser-\/Default-\/Roboterstimmen)/i,
+  );
+});
+
+test("Voice 4 documentation keeps an audible local emergency path", () => {
+  const master = docs["docs/MASTER_PROMPT_FOR_WORK.md"];
+  const handoff = docs["docs/HANDOFF_SUMMARY.md"];
+
+  assert.match(master, /komplette Stille ist kein zulässiger Dauer-Fallback/i);
+  assert.match(master, /DE\/TR-Clips als hörbarem Notfall-Fallback/i);
+  assert.match(handoff, /Kein Dauer-Stumm-Fallback/i);
+  assert.match(handoff, /lokale(?:r)? DE\/TR-(?:Notfallclip|Clip)/i);
 });
