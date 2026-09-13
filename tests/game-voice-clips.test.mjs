@@ -74,30 +74,18 @@ test("new home and drawing guidance has full natural DE/TR recordings", () => {
 
 test("dynamic common game prompts are composed only from recorded clips", () => {
   for (const [text, lang, minParts] of [
-    ["Finde: Hund.", "de", 2],
-    ["Köpek nerede?", "tr", 2],
-    ["Finde: Apfel.", "de", 2],
-    ["Elma nerede?", "tr", 2],
-    ["Finde: Wassermelone.", "de", 2],
-    ["Karpuz nerede?", "tr", 2],
-    ["In welchen Korb gehört das? Katze.", "de", 2],
-    ["Hangi sepete ait? Kedi.", "tr", 2],
-    ["Mit welchem Buchstaben beginnt Hund?", "de", 2],
-    ["Köpek hangi harfle başlıyor?", "tr", 2],
-    ["Sprich mir nach: Löwe", "de", 2],
-    ["Benimle söyle: Aslan", "tr", 2],
-    ["Fahre den Buchstaben A nach. Starte am grünen Punkt.", "de", 1],
-    ["A harfini çiz. Yeşil noktadan başla.", "tr", 1],
-    ["Wo ist Hund? Das wiederholen wir noch einmal.", "de", 3],
-    ["Köpek nerede? Bir kez daha hatırlayalım.", "tr", 3],
-    ["Hund. Tippe auf dieses Bild.", "de", 2],
-    ["Köpek. Bu resmi seç.", "tr", 2],
-    ["Hund. Was ist das Gegenteil?", "de", 2],
-    ["Köpek. Bunun zıttı hangisi?", "tr", 2],
-    ["Was kommt nach Hund?", "de", 2],
-    ["Köpek sonrasında ne gelir?", "tr", 2],
-    ["Nach Hund kommt Katze.", "de", 3],
-    ["Köpek sonrasında Kedi gelir.", "tr", 3],
+    ["Finde: Hund.", "de", 2], ["Köpek nerede?", "tr", 2],
+    ["Finde: Apfel.", "de", 2], ["Elma nerede?", "tr", 2],
+    ["Finde: Wassermelone.", "de", 2], ["Karpuz nerede?", "tr", 2],
+    ["In welchen Korb gehört das? Katze.", "de", 2], ["Hangi sepete ait? Kedi.", "tr", 2],
+    ["Mit welchem Buchstaben beginnt Hund?", "de", 2], ["Köpek hangi harfle başlıyor?", "tr", 2],
+    ["Sprich mir nach: Löwe", "de", 2], ["Benimle söyle: Aslan", "tr", 2],
+    ["Fahre den Buchstaben A nach. Starte am grünen Punkt.", "de", 1], ["A harfini çiz. Yeşil noktadan başla.", "tr", 1],
+    ["Wo ist Hund? Das wiederholen wir noch einmal.", "de", 3], ["Köpek nerede? Bir kez daha hatırlayalım.", "tr", 3],
+    ["Hund. Tippe auf dieses Bild.", "de", 2], ["Köpek. Bu resmi seç.", "tr", 2],
+    ["Hund. Was ist das Gegenteil?", "de", 2], ["Köpek. Bunun zıttı hangisi?", "tr", 2],
+    ["Was kommt nach Hund?", "de", 2], ["Köpek sonrasında ne gelir?", "tr", 2],
+    ["Nach Hund kommt Katze.", "de", 3], ["Köpek sonrasında Kedi gelir.", "tr", 3],
   ]) {
     const plan = naturalVoicePlan(text, lang);
     assert.ok(plan.length >= minParts, `expected natural plan for ${lang}: ${text}`);
@@ -158,14 +146,15 @@ test("natural Mino library keeps at least 218 recorded prompts and words", () =>
   assert.ok(urls.length >= 218, `expected at least 218 natural clips, got ${urls.length}`);
 });
 
-test("fixed Mino speech prefers Voice 4 and retains personal fallback plans", () => {
-  assert.match(voice, /speakWithVoice4\(/);
-  assert.match(voice, /naturalVoicePlan\(text, lang\)/);
+test("fixed Mino speech uses bundled natural narration before Voice 4 and never automatic personal clips", () => {
+  assert.match(voice, /fixedNaturalVoicePlan\(text, lang\)/);
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
-  const systemIndex = voice.indexOf("speakWithVoice4(");
-  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  const planIndex = voice.indexOf("const plan = naturalVoicePlan(text, lang)");
-  assert.ok(systemIndex > 0 && personalIndex > systemIndex && planIndex > personalIndex);
+  assert.match(voice, /speakWithVoice4\(/);
+  const fixedIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+  const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
+  assert.ok(fixedIndex > 0 && playbackIndex > fixedIndex && systemIndex > playbackIndex);
+  assert.doesNotMatch(voice, /personalVoiceClip/);
 });
 
 test("iOS Voice 4 is allowed but arbitrary robotic system voices are rejected", () => {
