@@ -34,13 +34,13 @@ test("dynamic narration is composed only from the fixed natural library", () => 
   assertFixedPlan("Mino en son ne görüyor? Aslan", "tr", 2);
 });
 
-test("runtime tries iOS Voice 4 before fixed natural fallback", () => {
-  const voice4Index = voice.indexOf("speakWithVoice4(");
+test("runtime tries fixed natural narration before iOS Voice 4 fallback", () => {
   const fixedPlanIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const naturalPlaybackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
-  assert.ok(voice4Index > 0);
-  assert.ok(fixedPlanIndex > voice4Index);
+  const voice4Index = voice.indexOf("speakWithVoice4(");
+  assert.ok(fixedPlanIndex > 0);
   assert.ok(naturalPlaybackIndex > fixedPlanIndex);
+  assert.ok(voice4Index > naturalPlaybackIndex);
   assert.doesNotMatch(voice, /personalVoiceClip/);
   assert.doesNotMatch(voice, /resource2\.heygen\.ai/);
 });
