@@ -4,9 +4,9 @@ import fs from "node:fs";
 
 const voice = fs.readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 
-test("an established iOS Voice 4 blocks recorded fallback during a transient engine gap", () => {
+test("an established iOS Voice 4 blocks recorded fallback during a speech engine gap", () => {
   assert.match(voice, /const establishedVoice4Languages = new Set\(\)/);
-  assert.match(voice, /const VOICE4_ENGINE_GRACE_MS = 5000/);
+  assert.match(voice, /const VOICE4_ENGINE_GRACE_MS = Number\.POSITIVE_INFINITY/);
   assert.match(voice, /export function holdVoice4DuringEngineGap/);
   assert.match(voice, /isIOSSpeechEnvironment\(\)/);
 
@@ -22,7 +22,9 @@ test("Voice 4 continuity is established only after a real selection and cleared 
   assert.match(voice, /if \(!voice4InventoryReady\(\)\) return false;\s*[\s\S]*clearVoice4Continuity\(lang\);/);
 });
 
-test("the engine-gap hold expires instead of permanently disabling the recorded fallback", () => {
+test("the engine-gap hold cannot expire into a different narrator once Voice 4 was established", () => {
   assert.match(voice, /voice4EngineMissingSince\.set\(lang, now\)/);
   assert.match(voice, /return now - missingSince < VOICE4_ENGINE_GRACE_MS/);
+  assert.match(voice, /VOICE4_ENGINE_GRACE_MS = Number\.POSITIVE_INFINITY/);
+  assert.doesNotMatch(voice, /VOICE4_ENGINE_GRACE_MS = 5000/);
 });
