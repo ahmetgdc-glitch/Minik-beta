@@ -40,17 +40,15 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
-test("an unresolved or transient Safari voice inventory cannot trigger the personal narrator", () => {
-  const inventoryGuard = voice.indexOf("if (!voice4InventoryReady(lang, settings)) return false;");
+test("an unresolved Safari voice inventory cannot permanently silence MINIK", () => {
+  const inventoryCheck = voice.indexOf("if (voice4InventoryReady(lang, settings)) {");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(inventoryGuard > 0);
-  assert.ok(personalIndex > inventoryGuard);
+  assert.ok(inventoryCheck > 0);
+  assert.ok(personalIndex > inventoryCheck);
+  assert.doesNotMatch(voice, /if \(!voice4InventoryReady\(lang, settings\)\) return false;/);
   assert.match(systemVoice4, /export function voice4InventoryReady\(lang = "de", settings = \{\}\)/);
   assert.match(systemVoice4, /if \(!voices\.length\) \{/);
-  assert.match(systemVoice4, /if \(!isIOSSpeechEnvironment\(\)\) return true/);
   assert.match(systemVoice4, /IOS_ABSENCE_GRACE_MS = 5000/);
-  assert.match(systemVoice4, /return now - missingSince >= IOS_ABSENCE_GRACE_MS/);
-  assert.doesNotMatch(systemVoice4, /voicesObserved \|\| exposedSystemVoices\(\)\.length > 0/);
 });
 
 test("Voice 4 retries a transient Safari playback failure once", () => {
@@ -62,12 +60,13 @@ test("Voice 4 retries a transient Safari playback failure once", () => {
   assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, retryVoice, stillCurrent\)/);
 });
 
-test("a known Voice 4 never switches to a personal recording after runtime failure", () => {
+test("a known Voice 4 falls back to bundled audio after runtime playback failure", () => {
   const stickyIndex = voice.indexOf("if (hasVoice4Selection(lang, settings)) {");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   assert.ok(stickyIndex > 0);
   assert.ok(personalIndex > stickyIndex);
-  assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s);
+  assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*\}/s);
+  assert.doesNotMatch(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s);
   assert.match(systemVoice4, /export function hasVoice4Selection/);
 });
 
