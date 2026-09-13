@@ -49,13 +49,15 @@ test("an unresolved Safari voice inventory keeps Voice 4 first but cannot silenc
   assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
 });
 
-test("Voice 4 retries a transient Safari playback failure once", () => {
+test("Voice 4 retries a transient Safari playback error but not a queue-only stall", () => {
   assert.match(systemVoice4, /PLAYBACK_RETRY_MS = 90/);
   assert.match(systemVoice4, /const firstAttempt = await playVoice4Attempt/);
+  assert.match(systemVoice4, /if \(firstAttempt === null\) return false/);
   assert.match(systemVoice4, /const mayRetry = await retryDelay\(stillCurrent\)/);
   assert.match(systemVoice4, /const retryVoice = currentVoice4ForRetry\(lang, settings\)/);
   assert.match(systemVoice4, /if \(!retryVoice \|\| !stillCurrent\(\)\) return false/);
-  assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, retryVoice, stillCurrent\)/);
+  assert.match(systemVoice4, /const retryAttempt = await playVoice4Attempt\(text, lang, settings, retryVoice, stillCurrent\)/);
+  assert.match(systemVoice4, /return retryAttempt === true/);
 });
 
 test("a known iOS Voice 4 falls back only after its guarded runtime attempt fails", () => {
@@ -141,9 +143,11 @@ test("Voice 4 playback has bounded Safari start and completion watchdogs", async
   const mod = await import(`../src/audio/systemVoice4.js?watchdog=${Date.now()}`);
   assert.equal(mod.voice4PlaybackWatchdogMs("Hi"), 5000);
   assert.equal(mod.voice4PlaybackWatchdogMs("x".repeat(1000)), 18000);
-  assert.match(systemVoice4, /PLAYBACK_START_WATCHDOG_MS = 1500/);
+  assert.match(systemVoice4, /PLAYBACK_START_WATCHDOG_MS = 700/);
   assert.match(systemVoice4, /utterance\.onstart = \(\) => \{[\s\S]*started = true;[\s\S]*clearStartWatchdog\(\)/);
-  assert.match(systemVoice4, /startWatchdog = setTimeout\([\s\S]*synth\.speaking === true \|\| synth\.pending === true/);
+  assert.match(systemVoice4, /startWatchdog = setTimeout\([\s\S]*if \(synth\.speaking === true\) return/);
+  assert.doesNotMatch(systemVoice4, /synth\.speaking === true \|\| synth\.pending === true/);
+  assert.match(systemVoice4, /finish\(false, true\)/);
   assert.match(systemVoice4, /watchdog = setTimeout\([\s\S]*synth\.cancel\(\)[\s\S]*finish\(false\)[\s\S]*voice4PlaybackWatchdogMs\(text\)/);
 });
 
