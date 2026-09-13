@@ -66,7 +66,7 @@ async function withNavigator(value, run) {
   }
 }
 
-test("fixed natural narrator wins before Voice 4 on iPhone", async () => {
+test("Voice 4 wins before fixed natural fallback on iPhone", async () => {
   let fixedLookups = 0;
   let voice4Calls = 0;
   const api = buildVoiceHarness({
@@ -87,14 +87,18 @@ test("fixed natural narrator wins before Voice 4 on iPhone", async () => {
   );
 
   assert.equal(result, true);
-  assert.equal(fixedLookups, 1);
-  assert.equal(voice4Calls, 0, "Voice 4 must not replace a playable fixed MINIK narrator clip");
+  assert.equal(voice4Calls, 1);
+  assert.equal(fixedLookups, 0, "playable Voice 4 must finish before local fallback is resolved");
 });
 
 test("missing iOS speech engine still plays fixed bundled narration", async () => {
   let engineChecks = 0;
+  let fixedLookups = 0;
   const api = buildVoiceHarness({
-    fixedNaturalVoicePlan: () => [FIXED_CLIP],
+    fixedNaturalVoicePlan() {
+      fixedLookups += 1;
+      return [FIXED_CLIP];
+    },
     systemVoice4Available() {
       engineChecks += 1;
       return false;
@@ -107,7 +111,34 @@ test("missing iOS speech engine still plays fixed bundled narration", async () =
   );
 
   assert.equal(result, true);
-  assert.equal(engineChecks, 0, "a playable bundled narrator must finish before system speech is consulted");
+  assert.equal(engineChecks, 1, "Voice 4 availability must be checked before local fallback");
+  assert.equal(fixedLookups, 1);
+});
+
+test("failed iOS Voice 4 falls back to fixed bundled narration", async () => {
+  let voice4Calls = 0;
+  let fixedLookups = 0;
+  const api = buildVoiceHarness({
+    fixedNaturalVoicePlan() {
+      fixedLookups += 1;
+      return [FIXED_CLIP];
+    },
+    systemVoice4Available: () => true,
+    speakWithVoice4: async () => {
+      voice4Calls += 1;
+      return false;
+    },
+    hasVoice4Selection: () => true,
+  });
+
+  const result = await withNavigator(
+    { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5 },
+    () => api.speak("Hallo", "de", { audio: true }),
+  );
+
+  assert.equal(result, true);
+  assert.equal(voice4Calls, 1);
+  assert.equal(fixedLookups, 1);
 });
 
 test("unmapped text may try Voice 4 but never revives the removed personal narrator", async () => {
