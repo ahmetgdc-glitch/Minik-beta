@@ -49,9 +49,11 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
     const resumeAfterBackground = () => {
       stopMusic();
       if (document.visibilityState !== "visible") return;
-      // Safari may suspend WebAudio after backgrounding. Re-arm the next tap;
-      // never try to auto-play media from visibilitychange itself.
+      // Safari may suspend WebAudio or revoke media playback readiness after
+      // backgrounding. Re-arm BOTH audio paths for the next real tap; never
+      // assume the old voice media unlock is still valid after resume.
       webAudioReady = false;
+      voiceReady = false;
       window.addEventListener("pointerdown", prime, true);
       window.addEventListener("touchstart", prime, true);
       window.addEventListener("keydown", prime, true);
