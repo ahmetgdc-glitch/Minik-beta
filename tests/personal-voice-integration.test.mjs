@@ -87,7 +87,7 @@ test("legacy composition may know personal assets but runtime converts to fixed 
 
 test("runtime uses fixed natural narration first, Voice 4 only as fallback, and never auto-plays personal recordings", () => {
   const fixedIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const playbackIndex = voice.indexOf("await speakNaturalPlan(plan, token)");
   const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(fixedIndex > 0);
   assert.ok(playbackIndex > fixedIndex);

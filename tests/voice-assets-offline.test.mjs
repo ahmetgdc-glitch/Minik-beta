@@ -41,7 +41,7 @@ test("localized voice files are packaged but cached only after use", () => {
 
 test("runtime uses fixed natural narration first and keeps Voice 4 as emergency fallback", () => {
   const planIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const playbackIndex = voice.indexOf("await speakNaturalPlan(plan, token)");
   const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(planIndex > 0, "fixed natural narrator must be resolved first");
   assert.ok(playbackIndex > planIndex, "fixed natural narrator must be playable before system fallback");

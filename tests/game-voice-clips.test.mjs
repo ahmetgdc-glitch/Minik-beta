@@ -151,7 +151,7 @@ test("fixed Mino speech uses bundled natural narration before Voice 4 and never 
   assert.match(voice, /speakNaturalPlan\(plan, token\)/);
   assert.match(voice, /speakWithVoice4\(/);
   const fixedIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const playbackIndex = voice.indexOf("await speakNaturalPlan(plan, token)");
   const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(fixedIndex > 0 && playbackIndex > fixedIndex && systemIndex > playbackIndex);
   assert.doesNotMatch(voice, /personalVoiceClip/);

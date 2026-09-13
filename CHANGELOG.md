@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.67.0 Beta 70 — CI-Reparatur vom 13. September 2026
+
+- Sieben Sprachtests unterscheiden jetzt den tatsächlichen `await`-Aufruf von der davor stehenden Funktionsdefinition. Die feste natürliche MINIK-Stimme bleibt primär, Voice 4 bleibt Notfall-Fallback.
+- Der veraltete Lifecycle-Check auf entfernten Personal-Voice-Code ist durch reale Abbruchtests für `visibilitychange` und `pagehide` ergänzt: keine Folgeclips oder verspäteten Fallbacks nach dem Verlassen der Seite.
+- Ausgangspunkt ist der aktuelle `main`-Commit `6eaaf3f`; alle bestehenden Audio- und Release-Gates bleiben aktiv.
+
 ## 1.67.0 Beta 70 — Telefonstimme vollständig aus dem Spielpfad entfernt
 
 - Persönliche und aufgezeichnete MINIK-Clips sind jetzt der einzige Audiopfad im Spiel.

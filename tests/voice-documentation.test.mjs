@@ -39,7 +39,7 @@ test("fallback contract excludes arbitrary robotic system voices", () => {
 
 test("runtime source enforces fixed natural narration before Voice 4", () => {
   const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const playbackIndex = voice.indexOf("await speakNaturalPlan(plan, token)");
   const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(naturalIndex > 0);
   assert.ok(playbackIndex > naturalIndex);

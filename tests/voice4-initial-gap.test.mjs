@@ -6,7 +6,7 @@ const voice = fs.readFileSync(new URL("../src/audio/voice.js", import.meta.url),
 
 test("an initial iOS engine gap cannot block bundled MINIK narration", () => {
   const naturalPlan = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const naturalPlayback = voice.indexOf("speakNaturalPlan(plan, token)");
+  const naturalPlayback = voice.indexOf("await speakNaturalPlan(plan, token)");
   const systemCheck = voice.indexOf("const voice4Available = systemVoice4Available()");
   const gapGuard = voice.indexOf("if (!voice4Available && holdVoice4DuringEngineGap(lang)) return false;");
 

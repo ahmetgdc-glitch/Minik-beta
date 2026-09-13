@@ -41,6 +41,8 @@ npm run verify:build
 
 `npm run preflight` prüft Release-Versionen, Dokumentation, Inhaltsumfang, Manifest und GitHub-Pages-Workflow. `npm run assets` erzeugt die lokalen Illustrations-/Content-Artefakte erneut.
 
+Die CI-Korrektur vom 13. September 2026 behebt acht veraltete beziehungsweise mehrdeutige Sprachtest-Prüfungen. Verhaltenstests prüfen zusätzlich den echten Audio-Abbruch bei Hintergrundwechsel und `pagehide`.
+
 ## GitHub Pages
 
 Der empfohlene Weg ist das vollständige Projekt auf `main` oder `master` zu laden und unter **Settings → Pages → Source** auf **GitHub Actions** zu stellen. Der Workflow installiert Abhängigkeiten, testet, führt den Release-Preflight aus, baut `dist/`, verifiziert den Offline-Build und veröffentlicht ihn.
