@@ -35,8 +35,6 @@ test("voiceschanged preserves an explicitly selected Voice 4 variant", async () 
     const mod = await import(`../src/audio/systemVoice4.js?saved-refresh=${Math.random()}`);
     const settings = { voices: { de: voiceB.voiceURI } };
     assert.equal(mod.hasVoice4Selection("de", settings), true);
-
-    // Register the observer without replacing the already selected voice.
     const playback = mod.speakWithVoice4("Hallo", "de", settings);
     voicesChanged?.();
     assert.equal(await playback, true);
@@ -84,6 +82,12 @@ test("partial iOS inventory cannot replace an explicitly saved Voice 4 variant",
     assert.equal(mod.selectVoice4(voices, "de", settings), null, "another Voice 4 must not replace the saved narrator");
     assert.equal(mod.hasVoice4Selection("de", settings), false, "a partial inventory must not report the saved narrator as selectable");
     assert.equal(mod.voice4InventoryReady("de", settings), false, "partial inventory must keep personal fallback closed");
+
+    voices = [];
+    assert.equal(mod.hasVoice4Selection("de", settings), true, "the remembered saved narrator identity must survive the partial inventory");
+
+    voices = [voiceA, voiceB];
+    assert.equal(mod.selectVoice4(voices, "de", settings), voiceB, "the saved narrator must resume when Safari exposes it again");
   } finally {
     if (previousSynth === undefined) delete globalThis.speechSynthesis;
     else globalThis.speechSynthesis = previousSynth;
