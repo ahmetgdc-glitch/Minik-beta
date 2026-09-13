@@ -14,6 +14,12 @@ class AutoEndingAudio {
   }
 }
 
+class FailingAudio extends AutoEndingAudio {
+  play() {
+    return Promise.reject(new Error("fixed clip unavailable"));
+  }
+}
+
 function buildVoiceHarness({
   Audio = AutoEndingAudio,
   fixedNaturalVoicePlan = () => [],
@@ -66,7 +72,7 @@ async function withNavigator(value, run) {
   }
 }
 
-test("Voice 4 wins before fixed natural fallback on iPhone", async () => {
+test("fixed natural narration wins before Voice 4 on iPhone", async () => {
   let fixedLookups = 0;
   let voice4Calls = 0;
   const api = buildVoiceHarness({
@@ -87,11 +93,11 @@ test("Voice 4 wins before fixed natural fallback on iPhone", async () => {
   );
 
   assert.equal(result, true);
-  assert.equal(voice4Calls, 1);
-  assert.equal(fixedLookups, 0, "playable Voice 4 must finish before local fallback is resolved");
+  assert.equal(fixedLookups, 1);
+  assert.equal(voice4Calls, 0, "successful fixed narration must not invoke Voice 4");
 });
 
-test("missing iOS speech engine still plays fixed bundled narration", async () => {
+test("fixed bundled narration does not depend on the iOS speech engine", async () => {
   let engineChecks = 0;
   let fixedLookups = 0;
   const api = buildVoiceHarness({
@@ -111,14 +117,15 @@ test("missing iOS speech engine still plays fixed bundled narration", async () =
   );
 
   assert.equal(result, true);
-  assert.equal(engineChecks, 1, "Voice 4 availability must be checked before local fallback");
   assert.equal(fixedLookups, 1);
+  assert.equal(engineChecks, 0, "successful fixed narration must finish before checking Voice 4");
 });
 
-test("failed iOS Voice 4 falls back to fixed bundled narration", async () => {
+test("failed fixed narration may use Voice 4 as emergency fallback", async () => {
   let voice4Calls = 0;
   let fixedLookups = 0;
   const api = buildVoiceHarness({
+    Audio: FailingAudio,
     fixedNaturalVoicePlan() {
       fixedLookups += 1;
       return [FIXED_CLIP];
@@ -126,7 +133,7 @@ test("failed iOS Voice 4 falls back to fixed bundled narration", async () => {
     systemVoice4Available: () => true,
     speakWithVoice4: async () => {
       voice4Calls += 1;
-      return false;
+      return true;
     },
     hasVoice4Selection: () => true,
   });
@@ -137,8 +144,8 @@ test("failed iOS Voice 4 falls back to fixed bundled narration", async () => {
   );
 
   assert.equal(result, true);
-  assert.equal(voice4Calls, 1);
   assert.equal(fixedLookups, 1);
+  assert.equal(voice4Calls, 1);
 });
 
 test("unmapped text may try Voice 4 but never revives the removed personal narrator", async () => {
