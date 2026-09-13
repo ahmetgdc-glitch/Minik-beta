@@ -25,6 +25,8 @@ test("speech recognition errors distinguish permission, silence and temporary fa
   const { recognitionIssue } = await import("../src/games/pronunciation.js");
   assert.equal(recognitionIssue("not-allowed", "de").kind, "permission");
   assert.equal(recognitionIssue("not-allowed", "de").retryable, false);
+  assert.equal(recognitionIssue("NotAllowedError", "de").kind, "permission");
+  assert.equal(recognitionIssue("SecurityError", "tr").kind, "permission");
   assert.equal(recognitionIssue("no-speech", "tr").kind, "silence");
   assert.equal(recognitionIssue("network", "de").retryable, true);
   assert.equal(recognitionIssue("audio-capture", "tr").kind, "microphone");
