@@ -2,9 +2,23 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
+const FIXED_CLIP = "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/00000000-0000-0000-0000-000000000001.mp3";
+
+class AutoEndingAudio {
+  setAttribute() {}
+  pause() {}
+  load() {}
+  play() {
+    queueMicrotask(() => this.onended?.());
+    return Promise.resolve();
+  }
+}
+
 function buildVoiceHarness({
-  personalVoiceClip,
-  systemVoice4Available,
+  Audio = AutoEndingAudio,
+  fixedNaturalVoicePlan = () => [],
+  isFixedNaturalVoiceClipUrl = () => true,
+  systemVoice4Available = () => false,
   speakWithVoice4 = async () => false,
   hasVoice4Selection = () => true,
   voice4InventoryReady = () => false,
@@ -15,8 +29,9 @@ function buildVoiceHarness({
     .replace(/export /g, "");
 
   return new Function(
-    "naturalVoicePlan",
-    "personalVoiceClip",
+    "Audio",
+    "fixedNaturalVoicePlan",
+    "isFixedNaturalVoiceClipUrl",
     "setSpeechActive",
     "hasVoice4Selection",
     "speakWithVoice4",
@@ -25,13 +40,14 @@ function buildVoiceHarness({
     "voice4InventoryReady",
     `${source}; return { speak };`,
   )(
-    () => [],
-    personalVoiceClip || (() => ""),
+    Audio,
+    fixedNaturalVoicePlan,
+    isFixedNaturalVoiceClipUrl,
     () => {},
     hasVoice4Selection,
     speakWithVoice4,
     () => {},
-    systemVoice4Available || (() => false),
+    systemVoice4Available,
     voice4InventoryReady,
   );
 }
@@ -50,43 +66,67 @@ async function withNavigator(value, run) {
   }
 }
 
-test("failed Voice 4 playback on iPhone reaches bundled narrator lookup", async () => {
-  let personalLookups = 0;
+test("fixed natural narrator wins before Voice 4 on iPhone", async () => {
+  let fixedLookups = 0;
+  let voice4Calls = 0;
   const api = buildVoiceHarness({
-    personalVoiceClip() {
-      personalLookups += 1;
-      return "personal.mp3";
+    fixedNaturalVoicePlan() {
+      fixedLookups += 1;
+      return [FIXED_CLIP];
     },
     systemVoice4Available: () => true,
-    speakWithVoice4: async () => false,
+    speakWithVoice4: async () => {
+      voice4Calls += 1;
+      return true;
+    },
+  });
+
+  const result = await withNavigator(
+    { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5 },
+    () => api.speak("Hallo", "de", { audio: true }),
+  );
+
+  assert.equal(result, true);
+  assert.equal(fixedLookups, 1);
+  assert.equal(voice4Calls, 0, "Voice 4 must not replace a playable fixed MINIK narrator clip");
+});
+
+test("missing iOS speech engine still plays fixed bundled narration", async () => {
+  let engineChecks = 0;
+  const api = buildVoiceHarness({
+    fixedNaturalVoicePlan: () => [FIXED_CLIP],
+    systemVoice4Available() {
+      engineChecks += 1;
+      return false;
+    },
+  });
+
+  const result = await withNavigator(
+    { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5 },
+    () => api.speak("Hallo", "de", { audio: true }),
+  );
+
+  assert.equal(result, true);
+  assert.equal(engineChecks, 0, "a playable bundled narrator must finish before system speech is consulted");
+});
+
+test("unmapped text may try Voice 4 but never revives the removed personal narrator", async () => {
+  let voice4Calls = 0;
+  const api = buildVoiceHarness({
+    fixedNaturalVoicePlan: () => [],
+    systemVoice4Available: () => true,
+    speakWithVoice4: async () => {
+      voice4Calls += 1;
+      return false;
+    },
     hasVoice4Selection: () => true,
   });
 
   const result = await withNavigator(
     { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5 },
-    () => api.speak("Hallo", "de", { audio: true }),
+    () => api.speak("Unbekannter Satz", "de", { audio: true }),
   );
 
   assert.equal(result, false);
-  assert.equal(personalLookups, 1, "iOS must keep an audible bundled fallback reachable after Voice 4 fails");
-});
-
-test("missing iOS speech engine still reaches bundled narrator lookup", async () => {
-  let personalLookups = 0;
-  const api = buildVoiceHarness({
-    personalVoiceClip() {
-      personalLookups += 1;
-      return "";
-    },
-    systemVoice4Available: () => false,
-    hasVoice4Selection: () => false,
-  });
-
-  const result = await withNavigator(
-    { userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)", platform: "iPhone", maxTouchPoints: 5 },
-    () => api.speak("Hallo", "de", { audio: true }),
-  );
-
-  assert.equal(result, false);
-  assert.equal(personalLookups, 1, "complete speech engine loss must keep the bundled emergency path reachable");
+  assert.equal(voice4Calls, 1);
 });
