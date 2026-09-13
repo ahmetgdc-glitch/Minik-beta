@@ -42,6 +42,21 @@ function sameVoice(a, b) {
   return Boolean(a && b && voiceIdentity(a) === voiceIdentity(b));
 }
 
+function savedVoicePreference(lang, settings = {}) {
+  return String(settings?.voices?.[lang] || "").trim().toLowerCase();
+}
+
+function matchesSavedVoice(voice, saved) {
+  if (!saved) return true;
+  return [voice?.name, voice?.voiceURI].some(
+    (value) => String(value || "").trim().toLowerCase() === saved,
+  );
+}
+
+function voiceLookupKey(lang, settings = {}) {
+  return `${lang}:${savedVoicePreference(lang, settings)}`;
+}
+
 export function isVoice4Candidate(voice) {
   const id = voiceIdentity(voice);
   return VOICE4_RE.test(id) || TURKISH_VOICE4_RE.test(id) || SIRI_RE.test(id);
@@ -89,10 +104,19 @@ function syncVoiceEngine() {
   return synth;
 }
 
-function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
+function cachedVoiceFor(lang, voices = exposedSystemVoices(), settings = {}) {
   syncVoiceEngine();
   const cached = selectedVoiceCache.get(lang);
   if (!cached || !voiceIsEligibleForLanguage(cached, lang)) {
+    selectedVoiceCache.delete(lang);
+    return null;
+  }
+
+  // A changed explicit Voice 4 preference must take effect immediately. A
+  // stale per-language cache would otherwise keep speaking the previous
+  // narrator, especially when rapid requests share Safari's delayed inventory.
+  const saved = savedVoicePreference(lang, settings);
+  if (saved && !matchesSavedVoice(cached, saved)) {
     selectedVoiceCache.delete(lang);
     return null;
   }
@@ -202,13 +226,9 @@ export function selectVoice4(voices, lang, settings = {}) {
   const eligible = isIOSSpeechEnvironment() ? sameLanguage : available;
   if (!eligible.length) return null;
 
-  const saved = String(settings?.voices?.[lang] || "").trim().toLowerCase();
+  const saved = savedVoicePreference(lang, settings);
   if (saved) {
-    const exact = eligible.find((voice) =>
-      [voice?.name, voice?.voiceURI].some(
-        (value) => String(value || "").trim().toLowerCase() === saved,
-      ),
-    );
+    const exact = eligible.find((voice) => matchesSavedVoice(voice, saved));
     if (exact) return exact;
   }
 
@@ -226,7 +246,7 @@ export function selectVoice4(voices, lang, settings = {}) {
 export function hasVoice4Selection(lang = "de", settings = {}) {
   syncVoiceEngine();
   const voices = exposedSystemVoices();
-  const cached = cachedVoiceFor(lang, voices);
+  const cached = cachedVoiceFor(lang, voices, settings);
   if (cached) return true;
   const selected = selectVoice4(voices, lang, settings);
   if (selected) {
@@ -240,7 +260,7 @@ async function waitForVoice4(lang, settings, timeoutMs) {
   observeVoiceChanges();
   const lookupSynth = syncVoiceEngine();
   const initialVoices = exposedSystemVoices();
-  const cached = cachedVoiceFor(lang, initialVoices);
+  const cached = cachedVoiceFor(lang, initialVoices, settings);
   if (cached) return cached;
 
   let selected = selectVoice4(refreshVoiceCache(), lang, settings);
@@ -249,7 +269,8 @@ async function waitForVoice4(lang, settings, timeoutMs) {
     return selected;
   }
 
-  if (pendingVoiceLookup.has(lang)) return pendingVoiceLookup.get(lang);
+  const lookupKey = voiceLookupKey(lang, settings);
+  if (pendingVoiceLookup.has(lookupKey)) return pendingVoiceLookup.get(lookupKey);
   const synth = lookupSynth;
   if (!synth || typeof synth.addEventListener !== "function") return null;
 
@@ -288,10 +309,10 @@ async function waitForVoice4(lang, settings, timeoutMs) {
     synth.addEventListener("voiceschanged", onVoicesChanged);
     onVoicesChanged();
   }).finally(() => {
-    if (pendingVoiceLookup.get(lang) === pending) pendingVoiceLookup.delete(lang);
+    if (pendingVoiceLookup.get(lookupKey) === pending) pendingVoiceLookup.delete(lookupKey);
   });
 
-  pendingVoiceLookup.set(lang, pending);
+  pendingVoiceLookup.set(lookupKey, pending);
   return pending;
 }
 
@@ -387,7 +408,7 @@ function retryDelay(isCurrent) {
 
 function currentVoice4ForRetry(lang, settings) {
   const voices = exposedSystemVoices();
-  const cached = cachedVoiceFor(lang, voices);
+  const cached = cachedVoiceFor(lang, voices, settings);
   if (cached) return cached;
 
   const selected = selectVoice4(voices, lang, settings);
