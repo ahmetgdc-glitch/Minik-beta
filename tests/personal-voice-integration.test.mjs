@@ -85,13 +85,13 @@ test("legacy composition may know personal assets but runtime converts to fixed 
   }
 });
 
-test("runtime uses Voice 4 first, fixed natural fallback second, and never auto-plays personal recordings", () => {
-  const systemIndex = voice.indexOf("speakWithVoice4(");
+test("runtime uses fixed natural narration first, Voice 4 only as fallback, and never auto-plays personal recordings", () => {
   const fixedIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const playbackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
-  assert.ok(systemIndex > 0);
-  assert.ok(fixedIndex > systemIndex);
+  const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
+  assert.ok(fixedIndex > 0);
   assert.ok(playbackIndex > fixedIndex);
+  assert.ok(systemIndex > playbackIndex);
   assert.doesNotMatch(voice, /personalVoiceClip/);
   assert.doesNotMatch(voice, /resource2\.heygen\.ai/);
   assert.match(systemVoice4, /VOICE4_RE/);
