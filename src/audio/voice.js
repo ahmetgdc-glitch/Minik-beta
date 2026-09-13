@@ -61,7 +61,15 @@ function isIOSSpeechEnvironment() {
 }
 
 export function holdVoice4DuringEngineGap(lang = "de", now = Date.now()) {
-  if (!isIOSSpeechEnvironment() || !establishedVoice4Languages.has(lang)) return false;
+  if (!isIOSSpeechEnvironment()) return false;
+
+  // On iOS, a missing speechSynthesis object during launch/resume is not
+  // evidence that Voice 4 is unsupported. This can happen before the first
+  // successful utterance as well as after one. Keep the narrator identity
+  // stable from the very first request: silence is preferable to switching to
+  // a personal recording while Safari rebuilds its speech engine.
+  if (!establishedVoice4Languages.has(lang)) return true;
+
   const missingSince = voice4EngineMissingSince.get(lang);
   if (!missingSince) {
     voice4EngineMissingSince.set(lang, now);
