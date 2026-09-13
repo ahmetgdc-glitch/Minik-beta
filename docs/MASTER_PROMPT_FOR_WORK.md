@@ -13,7 +13,7 @@ Baue MINIK zu einer vollwertigen Kinder-Lernwelt aus, deren Funktionsumfang und 
 5. **Mino, der Fisch:** zentrale Figur, animierter Helfer, erklärt, motiviert und gibt Hinweise.
 6. **Sterne und Belohnungen:** Sterne, Serien, Schatztruhen, Level, Aquarium, Mino-Zubehör und freischaltbare Welten.
 7. **Echte Menschen:** Neben Illustrationen auch echte, lizenzierte/selbst erzeugte Fotos von Menschen, Emotionen, Körperteilen, Berufen und Alltagssituationen.
-8. **Voice 4 zuerst:** iOS Stimme 4 ist die primäre MINIK-Stimme. Wenn sie einmal erfolgreich ausgewählt wurde, muss sie sticky bleiben; transiente Safari-Fehler dürfen keinen Sprecherwechsel auslösen. Persönliche Offline-Clips sind nur Fallback, wenn Stimme 4 tatsächlich nicht verfügbar ist. Beliebige Default-/Roboterstimmen sind kein zulässiger Ersatz. Kein API-Key im Frontend.
+8. **Voice 4 zuerst, niemals dauerhaft stumm:** iOS Stimme 4 ist die primäre MINIK-Stimme und wird bei jedem Satz zuerst versucht. Transiente Safari-Fehler bekommen genau einen kontrollierten Retry. Wenn Voice 4 danach nicht abgespielt werden kann, muss der gebündelte lokale DE/TR-Clip hörbar bleiben; komplette Stille ist kein zulässiger Dauer-Fallback. Beliebige Default-/Roboterstimmen sind weiterhin verboten. Kein API-Key im Frontend.
 9. **Adaptive Hilfe:** nach Inaktivität oder wiederholten Fehlern hilft Mino schrittweise.
 10. **Elternbereich:** Fortschritt, schwierige Wörter, Sitzungen, Kategorien, Sprache, Schwierigkeit, Audio, Anzahl Antwortoptionen.
 11. **Offline/PWA:** Kernspiele offline nutzbar; große Assets können später paketweise geladen werden.
@@ -77,12 +77,13 @@ Tiere, Farben, Formen, Zahlen, Buchstaben, Körper, Gefühle, Menschen, Familie,
 Implementiere und erhalte einen Voice-Service mit:
 - iOS Stimme 4 als primäre Stimme auf unterstützten Apple-Geräten
 - stabiler Voice-Listen-Bereitschaft und gecachter Auswahl
-- sticky Voice-4-Zustand über einzelne Wiedergabefehler hinweg
+- sticky Voice-4-Zustand über einzelne Wiedergabefehler hinweg, ohne einen funktionierenden lokalen Notfallpfad zu blockieren
 - genau einem kontrollierten Retry bei transientem Safari-Fehler
-- persönlichen lokalen DE/TR-Clips nur als Fallback, wenn Stimme 4 nicht auflösbar ist
+- persönlichen/lokalen DE/TR-Clips als hörbarem Notfall-Fallback, wenn Voice 4 nicht auflösbar oder nach Retry nicht abspielbar ist
 - keinem Wechsel auf beliebige Browser-/Default-/Roboterstimmen
 - keiner überlappenden Sprachausgabe
 - sauberem Abbruch bei Pause, Navigation, BFCache und Hintergrundwechsel
+- erneutem Audio-Unlock nach iOS Background/Resume
 - optionalem Interface `cloudTTS(text, lang)` ohne Secret im Client
 
 ## Visuelles Design
