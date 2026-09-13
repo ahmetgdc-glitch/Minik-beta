@@ -11,7 +11,7 @@ Stand **1.67.0 Beta 70 · 2026-09-12**. Beta 66 bleibt das technische Fundament.
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
 - [x] Persönliche DE/TR-Stimme für alle 332 festen Begriffe und Anweisungen lokal/offline bereitstellen
-- [ ] Persönliche Stimme und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
+- [ ] iOS Stimme 4 und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen; auf iOS darf dabei kein Sprecherwechsel zu persönlichen Aufnahmen oder Roboterstimmen auftreten
 
 ## Fundament und Lernkern
 
@@ -60,12 +60,12 @@ Stand **1.67.0 Beta 70 · 2026-09-12**. Beta 66 bleibt das technische Fundament.
 
 ## Vor MINIK 1.0 noch zwingend
 
-- [ ] Produktionsbuild im tatsächlichen GitHub-Repository erfolgreich ausführen
+- [x] Produktionsbuild im tatsächlichen GitHub-Repository erfolgreich ausführen
 - [ ] Veröffentlichte GitHub-Pages-URL aufrufen und Kernpfade durchspielen
 - [ ] Physisches iPhone: Safari + Home-Screen-PWA + Hoch/Querformat + Hintergrund/Wiederaufnahme
 - [ ] Physisches iPad: Touchflächen, Layout, Scrollen und längere Spielsitzung
 - [ ] Einmal online laden, vollständig schließen und im Flugmodus erneut starten
-- [ ] Persönliche deutsche und türkische Stimme anhören und schnelle Wiederholungen prüfen
+- [ ] iOS Stimme 4 in Deutsch und Türkisch anhören, schnelle Wiederholungen prüfen und bestätigen, dass kein Wechsel zu persönlichen Aufnahmen/Roboterstimmen erfolgt
 - [ ] Mikrofonberechtigung/Spracherkennung auf der konkret verwendeten iOS-Version testen
 - [ ] Begriffe, Geschichten und Sicherheitssequenzen durch DE/TR-sprachige pädagogische Fachperson gegenlesen
 
