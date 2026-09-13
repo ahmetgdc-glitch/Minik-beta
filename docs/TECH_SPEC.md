@@ -36,9 +36,9 @@ Die optionale Eltern-PIN ist eine lokale Kindersperre, keine Kontenauthentifizie
 
 ## Audio
 
-`audio/voice.js` kapselt die Sprachausgabe und erzwingt auf unterstützten iPhone-/iPad-Safari-Umgebungen **iOS Stimme 4 als primären Erzähler**. Die Voice-Liste wird bei Bedarf mit einem längeren Safari-Bereitschaftsfenster geladen; eine einmal gefundene Stimme 4 wird gecacht und über nachfolgende Ausgaben hinweg sticky gehalten. Ein transienter `speechSynthesis`-Wiedergabefehler löst einen kontrollierten Voice-4-Retry aus und darf keinen Sprecherwechsel verursachen.
+`audio/voice.js` verwendet die **feste natürliche MINIK-Stimme als primären Erzähler**. Für bekannte DE/TR-Begriffe, Anweisungen und modular zusammensetzbare Sätze wird zuerst der gebündelte feste Sprachplan aufgelöst und abgespielt. Der Produktionsbuild lokalisiert die 332 bekannten Sprachbausteine nach `assets/voice/`; die Laufzeit lädt und cached sie bedarfsgerecht, statt die gesamte Bibliothek beim Service-Worker-Install vorzuladen.
 
-Die 332 persönlichen lokalen DE/TR-Aufnahmen sind ein definierter Fallback für den Fall, dass Stimme 4 auf dem Gerät tatsächlich nicht auflösbar ist. Sie dürfen nicht nach einem bloßen Laufzeitfehler einer bereits ausgewählten Stimme 4 übernehmen. Beliebige Default-, Browser- oder Roboterstimmen werden nicht als Ersatz gewählt. Vor neuem Sprechen werden laufende Jobs sauber abgebrochen; Audiojobs bleiben referenziert, damit Pause, Navigation, BFCache und Hintergrundwechsel sicher aufräumen können.
+Apple Voice 4 bleibt als kontrollierter Notfall-Fallback erhalten, wenn für einen Satz kein fester Plan verfügbar ist oder die feste Audiodatei nicht abspielbar ist. Dafür bleiben Safari-Bereitschaft, gecachte Voice-4-Auswahl, Sprachfilter, Start-/Abschluss-Watchdogs und kontrollierter Retry erhalten. Die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet. Beliebige Default-, Browser- oder Roboterstimmen werden nicht als Ersatz gewählt. Vor neuem Sprechen werden laufende Jobs sauber abgebrochen; Audiojobs bleiben referenziert, damit Pause, Navigation, BFCache und Hintergrundwechsel sicher aufräumen können.
 
 `cloudTTS(text, lang, provider)` ist nur eine Erweiterungsschnittstelle für einen späteren sicheren Provider, der ein Audio-Blob liefert. Kein Endpoint, Secret, Cloud-Aufruf oder kostenpflichtiger Dienst ist vorkonfiguriert.
 
@@ -50,7 +50,7 @@ Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker l
 
 Assets werden aus dem Cache beantwortet, unbekannte gleichursprüngliche Assets bei Bedarf nachgeladen. Navigation versucht zuerst das Netz, bei Verbindungsfehler das gecachte `index.html`. Neue Worker verdrängen eine laufende Spielsession nicht automatisch. Für ein Update alle App-Tabs schließen und erneut öffnen. Große zukünftige Medienpakete benötigen eigene Auswahl/Downloadverwaltung; sie sind noch nicht implementiert.
 
-Alle 332 festen DE/TR-Sprachbausteine besitzen persönliche Audiodateien und stehen als lokaler Fallback zur Verfügung. Die primäre Ausgabe bleibt jedoch Stimme 4, sobald sie auf dem Gerät erfolgreich ausgewählt wurde. Offline-/PWA-Gerätetests müssen deshalb sowohl Voice-4-Verhalten als auch den Fallback ohne Netz prüfen.
+Alle 332 festen DE/TR-Sprachbausteine werden für den Produktionsbuild lokalisiert und sind die primäre MINIK-Erzählquelle. Sprachdateien werden im Service Worker bei Nutzung nachgeladen/gecached, nicht vollständig vorab installiert. Offline-/PWA-Gerätetests müssen deshalb die feste Erzählstimme nach erfolgtem Cache-Aufbau sowie Voice 4 als Notfall-Fallback prüfen.
 
 ## Qualitätsgates
 
