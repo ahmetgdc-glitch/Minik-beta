@@ -59,7 +59,7 @@ const pendingVoiceLookup = new Map();
 let observedSynth = null;
 let cacheSynth = null;
 let voicesObserved = false;
-let iosVoice4MissingSince = 0;
+const iosVoice4MissingSince = new Map();
 
 function syncVoiceEngine() {
   const synth = engine();
@@ -67,7 +67,7 @@ function syncVoiceEngine() {
     selectedVoiceCache.clear();
     pendingVoiceLookup.clear();
     voicesObserved = false;
-    iosVoice4MissingSince = 0;
+    iosVoice4MissingSince.clear();
   }
   cacheSynth = synth;
   return synth;
@@ -84,14 +84,14 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
 
   const live = voices.find((voice) => isVoice4Candidate(voice) && sameVoice(voice, cached));
   if (live) {
-    iosVoice4MissingSince = 0;
+    iosVoice4MissingSince.delete(lang);
     selectedVoiceCache.set(lang, live);
     return live;
   }
 
   const replacementVoice4 = voices.some(isVoice4Candidate);
   if (replacementVoice4) {
-    iosVoice4MissingSince = 0;
+    iosVoice4MissingSince.delete(lang);
   } else if (isIOSSpeechEnvironment()) {
     // Once iOS has actually exposed Voice 4 during this speechSynthesis
     // session, keep that narrator identity sticky. Safari can publish a
@@ -100,20 +100,21 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
     // voice.js to switch Mino to a personal recording mid-session. A failed
     // playback is preferable to a different narrator; replacing the actual
     // speechSynthesis engine still clears this cache via syncVoiceEngine().
-    if (!iosVoice4MissingSince) iosVoice4MissingSince = Date.now();
+    if (!iosVoice4MissingSince.has(lang)) iosVoice4MissingSince.set(lang, Date.now());
     return cached;
   }
 
   // Outside iOS, or when iOS exposes another explicit Voice 4 candidate,
   // invalidate the stale identity so selection can move to the live voice.
   selectedVoiceCache.delete(lang);
+  iosVoice4MissingSince.delete(lang);
   return null;
 }
 
 function refreshVoiceCache() {
   syncVoiceEngine();
   const voices = exposedSystemVoices();
-  if (voices.some(isVoice4Candidate)) iosVoice4MissingSince = 0;
+  if (voices.some(isVoice4Candidate)) iosVoice4MissingSince.clear();
 
   // voiceschanged is an inventory refresh, not a user preference change.
   // Preserve an existing per-language Voice 4 identity when it is still live,
@@ -139,7 +140,7 @@ function observeVoiceChanges() {
   });
 }
 
-export function voice4InventoryReady() {
+export function voice4InventoryReady(lang = "de") {
   if (!systemVoice4Available()) return true;
   syncVoiceEngine();
   const voices = exposedSystemVoices();
@@ -147,25 +148,27 @@ export function voice4InventoryReady() {
   // A real non-empty inventory is the only safe evidence that Voice 4 was
   // checked. Until then, never switch narrator.
   if (!voices.length) {
-    iosVoice4MissingSince = 0;
+    iosVoice4MissingSince.delete(lang);
     return false;
   }
   if (voices.some(isVoice4Candidate)) {
-    iosVoice4MissingSince = 0;
+    iosVoice4MissingSince.delete(lang);
     return true;
   }
   if (!isIOSSpeechEnvironment()) return true;
 
   // Before Voice 4 has ever been selected, iOS can briefly expose a populated
-  // but incomplete inventory while Safari resumes or refreshes voices. Require
-  // the absence to remain stable before allowing the recorded fallback. Once
-  // a Voice 4 selection exists, cachedVoiceFor() keeps that narrator sticky.
+  // but incomplete inventory while Safari resumes or refreshes voices. Track
+  // that grace independently for each language so a German request cannot
+  // exhaust the Turkish narrator's protection (or vice versa). Once a Voice 4
+  // selection exists, cachedVoiceFor() keeps that narrator sticky.
   const now = Date.now();
-  if (!iosVoice4MissingSince) {
-    iosVoice4MissingSince = now;
+  const missingSince = iosVoice4MissingSince.get(lang);
+  if (!missingSince) {
+    iosVoice4MissingSince.set(lang, now);
     return false;
   }
-  return now - iosVoice4MissingSince >= IOS_ABSENCE_GRACE_MS;
+  return now - missingSince >= IOS_ABSENCE_GRACE_MS;
 }
 
 export function selectVoice4(voices, lang, settings = {}) {
