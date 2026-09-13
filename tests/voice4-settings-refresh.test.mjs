@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-test("voiceschanged preserves an explicitly selected Voice 4 variant", async () => {
+test("voiceschanged preserves an explicitly selected Voice 4 variant while it is live", async () => {
   const previousSynth = globalThis.speechSynthesis;
   const previousUtterance = globalThis.SpeechSynthesisUtterance;
   const previousNavigator = globalThis.navigator;
@@ -38,7 +38,7 @@ test("voiceschanged preserves an explicitly selected Voice 4 variant", async () 
     const playback = mod.speakWithVoice4("Hallo", "de", settings);
     voicesChanged?.();
     assert.equal(await playback, true);
-    assert.equal(spokenVoice?.voiceURI, voiceB.voiceURI, "inventory refresh must not replace the saved Voice 4 variant");
+    assert.equal(spokenVoice?.voiceURI, voiceB.voiceURI, "inventory refresh must not replace a saved Voice 4 variant that is still live");
   } finally {
     if (previousSynth === undefined) delete globalThis.speechSynthesis;
     else globalThis.speechSynthesis = previousSynth;
@@ -49,12 +49,13 @@ test("voiceschanged preserves an explicitly selected Voice 4 variant", async () 
   }
 });
 
-test("partial iOS inventory cannot replace an explicitly saved Voice 4 variant", async () => {
+test("stale saved iOS Voice 4 preference falls back to another live same-language Voice 4", async () => {
   const previousSynth = globalThis.speechSynthesis;
   const previousUtterance = globalThis.SpeechSynthesisUtterance;
   const previousNavigator = globalThis.navigator;
   const voiceA = { name: "Stimme 4", voiceURI: "com.apple.voice4.a", lang: "de-DE" };
   const voiceB = { name: "Siri Stimme 4", voiceURI: "com.apple.voice4.b", lang: "de-DE" };
+  const turkishVoice4 = { name: "Ses 4", voiceURI: "com.apple.voice4.tr", lang: "tr-TR" };
   let voices = [voiceA, voiceB];
 
   globalThis.speechSynthesis = {
@@ -75,19 +76,22 @@ test("partial iOS inventory cannot replace an explicitly saved Voice 4 variant",
   try {
     const mod = await import(`../src/audio/systemVoice4.js?saved-partial=${Math.random()}`);
     const settings = { voices: { de: voiceB.voiceURI } };
-    assert.equal(mod.selectVoice4(voices, "de", settings), voiceB);
+    assert.equal(mod.selectVoice4(voices, "de", settings), voiceB, "the saved Voice 4 remains first choice while available");
     assert.equal(mod.hasVoice4Selection("de", settings), true);
 
     voices = [voiceA];
-    assert.equal(mod.selectVoice4(voices, "de", settings), null, "another Voice 4 must not replace the saved narrator");
-    assert.equal(mod.hasVoice4Selection("de", settings), false, "a partial inventory must not report the saved narrator as selectable");
-    assert.equal(mod.voice4InventoryReady("de", settings), false, "partial inventory must keep personal fallback closed");
+    assert.equal(mod.selectVoice4(voices, "de", settings), voiceA, "a live German Voice 4 must beat silence when the saved variant is stale");
+    assert.equal(mod.hasVoice4Selection("de", settings), true, "the same-language Voice 4 fallback must remain selectable");
+    assert.equal(mod.voice4InventoryReady("de", settings), false, "readiness may still track the exact saved identity without blocking playback");
+
+    voices = [turkishVoice4];
+    assert.equal(mod.selectVoice4(voices, "de", settings), null, "German narration must never cross over to Turkish Voice 4");
 
     voices = [];
-    assert.equal(mod.hasVoice4Selection("de", settings), true, "the remembered saved narrator identity must survive the partial inventory");
+    assert.equal(mod.selectVoice4(voices, "de", settings), null, "an empty inventory must not invent a system voice");
 
     voices = [voiceA, voiceB];
-    assert.equal(mod.selectVoice4(voices, "de", settings), voiceB, "the saved narrator must resume when Safari exposes it again");
+    assert.equal(mod.selectVoice4(voices, "de", settings), voiceB, "the saved narrator must resume as soon as Safari exposes it again");
   } finally {
     if (previousSynth === undefined) delete globalThis.speechSynthesis;
     else globalThis.speechSynthesis = previousSynth;
@@ -98,7 +102,7 @@ test("partial iOS inventory cannot replace an explicitly saved Voice 4 variant",
   }
 });
 
-test("voice fallback gating passes the saved Voice 4 settings through", () => {
+test("voice fallback bookkeeping passes the saved Voice 4 settings through", () => {
   const source = readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
   assert.match(source, /voice4InventoryReady\(lang, settings\)/);
 });
