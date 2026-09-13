@@ -13,7 +13,7 @@ Baue MINIK zu einer vollwertigen Kinder-Lernwelt aus, deren Funktionsumfang und 
 5. **Mino, der Fisch:** zentrale Figur, animierter Helfer, erklärt, motiviert und gibt Hinweise.
 6. **Sterne und Belohnungen:** Sterne, Serien, Schatztruhen, Level, Aquarium, Mino-Zubehör und freischaltbare Welten.
 7. **Echte Menschen:** Neben Illustrationen auch echte, lizenzierte/selbst erzeugte Fotos von Menschen, Emotionen, Körperteilen, Berufen und Alltagssituationen.
-8. **Voice 4 zuerst, niemals dauerhaft stumm:** iOS Stimme 4 ist die primäre MINIK-Stimme und wird bei jedem Satz zuerst versucht. Transiente Safari-Fehler bekommen genau einen kontrollierten Retry. Wenn Voice 4 danach nicht abgespielt werden kann, muss der gebündelte lokale DE/TR-Clip hörbar bleiben; komplette Stille ist kein zulässiger Dauer-Fallback. Beliebige Default-/Roboterstimmen sind weiterhin verboten. Kein API-Key im Frontend.
+8. **Feste natürliche MINIK-Stimme zuerst:** Die gebündelte natürliche DE/TR-Stimmbibliothek ist der primäre Erzähler. Apple Voice 4 ist nur ein kontrollierter Notfall-Fallback, wenn kein passender fester Sprachplan verfügbar oder dessen Audio nicht abspielbar ist. Die persönliche/gekloonte Nutzerstimme darf im normalen Kinderfluss nicht automatisch verwendet werden. Beliebige Default-/Browser-/Roboterstimmen sind verboten. Kein API-Key im Frontend.
 9. **Adaptive Hilfe:** nach Inaktivität oder wiederholten Fehlern hilft Mino schrittweise.
 10. **Elternbereich:** Fortschritt, schwierige Wörter, Sitzungen, Kategorien, Sprache, Schwierigkeit, Audio, Anzahl Antwortoptionen.
 11. **Offline/PWA:** Kernspiele offline nutzbar; große Assets können später paketweise geladen werden.
@@ -75,11 +75,12 @@ Tiere, Farben, Formen, Zahlen, Buchstaben, Körper, Gefühle, Menschen, Familie,
 
 ## Stimme
 Implementiere und erhalte einen Voice-Service mit:
-- iOS Stimme 4 als primäre Stimme auf unterstützten Apple-Geräten
-- stabiler Voice-Listen-Bereitschaft und gecachter Auswahl
-- sticky Voice-4-Zustand über einzelne Wiedergabefehler hinweg, ohne einen funktionierenden lokalen Notfallpfad zu blockieren
-- genau einem kontrollierten Retry bei transientem Safari-Fehler
-- persönlichen/lokalen DE/TR-Clips als hörbarem Notfall-Fallback, wenn Voice 4 nicht auflösbar oder nach Retry nicht abspielbar ist
+- der festen natürlichen DE/TR-MINIK-Stimmbibliothek als primärer Stimme auf allen Plattformen
+- lokalisierten festen Sprachbausteinen, die zur Laufzeit bedarfsgerecht geladen und offline gecacht werden
+- Apple Voice 4 als sekundärem Notfall-Fallback, wenn ein fester Sprachplan fehlt oder der feste Clip nicht abspielbar ist
+- stabiler Voice-Listen-Bereitschaft, gecachter Auswahl, Sprachfilter und Watchdogs für diesen Voice-4-Fallback
+- genau einem kontrollierten Voice-4-Retry bei transientem Safari-Fehler
+- keiner automatischen Nutzung der persönlichen/gekloonten Nutzerstimme im normalen Kinderfluss
 - keinem Wechsel auf beliebige Browser-/Default-/Roboterstimmen
 - keiner überlappenden Sprachausgabe
 - sauberem Abbruch bei Pause, Navigation, BFCache und Hintergrundwechsel
