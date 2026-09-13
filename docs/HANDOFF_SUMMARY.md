@@ -11,18 +11,19 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 - adaptive Schwierigkeit, Mastery pro Begriff/Sprache und Spaced Repetition
 - Sterne, XP, Tagesreise, Aquarium, Achievements und Mino-Outfits
 - Elternbereich mit Rechengate/PIN, Wochenanalyse, Backup/Restore und Einstellungen
-- iOS Stimme 4 als feste primäre MINIK-Erzählstimme; auf iPhone/iPad kein Wechsel zu persönlichen Aufnahmen oder beliebigen Ersatzstimmen
+- iOS Stimme 4 als primäre MINIK-Erzählstimme; beliebige Browser-/Default-/Roboterstimmen bleiben verboten, ein lokaler DE/TR-Notfallclip verhindert aber komplette Stille, wenn Voice 4 nach Retry nicht abspielbar ist
 - installierbare PWA, Offline-Service-Worker, Recovery-Speicher und Session-Checkpoints
 
 ## Voice-4-Härtung
 
-- iOS Stimme 4 ist der feste primäre Sprecher auf unterstützten Apple-Geräten.
+- iOS Stimme 4 ist der primäre Sprecher auf unterstützten Apple-Geräten und wird für jeden Satz zuerst versucht.
 - Safari bekommt ein längeres Bereitschaftsfenster für `speechSynthesis.getVoices()`; eine erfolgreich gefundene Stimme 4 wird gecacht.
-- Die Auswahl bleibt sticky: ein einzelner Laufzeitfehler darf keinen Sprecherwechsel auslösen.
-- Bei transienten Wiedergabefehlern wird Stimme 4 einmal kontrolliert erneut versucht.
-- Auf iOS bleibt der persönliche DE/TR-Fallback geschlossen: wenn Stimme 4 vorübergehend fehlt oder Safari nur ein partielles Voice-Inventar liefert, bleibt MINIK für diesen Satz lieber still, statt den Erzähler zu wechseln. Die persönlichen Clips bleiben nur für nicht-iOS-Fallbackpfade erhalten.
+- Bei transienten Wiedergabefehlern wird Stimme 4 genau einmal kontrolliert erneut versucht.
+- **Kein Dauer-Stumm-Fallback:** wenn Safari Voice 4 danach nicht auflösen oder abspielen kann, bleibt der gebündelte lokale DE/TR-Clip erreichbar. Beim nächsten Satz wird Stimme 4 erneut zuerst versucht.
+- Ein fehlgeschlagener stiller iOS-Media-Unlock darf nicht als erfolgreich gelten; die Gesture-Listener bleiben bis zu einer echten Audiofreigabe aktiv.
+- Nach Background/Resume werden WebAudio und Voice-Media-Unlock beide neu bewaffnet.
 - Beliebige Browser-/Default-/Roboterstimmen bleiben ausgeschlossen.
-- Regressionstests sichern Voice-Auswahl, Sticky-Verhalten, Retry und Fallback-Reihenfolge ab.
+- Regressionstests sichern Voice-Auswahl, Retry, Audio-Unlock, Background/Resume und Fallback-Reihenfolge ab.
 
 ## Neue Entdeckerwelt — Beta 67
 
@@ -65,4 +66,4 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
-Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der Voice-4-Pfad dürfen nicht verloren gehen. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.
+Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der Voice-4-Pfad dürfen nicht verloren gehen. Voice 4 bleibt primär, aber ein Safari-Fehler darf MINIK nicht komplett stummschalten. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.
