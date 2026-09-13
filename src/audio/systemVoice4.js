@@ -4,7 +4,7 @@ const SIRI_RE = /(?:^|\b)siri\s*(?:stimme|voice|ses)?\s*4(?:\b|$)/iu;
 const FIRST_VOICE_WAIT_MS = 1600;
 const RETRY_VOICE_WAIT_MS = 700;
 const PLAYBACK_RETRY_MS = 90;
-const PLAYBACK_START_WATCHDOG_MS = 1500;
+const PLAYBACK_START_WATCHDOG_MS = 700;
 const PLAYBACK_WATCHDOG_MIN_MS = 5000;
 const PLAYBACK_WATCHDOG_MAX_MS = 18000;
 const IOS_ABSENCE_GRACE_MS = 5000;
@@ -374,7 +374,7 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       if (startWatchdog !== null) clearTimeout(startWatchdog);
       startWatchdog = null;
     };
-    const finish = (ok) => {
+    const finish = (ok, stalled = false) => {
       if (done) return;
       done = true;
       clearStartWatchdog();
@@ -387,6 +387,10 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       if (activeUtterance === utterance) activeUtterance = null;
       if (activeSynth === synth) activeSynth = null;
       if (activeAttemptFinish === finish) activeAttemptFinish = null;
+      if (stalled) {
+        resolve(null);
+        return;
+      }
       resolve(Boolean(ok && isCurrent() && engine() === synth));
     };
 
@@ -418,13 +422,12 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       if (!started) {
         startWatchdog = setTimeout(() => {
           if (done || started) return;
-          // Some Safari versions omit the start event while correctly marking
-          // the engine as speaking/pending. In that case keep the normal long
-          // watchdog. Fail fast only when WebKit accepted speak() but exposes
-          // no evidence that the utterance ever entered its speech queue.
-          if (synth.speaking === true || synth.pending === true) return;
+          // `pending` only means queued; it is not evidence that the child can
+          // hear anything. Keep Voice 4 when WebKit is actually speaking, but
+          // abandon a queue-only stall quickly so the local narrator can play.
+          if (synth.speaking === true) return;
           try { synth.cancel(); } catch {}
-          finish(false);
+          finish(false, true);
         }, PLAYBACK_START_WATCHDOG_MS);
       }
     } catch {
@@ -458,7 +461,12 @@ export async function speakWithVoice4(text, lang = "de", settings = {}, isCurren
   if (!voice || !stillCurrent()) return false;
 
   const firstAttempt = await playVoice4Attempt(text, lang, settings, voice, stillCurrent);
-  if (firstAttempt || !stillCurrent()) return firstAttempt;
+  if (firstAttempt === true || !stillCurrent()) return firstAttempt === true;
+  // A queue-only Safari stall is not worth retrying immediately: repeated child
+  // taps would otherwise cancel every attempt before the recorded fallback can
+  // begin. Let voice.js use the audible local narrator for this utterance; the
+  // next utterance will still try Voice 4 first.
+  if (firstAttempt === null) return false;
 
   // Safari can transiently reject/interupt one speechSynthesis call while the
   // selected voice itself is still valid. Retry Voice 4 once instead of
@@ -471,5 +479,6 @@ export async function speakWithVoice4(text, lang = "de", settings = {}, isCurren
   if (!mayRetry) return false;
   const retryVoice = currentVoice4ForRetry(lang, settings);
   if (!retryVoice || !stillCurrent()) return false;
-  return playVoice4Attempt(text, lang, settings, retryVoice, stillCurrent);
+  const retryAttempt = await playVoice4Attempt(text, lang, settings, retryVoice, stillCurrent);
+  return retryAttempt === true;
 }
