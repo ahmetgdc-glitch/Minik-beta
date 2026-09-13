@@ -137,12 +137,14 @@ test("music stops on background and pagehide and resumes only after a visible ge
   const source = read("src/app/useAudioPrime.js")
     .replace(/^import .*;\n/gm, "")
     .replace("export function", "function");
-  const hook = new Function("useEffect", "unlockAudio", "startMusic", "stopMusic", "unlockVoiceAudio", "window", "document", `${source}; return useAudioPrime;`)(
+  const hook = new Function("useEffect", "unlockAudio", "startMusic", "stopMusic", "unlockVoiceAudio", "primeSystemSpeechForIOS", "window", "document", `${source}; return useAudioPrime;`)(
     (effect) => { cleanup = effect(); },
     () => ({ state: "running" }),
     () => { starts++; },
     () => { stops++; },
-    () => Promise.resolve(true), target, document,
+    () => Promise.resolve(true),
+    () => true,
+    target, document,
   );
   hook(true, true);
   listeners.get("pointerdown")();
