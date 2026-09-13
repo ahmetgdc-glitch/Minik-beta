@@ -55,7 +55,9 @@ test("Voice 4 retries a transient Safari playback failure once", () => {
   assert.match(systemVoice4, /PLAYBACK_RETRY_MS = 90/);
   assert.match(systemVoice4, /const firstAttempt = await playVoice4Attempt/);
   assert.match(systemVoice4, /const mayRetry = await retryDelay\(stillCurrent\)/);
-  assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, voice, stillCurrent\)/);
+  assert.match(systemVoice4, /const retryVoice = currentVoice4ForRetry\(lang, settings\)/);
+  assert.match(systemVoice4, /if \(!retryVoice \|\| !stillCurrent\(\)\) return false/);
+  assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, retryVoice, stillCurrent\)/);
 });
 
 test("a known Voice 4 never switches to a personal recording after runtime failure", () => {
