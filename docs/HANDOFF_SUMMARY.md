@@ -11,7 +11,7 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 - adaptive Schwierigkeit, Mastery pro Begriff/Sprache und Spaced Repetition
 - Sterne, XP, Tagesreise, Aquarium, Achievements und Mino-Outfits
 - Elternbereich mit Rechengate/PIN, Wochenanalyse, Backup/Restore und Einstellungen
-- iOS Stimme 4 als primäre MINIK-Erzählstimme; 332 persönliche lokale DE/TR-Sprachclips als kontrollierter Fallback
+- iOS Stimme 4 als feste primäre MINIK-Erzählstimme; auf iPhone/iPad kein Wechsel zu persönlichen Aufnahmen oder beliebigen Ersatzstimmen
 - installierbare PWA, Offline-Service-Worker, Recovery-Speicher und Session-Checkpoints
 
 ## Voice-4-Härtung
@@ -20,7 +20,7 @@ Stand: **12. September 2026 · 1.67.0 Beta 70**. Der langfristige Nutzerauftrag 
 - Safari bekommt ein längeres Bereitschaftsfenster für `speechSynthesis.getVoices()`; eine erfolgreich gefundene Stimme 4 wird gecacht.
 - Die Auswahl bleibt sticky: ein einzelner Laufzeitfehler darf keinen Sprecherwechsel auslösen.
 - Bei transienten Wiedergabefehlern wird Stimme 4 einmal kontrolliert erneut versucht.
-- Persönliche DE/TR-Clips werden nur verwendet, wenn Stimme 4 tatsächlich nicht verfügbar bzw. nicht auflösbar ist.
+- Auf iOS bleibt der persönliche DE/TR-Fallback geschlossen: wenn Stimme 4 vorübergehend fehlt oder Safari nur ein partielles Voice-Inventar liefert, bleibt MINIK für diesen Satz lieber still, statt den Erzähler zu wechseln. Die persönlichen Clips bleiben nur für nicht-iOS-Fallbackpfade erhalten.
 - Beliebige Browser-/Default-/Roboterstimmen bleiben ausgeschlossen.
 - Regressionstests sichern Voice-Auswahl, Sticky-Verhalten, Retry und Fallback-Reihenfolge ab.
 
