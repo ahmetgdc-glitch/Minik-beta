@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { unlockAudio, startMusic, stopMusic } from "../audio/sounds.js";
+import { primeSystemSpeechForIOS } from "../audio/iosSpeechPrime.js";
 import { unlockVoiceAudio } from "../audio/voice.js";
 
 /**
@@ -32,6 +33,11 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
     };
     const prime = () => {
       if (disposed || document.visibilityState !== "visible") return;
+
+      // Must stay synchronous and before every promise/await path. iOS WebKit
+      // removes its first-speech user-gesture restriction only when speak() is
+      // called while the real touch/key gesture is still being processed.
+      primeSystemSpeechForIOS();
 
       const context = unlockAudio();
       startMusic({ enabled: musicEnabled });
