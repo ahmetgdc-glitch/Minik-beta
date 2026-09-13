@@ -50,7 +50,7 @@ async function withNavigator(value, run) {
   }
 }
 
-test("failed Voice 4 playback on iPhone does not invoke personal narrator lookup", async () => {
+test("failed Voice 4 playback on iPhone reaches bundled narrator lookup", async () => {
   let personalLookups = 0;
   const api = buildVoiceHarness({
     personalVoiceClip() {
@@ -68,7 +68,7 @@ test("failed Voice 4 playback on iPhone does not invoke personal narrator lookup
   );
 
   assert.equal(result, false);
-  assert.equal(personalLookups, 0, "iOS must not even resolve a different recorded narrator after Voice 4 fails");
+  assert.equal(personalLookups, 1, "iOS must keep an audible bundled fallback reachable after Voice 4 fails");
 });
 
 test("missing iOS speech engine still reaches bundled narrator lookup", async () => {
