@@ -40,15 +40,14 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
-test("an unresolved Safari voice inventory cannot permanently silence MINIK", () => {
-  const inventoryCheck = voice.indexOf("if (voice4InventoryReady(lang, settings)) {");
+test("an unresolved Safari voice inventory cannot switch to the personal narrator", () => {
+  const iosGuard = voice.indexOf("if (isIOSSpeechEnvironment()) return false;");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(inventoryCheck > 0);
-  assert.ok(personalIndex > inventoryCheck);
-  assert.doesNotMatch(voice, /if \(!voice4InventoryReady\(lang, settings\)\) return false;/);
-  assert.match(systemVoice4, /export function voice4InventoryReady\(lang = "de", settings = \{\}\)/);
-  assert.match(systemVoice4, /if \(!voices\.length\) \{/);
-  assert.match(systemVoice4, /IOS_ABSENCE_GRACE_MS = 5000/);
+  assert.ok(iosGuard > 0);
+  assert.ok(personalIndex > iosGuard);
+  assert.match(voice, /const selectedVoice4 = hasVoice4Selection\(lang, settings\)/);
+  assert.match(voice, /else if \(voice4InventoryReady\(lang, settings\)\) clearVoice4Continuity\(lang\)/);
+  assert.match(systemVoice4, /IOS_RECORDED_FALLBACK_ALLOWED = false/);
 });
 
 test("Voice 4 retries a transient Safari playback failure once", () => {
@@ -60,13 +59,14 @@ test("Voice 4 retries a transient Safari playback failure once", () => {
   assert.match(systemVoice4, /return playVoice4Attempt\(text, lang, settings, retryVoice, stillCurrent\)/);
 });
 
-test("a known Voice 4 falls back to bundled audio after runtime playback failure", () => {
-  const stickyIndex = voice.indexOf("if (hasVoice4Selection(lang, settings)) {");
+test("a known iOS Voice 4 never falls through to bundled personal audio after runtime failure", () => {
+  const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
+  const iosGuard = voice.indexOf("if (isIOSSpeechEnvironment()) return false;");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(stickyIndex > 0);
-  assert.ok(personalIndex > stickyIndex);
-  assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*\}/s);
-  assert.doesNotMatch(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s);
+  assert.ok(selectionIndex > 0);
+  assert.ok(iosGuard > selectionIndex);
+  assert.ok(personalIndex > iosGuard);
+  assert.match(voice, /if \(selectedVoice4\) markVoice4Established\(lang\)/);
   assert.match(systemVoice4, /export function hasVoice4Selection/);
 });
 
