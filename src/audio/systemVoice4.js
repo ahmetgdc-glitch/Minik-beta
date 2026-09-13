@@ -114,10 +114,16 @@ function refreshVoiceCache() {
   syncVoiceEngine();
   const voices = exposedSystemVoices();
   if (voices.some(isVoice4Candidate)) iosVoice4MissingSince = 0;
-  for (const lang of ["de", "tr"]) {
-    const selected = selectVoice4(voices, lang);
-    if (selected) selectedVoiceCache.set(lang, selected);
-    else if (voices.length) cachedVoiceFor(lang, voices);
+
+  // voiceschanged is an inventory refresh, not a user preference change.
+  // Preserve an existing per-language Voice 4 identity when it is still live,
+  // but do not populate an empty cache without the settings object that may
+  // contain the user's explicitly selected Voice 4 variant. Callers that have
+  // settings (waitForVoice4/hasVoice4Selection) perform the actual selection.
+  if (voices.length) {
+    for (const lang of ["de", "tr"]) {
+      if (selectedVoiceCache.has(lang)) cachedVoiceFor(lang, voices);
+    }
   }
   return voices;
 }
