@@ -55,10 +55,19 @@ function isIOSSpeechEnvironment() {
   return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
 }
 
-function voiceIsSafeForPlayback(voice) {
+function voiceIsEligibleForLanguage(voice, lang) {
+  return Boolean(
+    isVoice4Candidate(voice) &&
+    (!isIOSSpeechEnvironment() || matchesLanguage(voice, lang)),
+  );
+}
+
+function voiceIsSafeForPlayback(voice, lang) {
   const voices = exposedSystemVoices();
   if (!voices.length) return !isIOSSpeechEnvironment();
-  return voices.some((candidate) => isVoice4Candidate(candidate) && sameVoice(candidate, voice));
+  return voices.some(
+    (candidate) => voiceIsEligibleForLanguage(candidate, lang) && sameVoice(candidate, voice),
+  );
 }
 
 const selectedVoiceCache = new Map();
@@ -83,20 +92,25 @@ function syncVoiceEngine() {
 function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
   syncVoiceEngine();
   const cached = selectedVoiceCache.get(lang);
-  if (!cached || !isVoice4Candidate(cached)) return null;
+  if (!cached || !voiceIsEligibleForLanguage(cached, lang)) {
+    selectedVoiceCache.delete(lang);
+    return null;
+  }
 
   // An empty list on Safari means "inventory not ready", not "voice removed".
   // Preserve the last known narrator until iOS exposes a real inventory.
   if (!voices.length) return cached;
 
-  const live = voices.find((voice) => isVoice4Candidate(voice) && sameVoice(voice, cached));
+  const live = voices.find(
+    (voice) => voiceIsEligibleForLanguage(voice, lang) && sameVoice(voice, cached),
+  );
   if (live) {
     iosVoice4MissingSince.delete(lang);
     selectedVoiceCache.set(lang, live);
     return live;
   }
 
-  const replacementVoice4 = voices.some(isVoice4Candidate);
+  const replacementVoice4 = voices.some((voice) => voiceIsEligibleForLanguage(voice, lang));
   if (replacementVoice4) {
     iosVoice4MissingSince.delete(lang);
   } else if (isIOSSpeechEnvironment()) {
@@ -110,8 +124,9 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
     return null;
   }
 
-  // Outside iOS, or when iOS exposes another explicit Voice 4 candidate,
-  // invalidate the stale identity so selection can move to the live voice.
+  // Outside iOS, or when iOS exposes another explicit same-language Voice 4
+  // candidate, invalidate the stale identity so selection can move to the
+  // live voice without ever crossing German/Turkish narrator identities.
   selectedVoiceCache.delete(lang);
   iosVoice4MissingSince.delete(lang);
   return null;
@@ -120,7 +135,11 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
 function refreshVoiceCache() {
   syncVoiceEngine();
   const voices = exposedSystemVoices();
-  if (voices.some(isVoice4Candidate)) iosVoice4MissingSince.clear();
+  for (const lang of ["de", "tr"]) {
+    if (voices.some((voice) => voiceIsEligibleForLanguage(voice, lang))) {
+      iosVoice4MissingSince.delete(lang);
+    }
+  }
 
   // voiceschanged is an inventory refresh, not a user preference change.
   // Preserve an existing per-language Voice 4 identity when it is still live,
@@ -157,16 +176,16 @@ export function voice4InventoryReady(lang = "de") {
     iosVoice4MissingSince.delete(lang);
     return false;
   }
-  if (voices.some(isVoice4Candidate)) {
+  if (voices.some((voice) => voiceIsEligibleForLanguage(voice, lang))) {
     iosVoice4MissingSince.delete(lang);
     return true;
   }
   if (!isIOSSpeechEnvironment()) return true;
 
-  // iOS narrator identity is strict: even a long-lived populated inventory
-  // without Voice 4 is not permission to switch Mino to a personal recording.
-  // Keep the historical timer only as diagnostic state; fallback is disabled
-  // on iOS so a delayed/partial Safari inventory can never change narrator.
+  // iOS narrator identity is strict: an opposite-language Voice 4 is not
+  // evidence that the requested narrator is available. Treat that partial
+  // inventory like a missing Voice 4 rather than switching languages or
+  // falling through to a personal recording.
   const now = Date.now();
   const missingSince = iosVoice4MissingSince.get(lang);
   if (!missingSince) {
@@ -180,10 +199,12 @@ export function selectVoice4(voices, lang, settings = {}) {
   const available = (voices || []).filter(isVoice4Candidate);
   if (!available.length) return null;
   const sameLanguage = available.filter((voice) => matchesLanguage(voice, lang));
+  const eligible = isIOSSpeechEnvironment() ? sameLanguage : available;
+  if (!eligible.length) return null;
 
   const saved = String(settings?.voices?.[lang] || "").trim().toLowerCase();
   if (saved) {
-    const exact = available.find((voice) =>
+    const exact = eligible.find((voice) =>
       [voice?.name, voice?.voiceURI].some(
         (value) => String(value || "").trim().toLowerCase() === saved,
       ),
@@ -195,9 +216,9 @@ export function selectVoice4(voices, lang, settings = {}) {
     sameLanguage.find((voice) => VOICE4_RE.test(voiceIdentity(voice))) ||
     sameLanguage.find((voice) => TURKISH_VOICE4_RE.test(voiceIdentity(voice))) ||
     sameLanguage.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
-    available.find((voice) => VOICE4_RE.test(voiceIdentity(voice))) ||
-    available.find((voice) => TURKISH_VOICE4_RE.test(voiceIdentity(voice))) ||
-    available.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
+    eligible.find((voice) => VOICE4_RE.test(voiceIdentity(voice))) ||
+    eligible.find((voice) => TURKISH_VOICE4_RE.test(voiceIdentity(voice))) ||
+    eligible.find((voice) => SIRI_RE.test(voiceIdentity(voice))) ||
     null
   );
 }
@@ -312,7 +333,7 @@ export function stopSystemVoice4() {
 function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
   const synth = syncVoiceEngine();
   const Utterance = UtteranceClass();
-  if (!synth || !Utterance || !voice || !isCurrent() || !voiceIsSafeForPlayback(voice)) {
+  if (!synth || !Utterance || !voice || !isCurrent() || !voiceIsSafeForPlayback(voice, lang)) {
     return Promise.resolve(false);
   }
 
