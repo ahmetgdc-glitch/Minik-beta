@@ -94,15 +94,14 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
   if (replacementVoice4) {
     iosVoice4MissingSince.delete(lang);
   } else if (isIOSSpeechEnvironment()) {
-    // Once iOS has actually exposed Voice 4 during this speechSynthesis
-    // session, keep that narrator identity sticky. Safari can publish a
-    // populated but incomplete voice inventory for longer than the fallback
-    // grace window after resume. Invalidating the known voice here allowed
-    // voice.js to switch Mino to a personal recording mid-session. A failed
-    // playback is preferable to a different narrator; replacing the actual
-    // speechSynthesis engine still clears this cache via syncVoiceEngine().
+    // Keep the remembered narrator identity across Safari's partial inventory,
+    // but never hand a stale Voice 4 object to speechSynthesis. Safari may
+    // ignore a voice object that is absent from the current non-empty
+    // inventory and silently speak with its default robotic voice. Returning
+    // null here makes this request wait/fail silently while preserving the
+    // cache for the next inventory refresh.
     if (!iosVoice4MissingSince.has(lang)) iosVoice4MissingSince.set(lang, Date.now());
-    return cached;
+    return null;
   }
 
   // Outside iOS, or when iOS exposes another explicit Voice 4 candidate,
