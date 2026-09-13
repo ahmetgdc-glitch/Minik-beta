@@ -51,18 +51,10 @@ function speechForegroundAllowed() {
   return !document.hidden && document.visibilityState !== "hidden";
 }
 
-function isIOSSpeechEnvironment() {
-  if (typeof navigator === "undefined") return false;
-  const ua = String(navigator.userAgent || "");
-  const platform = String(navigator.platform || "");
-  const touchPoints = Number(navigator.maxTouchPoints || 0);
-  return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
-}
-
 export function holdVoice4DuringEngineGap() {
-  // A Voice 4 engine gap must never make MINIK permanently silent. The caller
-  // already gives Safari a Voice 4 attempt first; when the engine itself is
-  // unavailable we immediately allow the bundled MINIK recording fallback.
+  // Voice 4 is always attempted first when Safari exposes speechSynthesis.
+  // If the engine itself disappears, never turn the app permanently silent:
+  // the bundled/offline MINIK recording remains the emergency path.
   return false;
 }
 
@@ -110,9 +102,8 @@ export async function unlockVoiceAudio() {
       return true;
     } catch {
       // A working speechSynthesis object does not prove that recorded fallback
-      // is unlocked. If the silent media prime failed and WebAudio is not
-      // running, report false so useAudioPrime keeps listening for the next
-      // real user gesture instead of leaving the fallback permanently blocked.
+      // is unlocked. Keep gesture listeners armed until media/WebAudio really
+      // succeeds, otherwise a later Voice 4 failure can leave iOS fully silent.
       return contextReady;
     }
   })();
@@ -317,12 +308,10 @@ export async function speak(text, lang = "de", settings = {}) {
       if (selectedVoice4) markVoice4Established(lang);
       else if (voice4InventoryReady(lang, settings)) clearVoice4Continuity(lang);
 
-      // On iOS, speechSynthesis being present means Voice 4 remains Mino's
-      // narrator for this request even if WebKit transiently rejects playback,
-      // exposes a partial inventory, or stalls. Never change character mid-
-      // session by falling through to a personal recording, and never submit
-      // an arbitrary system voice. A later user action will retry Voice 4.
-      if (isIOSSpeechEnvironment()) return false;
+      // Voice 4 stays the first choice and arbitrary/default system voices stay
+      // forbidden. But a failed WebKit Voice 4 request must not make MINIK
+      // silent: continue to the bundled/offline recording for this utterance.
+      // The next utterance will try Voice 4 first again.
     } else {
       clearVoice4Continuity(lang);
     }
