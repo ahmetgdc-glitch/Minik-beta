@@ -36,7 +36,7 @@ test("iOS Voice 4 absence stays blocked independently in both languages", async 
     now = 120_000;
     assert.equal(mod.voice4InventoryReady("tr"), false, "Turkish iOS narration must not expire into a recorded fallback either");
     assert.equal(mod.voice4InventoryReady("de"), false, "long Voice 4 absence must stay blocked for German too");
-    assert.match(voice, /voice4InventoryReady\(lang\)/, "caller must pass the active language into the inventory guard");
+    assert.match(voice, /voice4InventoryReady\(lang, settings\)/, "caller must pass the active language and saved narrator settings into the inventory guard");
   } finally {
     Date.now = previousDateNow;
     if (previousSynth === undefined) delete globalThis.speechSynthesis;
