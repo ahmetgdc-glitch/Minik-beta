@@ -1,5 +1,5 @@
 .review-island {
-  width: min(100%, 980px);
+  width: min(100%, 1120px);
   margin: 0 auto;
   display: grid;
   gap: clamp(18px, 3vw, 30px);
@@ -9,11 +9,13 @@
 .review-island__stage {
   position: relative;
   overflow: hidden;
-  min-height: clamp(250px, 38vh, 390px);
+  min-height: clamp(300px, 44svh, 450px);
   border-radius: clamp(30px, 6vw, 52px);
-  padding: clamp(22px, 5vw, 42px);
+  padding: clamp(22px, 5vw, 46px);
   display: grid;
+  grid-template-columns: minmax(0, 1.22fr) minmax(190px, .78fr);
   place-items: center;
+  gap: clamp(18px, 4vw, 54px);
   text-align: center;
   background:
     radial-gradient(circle at 18% 18%, rgba(255,255,255,.92) 0 8%, transparent 9%),
@@ -39,16 +41,19 @@
 .review-island__stage::after { right: -8%; transform: rotate(-7deg); }
 
 .review-island__focus {
-  width: min(100%, 520px);
+  width: min(100%, 560px);
   display: grid;
   gap: 12px;
   justify-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .review-island__badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   min-height: 46px;
   padding: 10px 18px;
   border-radius: 999px;
@@ -59,7 +64,7 @@
 }
 
 .review-island__orb {
-  width: clamp(112px, 24vw, 190px);
+  width: clamp(120px, 19vw, 190px);
   aspect-ratio: 1;
   border-radius: 50%;
   display: grid;
@@ -86,19 +91,13 @@
   outline-offset: 5px;
 }
 
-.review-island__listen:not(:disabled):active {
-  transform: scale(.94);
-}
-
-.review-island__listen:disabled {
-  cursor: default;
-  opacity: .72;
-}
+.review-island__listen:not(:disabled):active { transform: scale(.94); }
+.review-island__listen:disabled { cursor: default; opacity: .72; }
 
 .review-island__title {
   margin: 0;
   font-weight: 1000;
-  font-size: clamp(1.25rem, 4vw, 2.25rem);
+  font-size: clamp(1.35rem, 4vw, 2.45rem);
   line-height: 1.08;
 }
 
@@ -107,36 +106,161 @@
   max-width: 34ch;
   font-weight: 700;
   opacity: .74;
-  font-size: clamp(.9rem, 2.5vw, 1.05rem);
+  font-size: clamp(.9rem, 2.5vw, 1.08rem);
 }
 
-.review-island .option-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(12px, 2.4vw, 22px);
+.review-island__mino {
+  position: relative;
+  width: clamp(180px, 25vw, 300px);
+  aspect-ratio: .88;
+  display: grid;
+  place-items: end center;
+  filter: drop-shadow(0 18px 18px rgba(33, 105, 81, .18));
+  animation: reviewMino 3.8s ease-in-out infinite;
 }
 
-.review-island .option-card {
-  min-height: clamp(150px, 25vw, 230px);
-  border-radius: clamp(24px, 5vw, 38px);
-  box-shadow: 0 14px 28px rgba(43, 74, 91, .14);
+.review-island__mino-glow {
+  position: absolute;
+  inset: 12% -12% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,.92) 0 38%, rgba(255,243,164,.62) 39% 57%, transparent 58%);
 }
+
+.review-island__mino .mino-avatar {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: end center;
+}
+
+.review-island__mino .mino { width: 100%; max-height: 100%; object-fit: contain; }
+
+.review-island__choice-label {
+  justify-self: center;
+  padding: 9px 17px;
+  border-radius: 999px;
+  background: #fff8d9;
+  color: #6d5b24;
+  font-weight: 950;
+  font-size: clamp(.95rem, 2.2vw, 1.12rem);
+  box-shadow: 0 8px 18px rgba(100, 83, 31, .1);
+}
+
+.review-island__choices {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(13px, 2.3vw, 23px);
+}
+
+.review-island__choices.choices-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.review-island__choice {
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(200px, 29svh, 310px);
+  border: 2px solid rgba(255,255,255,.92);
+  padding: clamp(14px, 2.4vw, 24px);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  place-items: center;
+  gap: 10px;
+  overflow: hidden;
+  background: linear-gradient(155deg, rgba(255,255,255,.98), rgba(240,253,244,.96));
+  box-shadow: 0 14px 0 #d8ead9, 0 24px 38px rgba(52, 94, 76, .14);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease, filter .16s ease;
+}
+
+.review-choice-1 { border-radius: 46% 54% 42% 58% / 40% 48% 52% 60%; }
+.review-choice-2 { border-radius: 56% 44% 55% 45% / 50% 58% 42% 50%; }
+.review-choice-3 { border-radius: 44% 56% 52% 48% / 58% 44% 56% 42%; }
+.review-choice-4 { border-radius: 57% 43% 45% 55% / 43% 55% 45% 57%; }
+
+.review-island__choice-glow {
+  position: absolute;
+  z-index: -1;
+  top: 4%;
+  left: 12%;
+  width: 76%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(145, 225, 169, .4), rgba(145, 225, 169, 0) 70%);
+}
+
+.review-island__choice .item-visual {
+  width: min(27vw, 230px);
+  height: min(27vw, 230px);
+  object-fit: contain;
+  filter: drop-shadow(0 12px 14px rgba(43, 93, 72, .12));
+}
+
+.review-island__choice b {
+  max-width: 94%;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.92);
+  color: #345f4f;
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  line-height: 1.1;
+  text-align: center;
+  box-shadow: 0 5px 12px rgba(44, 85, 70, .08);
+}
+
+.review-island__choice:not(:disabled):active {
+  transform: translateY(8px) scale(.985);
+  box-shadow: 0 6px 0 #d8ead9, 0 12px 20px rgba(52, 94, 76, .12);
+}
+
+.review-island__choice:focus-visible {
+  outline: 5px solid rgba(255, 199, 68, .76);
+  outline-offset: 4px;
+}
+
+.review-island__choice:disabled { cursor: default; }
+.review-island__choice.hint-target { outline: 6px solid rgba(255, 199, 68, .72); outline-offset: 4px; animation: reviewHint 1.05s ease-in-out infinite; }
+.review-island__choice.quiet-option { opacity: .5; filter: saturate(.72); }
 
 .review-practice .review-island__orb { background: #fff2c9; }
 .review-learning .review-island__orb { background: #daf4ff; }
 .review-mastered .review-island__orb { background: #e0f8dd; }
+.review-practice .review-island__choice-glow { background: radial-gradient(circle, rgba(255, 219, 117, .4), rgba(255, 219, 117, 0) 70%); }
+.review-learning .review-island__choice-glow { background: radial-gradient(circle, rgba(135, 213, 246, .4), rgba(135, 213, 246, 0) 70%); }
 
-@keyframes reviewFloat {
-  0%, 100% { transform: translateY(0) rotate(-2deg); }
-  50% { transform: translateY(-10px) rotate(2deg); }
-}
+@keyframes reviewFloat { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+@keyframes reviewMino { 0%, 100% { transform: translateY(0) rotate(1deg); } 50% { transform: translateY(-8px) rotate(-1deg); } }
+@keyframes reviewHint { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
 
 @media (max-width: 640px) {
-  .review-island__stage { min-height: 220px; padding: 20px 16px 24px; }
-  .review-island .option-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .review-island .option-card { min-height: 142px; }
+  .review-island { gap: 17px; }
+  .review-island__stage { min-height: 0; padding: 20px 16px 24px; grid-template-columns: minmax(0, 1fr) minmax(105px, .48fr); gap: 10px; }
+  .review-island__focus { gap: 9px; }
+  .review-island__badge { grid-column: 1 / -1; }
+  .review-island__orb { width: clamp(100px, 30vw, 145px); }
+  .review-island__subtitle { font-size: .9rem; }
+  .review-island__mino { width: clamp(105px, 30vw, 150px); }
+  .review-island__choices,
+  .review-island__choices.choices-6 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .review-island__choice { min-height: clamp(145px, 23svh, 220px); padding: 11px; border-radius: 31px; }
+  .review-island__choice .item-visual { width: min(38vw, 165px); height: min(38vw, 165px); }
+  .review-island__choice b { padding: 6px 10px; font-size: clamp(.88rem, 4vw, 1.08rem); }
+}
+
+@media (max-width: 390px) {
+  .review-island__stage { padding: 16px 12px 20px; }
+  .review-island__mino { width: 100px; }
+  .review-island__orb { width: 98px; }
+  .review-island__title { font-size: 1.25rem; }
+  .review-island__choice { min-height: 138px; padding: 9px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .review-island__orb { animation: none; }
-  .review-island__listen { transition: none; }
+  .review-island__orb,
+  .review-island__mino,
+  .review-island__choice.hint-target { animation: none; }
+  .review-island__listen,
+  .review-island__choice { transition: none; }
 }
