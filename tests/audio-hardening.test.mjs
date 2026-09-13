@@ -4,11 +4,14 @@ import fs from "node:fs";
 const voice = fs.readFileSync(new URL("../src/audio/voice.js", import.meta.url), "utf8");
 const systemVoice4 = fs.readFileSync(new URL("../src/audio/systemVoice4.js", import.meta.url), "utf8");
 
-test("MINIK prefers iOS Voice 4 before recorded fallback", () => {
+test("MINIK prefers the fixed natural narrator before optional iOS Voice 4", () => {
+  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+  const naturalPlaybackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
   const systemIndex = voice.indexOf("speakWithVoice4(");
-  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(systemIndex > 0);
-  assert.ok(personalIndex > systemIndex);
+  assert.ok(naturalIndex > 0);
+  assert.ok(naturalPlaybackIndex > naturalIndex);
+  assert.ok(systemIndex > naturalPlaybackIndex);
+  assert.doesNotMatch(voice, /personalVoiceClip/);
 });
 
 test("Voice 4 selector never falls back to arbitrary robotic system voices", () => {
@@ -40,11 +43,11 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
   assert.match(systemVoice4, /const finalVoice = selectVoice4\(refreshVoiceCache\(\), lang, settings\)/);
 });
 
-test("an unresolved Safari voice inventory keeps Voice 4 first but cannot silence local audio", () => {
-  const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
-  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(selectionIndex > 0);
-  assert.ok(personalIndex > selectionIndex);
+test("an unresolved Safari voice inventory cannot block fixed local narration", () => {
+  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
+  const systemIndex = voice.indexOf("speakWithVoice4(");
+  assert.ok(naturalIndex > 0);
+  assert.ok(systemIndex > naturalIndex);
   assert.match(voice, /else if \(voice4InventoryReady\(lang, settings\)\) clearVoice4Continuity\(lang\)/);
   assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
 });
@@ -60,14 +63,14 @@ test("Voice 4 retries a transient Safari playback error but not a queue-only sta
   assert.match(systemVoice4, /return retryAttempt === true/);
 });
 
-test("a known iOS Voice 4 falls back only after its guarded runtime attempt fails", () => {
+test("a known iOS Voice 4 remains a guarded fallback only after fixed narration", () => {
+  const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const selectionIndex = voice.indexOf("const selectedVoice4 = hasVoice4Selection(lang, settings)");
-  const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
-  assert.ok(selectionIndex > 0);
-  assert.ok(personalIndex > selectionIndex);
+  assert.ok(naturalIndex > 0);
+  assert.ok(selectionIndex > naturalIndex);
   assert.match(voice, /if \(selectedVoice4\) markVoice4Established\(lang\)/);
   assert.match(systemVoice4, /export function hasVoice4Selection/);
-  assert.doesNotMatch(voice, /if \(isIOSSpeechEnvironment\(\)\) return false;/);
+  assert.doesNotMatch(voice, /personalVoiceClip/);
 });
 
 test("Voice 4 cache survives unknown Safari inventory but invalidates against a populated changed inventory", async () => {
@@ -86,10 +89,8 @@ test("Voice 4 cache survives unknown Safari inventory but invalidates against a 
   try {
     const mod = await import(`../src/audio/systemVoice4.js?cache-lifecycle=${Date.now()}`);
     assert.equal(mod.hasVoice4Selection("de"), true);
-
     voices = [];
     assert.equal(mod.hasVoice4Selection("de"), true, "empty Safari inventory must preserve the known narrator");
-
     voices = [{ name: "Anna", voiceURI: "com.apple.anna", lang: "de-DE" }];
     assert.equal(mod.hasVoice4Selection("de"), false, "populated inventory without Voice 4 must invalidate stale cache");
   } finally {
@@ -118,11 +119,9 @@ test("Voice 4 cache resets when Safari speech synthesis disappears and returns",
   try {
     const mod = await import(`../src/audio/systemVoice4.js?engine-gap=${Date.now()}`);
     assert.equal(mod.hasVoice4Selection("de"), true);
-
     synth = null;
     assert.equal(mod.systemVoice4Available(), false);
     assert.equal(mod.hasVoice4Selection("de"), false, "missing engine must clear the old Voice 4 cache");
-
     synth = {
       getVoices: () => [replacementVoice4],
       addEventListener() {},
@@ -164,22 +163,13 @@ test("stopping Voice 4 resolves a Safari utterance that never emits end or error
     cancel() {},
     speak() { markStarted(); },
   };
-  globalThis.SpeechSynthesisUtterance = class {
-    constructor(text) { this.text = text; }
-  };
-
+  globalThis.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
   try {
     const mod = await import(`../src/audio/systemVoice4.js?stalled-stop=${Date.now()}`);
     const pending = mod.speakWithVoice4("Hallo Mino", "de");
-    await Promise.race([
-      started,
-      new Promise((_, reject) => setTimeout(() => reject(new Error("Voice 4 attempt did not start")), 250)),
-    ]);
+    await Promise.race([started, new Promise((_, reject) => setTimeout(() => reject(new Error("Voice 4 attempt did not start")), 250))]);
     mod.stopSystemVoice4();
-    const result = await Promise.race([
-      pending,
-      new Promise((_, reject) => setTimeout(() => reject(new Error("stalled Voice 4 did not resolve on stop")), 250)),
-    ]);
+    const result = await Promise.race([pending, new Promise((_, reject) => setTimeout(() => reject(new Error("stalled Voice 4 did not resolve on stop")), 250))]);
     assert.equal(result, false);
   } finally {
     if (previousSynth === undefined) delete globalThis.speechSynthesis;
@@ -198,7 +188,7 @@ test("speech keeps stale-playback and cancellation guards", () => {
   assert.match(systemVoice4, /runSequence === voice4Sequence && isCurrent\(\)/);
 });
 
-test("recorded fallback still uses one lazy media player", () => {
+test("fixed natural narrator still uses one lazy media player", () => {
   assert.match(voice, /voicePlayer = new Audio\(\)/);
   assert.match(voice, /voicePlayer\.preload = "none"/);
 });
