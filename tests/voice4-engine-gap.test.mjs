@@ -19,7 +19,7 @@ test("an established iOS Voice 4 blocks recorded fallback during a speech engine
 test("Voice 4 continuity is established only after a real selection and cleared after confirmed absence", () => {
   assert.match(voice, /if \(playedSystem\) \{\s*markVoice4Established\(lang\);\s*return true;/s);
   assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s);
-  assert.match(voice, /if \(!voice4InventoryReady\(lang\)\) return false;\s*[\s\S]*clearVoice4Continuity\(lang\);/);
+  assert.match(voice, /if \(!voice4InventoryReady\(lang, settings\)\) return false;\s*[\s\S]*clearVoice4Continuity\(lang\);/);
 });
 
 test("the engine-gap hold cannot expire into a different narrator once Voice 4 was established", () => {
