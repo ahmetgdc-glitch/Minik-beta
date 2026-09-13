@@ -3,7 +3,7 @@ import { unlockAudio, startMusic, stopMusic } from "../audio/sounds.js";
 import { unlockVoiceAudio } from "../audio/voice.js";
 
 /**
- * Prime both audio engines from the first real user gesture.
+ * Prime both audio engines from real user gestures.
  * Important: this unlocks ONE reusable media element only. It must never
  * preload the whole voice library during boot.
  */
@@ -14,6 +14,10 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
     let webAudioReady = false;
     let voiceReady = false;
     let disposed = false;
+    const ua = String(window.navigator?.userAgent || "");
+    const platform = String(window.navigator?.platform || "");
+    const touchPoints = Number(window.navigator?.maxTouchPoints || 0);
+    const ios = /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
 
     const cleanupGestureListeners = () => {
       window.removeEventListener("pointerdown", prime, true);
@@ -21,12 +25,14 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
       window.removeEventListener("keydown", prime, true);
     };
     const maybeFinish = () => {
-      if (webAudioReady && voiceReady) cleanupGestureListeners();
+      // iOS can revoke media readiness after the first successful gesture or
+      // report readiness too optimistically. Keep the lightweight prime hooks
+      // available there so a later tap can recover voice without a reload.
+      if (!ios && webAudioReady && voiceReady) cleanupGestureListeners();
     };
     const prime = () => {
       if (disposed || document.visibilityState !== "visible") return;
 
-      // Both resume()/play() are invoked synchronously inside the real gesture.
       const context = unlockAudio();
       startMusic({ enabled: musicEnabled });
       if (context?.state === "running") {
@@ -49,9 +55,6 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
     const resumeAfterBackground = () => {
       stopMusic();
       if (document.visibilityState !== "visible") return;
-      // Safari may suspend WebAudio or revoke media playback readiness after
-      // backgrounding. Re-arm BOTH audio paths for the next real tap; never
-      // assume the old voice media unlock is still valid after resume.
       webAudioReady = false;
       voiceReady = false;
       window.addEventListener("pointerdown", prime, true);
