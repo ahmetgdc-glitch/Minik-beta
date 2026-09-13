@@ -24,7 +24,7 @@ export function speechRecognitionCtor(scope = globalThis) {
 export function recognitionIssue(code, lang = "de") {
   const tr = lang === "tr";
   const key = String(code || "").toLowerCase();
-  if (["not-allowed", "service-not-allowed"].includes(key)) {
+  if (["not-allowed", "service-not-allowed", "notallowederror", "securityerror"].includes(key)) {
     return {
       kind: "permission",
       retryable: false,
