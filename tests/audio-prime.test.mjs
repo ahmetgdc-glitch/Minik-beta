@@ -3,29 +3,32 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
+const FIXED_CLIP = "https://storage.googleapis.com/adm--audio-playback--7d--public/mcp-preview/00000000-0000-0000-0000-000000000001.mp3";
 const voiceSourceForHarness = () => read("src/audio/voice.js")
   .replace(/^import .*;\n/gm, "")
   .replace(/import \{[\s\S]*?\} from "\.\/systemVoice4\.js";\n/u, "")
   .replace(/export /g, "");
-const voiceHarness = (Audio, personalVoiceClip, naturalVoicePlan, setSpeechActive) =>
+const voiceHarness = (Audio, fixedNaturalVoicePlan, setSpeechActive) =>
   new Function(
     "Audio",
-    "personalVoiceClip",
-    "naturalVoicePlan",
+    "fixedNaturalVoicePlan",
+    "isFixedNaturalVoiceClipUrl",
     "setSpeechActive",
     "hasVoice4Selection",
     "speakWithVoice4",
     "stopSystemVoice4",
     "systemVoice4Available",
+    "voice4InventoryReady",
     `${voiceSourceForHarness()}; return {speak, stopSpeech, unlockVoiceAudio};`,
   )(
     Audio,
-    personalVoiceClip,
-    naturalVoicePlan,
+    fixedNaturalVoicePlan,
+    () => true,
     setSpeechActive,
     () => false,
     async () => false,
     () => {},
+    () => false,
     () => false,
   );
 
@@ -41,7 +44,7 @@ test("late audio unlock cannot pause a new narration or replace its handlers", a
       return plays === 1 ? new Promise((resolve) => { finishUnlock = resolve; }) : Promise.resolve();
     }
   }
-  const api = voiceHarness(Audio, () => "clip.mp3", () => [], () => {});
+  const api = voiceHarness(Audio, () => [FIXED_CLIP], () => {});
   const unlock = api.unlockVoiceAudio();
   const duplicate = api.unlockVoiceAudio();
   assert.equal(plays, 1);
@@ -54,7 +57,7 @@ test("late audio unlock cannot pause a new narration or replace its handlers", a
   assert.equal(pauses, pauseCount);
   assert.equal(player.onended, handler);
   assert.equal(await api.unlockVoiceAudio(), true);
-  assert.equal(player.src, "clip.mp3");
+  assert.equal(player.src, FIXED_CLIP);
   assert.equal(player.onended, handler);
   assert.equal(plays, 2);
   player.onended();
@@ -71,7 +74,7 @@ test("speech ducking survives cancellation and ends on completion or audio off",
     load() {}
     play() { return Promise.resolve(); }
   }
-  const api = voiceHarness(Audio, () => "clip.mp3", () => [], (active) => levels.push(active));
+  const api = voiceHarness(Audio, () => [FIXED_CLIP], (active) => levels.push(active));
   const first = api.speak("eins");
   assert.equal(levels.at(-1), true);
   const second = api.speak("zwei");
