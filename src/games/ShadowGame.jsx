@@ -1,10 +1,11 @@
 import React from "react";
 import { Volume2 } from "lucide-react";
-import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
-import Visual from "../components/Visual.jsx";
+import { useSelection, useLesson } from "./shared.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 export default function ShadowGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -29,6 +30,7 @@ export default function ShadowGame({
     help,
   );
   const controlsDisabled = paused || interactionBlocked();
+  const quietOption = options.find((item) => item.id !== target.id);
 
   function repeatPrompt() {
     if (controlsDisabled) return;
@@ -49,14 +51,36 @@ export default function ShadowGame({
         disabled={controlsDisabled}
         aria-label={lang === "tr" ? "Soruyu tekrar dinle" : "Aufgabe noch einmal hören"}
       >
+        <span className="shadow-cave-glow" aria-hidden="true" />
         <Visual item={target} lang={lang} silhouette={hint < 3} />
+        <div className="shadow-mino-guide" aria-hidden="true">
+          <span className="shadow-mino-lantern" />
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
         <span className="shadow-listen-hint" aria-hidden="true"><Volume2 size={24} /></span>
       </button>
-      <OptionGrid
-        {...{ target, options, hint, lang, settings }}
-        disabled={controlsDisabled}
-        onPick={pick}
-      />
+      <div className="shadow-choice-label">{lang === "tr" ? "Gölgenin sahibini bul" : "Finde das passende Bild"}</div>
+      <div className={`shadow-choice-field choices-${options.length}`} aria-disabled={controlsDisabled || undefined}>
+        {options.map((item, index) => {
+          const isTarget = item.id === target.id;
+          const hinted = hint >= 2 && isTarget;
+          const quiet = hint >= 2 && options.length > 2 && item.id === quietOption?.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`shadow-choice shadow-choice-${(index % 4) + 1} ${hinted ? "hint-target" : ""} ${quiet ? "quiet-option" : ""}`}
+              onClick={() => pick(item)}
+              disabled={controlsDisabled}
+              aria-label={item.labels[lang]}
+            >
+              <span className="shadow-choice-glow" aria-hidden="true" />
+              <Visual item={item} lang={lang} photos={settings.photos} />
+              <b>{item.labels[lang]}</b>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
