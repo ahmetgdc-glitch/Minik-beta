@@ -336,7 +336,7 @@ export async function speak(text, lang = "de", settings = {}) {
       // within the first wait window. Staying silent for this one request is
       // preferable to switching Mino to a different recorded speaker; the next
       // request will retry Voice 4 once the inventory appears.
-      if (!voice4InventoryReady()) return false;
+      if (!voice4InventoryReady(lang)) return false;
 
       // Voice 4 is conclusively unavailable on a populated, stable inventory.
       // Forget the continuity hold so a later genuine engine loss cannot keep
