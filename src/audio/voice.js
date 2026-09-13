@@ -1,5 +1,7 @@
-import { naturalVoicePlan } from "./naturalVoicePlans.js";
-import { personalVoiceClip } from "./personalVoiceClips.js";
+import {
+  fixedNaturalVoicePlan,
+  isFixedNaturalVoiceClipUrl,
+} from "./fixedNaturalVoicePlans.js";
 import { setSpeechActive } from "./sounds.js";
 import {
   hasVoice4Selection,
@@ -52,9 +54,8 @@ function speechForegroundAllowed() {
 }
 
 export function holdVoice4DuringEngineGap() {
-  // Voice 4 is always attempted first when Safari exposes speechSynthesis.
-  // If the engine itself disappears, never turn the app permanently silent:
-  // the bundled/offline MINIK recording remains the emergency path.
+  // Fixed bundled narration is the primary MINIK voice. Voice 4 is only an
+  // emergency fallback, so an iOS speech-engine gap must never block audio.
   return false;
 }
 
@@ -101,14 +102,14 @@ export async function unlockVoiceAudio() {
       }
       return true;
     } catch {
-      // A working speechSynthesis object does not prove that recorded fallback
-      // is unlocked. Keep gesture listeners armed until media/WebAudio really
-      // succeeds, otherwise a later Voice 4 failure can leave iOS fully silent.
       return contextReady;
     }
   })();
-  try { return await unlockPending; }
-  finally { unlockPending = null; }
+  try {
+    return await unlockPending;
+  } finally {
+    unlockPending = null;
+  }
 }
 
 export function stopSpeech() {
@@ -116,7 +117,9 @@ export function stopSpeech() {
   cloudAbort?.abort();
   cloudPlayer?.pause();
   stopSystemVoice4();
-  try { voiceSource?.stop(); } catch {}
+  try {
+    voiceSource?.stop();
+  } catch {}
   voiceSource = null;
   voicePlayer?.pause();
   if (voicePlayer) {
@@ -140,13 +143,6 @@ function bindSpeechLifecycle() {
 }
 
 bindSpeechLifecycle();
-
-function isPersonalVoiceClipUrl(url) {
-  return (
-    /^assets\/personal-voice\/personal-(?:de|tr)-[a-f0-9]{20}\.mp3$/u.test(url || "") ||
-    /^https:\/\/resource2\.heygen\.ai\/text_to_speech\/[^\s]+\/id=[a-f0-9-]+\.wav$/u.test(url || "")
-  );
-}
 
 function localizedGameClip(url) {
   if (!url || typeof document === "undefined") return "";
@@ -194,13 +190,17 @@ async function speakWebAudioClip(url, token) {
     const finish = (ok) => {
       if (done) return;
       done = true;
-      try { source.disconnect(); } catch {}
+      try {
+        source.disconnect();
+      } catch {}
       if (voiceSource === source) voiceSource = null;
       settle = null;
       resolve(Boolean(ok && token === sequence));
     };
     settle = () => {
-      try { source.stop(); } catch {}
+      try {
+        source.stop();
+      } catch {}
       finish(false);
     };
     source.onended = () => finish(true);
@@ -272,7 +272,7 @@ async function playPreferredClip(url, token) {
 }
 
 async function speakNaturalPlan(plan, token) {
-  if (!plan?.length || !plan.every(isPersonalVoiceClipUrl)) return false;
+  if (!plan?.length || !plan.every(isFixedNaturalVoiceClipUrl)) return false;
   for (const clip of plan) {
     if (token !== sequence || !speechForegroundAllowed()) return false;
     const played = await playPreferredClip(clip, token);
@@ -287,6 +287,18 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
+    // The bundled natural MINIK narrator is now the primary voice everywhere.
+    // This keeps German and Turkish consistent across Safari, PWA, iPad and
+    // other browsers instead of depending on Apple's changing voice inventory.
+    const plan = fixedNaturalVoicePlan(text, lang);
+    if (plan.length) {
+      const playedNatural = await speakNaturalPlan(plan, token);
+      if (playedNatural || token !== sequence) return playedNatural;
+    }
+
+    // Voice 4 is retained only as an emergency fallback for an unmapped or
+    // temporarily unplayable bundled clip. Arbitrary/default system voices are
+    // still rejected inside systemVoice4.js.
     const voice4Available = systemVoice4Available();
     if (!voice4Available && holdVoice4DuringEngineGap(lang)) return false;
 
@@ -307,27 +319,13 @@ export async function speak(text, lang = "de", settings = {}) {
       const selectedVoice4 = hasVoice4Selection(lang, settings);
       if (selectedVoice4) markVoice4Established(lang);
       else if (voice4InventoryReady(lang, settings)) clearVoice4Continuity(lang);
-
-      // Voice 4 stays the first choice and arbitrary/default system voices stay
-      // forbidden. But a failed WebKit Voice 4 request must not make MINIK
-      // silent: continue to the bundled/offline recording for this utterance.
-      // The next utterance will try Voice 4 first again.
     } else {
       clearVoice4Continuity(lang);
     }
 
-    if (!speechForegroundAllowed()) return false;
-    const personalClip = personalVoiceClip(text, lang);
-    if (personalClip) {
-      const playedPersonal = await playPreferredClip(personalClip, token);
-      if (playedPersonal || token !== sequence) return playedPersonal;
-    }
-
-    const plan = naturalVoicePlan(text, lang);
-    if (plan.length && plan.every(isPersonalVoiceClipUrl)) {
-      const played = await speakNaturalPlan(plan, token);
-      if (played || token !== sequence) return played;
-    }
+    // Personal recordings are intentionally not an automatic narrator any
+    // more. If both the fixed natural library and Voice 4 fail, return false
+    // rather than unexpectedly changing to the owner's recorded voice.
     return false;
   } finally {
     if (token === sequence) setSpeechActive(false);
