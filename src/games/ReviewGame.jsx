@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
-import { Volume2 } from "lucide-react";
+import { Sparkles, Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { itemMastery } from "../learning/mastery.js";
 import { reviewItems } from "../learning/review.js";
 import { choicesFor } from "../utils/random.js";
-import { useLesson, OptionGrid } from "./shared.jsx";
+import { useLesson } from "./shared.jsx";
 
 export default function ReviewGame({
   items,
@@ -39,6 +40,7 @@ export default function ReviewGame({
 
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
   const controlsDisabled = paused || interactionBlocked();
+  const quietOption = options.find((item) => item.id !== target.id);
 
   function replayTarget() {
     if (controlsDisabled) return;
@@ -54,7 +56,7 @@ export default function ReviewGame({
     <div className={`review-game review-island review-${state.level}`} aria-disabled={controlsDisabled || undefined}>
       <section className="review-island__stage" aria-label={badge}>
         <div className="review-island__focus">
-          <div className="review-island__badge">{badge}</div>
+          <div className="review-island__badge"><Sparkles size={18} aria-hidden="true" /> {badge}</div>
           <button
             type="button"
             className="review-island__orb review-island__listen"
@@ -73,12 +75,33 @@ export default function ReviewGame({
               : "Hör das Wort, finde das richtige Bild und festige, was du schon gelernt hast."}
           </p>
         </div>
+        <div className="review-island__mino" aria-hidden="true">
+          <span className="review-island__mino-glow" />
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
       </section>
-      <OptionGrid
-        {...{ options, target, hint, lang, settings }}
-        disabled={controlsDisabled}
-        onPick={pick}
-      />
+      <div className="review-island__choice-label">{lang === "tr" ? "Doğru resmi bul" : "Finde das richtige Bild"}</div>
+      <div className={`review-island__choices choices-${options.length}`} aria-disabled={controlsDisabled || undefined}>
+        {options.map((item, index) => {
+          const isTarget = item.id === target.id;
+          const hinted = hint >= 2 && isTarget;
+          const quiet = hint >= 2 && options.length > 2 && item.id === quietOption?.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`review-island__choice review-choice-${(index % 4) + 1} ${hinted ? "hint-target" : ""} ${quiet ? "quiet-option" : ""}`}
+              onClick={() => pick(item)}
+              disabled={controlsDisabled}
+              aria-label={item.labels[lang]}
+            >
+              <span className="review-island__choice-glow" aria-hidden="true" />
+              <Visual item={item} lang={lang} photos={settings.photos} />
+              <b>{item.labels[lang]}</b>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
