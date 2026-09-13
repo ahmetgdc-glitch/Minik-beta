@@ -6,7 +6,7 @@ const systemVoice4 = fs.readFileSync(new URL("../src/audio/systemVoice4.js", imp
 
 test("MINIK prefers the fixed natural narrator before optional iOS Voice 4", () => {
   const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const naturalPlaybackIndex = voice.indexOf("speakNaturalPlan(plan, token)");
+  const naturalPlaybackIndex = voice.indexOf("const playedNatural = await speakNaturalPlan(plan, token);");
   const systemIndex = voice.indexOf("speakWithVoice4(");
   assert.ok(naturalIndex > 0);
   assert.ok(naturalPlaybackIndex > naturalIndex);
