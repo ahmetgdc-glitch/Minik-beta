@@ -356,6 +356,16 @@ function retryDelay(isCurrent) {
   });
 }
 
+function currentVoice4ForRetry(lang, settings) {
+  const voices = exposedSystemVoices();
+  const cached = cachedVoiceFor(lang, voices);
+  if (cached) return cached;
+
+  const selected = selectVoice4(voices, lang, settings);
+  if (selected) selectedVoiceCache.set(lang, selected);
+  return selected;
+}
+
 export async function speakWithVoice4(text, lang = "de", settings = {}, isCurrent = () => true) {
   if (!text || !systemVoice4Available() || !isCurrent()) return false;
   syncVoiceEngine();
@@ -371,7 +381,12 @@ export async function speakWithVoice4(text, lang = "de", settings = {}, isCurren
   // selected voice itself is still valid. Retry Voice 4 once instead of
   // immediately changing narrator to a recorded fallback. An explicit stop
   // invalidates this run sequence so the retry cannot resurrect old speech.
+  // Re-resolve the narrator after the delay: Safari may have published a new
+  // non-empty inventory in between, and submitting the old voice object can
+  // make WebKit silently substitute its default robotic voice.
   const mayRetry = await retryDelay(stillCurrent);
   if (!mayRetry) return false;
-  return playVoice4Attempt(text, lang, settings, voice, stillCurrent);
+  const retryVoice = currentVoice4ForRetry(lang, settings);
+  if (!retryVoice || !stillCurrent()) return false;
+  return playVoice4Attempt(text, lang, settings, retryVoice, stillCurrent);
 }
