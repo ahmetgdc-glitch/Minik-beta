@@ -20,7 +20,6 @@ let settle = null,
 const voiceBufferCache = new Map();
 const establishedVoice4Languages = new Set();
 const voice4EngineMissingSince = new Map();
-const VOICE4_ENGINE_GRACE_MS = Number.POSITIVE_INFINITY;
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -60,22 +59,11 @@ function isIOSSpeechEnvironment() {
   return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
 }
 
-export function holdVoice4DuringEngineGap(lang = "de", now = Date.now()) {
-  if (!isIOSSpeechEnvironment()) return false;
-
-  // On iOS, a missing speechSynthesis object during launch/resume is not
-  // evidence that Voice 4 is unsupported. This can happen before the first
-  // successful utterance as well as after one. Keep the narrator identity
-  // stable from the very first request: silence is preferable to switching to
-  // a personal recording while Safari rebuilds its speech engine.
-  if (!establishedVoice4Languages.has(lang)) return true;
-
-  const missingSince = voice4EngineMissingSince.get(lang);
-  if (!missingSince) {
-    voice4EngineMissingSince.set(lang, now);
-    return true;
-  }
-  return now - missingSince < VOICE4_ENGINE_GRACE_MS;
+export function holdVoice4DuringEngineGap() {
+  // A Voice 4 engine gap must never make MINIK permanently silent. The caller
+  // already gives Safari a Voice 4 attempt first; when the engine itself is
+  // unavailable we immediately allow the bundled MINIK recording fallback.
+  return false;
 }
 
 function markVoice4Established(lang) {
@@ -321,29 +309,21 @@ export async function speak(text, lang = "de", settings = {}) {
       }
       if (token !== sequence) return false;
 
-      // A selected Voice 4 must remain the narrator. Safari occasionally
-      // rejects an individual speechSynthesis call even though the voice is
-      // still available; changing to a recorded person for only that sentence
-      // sounds like a different character. Only use recordings when Voice 4
-      // is genuinely unavailable.
+      // Voice 4 remains the first choice, but a WebKit playback failure must
+      // not turn the app silent. After the Voice 4 retry has failed, continue
+      // to the bundled MINIK recording rather than switching to an arbitrary
+      // system voice.
       if (hasVoice4Selection(lang, settings)) {
         markVoice4Established(lang);
-        return false;
       }
 
-      // An empty Safari voice inventory is not proof that Voice 4 is absent.
-      // Some iOS launches populate getVoices() late and never fire the event
-      // within the first wait window. Staying silent for this one request is
-      // preferable to switching Mino to a different recorded speaker; the next
-      // request will retry Voice 4 once the inventory appears. The settings
-      // object is required here as well: a partial inventory containing a
-      // different Voice 4 variant must not make an explicitly selected iOS
-      // narrator look conclusively unavailable.
-      if (!voice4InventoryReady(lang, settings)) return false;
-
-      // Voice 4 is conclusively unavailable on a populated, stable inventory.
-      // Forget the continuity hold so a later genuine engine loss cannot keep
-      // blocking the intended recorded fallback indefinitely.
+      // Safari may still expose an empty or partial inventory after the Voice 4
+      // wait window. Keep the continuity bookkeeping when it is unresolved,
+      // but do not block audible local fallback for the current request.
+      if (voice4InventoryReady(lang, settings)) {
+        clearVoice4Continuity(lang);
+      }
+    } else {
       clearVoice4Continuity(lang);
     }
 
