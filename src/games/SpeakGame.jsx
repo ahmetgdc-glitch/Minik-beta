@@ -89,7 +89,12 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
       if (alternatives.some((text) => speechMatches(text, expected, lang))) onSolve([target.id]);
       else onWrong([target.id]);
     };
-    try { rec.start(); } catch { stopRecognition(); }
+    try {
+      rec.start();
+    } catch (error) {
+      stopRecognition();
+      if (!interactionBlocked()) setIssue(recognitionIssue(error?.name || error?.code, lang));
+    }
   }
 
   function assistedSolve() {
