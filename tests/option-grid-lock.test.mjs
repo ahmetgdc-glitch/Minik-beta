@@ -18,7 +18,7 @@ test("OptionGrid exposes a real disabled state to every answer button", () => {
 });
 
 test("choice games wire the shared lock state into OptionGrid", () => {
-  for (const [name, source] of Object.entries({ ShadowGame: shadow, SoundsGame: sounds, ReviewGame: review, StoryGame: story })) {
+  for (const [name, source] of Object.entries({ ShadowGame: shadow, SoundsGame: sounds, StoryGame: story })) {
     assert.match(source, /const controlsDisabled = paused \|\| interactionBlocked\(\);/, `${name} must derive the live session lock`);
     assert.match(source, /<OptionGrid[\s\S]*?disabled=\{controlsDisabled\}/, `${name} must disable its shared answer cards`);
   }
@@ -30,6 +30,14 @@ test("ListenGame custom visual islands preserve the full session lock", () => {
   assert.match(listen, /disabled=\{controlsDisabled\}/);
   assert.match(listen, /function pick\(item\) \{\s*if \(controlsDisabled\) return;/s);
   assert.doesNotMatch(listen, /<OptionGrid/);
+});
+
+test("ReviewGame training islands preserve the full session lock", () => {
+  assert.match(review, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(review, /className=\{`review-island__choice review-choice-/);
+  assert.match(review, /disabled=\{controlsDisabled\}/);
+  assert.match(review, /function pick\(item\) \{\s*if \(controlsDisabled\) return;/s);
+  assert.doesNotMatch(review, /<OptionGrid/);
 });
 
 test("counting answers are unfocusable and unclickable until every object is counted", () => {
