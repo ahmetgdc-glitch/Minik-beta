@@ -20,7 +20,7 @@ let settle = null,
 const voiceBufferCache = new Map();
 const establishedVoice4Languages = new Set();
 const voice4EngineMissingSince = new Map();
-const VOICE4_ENGINE_GRACE_MS = 5000;
+const VOICE4_ENGINE_GRACE_MS = Number.POSITIVE_INFINITY;
 const SILENT_WAV =
   "data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YRAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
