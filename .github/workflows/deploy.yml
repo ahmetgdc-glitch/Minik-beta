@@ -132,7 +132,7 @@ jobs:
           page="${PAGE_URL}?minik_sha=${GITHUB_SHA}"
           html="$(curl --fail --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 5 "$page")"
 
-          if echo "$html" | grep -qE 'src=["'"']/src/main\.jsx'; then
+          if echo "$html" | grep -qE "src=['\"]/src/main\.jsx"; then
             echo "::error::Published Pages site is serving the Vite source entry instead of the production build."
             exit 1
           fi
