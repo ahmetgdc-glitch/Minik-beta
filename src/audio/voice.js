@@ -335,8 +335,11 @@ export async function speak(text, lang = "de", settings = {}) {
       // Some iOS launches populate getVoices() late and never fire the event
       // within the first wait window. Staying silent for this one request is
       // preferable to switching Mino to a different recorded speaker; the next
-      // request will retry Voice 4 once the inventory appears.
-      if (!voice4InventoryReady(lang)) return false;
+      // request will retry Voice 4 once the inventory appears. The settings
+      // object is required here as well: a partial inventory containing a
+      // different Voice 4 variant must not make an explicitly selected iOS
+      // narrator look conclusively unavailable.
+      if (!voice4InventoryReady(lang, settings)) return false;
 
       // Voice 4 is conclusively unavailable on a populated, stable inventory.
       // Forget the continuity hold so a later genuine engine loss cannot keep
