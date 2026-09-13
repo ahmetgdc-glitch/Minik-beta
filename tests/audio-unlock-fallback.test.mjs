@@ -53,3 +53,11 @@ test("successful media unlock is still accepted", async () => {
   const api = voiceHarness(Audio, () => true);
   assert.equal(await api.unlockVoiceAudio(), true);
 });
+
+test("background resume rearms both WebAudio and voice media unlock", () => {
+  const source = fs.readFileSync(new URL("../src/app/useAudioPrime.js", import.meta.url), "utf8");
+  assert.match(
+    source,
+    /const resumeAfterBackground = \(\) => \{[\s\S]*webAudioReady = false;\s*voiceReady = false;[\s\S]*addEventListener\("pointerdown", prime, true\)/,
+  );
+});
