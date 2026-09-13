@@ -15,18 +15,20 @@ test("Voice 4 selector never falls back to arbitrary robotic system voices", () 
   assert.match(systemVoice4, /VOICE4_RE/);
   assert.match(systemVoice4, /SIRI_RE/);
   assert.match(systemVoice4, /const available = \(voices \|\| \[\]\)\.filter\(isVoice4Candidate\)/);
-  assert.match(systemVoice4, /available\.find\(\(voice\) => VOICE4_RE/);
-  assert.match(systemVoice4, /available\.find\(\(voice\) => SIRI_RE/);
+  assert.match(systemVoice4, /eligible\.find\(\(voice\) => VOICE4_RE/);
+  assert.match(systemVoice4, /eligible\.find\(\(voice\) => SIRI_RE/);
   assert.doesNotMatch(systemVoice4, /voice\?\.default/);
   assert.doesNotMatch(systemVoice4, /voice\?\.localService/);
-  assert.doesNotMatch(systemVoice4, /sameLanguage\[0\]|voices\[0\]|available\[0\]/);
+  assert.doesNotMatch(systemVoice4, /sameLanguage\[0\]|voices\[0\]|available\[0\]|eligible\[0\]/);
 });
 
-test("Voice 4 tolerates incorrect iOS language tags without changing narrator", () => {
+test("iOS Voice 4 remains language-scoped while non-iOS can retain legacy candidate fallback", () => {
+  assert.match(systemVoice4, /const sameLanguage = available\.filter\(\(voice\) => matchesLanguage\(voice, lang\)\)/);
+  assert.match(systemVoice4, /const eligible = isIOSSpeechEnvironment\(\) \? sameLanguage : available/);
   assert.match(systemVoice4, /sameLanguage\.find\(\(voice\) => VOICE4_RE/);
   assert.match(systemVoice4, /sameLanguage\.find\(\(voice\) => SIRI_RE/);
-  assert.match(systemVoice4, /available\.find\(\(voice\) => VOICE4_RE/);
-  assert.match(systemVoice4, /available\.find\(\(voice\) => SIRI_RE/);
+  assert.match(systemVoice4, /eligible\.find\(\(voice\) => VOICE4_RE/);
+  assert.match(systemVoice4, /eligible\.find\(\(voice\) => SIRI_RE/);
 });
 
 test("Voice 4 waits long enough for Safari and caches the selected narrator", () => {
