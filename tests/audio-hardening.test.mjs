@@ -7,7 +7,7 @@ const systemVoice4 = fs.readFileSync(new URL("../src/audio/systemVoice4.js", imp
 test("MINIK plays fixed natural narration before iOS Voice 4 fallback", () => {
   const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
   const naturalPlaybackIndex = voice.indexOf("const playedNatural = await speakNaturalPlan(plan, token);");
-  const systemIndex = voice.indexOf("speakWithVoice4(");
+  const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(naturalIndex > 0);
   assert.ok(naturalPlaybackIndex > naturalIndex);
   assert.ok(systemIndex > naturalPlaybackIndex);
@@ -45,7 +45,7 @@ test("Voice 4 waits long enough for Safari and caches the selected narrator", ()
 
 test("an unresolved Safari voice inventory cannot block fixed local narration", () => {
   const naturalIndex = voice.indexOf("fixedNaturalVoicePlan(text, lang)");
-  const systemIndex = voice.indexOf("speakWithVoice4(");
+  const systemIndex = voice.indexOf("const playedSystem = await speakWithVoice4(");
   assert.ok(naturalIndex > 0);
   assert.ok(systemIndex > naturalIndex);
   assert.match(voice, /else if \(voice4InventoryReady\(lang, settings\)\) clearVoice4Continuity\(lang\)/);
