@@ -189,7 +189,7 @@ function observeVoiceChanges() {
   });
 }
 
-export function voice4InventoryReady(lang = "de") {
+export function voice4InventoryReady(lang = "de", settings = {}) {
   if (!systemVoice4Available()) return true;
   syncVoiceEngine();
   const voices = exposedSystemVoices();
@@ -200,16 +200,20 @@ export function voice4InventoryReady(lang = "de") {
     iosVoice4MissingSince.delete(lang);
     return false;
   }
-  if (voices.some((voice) => voiceIsEligibleForLanguage(voice, lang))) {
+
+  const eligible = voices.filter((voice) => voiceIsEligibleForLanguage(voice, lang));
+  const saved = savedVoicePreference(lang, settings);
+  const exactSavedVoice = saved && eligible.some((voice) => matchesSavedVoice(voice, saved));
+  if (eligible.length && (!isIOSSpeechEnvironment() || !saved || exactSavedVoice)) {
     iosVoice4MissingSince.delete(lang);
     return true;
   }
   if (!isIOSSpeechEnvironment()) return true;
 
-  // iOS narrator identity is strict: an opposite-language Voice 4 is not
-  // evidence that the requested narrator is available. Treat that partial
-  // inventory like a missing Voice 4 rather than switching languages or
-  // falling through to a personal recording.
+  // iOS narrator identity is strict: an opposite-language Voice 4 or a
+  // different same-language Voice 4 variant is not evidence that the requested
+  // narrator is available. Treat that partial inventory like a missing Voice 4
+  // rather than switching voices or falling through to a personal recording.
   const now = Date.now();
   const missingSince = iosVoice4MissingSince.get(lang);
   if (!missingSince) {
@@ -230,6 +234,11 @@ export function selectVoice4(voices, lang, settings = {}) {
   if (saved) {
     const exact = eligible.find((voice) => matchesSavedVoice(voice, saved));
     if (exact) return exact;
+    // An explicitly selected iOS Voice 4 variant is part of Mino's narrator
+    // identity. Safari often publishes partial inventories during launch and
+    // resume; choosing another Voice 4 here would make the character change
+    // voice mid-session. Stay silent until the requested variant returns.
+    if (isIOSSpeechEnvironment()) return null;
   }
 
   return (
