@@ -93,15 +93,19 @@ function cachedVoiceFor(lang, voices = exposedSystemVoices()) {
   if (replacementVoice4) {
     iosVoice4MissingSince = 0;
   } else if (isIOSSpeechEnvironment()) {
-    const now = Date.now();
-    if (!iosVoice4MissingSince) iosVoice4MissingSince = now;
-    if (now - iosVoice4MissingSince < IOS_ABSENCE_GRACE_MS) return cached;
+    // Once iOS has actually exposed Voice 4 during this speechSynthesis
+    // session, keep that narrator identity sticky. Safari can publish a
+    // populated but incomplete voice inventory for longer than the fallback
+    // grace window after resume. Invalidating the known voice here allowed
+    // voice.js to switch Mino to a personal recording mid-session. A failed
+    // playback is preferable to a different narrator; replacing the actual
+    // speechSynthesis engine still clears this cache via syncVoiceEngine().
+    if (!iosVoice4MissingSince) iosVoice4MissingSince = Date.now();
+    return cached;
   }
 
-  // A populated iOS inventory can still be transiently incomplete while
-  // Safari resumes. Only invalidate a known narrator after the same grace
-  // period used by the fallback guard. A different exposed Voice 4 is safe to
-  // select immediately because the narrator family is still available.
+  // Outside iOS, or when iOS exposes another explicit Voice 4 candidate,
+  // invalidate the stale identity so selection can move to the live voice.
   selectedVoiceCache.delete(lang);
   return null;
 }
@@ -146,11 +150,10 @@ export function voice4InventoryReady() {
   }
   if (!isIOSSpeechEnvironment()) return true;
 
-  // iOS can briefly expose a populated but incomplete inventory while Safari
-  // resumes or refreshes voices. Treating that single snapshot as proof that
-  // Voice 4 disappeared made MINIK switch to a personal recording mid-session.
-  // Require the absence to remain stable across a short grace period. A later
-  // request will still permit the recorded fallback if Voice 4 is truly gone.
+  // Before Voice 4 has ever been selected, iOS can briefly expose a populated
+  // but incomplete inventory while Safari resumes or refreshes voices. Require
+  // the absence to remain stable before allowing the recorded fallback. Once
+  // a Voice 4 selection exists, cachedVoiceFor() keeps that narrator sticky.
   const now = Date.now();
   if (!iosVoice4MissingSince) {
     iosVoice4MissingSince = now;
