@@ -16,6 +16,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
   const expected = target?.labels?.[lang] || "";
   const prompt = lang === "tr" ? `Benimle söyle: ${expected}` : `Sprich mir nach: ${expected}`;
   const blocked = interactionBlocked();
+  const showAssistedFallback = Boolean(issue && issue.kind !== "silence");
 
   function repeat() {
     if (paused || blocked || listening) return;
@@ -120,7 +121,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
           </button>
           {heard && <p className="heard-speech">{lang === "tr" ? "Duydum:" : "Gehört:"} <b>{heard}</b></p>}
           {issue && <p className={`speech-issue ${issue.kind}`} role="status">{issue.text}</p>}
-          {issue?.kind === "permission" && (
+          {showAssistedFallback && (
             <button className="secondary speak-assisted" onClick={assistedSolve} disabled={paused || blocked}>
               <Check size={22} /> {lang === "tr" ? "Mino ile söyledim" : "Ich habe mit Mino mitgesprochen"}
             </button>
