@@ -26,7 +26,13 @@ export default function SoundsGame({
       setPlaying(false);
       return;
     }
-    const duration = playSound(target.sound, settings);
+    // The target sound is the learning content itself, not a reward/effect.
+    // Parent setting `sfx` only controls optional reward sounds. Keep this
+    // essential listening cue audible whenever the main audio setting is on.
+    const duration = playSound(target.sound, {
+      ...settings,
+      sfx: settings?.audio !== false,
+    });
     setPlaying(duration > 0);
   }
   const text =
