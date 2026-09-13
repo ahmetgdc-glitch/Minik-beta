@@ -59,10 +59,11 @@ test("Voice 4 retries a transient Safari playback failure once", () => {
 });
 
 test("a known Voice 4 never switches to a personal recording after runtime failure", () => {
-  const stickyIndex = voice.indexOf("if (hasVoice4Selection(lang, settings)) return false;");
+  const stickyIndex = voice.indexOf("if (hasVoice4Selection(lang, settings)) {");
   const personalIndex = voice.indexOf("const personalClip = personalVoiceClip(text, lang)");
   assert.ok(stickyIndex > 0);
   assert.ok(personalIndex > stickyIndex);
+  assert.match(voice, /if \(hasVoice4Selection\(lang, settings\)\) \{\s*markVoice4Established\(lang\);\s*return false;/s);
   assert.match(systemVoice4, /export function hasVoice4Selection/);
 });
 
