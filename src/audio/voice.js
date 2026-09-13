@@ -55,7 +55,7 @@ function speechForegroundAllowed() {
 
 export function holdVoice4DuringEngineGap() {
   // A transient iOS speech-engine gap must never block the authorized bundled
-  // MINIK fallback. Every new utterance still tries Voice 4 first when live.
+  // MINIK narrator. Voice 4 is only consulted after fixed narration cannot play.
   return false;
 }
 
@@ -287,8 +287,19 @@ export async function speak(text, lang = "de", settings = {}) {
   const token = sequence;
   setSpeechActive(true);
   try {
-    // Voice 4 is the primary MINIK narrator. A failed or temporarily missing
-    // WebKit Voice 4 must never switch to an arbitrary/default system voice.
+    // The bundled fixed DE/TR MINIK library is the primary narrator on every
+    // platform. It is deterministic, localizable for offline use, and avoids
+    // Safari voice-inventory differences.
+    const plan = fixedNaturalVoicePlan(text, lang);
+    if (plan.length) {
+      const playedNatural = await speakNaturalPlan(plan, token);
+      if (playedNatural || token !== sequence) return playedNatural;
+    }
+
+    if (!speechForegroundAllowed()) return false;
+
+    // Apple Voice 4 is an emergency fallback only. A missing or failed Voice 4
+    // must never switch MINIK to an arbitrary/default system voice.
     const voice4Available = systemVoice4Available();
     if (!voice4Available && holdVoice4DuringEngineGap(lang)) return false;
 
@@ -311,15 +322,6 @@ export async function speak(text, lang = "de", settings = {}) {
       else if (voice4InventoryReady(lang, settings)) clearVoice4Continuity(lang);
     } else {
       clearVoice4Continuity(lang);
-    }
-
-    // If Voice 4 cannot speak this utterance, keep MINIK audible with the
-    // authorized fixed DE/TR narrator. Every next utterance tries Voice 4 first.
-    if (!speechForegroundAllowed()) return false;
-    const plan = fixedNaturalVoicePlan(text, lang);
-    if (plan.length) {
-      const playedNatural = await speakNaturalPlan(plan, token);
-      if (playedNatural || token !== sequence) return playedNatural;
     }
 
     return false;
