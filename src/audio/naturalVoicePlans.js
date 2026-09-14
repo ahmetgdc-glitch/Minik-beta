@@ -91,8 +91,11 @@ function recordedClip(text, lang) {
 }
 
 function resolve(parts, lang) {
-  const urls = parts.map((part) => recordedClip(part, lang));
-  return urls.length && urls.every(Boolean) ? urls : [];
+  // A dynamic lesson must not become completely silent just because one
+  // vocabulary item has no fixed recording yet. Keep every recorded fragment
+  // in order; this preserves the natural MINIK instruction/help voice while
+  // untranslated vocabulary coverage is expanded separately.
+  return parts.map((part) => recordedClip(part, lang)).filter(Boolean);
 }
 
 export function naturalVoicePlan(text, lang = "de") {
