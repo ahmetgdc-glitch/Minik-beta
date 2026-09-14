@@ -4,6 +4,7 @@ import Visual from "../components/Visual.jsx";
 import { sample, choicesFor } from "../utils/random.js";
 import { useLesson, OptionGrid } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
+import { difficultyProfile } from "./difficulty.js";
 
 function storySentence(labels, lang) {
   if (labels.length <= 1) {
@@ -16,9 +17,14 @@ function storySentence(labels, lang) {
       ? `Mino önce ${labels[0]} ve sonra ${labels[1]} görüyor.`
       : `Mino sieht zuerst ${labels[0]} und dann ${labels[1]}.`;
   }
+  if (labels.length === 3) {
+    return lang === "tr"
+      ? `Mino önce ${labels[0]}, sonra ${labels[1]} ve en son ${labels[2]} görüyor.`
+      : `Mino sieht zuerst ${labels[0]}, dann ${labels[1]} und zum Schluss ${labels[2]}.`;
+  }
   return lang === "tr"
-    ? `Mino önce ${labels[0]}, sonra ${labels[1]} ve en son ${labels[2]} görüyor.`
-    : `Mino sieht zuerst ${labels[0]}, dann ${labels[1]} und zum Schluss ${labels[2]}.`;
+    ? `Mino önce ${labels[0]}, sonra ${labels[1]}, sonra ${labels[2]} ve en son ${labels[3]} görüyor.`
+    : `Mino sieht zuerst ${labels[0]}, dann ${labels[1]}, dann ${labels[2]} und zum Schluss ${labels[3]}.`;
 }
 
 export default function StoryGame({
@@ -33,12 +39,14 @@ export default function StoryGame({
   onWrong,
   onSolve,
 }) {
-  const [storyItems] = useState(() => sample(items, Math.min(3, items.length)));
+  const profile = difficultyProfile(difficulty);
+  const storyLength = profile.id === "easy" ? 2 : profile.id === "medium" ? 3 : 4;
+  const [storyItems] = useState(() => sample(items, Math.min(storyLength, items.length)));
   const [question, setQuestion] = useState(false);
   const [speakingId, setSpeakingId] = useState(null);
   const speechRun = useRef(0);
   const target = storyItems[storyItems.length - 1];
-  const options = useMemo(() => choicesFor(target, items, difficulty), [target, items, difficulty]);
+  const options = useMemo(() => choicesFor(target, items, profile.options), [target, items, profile.options]);
 
   if (!target) return null;
 
