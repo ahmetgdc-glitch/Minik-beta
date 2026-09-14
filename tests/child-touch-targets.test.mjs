@@ -24,6 +24,12 @@ test("atlas chapter navigation never collapses below a child-safe width", () => 
   assert.match(guards, /\.child-world-shell \.atlas-chapters button[\s\S]*?min-width: 44px[\s\S]*?min-height: 44px[\s\S]*?flex-shrink: 0/);
 });
 
+test("narrowest iPhones scroll chapter targets instead of shrinking or overflowing the atlas", () => {
+  assert.match(guards, /@media \(max-width: 375px\)/);
+  assert.match(guards, /\.child-world-shell \.atlas-chapters[\s\S]*?min-width: 0[\s\S]*?justify-content: flex-start[\s\S]*?overflow-x: auto[\s\S]*?overscroll-behavior-x: contain/);
+  assert.match(guards, /\.child-world-shell \.atlas-chapters::\-webkit-scrollbar[\s\S]*?display: none/);
+});
+
 test("profile edit and delete controls stay touch-safe on narrow devices", () => {
   assert.match(profiles, /className="profile-actions"/);
   assert.match(guards, /\.profile-actions button[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
