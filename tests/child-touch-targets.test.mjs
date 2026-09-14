@@ -23,6 +23,14 @@ test("profile edit and delete controls stay touch-safe on narrow devices", () =>
   assert.match(guards, /\.profile-actions button[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
 });
 
+test("profile creation modal remains reachable above iPhone keyboard and safe areas", () => {
+  assert.match(profiles, /className="profile-modal-backdrop"/);
+  assert.match(profiles, /className="profile-modal"/);
+  assert.match(guards, /@media \(max-width: 760px\), \(max-height: 700px\)/);
+  assert.match(guards, /\.profile-modal-backdrop[\s\S]*?overflow-y: auto[\s\S]*?env\(safe-area-inset-top\)[\s\S]*?env\(safe-area-inset-bottom\)/);
+  assert.match(guards, /\.profile-modal[\s\S]*?max-height: calc\(100dvh[\s\S]*?overflow-y: auto[\s\S]*?scroll-padding-bottom: 120px/);
+});
+
 test("in-game utility controls do not shrink below 44px on narrow iPhones", () => {
   assert.match(guards, /@media \(max-width: 540px\)/);
   assert.match(guards, /\.game-header \.icon-button,[\s\S]*?\.replay-audio[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
