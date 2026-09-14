@@ -41,6 +41,16 @@ test("narrowest iPhones scroll chapter targets instead of shrinking or overflowi
   assert.match(guards, /\.child-world-shell \.atlas-chapters::\-webkit-scrollbar[\s\S]*?display: none/);
 });
 
+test("active atlas chapter is kept visible when arrows or swipes change pages", () => {
+  assert.match(atlas, /import React, \{ useEffect, useMemo, useRef \} from "react"/);
+  assert.match(atlas, /const chapterNavRef = useRef\(null\)/);
+  assert.match(atlas, /querySelector\('\[aria-current="true"\]'\)/);
+  assert.match(atlas, /current\.offsetLeft \+ current\.offsetWidth \/ 2 - nav\.clientWidth \/ 2/);
+  assert.match(atlas, /nav\.scrollTo\(\{ left, behavior: reducedMotion \? "auto" : "smooth" \}\)/);
+  assert.match(atlas, /\[active\?\.chapter\.id, reducedMotion\]/);
+  assert.match(atlas, /<nav ref=\{chapterNavRef\} className="atlas-chapters"/);
+});
+
 test("profile edit and delete controls stay touch-safe on narrow devices", () => {
   assert.match(profiles, /className="profile-actions"/);
   assert.match(guards, /\.profile-actions button[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
