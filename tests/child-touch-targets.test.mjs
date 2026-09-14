@@ -5,6 +5,7 @@ import fs from "node:fs";
 const guards = fs.readFileSync(new URL("../src/app/child-touch-guards.css", import.meta.url), "utf8");
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
+const atlas = fs.readFileSync(new URL("../src/worlds/WorldAtlas.jsx", import.meta.url), "utf8");
 const profiles = fs.readFileSync(new URL("../src/parent/Profiles.jsx", import.meta.url), "utf8");
 
 test("narrow-phone child controls keep at least a 44px hit target", () => {
@@ -16,6 +17,11 @@ test("narrow-phone child controls keep at least a 44px hit target", () => {
   assert.match(guards, /min-width: 44px/);
   assert.match(guards, /height: 44px/);
   assert.match(guards, /min-height: 44px/);
+});
+
+test("atlas chapter navigation never collapses below a child-safe width", () => {
+  assert.match(atlas, /className="atlas-chapters"/);
+  assert.match(guards, /\.child-world-shell \.atlas-chapters button[\s\S]*?min-width: 44px[\s\S]*?min-height: 44px[\s\S]*?flex-shrink: 0/);
 });
 
 test("profile edit and delete controls stay touch-safe on narrow devices", () => {
