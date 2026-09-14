@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { itemsForWorld } from "../src/data/content.js";
 import { hasGameVoiceClip } from "../src/audio/gameVoiceClips.js";
+import { difficultyProfile } from "../src/games/difficulty.js";
 
 const countGame = readFileSync(new URL("../src/games/CountGame.jsx", import.meta.url), "utf8");
 
@@ -15,7 +16,12 @@ test("every number from one through twenty has natural speech in both languages"
   }
 });
 
-test("counting game speaks the canonical number-world labels while children count", () => {
+test("counting game speaks canonical number labels and scales its number range by difficulty", () => {
   assert.match(countGame, /itemsForWorld\("numbers"\)\[countedRef\.current\.length\]\.labels\[lang\]/);
-  assert.match(countGame, /const maximum = difficulty === 2 \? 5 : difficulty === 4 \? 10 : 20/);
+  assert.match(countGame, /const profile = difficultyProfile\(difficulty\)/);
+  assert.match(countGame, /const maximum = profile\.countMax/);
+  assert.deepEqual(
+    [difficultyProfile(2).countMax, difficultyProfile(4).countMax, difficultyProfile(6).countMax],
+    [5, 10, 20],
+  );
 });
