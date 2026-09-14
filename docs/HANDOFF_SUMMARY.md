@@ -69,6 +69,15 @@ Stand: **14. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### Audio-Hotfix nach Beta 78 · wartende Lernklänge
+
+- Ausgangspunkt: `6997eef`, 587 Tests sowie CI und Pages grün. Türkischer Standard, feste DE/TR-Stimme, drei Musikstimmungen und die jüngsten Grafik-/Wischkorrekturen bleiben erhalten.
+- Im echten Sound-Modul mit verzögertem Audio-Resume reproduziert: Nach `stopSounds()` konnte ein bereits wartender Geräusche-Auftrag noch den vierteiligen Glockenklang starten. Zwei schnelle Wiederholungen konnten einen veralteten Auftrag neben dem neuen fortsetzen.
+- `prepareSoundPlayback()` erzeugt jetzt vor dem Warten einen gemeinsamen Abbruch-Token und prüft ihn nach dem Resume erneut. Stop, neuer Ton, Mino-Sprache und eine versteckte Seite invalidieren alte Geräusch- und Rhythmusaufträge dauerhaft.
+- Geräusche- und Rhythmusspiel verwenden denselben Pfad. Vier neue Verhaltenstests prüfen Stop, jüngsten Auftrag, Sprecherpriorität und Hintergrundwechsel; zusammen 591 Tests.
+- Die vollständigen npm-Test-, Preflight-, Build- und Offline-Gates werden vor Übernahme auf `main` auf einem isolierten GitHub-Prüfzweig ausgeführt; dessen Workflow veröffentlicht keine Pages.
+- Weiterhin extern offen: physische iPhone-/iPad-Tonstartprüfung und fehlende feste Wortaufnahmen mit dem ursprünglichen Sprecherprofil.
+
 ### Audio-Hotfix nach Beta 78 · 14. September 2026
 
 - Ausgangspunkt: `6602d2f`, 580 Tests und CI/Pages grün; jüngste Grafik-, Wischschutz- und Musikauswahländerungen bleiben erhalten.

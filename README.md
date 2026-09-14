@@ -27,6 +27,8 @@ Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei th
 
 ## Entwickeln und prüfen
 
+Wartende Lernklänge im Geräusche- und Rhythmusspiel besitzen nun denselben Abbruchschutz wie einzelne Rhythmusnoten. Verlässt das Kind die Runde, beginnt Mino zu sprechen, wird die App verborgen oder folgt ein neuer Tap, kann ein alter Auftrag nach der iPhone-Audiofreigabe nicht mehr verspätet erklingen. Bei schneller Wiederholung gilt nur der jüngste Auftrag.
+
 Der Audio-Hotfix vom 14. September schützt auch Rhythmusnoten, die noch auf die Audiofreigabe warten: Pause, neue Taps oder Mino-Sprache verwerfen den alten Auftrag. Abgebrochene Taps zählen nicht als Antwort. Die feste DE/TR-Stimme und die drei Hintergrundmusik-Stimmungen bleiben erhalten.
 
 Beta 78 repariert Teilanfragen an gespeicherte Sprachaufnahmen: Der Audioplayer kann passende Tonabschnitte auch offline abrufen. Bei einer neuen gestreamten Aufnahme wird die vollständige Datei im Hintergrund gespeichert, ohne den Tonstart auf diesen Zusatzdownload warten zu lassen. Die feste türkische/deutsche Stimme und der kleine PWA-Startkern bleiben erhalten. Echte Tonstartzeiten auf iPhone/iPad müssen weiterhin am Gerät gemessen werden.

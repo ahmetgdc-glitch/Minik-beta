@@ -115,3 +115,55 @@ test("stopping one note does not poison the next rhythm interaction", async (t) 
   assert.equal(await sound.playNote(2), true);
   assert.deepEqual(heard, [392]);
 });
+
+
+test("a stopped learning-sound request stays silent after audio resume", async (t) => {
+  const { sound, heard, release } = await soundRuntime(t, { suspended: true });
+  const pending = (async () => {
+    const ready = await sound.prepareSoundPlayback();
+    return ready ? sound.playSound("bell", { sfx: true }) : 0;
+  })();
+  sound.stopSounds();
+  release();
+  assert.equal(await pending, 0);
+  assert.deepEqual(heard, []);
+});
+
+test("only the newest learning-sound request survives a delayed audio resume", async (t) => {
+  const { sound, heard, release } = await soundRuntime(t, { suspended: true });
+  const replay = async () => {
+    const ready = await sound.prepareSoundPlayback();
+    return ready ? sound.playSound("bell", { sfx: true }) : 0;
+  };
+  const first = replay();
+  const second = replay();
+  release();
+  assert.deepEqual(await Promise.all([first, second]), [0, 1500]);
+  assert.deepEqual(heard, [880, 1320, 880, 1320]);
+});
+
+test("Mino narration permanently cancels a waiting learning sound", async (t) => {
+  const { sound, heard, release } = await soundRuntime(t, { suspended: true });
+  const pending = (async () => {
+    const ready = await sound.prepareSoundPlayback();
+    return ready ? sound.playSound("bell", { sfx: true }) : 0;
+  })();
+  sound.setSpeechActive(true);
+  sound.setSpeechActive(false);
+  release();
+  assert.equal(await pending, 0);
+  assert.deepEqual(heard, []);
+});
+
+test("a learning sound cannot begin after its page became hidden", async (t) => {
+  const { sound, heard, document, release } = await soundRuntime(t, { suspended: true });
+  const pending = (async () => {
+    const ready = await sound.prepareSoundPlayback();
+    return ready ? sound.playSound("bell", { sfx: true }) : 0;
+  })();
+  document.hidden = true;
+  document.visibilityState = "hidden";
+  release();
+  assert.equal(await pending, 0);
+  assert.deepEqual(heard, []);
+});
