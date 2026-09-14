@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const guards = fs.readFileSync(new URL("../src/app/child-touch-guards.css", import.meta.url), "utf8");
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
 const atlas = fs.readFileSync(new URL("../src/worlds/WorldAtlas.jsx", import.meta.url), "utf8");
 const profiles = fs.readFileSync(new URL("../src/parent/Profiles.jsx", import.meta.url), "utf8");
@@ -17,6 +18,16 @@ test("narrow-phone child controls keep at least a 44px hit target", () => {
   assert.match(guards, /min-width: 44px/);
   assert.match(guards, /height: 44px/);
   assert.match(guards, /min-height: 44px/);
+});
+
+test("390px-class iPhones keep every essential topbar action without horizontal overflow", () => {
+  assert.match(app, /className="mobile-brand"/);
+  assert.match(app, /className="topbar-actions"/);
+  assert.match(guards, /@media \(max-width: 410px\)/);
+  assert.match(guards, /\.child-world-shell \.mobile-brand[\s\S]*?display: none/);
+  assert.match(guards, /\.child-world-shell \.topbar-actions[\s\S]*?width: 100%[\s\S]*?min-width: 0[\s\S]*?justify-content: space-between/);
+  assert.match(guards, /@media \(max-width: 375px\)[\s\S]*?\.child-world-shell \.topbar[\s\S]*?max\(8px, env\(safe-area-inset-left\)\)[\s\S]*?max\(8px, env\(safe-area-inset-right\)\)/);
+  assert.match(guards, /@media \(max-width: 375px\)[\s\S]*?\.child-world-shell \.language-switch span[\s\S]*?padding-inline: 4px/);
 });
 
 test("atlas chapter navigation never collapses below a child-safe width", () => {
