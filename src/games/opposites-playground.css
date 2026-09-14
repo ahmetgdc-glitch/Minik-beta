@@ -226,11 +226,49 @@
 }
 
 @media (max-width: 430px) {
-  .opposites-choice-grid { grid-template-columns: 1fr; }
+  .opposites-stage {
+    min-height: 390px;
+    padding: 16px;
+  }
+
+  .opposites-prompt-scene {
+    min-height: 190px;
+  }
+
+  .opposites-prompt-scene .visual {
+    width: min(52vw, 178px);
+    height: min(52vw, 178px);
+  }
+
+  .opposites-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
   .opposites-choice {
-    grid-template-columns: minmax(120px,.8fr) 1fr;
-    aspect-ratio: auto;
-    min-height: 150px;
+    grid-template-columns: 1fr;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    padding: 10px;
+    border-radius: 22px;
+  }
+
+  .opposites-choice .visual {
+    width: min(68%, 140px);
+    height: min(68%, 140px);
+  }
+
+  .opposites-choice b {
+    max-width: 100%;
+    font-size: clamp(.88rem, 4.2vw, 1.05rem);
+    line-height: 1.08;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+
+  .opposites-playground[data-difficulty="hard"] .opposites-choice .visual {
+    width: min(82%, 150px);
+    height: min(82%, 150px);
   }
 }
 
