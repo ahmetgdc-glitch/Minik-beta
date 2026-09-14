@@ -40,6 +40,32 @@
   }
 }
 
+/* Creating a profile opens a fairly tall form. On iPhone, especially while
+   the keyboard is open, the dialog must scroll inside the visible viewport
+   instead of hiding the final action buttons underneath the keyboard/home bar. */
+@media (max-width: 760px), (max-height: 700px) {
+  .profile-modal-backdrop {
+    align-items: start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding:
+      max(12px, env(safe-area-inset-top))
+      max(12px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .profile-modal {
+    width: min(560px, 100%);
+    max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    margin: auto 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 120px;
+  }
+}
+
 @media (max-width: 540px) {
   /* Legacy game styles used to shrink these below a child's comfortable hit
      target on iPhone. Keep the visible icons compact, but never the hit box. */
