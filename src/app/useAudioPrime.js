@@ -1,71 +1,56 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { unlockAudio, startMusic, stopMusic } from "../audio/sounds.js";
+import { getMusicStyle } from "../audio/musicProfiles.js";
 import { primeSystemSpeechForIOS } from "../audio/iosSpeechPrime.js";
 import { unlockVoiceAudio } from "../audio/voice.js";
 
 /**
- * Prime both audio engines from real user gestures.
- * Important: this unlocks ONE reusable media element only. It must never
- * preload the whole voice library during boot.
+ * Prime narration, effects and background music from real user gestures.
+ * These are independent audio layers: disabling narration must not silence a
+ * selected music profile, and choosing "music off" must not disable speech.
  */
-export function useAudioPrime(enabled = true, musicEnabled = enabled) {
-  useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+export function useAudioPrime(voiceEnabled = true, sfxEnabled = true) {
+  const voiceEnabledRef = useRef(Boolean(voiceEnabled));
+  const sfxEnabledRef = useRef(Boolean(sfxEnabled));
+  voiceEnabledRef.current = Boolean(voiceEnabled);
+  sfxEnabledRef.current = Boolean(sfxEnabled);
 
-    let webAudioReady = false;
-    let voiceReady = false;
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
     let disposed = false;
+    let voiceReady = false;
     const ua = String(window.navigator?.userAgent || "");
     const platform = String(window.navigator?.platform || "");
     const touchPoints = Number(window.navigator?.maxTouchPoints || 0);
     const ios = /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
 
-    const cleanupGestureListeners = () => {
-      window.removeEventListener("pointerdown", prime, true);
-      window.removeEventListener("touchstart", prime, true);
-      window.removeEventListener("keydown", prime, true);
-    };
-    const maybeFinish = () => {
-      // iOS can revoke media readiness after the first successful gesture or
-      // report readiness too optimistically. Keep the lightweight prime hooks
-      // available there so a later tap can recover voice without a reload.
-      if (!ios && webAudioReady && voiceReady) cleanupGestureListeners();
-    };
     const prime = () => {
       if (disposed || document.visibilityState !== "visible") return;
 
-      // Must stay synchronous and before every promise/await path. iOS WebKit
-      // removes its first-speech user-gesture restriction only when speak() is
-      // called while the real touch/key gesture is still being processed.
-      primeSystemSpeechForIOS();
+      const wantsVoice = voiceEnabledRef.current;
+      const wantsEffects = sfxEnabledRef.current;
+      const wantsMusic = getMusicStyle() !== "off";
 
-      const context = unlockAudio();
-      startMusic({ enabled: musicEnabled });
-      if (context?.state === "running") {
-        webAudioReady = true;
-      } else if (context?.resume) {
-        context.resume().then(() => {
-          if (disposed) return;
-          webAudioReady = context.state === "running";
-          maybeFinish();
+      // iOS requires the speech prime to happen inside the real gesture.
+      if (wantsVoice) primeSystemSpeechForIOS();
+
+      if (wantsEffects || wantsMusic) unlockAudio();
+      if (wantsMusic) startMusic();
+
+      // Keep lightweight gesture listeners mounted. Settings can change while
+      // the app stays open, so a later tap must be able to re-enable narration
+      // without requiring a reload. iOS may also revoke readiness after sleep.
+      if (wantsVoice && (!voiceReady || ios)) {
+        unlockVoiceAudio().then((ok) => {
+          if (!disposed) voiceReady ||= ok;
         }).catch(() => {});
       }
-
-      unlockVoiceAudio().then((ok) => {
-        if (disposed) return;
-        voiceReady ||= ok;
-        maybeFinish();
-      }).catch(() => {});
-      maybeFinish();
     };
+
     const resumeAfterBackground = () => {
       stopMusic();
-      if (document.visibilityState !== "visible") return;
-      webAudioReady = false;
-      voiceReady = false;
-      window.addEventListener("pointerdown", prime, true);
-      window.addEventListener("touchstart", prime, true);
-      window.addEventListener("keydown", prime, true);
+      if (document.visibilityState === "visible") voiceReady = false;
     };
 
     window.addEventListener("pointerdown", prime, true);
@@ -77,9 +62,11 @@ export function useAudioPrime(enabled = true, musicEnabled = enabled) {
     return () => {
       disposed = true;
       stopMusic();
-      cleanupGestureListeners();
+      window.removeEventListener("pointerdown", prime, true);
+      window.removeEventListener("touchstart", prime, true);
+      window.removeEventListener("keydown", prime, true);
       document.removeEventListener("visibilitychange", resumeAfterBackground);
       window.removeEventListener("pagehide", stopMusic);
     };
-  }, [enabled, musicEnabled]);
+  }, []);
 }
