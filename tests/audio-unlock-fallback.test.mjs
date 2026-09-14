@@ -54,10 +54,18 @@ test("successful media unlock is still accepted", async () => {
   assert.equal(await api.unlockVoiceAudio(), true);
 });
 
-test("background resume rearms both WebAudio and voice media unlock", () => {
+test("background return rearms voice and WebAudio on the next real gesture without autoplaying", () => {
   const source = fs.readFileSync(new URL("../src/app/useAudioPrime.js", import.meta.url), "utf8");
-  assert.match(
-    source,
-    /const resumeAfterBackground = \(\) => \{[\s\S]*webAudioReady = false;\s*voiceReady = false;[\s\S]*addEventListener\("pointerdown", prime, true\)/,
-  );
+  const resume = source.match(/const resumeAfterBackground = \(\) => \{([\s\S]*?)\n    \};/)?.[1] || "";
+  const prime = source.match(/const prime = \(\) => \{([\s\S]*?)\n    \};/)?.[1] || "";
+
+  assert.match(resume, /stopMusic\(\)/);
+  assert.match(resume, /document\.visibilityState === "visible"\) voiceReady = false/);
+  assert.doesNotMatch(resume, /unlockAudio\(\)/);
+  assert.doesNotMatch(resume, /unlockVoiceAudio\(\)/);
+  assert.doesNotMatch(resume, /startMusic\(\)/);
+
+  assert.match(prime, /if \(wantsEffects \|\| wantsMusic\) unlockAudio\(\)/);
+  assert.match(prime, /unlockVoiceAudio\(\)\.then/);
+  assert.match(source, /window\.addEventListener\("pointerdown", prime, true\)/);
 });
