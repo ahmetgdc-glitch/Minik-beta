@@ -13,6 +13,14 @@ test("software update controls stay out of the child surface", () => {
   assert.doesNotMatch(app, /\{updateReady && !playing && \(/);
 });
 
+test("offline and storage diagnostics stay in the adult area instead of covering learning worlds", () => {
+  assert.match(app, /!online && route === "parents"/);
+  assert.match(app, /getStorageFailure\(\) && route === "parents"/);
+  assert.match(app, /getStorageRecovery\(\) && !getStorageFailure\(\) && route === "parents"/);
+  assert.doesNotMatch(app, /\{!online && \(/);
+  assert.doesNotMatch(app, /\{getStorageFailure\(\) && \(/);
+});
+
 test("MINIK offers at least three distinct selectable music moods plus music off", () => {
   for (const id of ["playful", "calm", "adventure"]) {
     assert.match(profiles, new RegExp(`id: "${id}"`));
