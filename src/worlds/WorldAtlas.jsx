@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { ChevronLeft, ChevronRight, Play, Volume2, Star } from "lucide-react";
 import { worlds, worldById } from "../data/content.js";
 import { Art, MinoAvatar, assetUrl } from "../components/Visual.jsx";
@@ -14,6 +14,20 @@ export default function WorldAtlas({ progress, onOpen, onStart, availableWorlds 
   const offset = welcome ? 1 : 0;
   const pager = useScenePager(pages.length + offset, reducedMotion);
   const active = pages[pager.index - offset];
+  const chapterNavRef = useRef(null);
+
+  useEffect(() => {
+    const nav = chapterNavRef.current;
+    const current = nav?.querySelector('[aria-current="true"]');
+    if (!nav || !current) return;
+    const maxLeft = Math.max(0, nav.scrollWidth - nav.clientWidth);
+    if (maxLeft <= 0) return;
+    const centered = current.offsetLeft + current.offsetWidth / 2 - nav.clientWidth / 2;
+    const left = Math.max(0, Math.min(maxLeft, centered));
+    if (Math.abs(nav.scrollLeft - left) < 2) return;
+    nav.scrollTo({ left, behavior: reducedMotion ? "auto" : "smooth" });
+  }, [active?.chapter.id, reducedMotion]);
+
   function open(world) {
     unlockAudio();
     onOpen(world);
@@ -66,7 +80,7 @@ export default function WorldAtlas({ progress, onOpen, onStart, availableWorlds 
       </div>
       <div className="atlas-controls">
         <button className="scene-round-button" onClick={() => pager.go(pager.index - 1)} disabled={pager.index === 0} aria-label={t("Vorherige Insel", "Önceki ada")}><ChevronLeft size={30} /></button>
-        <nav className="atlas-chapters" aria-label={t("Inseln", "Adalar")}>
+        <nav ref={chapterNavRef} className="atlas-chapters" aria-label={t("Inseln", "Adalar")}>
           {sceneChapters.filter(chapter => pages.some(page => page.chapter.id === chapter.id)).map(chapter => <button
             key={chapter.id}
             className={active?.chapter.id === chapter.id ? "active" : ""}
