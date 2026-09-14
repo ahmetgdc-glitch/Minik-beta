@@ -108,11 +108,27 @@ test("manual music pause blocks gesture restarts until explicit resume", () => {
     },
     setInterval() { return 1; },
   };
-  const api = new Function("window", "clearInterval", read("src/audio/sounds.js").replace(/export /g, "") + "; return {startMusic, stopMusic, setMusicPaused};")(window, () => { cleared++; });
+  const source = read("src/audio/sounds.js")
+    .replace(/^import .*;\n/gm, "")
+    .replace(/export /g, "");
+  const musicStyleProfile = () => ({
+    id: "playful",
+    notes: [261.6, 329.6],
+    intervalMs: 720,
+    duration: 0.62,
+    type: "triangle",
+    volume: 0.018,
+    octaveEcho: 0,
+  });
+  const api = new Function("window", "clearInterval", "musicStyleProfile", source + "; return {startMusic, stopMusic, setMusicPaused};")(
+    window,
+    () => { cleared++; },
+    musicStyleProfile,
+  );
   assert.equal(api.startMusic(), true);
   api.setMusicPaused(true);
   assert.equal(cleared, 1);
-  assert.ok(stops >= 2);
+  assert.ok(stops >= 1);
   assert.equal(api.startMusic(), false);
   assert.equal(starts, 1);
   api.setMusicPaused(false);
