@@ -69,6 +69,13 @@ Stand: **14. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### CI-Hotfix nach Beta 78 · öffentliche Pages-Umschaltung
+
+- Beim ersten Releaseversuch von `7c5fc21` waren 591 Tests, Preflight, Build, Offline-Verifikation und beide Deployments erfolgreich. Der unmittelbar folgende Smoke-Test erhielt jedoch noch kurz das gültige Vite-Quell-HTML der vorherigen Legacy-Veröffentlichung und scheiterte; derselbe Lauf wurde nach der Umschaltung ohne Codeänderung erfolgreich.
+- Der Smoke-Test fragt den Seiteneinstieg nun bis zu zwölfmal im Abstand von fünf Sekunden mit je eigenem Cache-Schlüssel ab. Erst nach diesem begrenzten Fenster werden Quell-HTML oder ein fehlender gehashter Vite-Einstieg als Fehler gemeldet.
+- JavaScript-Einstieg, Manifest und Service Worker werden weiterhin einzeln mit HTTP-Fehlerprüfung geladen. Ein neuer Workflow-Vertragstest sichert Begrenzung, Cache-Trennung, Warteabstand und die erst nachgelagerte Fehlermeldung; zusammen 592 Tests.
+- Diese Änderung behebt eine beobachtete CI-Flake-Quelle, lockert aber keine Release-Prüfung und ersetzt keine physische iPhone-/iPad-Abnahme.
+
 ### Audio-Hotfix nach Beta 78 · wartende Lernklänge
 
 - Ausgangspunkt: `6997eef`, 587 Tests sowie CI und Pages grün. Türkischer Standard, feste DE/TR-Stimme, drei Musikstimmungen und die jüngsten Grafik-/Wischkorrekturen bleiben erhalten.

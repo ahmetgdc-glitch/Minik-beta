@@ -1,0 +1,34 @@
+name: Verify MINIK Pages smoke propagation
+
+on:
+  push:
+    branches:
+      - codex/pages-smoke-propagation-20260914
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run tests
+        run: npm test
+      - name: Run release preflight
+        run: npm run preflight
+      - name: Build production app
+        run: npm run build
+        env:
+          MINIK_REQUIRE_LOCAL_VOICE: "1"
+      - name: Verify production build
+        run: npm run verify:build

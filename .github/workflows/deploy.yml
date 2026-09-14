@@ -129,21 +129,28 @@ jobs:
             exit 1
           fi
 
-          page="${PAGE_URL}?minik_sha=${GITHUB_SHA}"
-          html="$(curl --fail --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 5 "$page")"
+          asset=""
+          html=""
+          asset_re='src="\./(assets/index-[^"]+\.js)"'
+          for attempt in {1..12}; do
+            page="${PAGE_URL}?minik_sha=${GITHUB_SHA}&attempt=${attempt}"
+            html="$(curl --fail --silent --show-error --location --retry 3 --retry-all-errors --retry-delay 2 "$page" || true)"
+            if ! grep -qE "src=['\"]/src/main\.jsx" <<<"$html" && [[ $html =~ $asset_re ]]; then
+              asset="${BASH_REMATCH[1]}"
+              break
+            fi
+            if [ "$attempt" -lt 12 ]; then
+              echo "Pages is still publishing the production entry (attempt ${attempt}/12); retrying in 5 seconds."
+              sleep 5
+            fi
+          done
 
           if grep -qE "src=['\"]/src/main\.jsx" <<<"$html"; then
-            echo "::error::Published Pages site is serving the Vite source entry instead of the production build."
+            echo "::error::Published Pages site is still serving the Vite source entry after the propagation window."
             exit 1
           fi
-
-          asset=""
-          asset_re='src="\./(assets/index-[^"]+\.js)"'
-          if [[ $html =~ $asset_re ]]; then
-            asset="${BASH_REMATCH[1]}"
-          fi
           if [ -z "$asset" ]; then
-            echo "::error::Published Pages HTML does not reference the expected hashed Vite JavaScript entry."
+            echo "::error::Published Pages HTML does not reference the expected hashed Vite JavaScript entry after the propagation window."
             exit 1
           fi
 
