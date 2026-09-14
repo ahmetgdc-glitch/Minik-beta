@@ -132,20 +132,24 @@ test("manual music pause blocks gesture restarts until explicit resume", () => {
   assert.equal(api.startMusic(), false);
   assert.equal(starts, 1);
   api.setMusicPaused(false);
-  assert.equal(api.startMusic({enabled: false}), false);
-  assert.equal(api.startMusic(), true);
+  // Legacy callers may still pass an `enabled` field. Music on/off now belongs
+  // to the selected profile, so narration state must not silence it.
+  assert.equal(api.startMusic({enabled: false}), true);
   assert.equal(starts, 2);
   api.stopMusic();
 });
 
-test("game manual pause sets the music lock and both resume paths honor audio", () => {
+test("game pause keeps a dedicated music lock while narration no longer owns music on/off", () => {
   const game = read("src/games/GameSession.jsx");
+  const sounds = read("src/audio/sounds.js");
   assert.match(game, /const pauseManually[\s\S]*?setMusicPaused\(true\)/);
   assert.equal((game.match(/startMusic\(\{ enabled: settings.audio \}\)/g) || []).length, 2);
   assert.match(game, /stopMusic\(\);\s*setMusicPaused\(false\)/);
+  assert.match(sounds, /export function startMusic\(\{ style \} = \{\}\)/);
+  assert.doesNotMatch(sounds, /!enabled \|\| profile\.id === "off"/);
 });
 
-test("music stops on background and pagehide and resumes only after a visible gesture", () => {
+test("music stops on background and resumes only after a visible gesture", () => {
   const listeners = new Map();
   const target = {
     addEventListener: (event, fn) => listeners.set(event, fn),
@@ -156,14 +160,29 @@ test("music stops on background and pagehide and resumes only after a visible ge
   const source = read("src/app/useAudioPrime.js")
     .replace(/^import .*;\n/gm, "")
     .replace("export function", "function");
-  const hook = new Function("useEffect", "unlockAudio", "startMusic", "stopMusic", "unlockVoiceAudio", "primeSystemSpeechForIOS", "window", "document", `${source}; return useAudioPrime;`)(
+  const hook = new Function(
+    "useEffect",
+    "useRef",
+    "unlockAudio",
+    "startMusic",
+    "stopMusic",
+    "getMusicStyle",
+    "unlockVoiceAudio",
+    "primeSystemSpeechForIOS",
+    "window",
+    "document",
+    `${source}; return useAudioPrime;`,
+  )(
     (effect) => { cleanup = effect(); },
+    (value) => ({ current: value }),
     () => ({ state: "running" }),
     () => { starts++; },
     () => { stops++; },
+    () => "playful",
     () => Promise.resolve(true),
     () => true,
-    target, document,
+    target,
+    document,
   );
   hook(true, true);
   listeners.get("pointerdown")();
@@ -184,11 +203,13 @@ test("music stops on background and pagehide and resumes only after a visible ge
   assert.equal(listeners.size, 0);
 });
 
-test("app primes WebAudio and one lazy voice player on the first direct user gesture", () => {
+test("app primes narration and effects independently on direct user gestures", () => {
   const app = read("src/App.jsx");
   const hook = read("src/app/useAudioPrime.js");
   const voice = read("src/audio/voice.js");
-  assert.match(app, /useAudioPrime\([\s\S]*progress\.settings\.audio \|\| progress\.settings\.sfx,[\s\S]*progress\.settings\.audio/);
+  assert.match(app, /useAudioPrime\(progress\.settings\.audio, progress\.settings\.sfx\)/);
+  assert.match(hook, /voiceEnabledRef/);
+  assert.match(hook, /sfxEnabledRef/);
   assert.match(hook, /addEventListener\("pointerdown", prime, true\)/);
   assert.match(hook, /addEventListener\("touchstart", prime, true\)/);
   assert.match(hook, /addEventListener\("keydown", prime, true\)/);
@@ -198,19 +219,25 @@ test("app primes WebAudio and one lazy voice player on the first direct user ges
   assert.match(voice, /voicePlayer\.preload = "none"/);
 });
 
-test("background music follows narration audio and stops during hook cleanup", () => {
+test("background music follows its own profile instead of narration audio", () => {
+  const app = read("src/App.jsx");
   const hook = read("src/app/useAudioPrime.js");
-  assert.match(hook, /startMusic\(\{ enabled: musicEnabled \}\)/);
-  assert.match(hook, /return \(\) => \{[\s\S]*stopMusic\(\)/);
-  assert.match(hook, /\[enabled, musicEnabled\]/);
+  const picker = read("src/components/MusicPicker.jsx");
+  assert.match(hook, /const wantsMusic = getMusicStyle\(\) !== "off"/);
+  assert.match(hook, /if \(wantsMusic\) startMusic\(\)/);
+  assert.match(picker, /if \(selected !== "off"\) startMusic\(\{ style: selected \}\)/);
+  assert.match(app, /<MusicPicker lang=\{lang\} \/>/);
+  assert.doesNotMatch(app, /<MusicPicker[^>]*enabled=/);
+  const voiceToggle = app.match(/className="audio-toggle"[\s\S]*?<\/button>/)?.[0] || "";
+  assert.doesNotMatch(voiceToggle, /stopMusic\(\)/);
 });
 
-test("audio priming re-arms after returning from the background without autoplaying", () => {
+test("audio priming re-arms readiness after returning from the background without autoplaying", () => {
   const hook = read("src/app/useAudioPrime.js");
   assert.match(hook, /visibilitychange/);
-  assert.match(hook, /document\.visibilityState !== "visible"/);
-  assert.match(hook, /webAudioReady = false/);
+  assert.match(hook, /document\.visibilityState === "visible"\) voiceReady = false/);
   assert.doesNotMatch(hook, /resumeAfterBackground[\s\S]*unlockVoiceAudio\(\)/);
+  assert.doesNotMatch(hook, /resumeAfterBackground[\s\S]*startMusic\(\)/);
 });
 
 test("voice module never eagerly preloads the complete library during boot", () => {
