@@ -1,4 +1,4 @@
-# Feste Wortaufnahmen — MINIK 1.68.0 Beta 71
+# Feste Wortaufnahmen — MINIK 1.69.0 Beta 72
 
 Stand: 2026-09-13. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label über `fixedNaturalVoicePlan` einen festen Sprachplan liefert. Anweisungen, zusammengesetzte Hilfesätze und Voice 4 werden nicht als zusätzliche Wortaufnahmen gezählt.
 

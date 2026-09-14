@@ -1,4 +1,4 @@
-# MINIK 1.68.0 Beta 71 — Technische Dokumentation
+# MINIK 1.69.0 Beta 72 — Technische Dokumentation
 
 ## Laufzeit und Module
 
@@ -31,6 +31,8 @@ Die optionale Eltern-PIN ist eine lokale Kindersperre, keine Kontenauthentifizie
 ## Inhalte und Assets
 
 `catalog.js` enthält redaktionelle Zeilen `key|de|tr|asset|group`. `content.js` ergänzt Darstellungstyp, stabile IDs, Tags, Schwierigkeit, DE/TR und Varianten. Farben, Formen und Zahlen werden exakt aus ihrem Datentyp gezeichnet. Gleichartige Bildmotive werden in Antwortmengen dedupliziert.
+
+`worlds/scenes.js` enthält zusätzlich reine Präsentationsmetadaten für die Landmarken jeder Welt. `WorldScenery` rendert drei vorhandene lokale SVGs hinter dem Lernobjekt. Die Schicht ist `aria-hidden`, hat keine Pointer-Ereignisse und verändert weder Lerninhalte noch stabile IDs, Routing oder Fortschritt.
 
 `npm run assets` extrahiert die gewählten lokalen Noto-SVGs aus `@iconify-json/noto`, prüft Schlüssel und erzeugt `public/assets/content-manifest.json`. Beim normalen Build werden die bereits eingecheckten Assets validiert. Foto-Varianten haben `kind`, `creator`, `created`, `realPerson`, Herkunft und Beschreibung. Mino und die sechs Fotomotive sind neu generiert. Lizenztexte stehen in `public/licenses/`.
 

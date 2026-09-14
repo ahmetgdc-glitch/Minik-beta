@@ -2,9 +2,22 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const explorer = readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
-const exploreGame = readFileSync(new URL("../src/games/ExploreGame.jsx", import.meta.url), "utf8");
-const css = readFileSync(new URL("../src/worlds/scene-themes.css", import.meta.url), "utf8");
+const explorer = readFileSync(
+  new URL("../src/worlds/SceneExplorer.jsx", import.meta.url),
+  "utf8",
+);
+const exploreGame = readFileSync(
+  new URL("../src/games/ExploreGame.jsx", import.meta.url),
+  "utf8",
+);
+const scenery = readFileSync(
+  new URL("../src/worlds/WorldScenery.jsx", import.meta.url),
+  "utf8",
+);
+const css = readFileSync(
+  new URL("../src/worlds/scene-themes.css", import.meta.url),
+  "utf8",
+);
 const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 
 test("discovery scenes expose the active world for visual theming without changing world ids", () => {
@@ -26,18 +39,34 @@ test("major preschool world families receive distinct visual moods", () => {
     ".world-feelings",
     ".world-music",
     ".world-space",
-  ]) assert.ok(css.includes(selector), `${selector} should have a scene theme`);
+  ])
+    assert.ok(css.includes(selector), `${selector} should have a scene theme`);
   assert.match(css, /--world-overlay/);
   assert.match(css, /--world-accent/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(main, /\.\/worlds\/scene-themes\.css/);
 });
 
+test("discovery scenes render non-interactive world landmarks behind the learning object", () => {
+  assert.match(explorer, /<WorldScenery worldId=\{worldId\}/);
+  assert.match(scenery, /decorationsForWorld\(worldId\)/);
+  assert.match(scenery, /aria-hidden="true"/);
+  assert.match(css, /\.world-scenery\s*\{[^}]*pointer-events:\s*none/);
+  assert.match(css, /\.world-scenery \.scene-landmark/);
+  assert.match(css, /contain:\s*layout paint/);
+});
+
 test("spoken discovery words keep the matching object highlighted for the real speech lifetime", () => {
-  assert.match(exploreGame, /const \[speakingId, setSpeakingId\] = useState\(null\)/);
+  assert.match(
+    exploreGame,
+    /const \[speakingId, setSpeakingId\] = useState\(null\)/,
+  );
   assert.match(exploreGame, /async function speakItem/);
   assert.match(exploreGame, /await speak\(item\.labels\[lang\]/);
-  assert.match(exploreGame, /if \(run === speechRun\.current\) setSpeakingId\(null\)/);
+  assert.match(
+    exploreGame,
+    /if \(run === speechRun\.current\) setSpeakingId\(null\)/,
+  );
   assert.match(explorer, /const speaking = item\.id === speakingId/);
   assert.match(explorer, /speaking \? "speaking" : ""/);
   assert.match(explorer, /data-speaking=\{speaking \|\| undefined\}/);

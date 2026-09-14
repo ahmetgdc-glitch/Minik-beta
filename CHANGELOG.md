@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.69.0 Beta 72 — Eigene Landmarken für alle Lernwelten
+
+- Alle 25 Welten erhalten eine eigene, datengetriebene Kombination aus drei thematisch passenden Landmarken statt nur einer farblich veränderten Grundszene.
+- Die Landmarken verwenden ausschließlich vorhandene lokale SVG-Illustrationen, benötigen keine zusätzlichen Downloads und bleiben hinter dem großen Lernobjekt.
+- Die Dekoration ist für Bedienhilfen verborgen, fängt keine Pointer-Ereignisse ab und wird auf kleinen iPhones bewusst kleiner und ruhiger dargestellt.
+- Neue Tests sichern die vollständige Weltenzuordnung, einzigartige Kombinationen, vorhandene lokale Assetdateien und die nicht-interaktive Szenenschicht.
+
 ## 1.68.0 Beta 71 — Audio-Unterbrechungen und sichere PWA-Updates
 
 - Audio-Unlock ist an die auslösende Geste gebunden. Ein später Safari-Resume kann kein inzwischen gestartetes Wort mehr mit dem stillen Unlock-Clip überschreiben.

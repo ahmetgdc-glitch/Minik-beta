@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **13. September 2026 · 1.68.0 Beta 71**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.69.0 Beta 72**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -65,6 +65,13 @@ Stand: **13. September 2026 · 1.68.0 Beta 71**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 72: individuelle Entdeckerorte
+
+- Alle 25 Welten besitzen eine eigene Kombination aus drei lokalen Landmarken. `sceneDecorations` hält die Präsentationsdaten getrennt von Lerninhalten, IDs, Fortschritt und Routing.
+- `WorldScenery` rendert die Motive dekorativ hinter dem großen Lernobjekt, ohne Touchflächen oder Screenreader zu beeinflussen. Kleine iPhone-Layouts reduzieren Größe und Deckkraft.
+- Tests verlangen exakt drei unterschiedliche, lokal vorhandene SVGs je Welt und eine einzigartige Kombination für jede Destination.
+- Reichere weltspezifische Interaktionen und die physische iPhone-/iPad-Abnahme bleiben offen.
 
 ### Beta 71: im aktuellen Work-Lauf behoben
 

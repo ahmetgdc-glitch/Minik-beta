@@ -1,6 +1,6 @@
 # MINIK Release-QA
 
-Stand: **2026-09-13 · 1.68.0 Beta 71**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
+Stand: **2026-09-14 · 1.69.0 Beta 72**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
 
 ## Automatisiert bestanden
 
@@ -21,6 +21,13 @@ Stand: **2026-09-13 · 1.68.0 Beta 71**. „Bestanden“ bedeutet automatisiert 
 - [x] Release-Preflight prüft Versionssynchronität, Doku, Inhaltsumfang, Manifest und GitHub-Pages-Workflow.
 
 ## Browser-/Quelllogik abgedeckt
+
+### Beta 72: zusätzlich geprüft
+
+- [x] Alle 25 Lernwelten besitzen exakt drei unterschiedliche Landmarken und jeweils eine einzigartige Kombination.
+- [x] Jede referenzierte Landmarke ist als lokales SVG vorhanden; keine neue Netzwerk- oder Offline-Abhängigkeit.
+- [x] Die Szenenschicht ist für Bedienhilfen verborgen, nimmt keine Pointer-Ereignisse an und liegt hinter Lernobjekt sowie Bedienelementen.
+- [ ] Physische visuelle Abnahme der neuen Landmarken auf iPhone und iPad bleibt erforderlich.
 
 ### Beta 71: zusätzlich geprüft
 

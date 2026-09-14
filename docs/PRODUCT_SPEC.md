@@ -1,10 +1,10 @@
-# MINIK 1.68.0 Beta 71 — Produktstand
+# MINIK 1.69.0 Beta 72 — Produktstand
 
 MINIK richtet sich an Kinder ungefähr zwischen zwei und sechs Jahren. Die Lernschleife ist kurz, visuell und wiederholbar: Welt wählen, Spiel starten, Mino zuhören oder Bilder betrachten, eine Aufgabe lösen, Stern erhalten, Aquarium erweitern.
 
 ## Navigation
 
-Startlandschaft, 25 Lernwelten mit 503 DE/TR-Lernobjekten, Spielkiste mit 23 Spieltypen und Aquarium. Auf Handys eine große untere Navigation, auf Tablet/Desktop eine Seitenleiste. Das Schloss öffnet den Elternbereich. Im Spiel stehen Pause und Audio-Wiederholung im Vordergrund.
+Startlandschaft, 25 Lernwelten mit 503 DE/TR-Lernobjekten, Spielkiste mit 23 Spieltypen und Aquarium. Jede Lernwelt hat eine eigene Kombination lokaler Landmarken hinter dem großen Lernobjekt. Auf Handys eine große untere Navigation, auf Tablet/Desktop eine Seitenleiste. Das Schloss öffnet den Elternbereich. Im Spiel stehen Pause und Audio-Wiederholung im Vordergrund.
 
 ## Lernen und Belohnungen
 
