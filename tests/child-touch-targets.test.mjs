@@ -96,6 +96,12 @@ test("profile creation modal remains reachable above iPhone keyboard and safe ar
   assert.match(guards, /\.profile-modal[\s\S]*?max-height: calc\(100dvh[\s\S]*?overflow-y: auto[\s\S]*?scroll-padding-bottom: 120px/);
 });
 
+test("320px profile modal stacks long action labels instead of overflowing", () => {
+  assert.match(guards, /@media \(max-width: 340px\)/);
+  assert.match(guards, /\.profile-modal \.modal-actions[\s\S]*?flex-direction: column[\s\S]*?align-items: stretch[\s\S]*?gap: 8px/);
+  assert.match(guards, /\.profile-modal \.modal-actions > button[\s\S]*?width: 100%/);
+});
+
 test("in-game utility controls do not shrink below 44px on narrow iPhones", () => {
   assert.match(guards, /@media \(max-width: 540px\)/);
   assert.match(guards, /\.game-header \.icon-button,[\s\S]*?\.replay-audio[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
