@@ -54,12 +54,13 @@ test("iOS primes speech synthesis synchronously with one silent utterance", asyn
   }
 });
 
-test("audio prime invokes iOS speech priming before async audio unlock work", () => {
+test("audio prime invokes iOS speech priming before WebAudio and recorded-voice unlock work", () => {
   const source = read("src/app/useAudioPrime.js");
-  const speechPrime = source.indexOf("primeSystemSpeechForIOS();");
-  const webAudioPrime = source.indexOf("const context = unlockAudio();");
-  const recordedPrime = source.indexOf("unlockVoiceAudio().then");
+  const primeBody = source.match(/const prime = \(\) => \{([\s\S]*?)\n    \};/)?.[1] || "";
+  const speechPrime = primeBody.indexOf("primeSystemSpeechForIOS();");
+  const webAudioPrime = primeBody.indexOf("unlockAudio();");
+  const recordedPrime = primeBody.indexOf("unlockVoiceAudio().then");
   assert.ok(speechPrime >= 0);
   assert.ok(webAudioPrime > speechPrime);
-  assert.ok(recordedPrime > speechPrime);
+  assert.ok(recordedPrime > webAudioPrime);
 });
