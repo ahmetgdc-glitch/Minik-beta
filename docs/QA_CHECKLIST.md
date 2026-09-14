@@ -1,10 +1,13 @@
 # MINIK Release-QA
 
-Stand: **2026-09-14 · 1.74.0 Beta 77**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
+Stand: **2026-09-14 · 1.75.0 Beta 78**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
 
 ## Automatisiert bestanden
 
-- [x] **551/551 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Schwierigkeitsprofile, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **561/561 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Schwierigkeitsprofile, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] Beta 78: Bytebereiche, ungültige Positionen, If-Range, Offline-Wiederholung, paralleles Speichern, Download-Deduplizierung, Quota, Timeout und Retry verhaltensgeprüft.
+- [x] Beta 78: Lokale türkische Aufnahme nutzt CORS; externer Ersatz und anschließende Rückkehr zur lokalen Aufnahme bleiben spielbar.
+- [x] Beta 78: Erzeugter Worker liefert bitgenaue MP3-/WAV-Teilstücke unter drei Installationspfaden; vollständige Aufnahme bleibt offline erhalten.
 - [x] Beta 77: Drei gemeinsame Profile skalieren Antwortmenge, Paare, Puzzleteile, Zählraum, Sequenzen, Merkbelastung und Zeichengenauigkeit.
 - [x] Beta 77: Minos automatische Hilfe und Demonstration folgen in allen 23 Spielen der gewählten beziehungsweise adaptiven Stufe.
 - [x] Beta 76: Türkisch ist die Erstsprache für neue Familien; eine ausdrücklich gespeicherte deutsche Auswahl bleibt erhalten.
@@ -76,6 +79,7 @@ Stand: **2026-09-14 · 1.74.0 Beta 77**. „Bestanden“ bedeutet automatisiert 
 - [ ] Feste natürliche deutsche und türkische MINIK-Stimme sowie Voice-4-Notfallpfad auf realen Geräten anhören; Tempo, Aussprache, Schnittgrenzen und schnelle Wiederholungen prüfen.
 - [ ] Mikrofonberechtigung und SpeechRecognition auf der konkret genutzten iOS-/Browser-Version prüfen.
 - [ ] Einmal online laden, App schließen und im Flugmodus erneut starten.
+- [ ] Beta 78 auf physischem iPhone/iPad: mehrere türkische Spielansagen vollständig online anhören, Hintergrundspeicherung abwarten, im Flugmodus wiederholen; Tonstart und schnelle Wortwechsel messen.
 - [ ] Backup exportieren, Browserdaten getrennt testen und Backup wiederherstellen.
 - [ ] Pädagogische DE/TR-Inhaltsprüfung mit Fachperson.
 

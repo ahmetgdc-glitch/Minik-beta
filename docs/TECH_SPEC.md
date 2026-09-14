@@ -1,4 +1,4 @@
-# MINIK 1.74.0 Beta 77 — Technische Dokumentation
+# MINIK 1.75.0 Beta 78 — Technische Dokumentation
 
 ## Laufzeit und Module
 
@@ -59,6 +59,10 @@ Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker l
 Assets werden aus dem Cache beantwortet, unbekannte gleichursprüngliche Assets bei Bedarf nachgeladen. Navigation versucht zuerst das Netz, bei Verbindungsfehler oder temporärem HTTP-Fehler das gecachte `index.html`. Scheitert das Speichern einer erfolgreichen Netzwerkantwort, bleibt die Antwort nutzbar. Ein neuer Worker wartet bei aktiver Vorgängerversion; Aktivierung erfolgt über die vorhandene Update-Aktion oder nach dem Schließen der bisherigen Tabs. Erst dann werden alte Caches derselben Installation entfernt. Große zukünftige Medienpakete benötigen eigene Auswahl/Downloadverwaltung; sie sind noch nicht implementiert.
 
 Alle 332 festen DE/TR-Sprachbausteine werden für den Produktionsbuild lokalisiert und sind die primäre MINIK-Erzählquelle. Sprachdateien werden im Service Worker bei Nutzung nachgeladen/gecached, nicht vollständig vorab installiert. Offline-/PWA-Gerätetests müssen deshalb die feste Erzählstimme nach erfolgtem Cache-Aufbau sowie Voice 4 als Notfall-Fallback prüfen.
+
+Seit Beta 78 behandelt derselbe Worker einzelne `Range`-Anfragen für lokale MP3-/WAV-Sprachdateien. Aus einer vollständigen Cachekopie entstehen HTTP 206 mit passendem Content-Range/-Length oder 416 bei unerfüllbaren Positionen. Nicht unterstützte Mehrfachbereiche und nicht passende If-Range-Validatoren erhalten die vollständige Antwort. Der HTML-Player fordert lokale Aufnahmen im CORS-Modus an; externe Ersatzquellen bleiben unverändert. Das folgt den [Browser-Anforderungen für gecachte Audio-/Videoantworten](https://developer.chrome.com/docs/workbox/serving-cached-audio-and-video), ohne eine neue Laufzeitabhängigkeit einzuführen.
+
+Bei einem Cachemiss wird die ursprüngliche Media-Antwort sofort weitergegeben. War sie nur ein Teilstück, hält `event.waitUntil` einen separaten vollständigen Download genau dieses Clips am Leben. Pro URL läuft höchstens ein solcher Download, mit zehn Sekunden Timeout und eigenem Abbruchsignal. Nur vollständige HTTP-200-Antworten werden gespeichert; Fehler durch Netz oder Speicherplatz werden abgefangen. Sprachdateien bleiben vom Installationskern ausgeschlossen. Die Build-Verifikation nutzt echte Request-/Response-Objekte, Cache-Body-Kopien und MP3-/WAV-Bytes, um das Verhalten online und offline unter allen drei Pfaden zu prüfen.
 
 ## Qualitätsgates
 

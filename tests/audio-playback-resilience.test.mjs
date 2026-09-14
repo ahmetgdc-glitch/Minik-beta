@@ -28,6 +28,27 @@ test("local recordings begin buffering before the decoder fallback deadline", as
   assert.equal(preload, "auto");
 });
 
+test("Turkish media uses CORS for cached ranges and preserves external fallback playback", async (t) => {
+  const loads = [];
+  let failLocal = false;
+  class Audio extends MediaAudio {
+    load() { loads.push({ url: this.src, crossOrigin: this.crossOrigin }); }
+    play() {
+      if (failLocal && this.src.startsWith("https://minik.example/")) return Promise.reject(new Error("local failure"));
+      return super.play();
+    }
+  }
+  const { voice } = await voiceRuntime(t, { Audio });
+  assert.equal(await voice.speak("Harika!", "tr"), true);
+  assert.equal(loads[0].crossOrigin, "anonymous");
+  failLocal = true;
+  assert.equal(await voice.speak("Harika!", "tr"), true);
+  assert.ok(loads.some((load) => !load.url.startsWith("https://minik.example/") && load.crossOrigin === null));
+  failLocal = false;
+  assert.equal(await voice.speak("Harika!", "tr"), true);
+  assert.equal(loads.at(-1).crossOrigin, "anonymous", "Local playback must regain CORS after a remote fallback");
+});
+
 function audioContext(overrides = {}) {
   return Object.assign(
     {

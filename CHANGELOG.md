@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.75.0 Beta 78 — Offline-Sprache mit korrekten Tonabschnitten
+
+- Gespeicherte Sprachaufnahmen beantworten Media-Teilanfragen jetzt mit dem angeforderten Bytebereich und korrekten HTTP-206-Headern. Zuvor lieferte der Worker unabhängig von der Anfrage die vollständige Datei mit HTTP 200.
+- Teilweise gestreamte Aufnahmen werden während der Wiedergabe vollständig im Hintergrund gespeichert. Der Ton wartet nicht auf diesen Zusatzdownload; gleichzeitige Anfragen teilen denselben Cacheaufbau, mit Timeout und erneutem Versuch nach Fehlern.
+- Lokale Medien verwenden CORS-Anfragen, damit der Browser erzeugte Teilantworten auch offline nutzen kann. Die feste türkische/deutsche Stimme und externe Ersatzquellen bleiben erhalten.
+- Die reale Cache-API erlaubt keine HTTP-206-Einträge. Tests und Build-Verifikation bilden diese Einschränkung jetzt ab und prüfen echte MP3-/WAV-Teilstücke unter allen drei Installationspfaden.
+- 561 automatisierte Tests; weiterhin keine Sprachbibliothek im PWA-Installationskern. Physische iPhone-/iPad-Hörprüfung und fehlende exakte TR-/DE-Wortaufnahmen bleiben offen.
+
 ## 1.74.0 Beta 77 — Drei echte Schwierigkeitsstufen im ganzen Spiel
 
 - Ein gemeinsames Profil steuert jetzt leichte, mittlere und schwere Runden statt verteilter Einzelwerte.

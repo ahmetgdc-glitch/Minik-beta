@@ -117,16 +117,29 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   stores.set(old, new Map());
   stores.set(other, new Map());
   const key = (request) => new URL(request.url || request, scope).href;
+  function basicResponse(body, options = {}) {
+    const response = new Response(body, options);
+    Object.defineProperty(response, "type", { value: "basic" });
+    return response;
+  }
   async function fetchFile(request) {
     if (offline) throw new Error("Simulated offline connection");
-    if (serverFailure) return { ok: false, status: 503, type: "basic", body: Buffer.from("temporary server error"), clone() { return this; } };
+    if (serverFailure) return basicResponse("temporary server error", { status: 503 });
     const url = key(request);
     assert.ok(url.startsWith(scope), `Unexpected request: ${url}`);
     const relative = url.slice(scope.length).split(/[?#]/)[0] || "index.html";
     const file = path.resolve(root, relative);
     assert.ok(file.startsWith(root + path.sep));
     const body = await fs.readFile(file);
-    lastNetworkResponse = { ok: true, type: "basic", body, clone() { return this; } };
+    const headers = { "Content-Type": relative.endsWith(".wav") ? "audio/wav" : relative.endsWith(".mp3") ? "audio/mpeg" : "application/octet-stream" };
+    if (request.headers?.has("Range")) {
+      assert.equal(request.headers.get("Range"), "bytes=0-1", "Cold media probe must reach the network unchanged");
+      lastNetworkResponse = basicResponse(body.subarray(0, 2), {
+        status: 206, headers: { ...headers, "Content-Range": `bytes 0-1/${body.byteLength}`, "Content-Length": "2" },
+      });
+    } else {
+      lastNetworkResponse = basicResponse(body, { headers });
+    }
     return lastNetworkResponse;
   }
   const caches = {
@@ -135,10 +148,12 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
       const store = stores.get(name);
       return {
         async addAll(files) { for (const file of files) store.set(key(file), await fetchFile(file)); },
-        async match(request) { return store.get(key(request)); },
+        async match(request) { return store.get(key(request))?.clone(); },
         async put(request, response) {
           if (failCacheWrites) throw new Error("Simulated QuotaExceededError");
-          store.set(key(request), response);
+          assert.notEqual(response.status, 206, "The real Cache API rejects partial media responses");
+          // Consume the body just as Cache.put does, and return independent copies.
+          store.set(key(request), new Response(await response.arrayBuffer(), { status: response.status, headers: response.headers }));
         },
       };
     },
@@ -146,7 +161,7 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
     async delete(name) { return stores.delete(name); },
   };
   vm.runInNewContext(worker, {
-    URL, caches, fetch: fetchFile, AbortController, setTimeout, clearTimeout,
+    URL, Request, Response, Headers, caches, fetch: fetchFile, AbortController, setTimeout, clearTimeout,
     self: {
       location: { origin: "https://example.test" }, registration,
       clients: { claim: async () => { claimCalls++; } },
@@ -179,11 +194,18 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
     false,
     "Boot cache must not preload the whole voice library",
   );
-  function request(url, mode = "cors", method = "GET") {
+  const background = [];
+  function request(url, mode = "cors", method = "GET", headers = {}) {
     let response;
-    listeners.get("fetch")({ request: { url, mode, method }, respondWith(promise) { response = promise; } });
+    const incoming = mode === "navigate" ? { url, mode, method, headers: new Headers(headers) } : new Request(url, { mode, method, headers });
+    listeners.get("fetch")({
+      request: incoming,
+      respondWith(promise) { response = promise; },
+      waitUntil(promise) { background.push(promise); },
+    });
     return response;
   }
+  async function finishBackground() { await Promise.all(background.splice(0)); }
   assert.equal(request(scope + "reset.html", "navigate"), undefined, "Recovery page must bypass the service worker");
   failCacheWrites = true;
   const uncachedVoice = await request(scope + `assets/voice/${builtVoiceFiles[0]}`);
@@ -193,24 +215,24 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   failCacheWrites = false;
   serverFailure = true;
   const degradedPage = await request(scope, "navigate");
-  assert.match(degradedPage.body.toString(), /MINIK/, "A temporary 5xx navigation must fall back to the cached app shell");
+  assert.match(await degradedPage.text(), /MINIK/, "A temporary 5xx navigation must fall back to the cached app shell");
   serverFailure = false;
   offline = true;
   const page = await request(scope, "navigate");
-  assert.match(page.body.toString(), /MINIK/);
+  assert.match(await page.text(), /MINIK/);
   const image = await request(scope + "assets/mascot/mino.webp");
-  assert.ok(image.body.byteLength > 1000);
+  assert.ok((await image.arrayBuffer()).byteLength > 1000);
   for (const script of builtJavaScript) {
     const chunk = await request(scope + `assets/${script}`);
-    assert.ok(chunk?.body.byteLength > 100, `Split module must work offline: ${script}`);
+    assert.ok((await chunk.arrayBuffer()).byteLength > 100, `Split module must work offline: ${script}`);
   }
   for (const stylesheet of builtStyles) {
     const chunk = await request(scope + `assets/${stylesheet}`);
-    assert.ok(chunk?.body.byteLength > 100, `Split game style must work offline: ${stylesheet}`);
+    assert.ok((await chunk.arrayBuffer()).byteLength > 100, `Split game style must work offline: ${stylesheet}`);
   }
   for (const scene of ["archipelago", "meadow", "playroom"]) {
     const landscape = await request(scope + `assets/scenes/${scene}.webp`);
-    assert.ok(landscape?.body.byteLength > 1000, `${scene} must work on the first offline visit`);
+    assert.ok((await landscape.arrayBuffer()).byteLength > 1000, `${scene} must work on the first offline visit`);
   }
 
   // Rich content is cached on demand rather than during startup. Once heard,
@@ -218,10 +240,36 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   offline = false;
   const voiceUrl = scope + `assets/voice/${builtVoiceFiles[0]}`;
   const warmedVoice = await request(voiceUrl);
-  assert.ok(warmedVoice?.body.byteLength > 100);
+  assert.ok((await warmedVoice.arrayBuffer()).byteLength > 100);
   offline = true;
   const cachedVoice = await request(voiceUrl);
-  assert.ok(cachedVoice?.body.byteLength > 100, "A used natural voice clip must remain available offline");
+  assert.ok((await cachedVoice.arrayBuffer()).byteLength > 100, "A used natural voice clip must remain available offline");
+
+  // Exercise actual MP3 and WAV bytes through the generated worker, including
+  // Safari's initial two-byte probe and later offline seeks under every scope.
+  for (const extension of ["mp3", "wav"]) {
+    const filename = builtVoiceFiles.find((file) => file.endsWith(`.${extension}`) && file !== builtVoiceFiles[0]);
+    const mediaUrl = scope + `assets/voice/${filename}`;
+    const original = await fs.readFile(path.join(root, "assets/voice", filename));
+    offline = false;
+    const probe = await request(mediaUrl, "cors", "GET", { Range: "bytes=0-1" });
+    assert.equal(probe.status, 206);
+    assert.deepEqual(Buffer.from(await probe.arrayBuffer()), original.subarray(0, 2));
+    await finishBackground();
+    offline = true;
+    for (const [range, start, end] of [["bytes=0-1", 0, 2], ["bytes=2-", 2, original.length], ["bytes=-4", original.length - 4, original.length]]) {
+      const replay = await request(mediaUrl, "cors", "GET", { Range: range });
+      assert.equal(replay.status, 206, `${extension}: ${range}`);
+      assert.equal(replay.headers.get("Content-Range"), `bytes ${start}-${end - 1}/${original.length}`);
+      assert.equal(replay.headers.get("Content-Length"), String(end - start));
+      assert.equal(replay.headers.get("Content-Type"), extension === "wav" ? "audio/wav" : "audio/mpeg");
+      assert.deepEqual(Buffer.from(await replay.arrayBuffer()), original.subarray(start, end));
+    }
+    const complete = await request(mediaUrl);
+    assert.equal(complete.status, 200, "Partial playback must preserve the complete cached recording");
+    assert.deepEqual(Buffer.from(await complete.arrayBuffer()), original);
+    await finishBackground();
+  }
 
   assert.equal(request("https://unrelated.test/asset.svg"), undefined);
   assert.equal(request(scope, "cors", "POST"), undefined);

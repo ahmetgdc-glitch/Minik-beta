@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import { audioRangeResponse, createAudioCacheHandler } from "./audio-cache.mjs";
 
 const root = path.resolve("dist");
 const pkg = JSON.parse(await fs.readFile(path.resolve("package.json"), "utf8"));
@@ -49,6 +50,9 @@ const code = `const PREFIX='minik:'+self.registration.scope+':';
 const CACHE=PREFIX+${JSON.stringify(cache)};
 const CORE=${JSON.stringify(initial.map((p) => "./" + p))};
 const NAV_TIMEOUT_MS=3500;
+${audioRangeResponse.toString()}
+${createAudioCacheHandler.toString()}
+const handleAudioRange=createAudioCacheHandler();
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>{if(!self.registration.active)return self.skipWaiting()}))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith(PREFIX)&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')event.waitUntil(self.skipWaiting())});
@@ -57,6 +61,11 @@ self.addEventListener('fetch',event=>{
  const url=new URL(event.request.url);if(url.origin!==self.location.origin||!url.href.startsWith(self.registration.scope))return;
  // Recovery must always reach the network and must never be replaced with the SPA shell.
  if(url.pathname.endsWith('/reset.html'))return;
+ // CORS media requests can consume synthesized partial responses, including offline.
+ const audioPath=url.href.slice(self.registration.scope.length).split(/[?#]/)[0];
+ if(event.request.headers?.has('Range')&&event.request.mode!=='no-cors'&&/^assets\\/(?:voice|personal-voice)\\/[^/]+\\.(?:mp3|wav)$/i.test(audioPath)){
+  handleAudioRange(event,caches.open(CACHE));return
+ }
  if(event.request.mode==='navigate'){
   event.respondWith((async()=>{
    const cache=await caches.open(CACHE);
@@ -72,7 +81,7 @@ self.addEventListener('fetch',event=>{
    finally{if(timer)clearTimeout(timer)}
   })());return
  }
- event.respondWith(caches.open(CACHE).then(async cache=>{const hit=await cache.match(event.request);if(hit)return hit;const response=await fetch(event.request);if(response.ok&&response.type==='basic'){try{await cache.put(event.request,response.clone())}catch{}}return response}));
+ event.respondWith(caches.open(CACHE).then(async cache=>{const hit=await cache.match(event.request);if(hit)return hit;const response=await fetch(event.request);if(response.status===200&&response.type==='basic'){try{await cache.put(event.request,response.clone())}catch{}}return response}));
 });
 `;
 await fs.writeFile(path.join(root, "sw.js"), code);

@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.74.0 Beta 77**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -68,6 +68,15 @@ Stand: **14. September 2026 · 1.74.0 Beta 77**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 78: gespeicherte Sprache mit Media-Teilanfragen
+
+- Aktuelles `main` und CI waren vor der Änderung grün. Im erzeugten Worker reproduziert: `Range: bytes=0-1` erhielt die gesamte Aufnahme mit HTTP 200; gestreamte HTTP-206-Antworten konnten zudem nicht in den Cache geschrieben werden.
+- `scripts/audio-cache.mjs` wird in denselben bestehenden Worker eingebettet. Gespeicherte MP3-/WAV-Dateien liefern korrekte 206-Abschnitte, ungültige Positionen 416. Wiederholte Teilanfragen verbrauchen die vollständige Cachekopie nicht.
+- Ein neuer Clip spielt direkt aus der Netzwerkantwort. Nur diese Aufnahme wird parallel vollständig gespeichert; gleiche laufende Downloads werden zusammengefasst, nach zehn Sekunden abgebrochen und bei späterer Nutzung erneut versucht. Speicher-/Netzfehler stoppen die bereits gelieferte Wiedergabe nicht.
+- Lokale Aufnahmen verwenden CORS-Media-Anfragen, damit der Player die erzeugten Teilantworten akzeptieren kann. Externe Ersatzquellen behalten ihr bisheriges Anfrageverhalten, die feste DE/TR-Stimme bleibt unverändert.
+- 561 automatisierte Tests; der erzeugte Worker prüft echte MP3-/WAV-Bytes und Offline-Teilanfragen unter `/`, `/Minik-beta/` und `/Minik-2.0-/`. Keine zusätzliche Sprachdatei im Installationskern.
+- Das behebt einen konkreten Cachepfad, ersetzt aber keine physische iPhone-/iPad-Abnahme und ergänzt keine der fehlenden exakten Wortaufnahmen. Als Nächstes türkische Spielansagen über mehrere Runden und Hintergrund-/Offline-Wechsel prüfen; feste TR-Aufnahmen benötigen weiterhin das ursprüngliche Sprecherprofil.
 
 ### Beta 77: drei Stufen im ganzen Spiel
 

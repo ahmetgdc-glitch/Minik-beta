@@ -1,4 +1,4 @@
-# MINIK 1.74.0 Beta 77 auf GitHub testen
+# MINIK 1.75.0 Beta 78 auf GitHub testen
 
 Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelten, 503 DE/TR-Inhalten und 23 Spieltypen**. Drei gemeinsame Schwierigkeitsstufen verändern Aufgaben und Minos Hilfe im ganzen Spiel. Neue Familien starten auf Türkisch; gespeicherte Sprachwahl bleibt erhalten. Bei noch fehlenden Wortaufnahmen bleibt die feste Aufgabenansage hörbar.
 
@@ -20,6 +20,8 @@ Das Repository enthält keinen eingecheckten `dist/`-Ordner. `dist/` soll aus ge
 ## Auf iPhone/iPad testen
 
 Die veröffentlichte HTTPS-Adresse zuerst einmal online in Safari öffnen. Danach über **Teilen → Zum Home-Bildschirm** installieren. Anschließend mindestens Touch, Hoch-/Querformat, deutsche/türkische Stimme, Mikrofonfreigabe bei „Sprich mit Mino“, App-Unterbrechung/Wiederaufnahme und einen Start im Flugmodus prüfen.
+
+Für Beta 78 mehrere türkische Spielansagen online vollständig anhören, kurz für das Hintergrundspeichern warten und dieselben Ansagen nach dem Neustart im Flugmodus wiederholen. Auch schnelle Wortwechsel und Mino-Hilfe prüfen. Noch nie geladene Wortaufnahmen sind nicht automatisch offline verfügbar.
 
 Sterne und Lernfortschritt werden pro Browser/Gerät lokal gespeichert. Für einen Gerätewechsel gibt es im Elternbereich Familien-Backup und Wiederherstellung.
 

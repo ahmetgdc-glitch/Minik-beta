@@ -205,6 +205,16 @@ function playbackTimeout(duration) {
   return Math.min(VOICE_PLAYBACK_LIMIT_MS, Math.max(5000, duration * 1000 + 2000));
 }
 
+function setMediaClipSource(player, url) {
+  // Cached byte-range responses need a CORS media request even on our own
+  // origin. External emergency sources keep their existing no-CORS behavior.
+  const base = typeof document !== "undefined" ? document.baseURI : null;
+  player.crossOrigin = base && new URL(url, base).origin === new URL(base).origin
+    ? "anonymous"
+    : null;
+  player.src = url;
+}
+
 function prepareMediaClip(url) {
   if (!url || !speechForegroundAllowed()) return;
   const player = naturalPlayer();
@@ -216,7 +226,7 @@ function prepareMediaClip(url) {
     player.onplaying = null;
     player.preload = "auto";
     if (player.src !== url) {
-      player.src = url;
+      setMediaClipSource(player, url);
       player.currentTime = 0;
       player.load?.();
     } else if (player.readyState === 0) {
@@ -310,7 +320,7 @@ async function speakMediaClip(url, token) {
     // metadata-only round trip after the optional decoder budget expires.
     player.preload = "auto";
     if (player.src !== url) {
-      player.src = url;
+      setMediaClipSource(player, url);
       player.currentTime = 0;
       player.load?.();
     } else {
