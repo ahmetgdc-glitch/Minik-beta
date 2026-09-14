@@ -17,6 +17,11 @@ test("narrow-phone child controls keep at least a 44px hit target", () => {
   assert.match(guards, /min-height: 44px/);
 });
 
+test("in-game utility controls do not shrink below 44px on narrow iPhones", () => {
+  assert.match(guards, /@media \(max-width: 540px\)/);
+  assert.match(guards, /\.game-header \.icon-button,[\s\S]*?\.replay-audio[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
+});
+
 test("scene navigation gets an even larger child-friendly target", () => {
   assert.match(guards, /\.child-world-shell \.scene-round-button[\s\S]*?width: 48px[\s\S]*?height: 48px/);
   assert.match(scene, /className="scene-round-button discovery-prev"/);
