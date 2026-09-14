@@ -7,7 +7,8 @@ let context = null,
   musicNodes = [],
   musicPaused = false,
   musicBus = null,
-  speechActive = false;
+  speechActive = false,
+  soundSequence = 0;
 export function setSpeechActive(active) {
   const next = Boolean(active);
   // The personal MINIK narrator always has priority over game effects. If a
@@ -42,6 +43,8 @@ export async function ensureAudioReady() {
   return c.state === "running" ? c : null;
 }
 export function stopSounds() {
+  // Also cancel notes still waiting for a suspended audio engine to resume.
+  soundSequence += 1;
   for (const n of nodes) {
     try {
       n.stop();
@@ -241,10 +244,16 @@ export function playSound(kind, { sfx = true } = {}) {
   }
   return 0;
 }
+function soundForegroundAllowed() {
+  return typeof document === "undefined" ||
+    (!document.hidden && document.visibilityState !== "hidden");
+}
 export async function playNote(note) {
   stopSounds();
+  const token = soundSequence;
+  if (speechActive || !soundForegroundAllowed()) return false;
   const c = await ensureAudioReady();
-  if (!c) return false;
+  if (!c || token !== soundSequence || speechActive || !soundForegroundAllowed()) return false;
   tone([261.6, 329.6, 392, 523.2][note % 4], 0, 0.34, "triangle", 0.14);
   return true;
 }
