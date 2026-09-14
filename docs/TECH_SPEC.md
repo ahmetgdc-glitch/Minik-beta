@@ -1,10 +1,10 @@
-# MINIK 1.70.0 Beta 73 — Technische Dokumentation
+# MINIK 1.71.0 Beta 74 — Technische Dokumentation
 
 ## Laufzeit und Module
 
 React 19 und Vite 8, CSS, lokal gebündelte Nunito-Schrift und Lucide-Bedienicons. Alle direkten Abhängigkeiten sind angepinnt; `package-lock.json` gehört zum Projekt. Node ab 22.12, CI auf Node 22. `base: './'` und Hash-Routen unterstützen GitHub-Repository-Pfade.
 
-`App` prüft jede Spiel-/Weltkombination gegen `gameCatalog`. Unbekannte Routen führen zu einer bedienbaren Rückkehrseite. Jedes Spiel ist eine eigene Komponente; `GameSession` koordiniert die gemeinsame Lernschleife.
+`App` prüft jede Spiel-/Weltkombination gegen `gameCatalog`. Unbekannte Routen führen zu einer bedienbaren Rückkehrseite. Jedes Spiel ist eine eigene Komponente; `GameSession` koordiniert die gemeinsame Lernschleife und lädt die 22 konkreten Spielmodule für 23 Spieltypen erst beim Öffnen mit `React.lazy`. Der Produktions-Einstieg umfasst dadurch 331,60 KB statt zuvor 503,09 KB. `Suspense` zeigt bei Bedarf eine zugängliche DE/TR-Mino-Ladeansicht.
 
 ## Game API
 
@@ -54,7 +54,7 @@ Audio-Unlock und Download-/Decode-Arbeit sind an den aktuellen Sprachauftrag geb
 
 ## Offline und Updates
 
-Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker lädt einen kleinen Startkern vorab: HTML, JavaScript, CSS, WOFF2-Schriften, Mino, die drei Startlandschaften, Icons und Manifest. Weitere Illustrationen, Fotos und Sprache werden bei Nutzung gecacht. Cache-Name enthält Installationsscope und Inhaltsrevision; andere Apps oder andere MINIK-Installationspfade werden bei Updates nicht gelöscht.
+Produktionsbuild registriert `sw.js` relativ zum Installationspfad. Der Worker lädt einen kleinen Startkern vorab: HTML, den Einstieg und alle kleinen Spiel-JavaScript-Chunks, CSS, WOFF2-Schriften, Mino, die drei Startlandschaften, Icons und Manifest. Dadurch bleiben sämtliche Spiele nach der Installation beim ersten Offline-Aufruf verfügbar, ohne den React-Einstieg aufzublähen. Weitere Illustrationen, Fotos und Sprache werden bei Nutzung gecacht. Cache-Name enthält Installationsscope und Inhaltsrevision; andere Apps oder andere MINIK-Installationspfade werden bei Updates nicht gelöscht.
 
 Assets werden aus dem Cache beantwortet, unbekannte gleichursprüngliche Assets bei Bedarf nachgeladen. Navigation versucht zuerst das Netz, bei Verbindungsfehler oder temporärem HTTP-Fehler das gecachte `index.html`. Scheitert das Speichern einer erfolgreichen Netzwerkantwort, bleibt die Antwort nutzbar. Ein neuer Worker wartet bei aktiver Vorgängerversion; Aktivierung erfolgt über die vorhandene Update-Aktion oder nach dem Schließen der bisherigen Tabs. Erst dann werden alte Caches derselben Installation entfernt. Große zukünftige Medienpakete benötigen eigene Auswahl/Downloadverwaltung; sie sind noch nicht implementiert.
 
@@ -62,6 +62,6 @@ Alle 332 festen DE/TR-Sprachbausteine werden für den Produktionsbuild lokalisie
 
 ## Qualitätsgates
 
-`npm test`: automatisierte Content-, Progress-, Audio-, UX- und Regressionstests. `npm run build`: Contentprüfung, Vite und SW. `npm run verify:build`: echte Builddateien für Root-/Unterordner prüfen, Workerinstallation simulieren, Offline-HTML/Mino lesen, Cacheisolation prüfen, fremde Origins und POST ignorieren. Kein Ersatz für den finalen Safari-Gerätetest.
+`npm test`: automatisierte Content-, Progress-, Audio-, UX- und Regressionstests. `npm run build`: Contentprüfung, Vite und SW. `npm run verify:build`: echte Builddateien für Root-/Unterordner prüfen, Workerinstallation simulieren, Offline-HTML/Mino und jeden Spiel-Chunk lesen, den Einstieg auf unter 400 KB begrenzen, Cacheisolation prüfen, fremde Origins und POST ignorieren. Kein Ersatz für den finalen Safari-Gerätetest.
 
 `tests/viewport.html` dient nur der lokalen Layoutprüfung des zuvor gebauten `dist/index.html` bei 320/393/768/1024 Pixeln. Sie gehört nicht zum veröffentlichten Build.

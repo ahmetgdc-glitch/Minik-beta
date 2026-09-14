@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.70.0 Beta 73**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.71.0 Beta 74**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -65,6 +65,13 @@ Stand: **14. September 2026 · 1.70.0 Beta 73**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 74: schneller Start bei vollständig offline-fähigen Spielen
+
+- `GameSession` lädt die 22 konkreten React-Spielmodule für 23 Spieltypen mit `React.lazy` erst beim Öffnen. Der initiale JS-Einstieg fiel im Produktionsbuild von 503,09 KB auf 331,60 KB.
+- `Suspense` zeigt währenddessen Mino und einen kurzen DE/TR-Status. Die einzige Bewegung ist über `prefers-reduced-motion` vollständig abschaltbar.
+- Der Service Worker nimmt weiterhin alle erzeugten JS-Chunks in `CORE` auf. `verify-build.mjs` verlangt getrennte Chunks, begrenzt den Einstieg auf unter 400 KB und ruft jeden Chunk offline unter allen drei getesteten Installationspfaden ab.
+- Die Zahl der Bootdateien steigt von 22 auf 49, bleibt deutlich unter dem bestehenden Safari-Limit von 120; große Bilder und sämtliche Sprachbibliotheken werden weiterhin nicht beim Install vorgeladen.
 
 ### Beta 73: Sprache und Szene verbunden
 

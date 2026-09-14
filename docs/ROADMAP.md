@@ -1,6 +1,6 @@
 # MINIK Roadmap
 
-Stand **1.70.0 Beta 73 · 2026-09-14**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+Stand **1.71.0 Beta 74 · 2026-09-14**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
 
 ## Immersive Kinderwelt
 
@@ -11,6 +11,7 @@ Stand **1.70.0 Beta 73 · 2026-09-14**. Beta 66 bleibt das technische Fundament.
 - [x] Netzwerkantworten trotz voller Runtime-Caches nutzbar halten
 - [x] Audio-Unlock, Download, Decoder und Wiedergabe gegen Hänger/Abbrüche absichern
 - [x] Dekodierten Audio-Speicher begrenzen und vorhandene Audioquellen versionieren
+- [x] Spielmodule bedarfsgerecht laden: Einstieg 34 % kleiner, alle Chunks trotzdem im Offline-Kern
 - [ ] Feste Wortaufnahmen ergänzen: 376 DE- und 375 TR-Items haben noch keinen passenden festen Sprachplan (siehe `VOICE_COVERAGE.md`)
 - [ ] Visuelle/akustische Abnahme auf iPhone und iPad; der Browserzugriff des aktuellen Work-Laufs ist blockiert
 

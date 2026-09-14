@@ -1,4 +1,6 @@
 import React, {
+  lazy,
+  Suspense,
   useState,
   useEffect,
   useCallback,
@@ -28,55 +30,42 @@ import { recommendedActivities } from "../learning/recommendations.js";
 import { maxOptionsForAge } from "../learning/age.js";
 import { shouldAcceptWrongTap, shouldBlockGameInteraction } from "./inputGuard.js";
 import { loadCheckpoint, saveCheckpoint, clearCheckpoint, checkpointMatchesProfile, checkpointForGame, checkpointDifficulty } from "./sessionCheckpoint.js";
-import ListenGame from "./ListenGame.jsx";
-import MemoryGame from "./MemoryGame.jsx";
-import MatchGame from "./MatchGame.jsx";
-import SortGame from "./SortGame.jsx";
-import CountGame from "./CountGame.jsx";
-import SoundsGame from "./SoundsGame.jsx";
-import PuzzleGame from "./PuzzleGame.jsx";
-import ShadowGame from "./ShadowGame.jsx";
-import MissingGame from "./MissingGame.jsx";
-import PatternGame from "./PatternGame.jsx";
-import TraceGame from "./TraceGame.jsx";
-import RhythmGame from "./RhythmGame.jsx";
-import DrawGame from "./DrawGame.jsx";
-import ExploreGame from "./ExploreGame.jsx";
-import ReviewGame from "./ReviewGame.jsx";
-import StoryGame from "./StoryGame.jsx";
-import InitialLetterGame from "./InitialLetterGame.jsx";
-import OppositesGame from "./OppositesGame.jsx";
-import DailyOrderGame from "./DailyOrderGame.jsx";
-import DifferentGame from "./DifferentGame.jsx";
-import SocialStepsGame from "./SocialStepsGame.jsx";
-import SpeakGame from "./SpeakGame.jsx";
 import { useModalSafety } from "../app/useModalSafety.js";
 
 const components = {
-  speak: SpeakGame,
-  socialsteps: SocialStepsGame,
-  different: DifferentGame,
-  dailyorder: DailyOrderGame,
-  opposites: OppositesGame,
-  initialletter: InitialLetterGame,
-  story: StoryGame,
-  review: ReviewGame,
-  explore: ExploreGame,
-  draw: DrawGame,
-  listen: ListenGame,
-  memory: MemoryGame,
-  match: MatchGame,
-  sort: SortGame,
-  count: CountGame,
-  sounds: SoundsGame,
-  puzzle: PuzzleGame,
-  shadow: ShadowGame,
-  missing: MissingGame,
-  pattern: PatternGame,
-  trace: TraceGame,
-  lettertrace: TraceGame,
-  rhythm: RhythmGame,
+  speak: lazy(() => import("./SpeakGame.jsx")),
+  socialsteps: lazy(() => import("./SocialStepsGame.jsx")),
+  different: lazy(() => import("./DifferentGame.jsx")),
+  dailyorder: lazy(() => import("./DailyOrderGame.jsx")),
+  opposites: lazy(() => import("./OppositesGame.jsx")),
+  initialletter: lazy(() => import("./InitialLetterGame.jsx")),
+  story: lazy(() => import("./StoryGame.jsx")),
+  review: lazy(() => import("./ReviewGame.jsx")),
+  explore: lazy(() => import("./ExploreGame.jsx")),
+  draw: lazy(() => import("./DrawGame.jsx")),
+  listen: lazy(() => import("./ListenGame.jsx")),
+  memory: lazy(() => import("./MemoryGame.jsx")),
+  match: lazy(() => import("./MatchGame.jsx")),
+  sort: lazy(() => import("./SortGame.jsx")),
+  count: lazy(() => import("./CountGame.jsx")),
+  sounds: lazy(() => import("./SoundsGame.jsx")),
+  puzzle: lazy(() => import("./PuzzleGame.jsx")),
+  shadow: lazy(() => import("./ShadowGame.jsx")),
+  missing: lazy(() => import("./MissingGame.jsx")),
+  pattern: lazy(() => import("./PatternGame.jsx")),
+  trace: lazy(() => import("./TraceGame.jsx")),
+  lettertrace: lazy(() => import("./TraceGame.jsx")),
+  rhythm: lazy(() => import("./RhythmGame.jsx")),
 };
+
+function GameLoading({ lang }) {
+  return (
+    <div className="game-loading" role="status" aria-live="polite">
+      <Mino />
+      <strong>{lang === "tr" ? "Oyun hazırlanıyor…" : "Spiel wird vorbereitet…"}</strong>
+    </div>
+  );
+}
 
 const praise = {
   de: ["Super gemacht!", "Wunderbar!", "Das hast du toll gemacht!"],
@@ -604,22 +593,24 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
           onHelp={help}
           disabled={interactionBlocked()}
         />
-        <Component
-          key={`${gameId}-${worldId}-${round}`}
-          items={items}
-          world={world}
-          progress={progress}
-          difficulty={difficulty}
-          lang={lang}
-          settings={settings}
-          hint={hint}
-          paused={paused}
-          round={round}
-          interactionBlocked={interactionBlocked}
-          onReady={ready}
-          onWrong={wrong}
-          onSolve={solve}
-        />
+        <Suspense fallback={<GameLoading lang={lang} />}>
+          <Component
+            key={`${gameId}-${worldId}-${round}`}
+            items={items}
+            world={world}
+            progress={progress}
+            difficulty={difficulty}
+            lang={lang}
+            settings={settings}
+            hint={hint}
+            paused={paused}
+            round={round}
+            interactionBlocked={interactionBlocked}
+            onReady={ready}
+            onWrong={wrong}
+            onSolve={solve}
+          />
+        </Suspense>
       </div>
       {paused && (
         <div className="pause-overlay" role="dialog" aria-modal="true">

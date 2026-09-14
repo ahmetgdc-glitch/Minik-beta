@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.71.0 Beta 74 — Schnellerer Start auf iPhone und iPad
+
+- Die 23 Spieltypen werden nicht mehr gemeinsam mit der Startwelt geladen, sondern erst beim Öffnen des jeweiligen Spiels. Der initiale JavaScript-Build sinkt dadurch von 503,09 KB auf 331,60 KB (rund 34 Prozent).
+- Eine kurze zweisprachige Mino-Ladeansicht ersetzt leere Spielflächen bei langsamen Verbindungen; Bewegungsreduktion deaktiviert ihre Animation.
+- Alle erzeugten Spielmodule bleiben Teil des kleinen Service-Worker-Startcaches. Damit kann nach erfolgreicher PWA-Installation weiterhin jedes Spiel beim ersten Offline-Aufruf starten.
+- Die Build-Verifikation erzwingt mindestens 24 getrennte JavaScript-Dateien, weniger als 400 KB für den Einstieg und die Offline-Verfügbarkeit jedes Chunks unter Root- und GitHub-Pages-Unterpfaden.
+
 ## 1.70.0 Beta 73 — Sichtbare Sprache in der Entdeckerwelt
 
 - Auch die freie Weltansicht markiert jetzt das große Objekt exakt während Minos tatsächlicher Wortwiedergabe; zuvor war diese Verbindung nur im Entdeckerspiel sichtbar.

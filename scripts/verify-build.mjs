@@ -12,6 +12,19 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
   await fs.access(path.resolve(root, match[1]));
 }
 
+const builtJavaScript = (await fs.readdir(path.join(root, "assets")))
+  .filter((file) => file.endsWith(".js"));
+assert.ok(builtJavaScript.length >= 24, `Expected split game modules, found ${builtJavaScript.length} JavaScript files`);
+const entryScript = html.match(/<script[^>]+src="\.\/(assets\/index-[^"]+\.js)"/u)?.[1];
+assert.ok(entryScript, "Production HTML must reference the hashed app entry");
+const entryBytes = (await fs.stat(path.join(root, entryScript))).size;
+assert.ok(entryBytes < 400_000, `Initial JavaScript must stay below 400 KB, found ${entryBytes} bytes`);
+const coreFiles = JSON.parse(worker.match(/const CORE=(\[[^;]+\]);/u)?.[1] || "null");
+assert.ok(Array.isArray(coreFiles), "Service worker must publish a readable CORE list");
+for (const file of builtJavaScript) {
+  assert.ok(coreFiles.includes(`./assets/${file}`), `Offline boot cache must include JavaScript chunk: ${file}`);
+}
+
 const legacyVoiceSourcePattern = /https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/([a-f0-9-]+\.mp3)/g;
 const personalVoiceSourcePattern = /https:\/\/resource2\.heygen\.ai\/text_to_speech\/[^"'\s]+\/(id=[a-f0-9-]+\.wav)/g;
 const legacyVoiceSourceFiles = [
@@ -180,6 +193,10 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   assert.match(page.body.toString(), /MINIK/);
   const image = await request(scope + "assets/mascot/mino.webp");
   assert.ok(image.body.byteLength > 1000);
+  for (const script of builtJavaScript) {
+    const chunk = await request(scope + `assets/${script}`);
+    assert.ok(chunk?.body.byteLength > 100, `Split module must work offline: ${script}`);
+  }
   for (const scene of ["archipelago", "meadow", "playroom"]) {
     const landscape = await request(scope + `assets/scenes/${scene}.webp`);
     assert.ok(landscape?.body.byteLength > 1000, `${scene} must work on the first offline visit`);
