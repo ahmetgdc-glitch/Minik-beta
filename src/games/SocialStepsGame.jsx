@@ -5,6 +5,7 @@ import Visual from "../components/Visual.jsx";
 import { choicesFor, sample } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 import { buildSocialSafetyRounds } from "./socialSteps.js";
+import { difficultyProfile } from "./difficulty.js";
 
 export default function SocialStepsGame({
   items,
@@ -18,6 +19,7 @@ export default function SocialStepsGame({
   onWrong,
   onSolve,
 }) {
+  const profile = difficultyProfile(difficulty);
   const round = useMemo(() => {
     const sequence = sample(buildSocialSafetyRounds(items), 1)[0];
     if (!sequence) return null;
@@ -28,9 +30,9 @@ export default function SocialStepsGame({
       first,
       second,
       target,
-      options: choicesFor(target, pool, difficulty),
+      options: choicesFor(target, pool, profile.options),
     };
-  }, [items, difficulty]);
+  }, [items, profile.options]);
 
   if (!round) return null;
 
@@ -38,11 +40,10 @@ export default function SocialStepsGame({
     lang === "tr"
       ? `${round.title.tr}. Sonra ne yapmalıyız?`
       : `${round.title.de}. Was machen wir danach?`;
-  // The scenario title and most routine labels are dynamic. Reuse MINIK's
-  // existing natural next-step prompt for both the lesson and Mino help so
-  // this activity never turns completely silent when a label clip is absent.
   const spokenPrompt = lang === "tr" ? "Sonra ne gelir?" : "Was kommt danach?";
   const help = spokenPrompt;
+  const showAnswerLabels = profile.id !== "hard" || hint >= 1;
+  const showSequenceLabels = profile.id === "easy" || hint >= 1;
 
   useLesson(
     onReady,
@@ -76,7 +77,7 @@ export default function SocialStepsGame({
   }
 
   return (
-    <div className="social-steps-game" aria-disabled={controlsDisabled || undefined}>
+    <div className="social-steps-game" aria-disabled={controlsDisabled || undefined} data-difficulty={profile.id}>
       <div className="social-scenario-title">{round.title[lang]}</div>
       <div className="social-sequence-strip" aria-label={round.title[lang]}>
         {[round.first, round.second].map((item, index) => (
@@ -92,7 +93,7 @@ export default function SocialStepsGame({
             >
               <span className="social-step-number">{index + 1}</span>
               <Visual item={item} lang={lang} photos={settings.photos} />
-              <b>{item.labels[lang]}</b>
+              {showSequenceLabels && <b>{item.labels[lang]}</b>}
               <span className="social-step-hear" aria-hidden="true"><Volume2 size={18} /></span>
             </div>
             <span className="social-step-arrow" aria-hidden="true">→</span>
@@ -114,7 +115,7 @@ export default function SocialStepsGame({
             aria-label={item.labels[lang]}
           >
             <Visual item={item} lang={lang} photos={settings.photos} />
-            <b>{item.labels[lang]}</b>
+            {showAnswerLabels && <b>{item.labels[lang]}</b>}
           </button>
         ))}
       </div>
