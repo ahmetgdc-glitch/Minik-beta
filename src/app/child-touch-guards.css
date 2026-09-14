@@ -48,6 +48,18 @@
     height: 44px;
     min-height: 44px;
   }
+
+  /* A half-width profile card makes the compact avatar grid too small on a
+     320px phone. Expand only the card being edited across the mobile grid. */
+  .profile-card.editing {
+    grid-column: 1 / -1;
+  }
+
+  .profile-card.editing .avatar-picker.compact button,
+  .profile-card.editing .age-picker.compact button {
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 
 /* Creating a profile opens a fairly tall form. On iPhone, especially while
