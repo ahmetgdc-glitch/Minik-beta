@@ -7,6 +7,7 @@ const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8"
 const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
 const atlas = fs.readFileSync(new URL("../src/worlds/WorldAtlas.jsx", import.meta.url), "utf8");
+const explore = fs.readFileSync(new URL("../src/games/ExploreGame.jsx", import.meta.url), "utf8");
 const profiles = fs.readFileSync(new URL("../src/parent/Profiles.jsx", import.meta.url), "utf8");
 
 test("narrow-phone child controls keep at least a 44px hit target", () => {
@@ -41,6 +42,16 @@ test("320px bottom navigation keeps Turkish tab labels on one line", () => {
   assert.match(guards, /\.child-world-shell \.bottom-nav button[\s\S]*?min-width: 0[\s\S]*?padding-inline: 2px/);
   assert.match(guards, /\.child-world-shell \.bottom-nav button svg[\s\S]*?width: 24px[\s\S]*?height: 24px/);
   assert.match(guards, /\.child-world-shell \.bottom-nav button span[\s\S]*?font-size: \.75rem[\s\S]*?white-space: nowrap/);
+});
+
+test("hard discovery progress fits beside Mino on 320px phones", () => {
+  assert.match(scene, /className="discovery-footer"/);
+  assert.match(explore, /className="discovery-progress"/);
+  assert.match(explore, /explorationSize\(difficulty\)/);
+  assert.match(guards, /@media \(max-width: 340px\)[\s\S]*?\.child-world-shell \.discovery-footer[\s\S]*?left: 8px[\s\S]*?right: 8px[\s\S]*?gap: 4px/);
+  assert.match(guards, /\.child-world-shell \.scene-mino[\s\S]*?width: 72px[\s\S]*?min-width: 72px[\s\S]*?height: 72px/);
+  assert.match(guards, /\.child-world-shell \.discovery-progress[\s\S]*?gap: 4px[\s\S]*?padding: 8px/);
+  assert.match(guards, /\.child-world-shell \.discovery-progress i[\s\S]*?width: 14px[\s\S]*?height: 14px[\s\S]*?flex: 0 0 14px/);
 });
 
 test("atlas chapter navigation never collapses below a child-safe width", () => {
