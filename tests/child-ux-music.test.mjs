@@ -56,6 +56,12 @@ test("music picker is independent from the narration toggle", () => {
   assert.doesNotMatch(voiceToggle, /stopMusic\(\)/);
 });
 
+test("music trigger and dialog close control keep child-safe hit targets", () => {
+  assert.match(pickerCss, /\.music-picker-trigger \{[^}]*width:44px;[^}]*min-width:44px;[^}]*height:44px;[^}]*min-height:44px;/u);
+  assert.match(pickerCss, /\.music-picker-head > button \{[^}]*width:44px;[^}]*min-width:44px;[^}]*height:44px;[^}]*min-height:44px;/u);
+  assert.match(pickerCss, /\.music-picker-options > button \{[^}]*min-height:64px;/u);
+});
+
 test("narrow iPhones keep the extra music control from crowding any top bar", () => {
   assert.match(pickerCss, /@media \(max-width:520px\)/);
   assert.match(pickerCss, /\.profile-chip b \{ display:none; \}/);
