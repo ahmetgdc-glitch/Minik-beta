@@ -1,0 +1,32 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const guards = fs.readFileSync(new URL("../src/app/child-touch-guards.css", import.meta.url), "utf8");
+const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
+
+test("narrow-phone child controls keep at least a 44px hit target", () => {
+  assert.match(guards, /@media \(max-width: 760px\)/);
+  for (const selector of ["audio-toggle", "music-picker-trigger", "profile-chip", "mobile-parents"]) {
+    assert.match(guards, new RegExp(`\\.${selector}`));
+  }
+  assert.match(guards, /width: 44px/);
+  assert.match(guards, /min-width: 44px/);
+  assert.match(guards, /height: 44px/);
+  assert.match(guards, /min-height: 44px/);
+});
+
+test("scene navigation gets an even larger child-friendly target", () => {
+  assert.match(guards, /\.child-world-shell \.scene-round-button[\s\S]*?width: 48px[\s\S]*?height: 48px/);
+  assert.match(scene, /className="scene-round-button discovery-prev"/);
+  assert.match(scene, /className="scene-round-button discovery-next"/);
+});
+
+test("touch guardrails are loaded after the major visual styles so they win the cascade", () => {
+  const guardsIndex = main.indexOf('import "./app/child-touch-guards.css";');
+  const worldsIndex = main.indexOf('import "./worlds/worlds.css";');
+  const immersiveIndex = main.indexOf('import "./games/immersive.css";');
+  assert.ok(guardsIndex > worldsIndex);
+  assert.ok(guardsIndex > immersiveIndex);
+});
