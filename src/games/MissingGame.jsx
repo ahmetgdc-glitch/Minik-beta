@@ -3,6 +3,7 @@ import { sample, choicesFor } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
+import { difficultyProfile } from "./difficulty.js";
 export default function MissingGame({
   items,
   difficulty,
@@ -15,9 +16,11 @@ export default function MissingGame({
   onWrong,
   onSolve,
 }) {
-  const [row] = useState(() => sample(items, difficulty === 2 ? 3 : 4)),
+  const profile = difficultyProfile(difficulty);
+  const rowSize = profile.id === "easy" ? 3 : profile.id === "medium" ? 4 : 6;
+  const [row] = useState(() => sample(items, rowSize)),
     [target] = useState(() => sample(row, 1)[0]);
-  const [options] = useState(() => choicesFor(target, items, difficulty)),
+  const [options] = useState(() => choicesFor(target, items, profile.options)),
     [hidden, setHidden] = useState(false);
   const text = hidden
     ? lang === "tr"
@@ -26,16 +29,8 @@ export default function MissingGame({
     : lang === "tr"
       ? "Resimlere dikkatle bak."
       : "Schau dir die Bilder gut an.";
-  const help = lang === "tr"
-    ? "Az önceki sırayı hatırla."
-    : "Denk an die Reihe von eben.";
-  useLesson(
-    onReady,
-    text,
-    () => speak(text, lang, settings),
-    [target.id],
-    help,
-  );
+  const help = lang === "tr" ? "Az önceki sırayı hatırla." : "Denk an die Reihe von eben.";
+  useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
   const controlsDisabled = paused || interactionBlocked();
 
   function replayPreview(item) {
@@ -60,12 +55,10 @@ export default function MissingGame({
   }
 
   return (
-    <div className="missing-stage-game" aria-disabled={controlsDisabled || undefined}>
+    <div className="missing-stage-game" data-difficulty={profile.id} aria-disabled={controlsDisabled || undefined}>
       <section className="missing-stage" aria-label={text}>
         <span className="missing-stage-label">
-          {hidden
-            ? lang === "tr" ? "Hangisi kayboldu?" : "Was ist verschwunden?"
-            : lang === "tr" ? "İyi bak ve hatırla" : "Gut anschauen und merken"}
+          {hidden ? (lang === "tr" ? "Hangisi kayboldu?" : "Was ist verschwunden?") : (lang === "tr" ? "İyi bak ve hatırla" : "Gut anschauen und merken")}
         </span>
         <div className="missing-object-row">
           {row.map((x) => {
@@ -81,11 +74,7 @@ export default function MissingGame({
                 onClick={() => replayPreview(x)}
                 onKeyDown={(event) => previewKeyDown(event, x)}
               >
-                {vanished ? (
-                  <span className="missing-mark">?</span>
-                ) : (
-                  <Visual item={x} lang={lang} photos={settings.photos} />
-                )}
+                {vanished ? <span className="missing-mark">?</span> : <Visual item={x} lang={lang} photos={settings.photos} />}
               </div>
             );
           })}
@@ -100,13 +89,7 @@ export default function MissingGame({
           <h2 className="missing-choices-title">{lang === "tr" ? "Hangi resim eksik?" : "Welches Bild fehlt?"}</h2>
           <div className="missing-choice-grid">
             {options.map((x) => (
-              <button
-                key={x.id}
-                className={`missing-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
-                onClick={() => pick(x)}
-                disabled={controlsDisabled}
-                aria-label={x.labels[lang]}
-              >
+              <button key={x.id} className={`missing-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`} onClick={() => pick(x)} disabled={controlsDisabled} aria-label={x.labels[lang]}>
                 <Visual item={x} lang={lang} photos={settings.photos} />
                 <b>{x.labels[lang]}</b>
               </button>
