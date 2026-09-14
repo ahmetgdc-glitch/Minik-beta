@@ -54,10 +54,14 @@ export function stopSounds() {
   activeTimers.forEach(clearTimeout);
   activeTimers = [];
 }
-/** Start a very quiet, deterministic child-friendly loop after a real gesture. */
-export function startMusic({ enabled = true, style } = {}) {
+/**
+ * Start the selected quiet child-friendly music loop after a real gesture.
+ * Music on/off is owned exclusively by the selected music profile. Narration
+ * and SFX settings must never implicitly disable background music.
+ */
+export function startMusic({ style } = {}) {
   const profile = musicStyleProfile(style);
-  if (!enabled || profile.id === "off" || musicPaused || musicTimer || !unlockAudio()) return false;
+  if (profile.id === "off" || musicPaused || musicTimer || !unlockAudio()) return false;
   if (!musicBus) {
     musicBus = context.createGain();
     musicBus.gain.value = speechActive ? 0.18 : 1;
