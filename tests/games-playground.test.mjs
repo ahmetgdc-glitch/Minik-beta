@@ -63,8 +63,17 @@ test("playground artwork is contained in its own row and cannot cover card label
   assert.match(guards, /grid-template-rows:\s*minmax\(0, 1fr\) auto/);
   assert.match(guards, /\.playground-island-art\s*\{[\s\S]*?overflow:\s*hidden/);
   assert.match(guards, /\.playground-island-art > \.art,[\s\S]*?max-height:\s*100%/);
-  assert.match(guards, /\.playground-island h3\s*\{[\s\S]*?position:\s*relative[\s\S]*?z-index:\s*2/);
+  assert.match(guards, /\.playground-island h3\s*\{[\s\S]*?background:\s*rgba\(255, 255, 255, \.88\)/);
   assert.match(guards, /@media \(max-width: 620px\)[\s\S]*?grid-template-rows:\s*minmax\(125px, 1fr\) auto/);
+});
+
+test("iPhone playground reserves navigation space and keeps organic world-card labels inside safe zones", () => {
+  assert.match(guards, /padding-bottom:\s*calc\(112px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(guards, /overflow-x:\s*clip/);
+  assert.match(guards, /\.world-island-art\s*\{[\s\S]*?inset:\s*9% 12% 28% 12%/);
+  assert.match(guards, /\.world-island-copy\s*\{[\s\S]*?max-width:\s*calc\(100% - 78px\)/);
+  assert.match(guards, /@media \(max-width: 620px\)[\s\S]*?\.world-island-copy\s*\{[\s\S]*?margin-left:\s*4px/);
+  assert.match(guards, /@media \(max-width: 390px\)/);
 });
 
 test("playground stylesheet is part of the production entry", () => {
