@@ -30,6 +30,12 @@ test("390px-class iPhones keep every essential topbar action without horizontal 
   assert.match(guards, /@media \(max-width: 375px\)[\s\S]*?\.child-world-shell \.language-switch span[\s\S]*?padding-inline: 4px/);
 });
 
+test("320px phones keep the star counter inside a 44px utility target", () => {
+  assert.match(guards, /@media \(max-width: 340px\)/);
+  assert.match(guards, /\.child-world-shell \.star-pill[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?max-width: 44px[\s\S]*?flex: 0 0 44px/);
+  assert.match(guards, /\.child-world-shell \.star-pill b[\s\S]*?position: absolute[\s\S]*?max-width: 30px[\s\S]*?text-overflow: ellipsis/);
+});
+
 test("atlas chapter navigation never collapses below a child-safe width", () => {
   assert.match(atlas, /className="atlas-chapters"/);
   assert.match(guards, /\.child-world-shell \.atlas-chapters button[\s\S]*?min-width: 44px[\s\S]*?min-height: 44px[\s\S]*?flex-shrink: 0/);
