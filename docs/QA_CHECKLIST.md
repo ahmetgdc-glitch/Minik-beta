@@ -1,6 +1,6 @@
 # MINIK Release-QA
 
-Stand: **2026-09-14 · 1.69.0 Beta 72**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
+Stand: **2026-09-14 · 1.70.0 Beta 73**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
 
 ## Automatisiert bestanden
 
@@ -21,6 +21,13 @@ Stand: **2026-09-14 · 1.69.0 Beta 72**. „Bestanden“ bedeutet automatisiert 
 - [x] Release-Preflight prüft Versionssynchronität, Doku, Inhaltsumfang, Manifest und GitHub-Pages-Workflow.
 
 ## Browser-/Quelllogik abgedeckt
+
+### Beta 73: zusätzlich geprüft
+
+- [x] Freie Welterkundung zeigt den Sprechzustand für die echte Promise-Lebensdauer der Wortwiedergabe.
+- [x] Alte Wiedergabeabschlüsse können einen neueren Objektzustand nicht löschen.
+- [x] Ansichts-, Sprach- und Routenwechsel stoppen alte Sprache und räumen die Hervorhebung auf.
+- [x] Landmarken reagieren nur während aktiver Sprache; reduzierte Bewegung deaktiviert sämtliche neue Animationen.
 
 ### Beta 72: zusätzlich geprüft
 

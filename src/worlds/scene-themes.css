@@ -61,6 +61,15 @@
   opacity: 0.42;
   transform: rotate(-4deg);
 }
+.world-scenery.is-listening .landmark-1 {
+  animation: landmarkWakeLeft 0.72s ease-in-out infinite alternate;
+}
+.world-scenery.is-listening .landmark-2 {
+  animation: landmarkWakeRight 0.8s 0.08s ease-in-out infinite alternate;
+}
+.world-scenery.is-listening .landmark-3 {
+  animation: landmarkWakeSmall 0.66s 0.16s ease-in-out infinite alternate;
+}
 .discovery-stage .discovery-word {
   background: var(--world-label);
   color: var(--world-accent);
@@ -99,6 +108,24 @@
 @keyframes discovery-speaker {
   to {
     transform: scale(1.18);
+  }
+}
+@keyframes landmarkWakeLeft {
+  to {
+    transform: translateY(-7px) rotate(-3deg) scale(1.035);
+    opacity: 0.64;
+  }
+}
+@keyframes landmarkWakeRight {
+  to {
+    transform: translateY(-6px) rotate(4deg) scale(1.04);
+    opacity: 0.64;
+  }
+}
+@keyframes landmarkWakeSmall {
+  to {
+    transform: translateY(-5px) rotate(1deg) scale(1.05);
+    opacity: 0.56;
   }
 }
 
@@ -308,7 +335,7 @@
   .discovery-stage .discovery-word {
     transition: none;
   }
-  .world-scenery .scene-landmark {
+  .world-scenery.is-listening .scene-landmark {
     animation: none;
   }
 }

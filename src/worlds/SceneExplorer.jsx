@@ -38,7 +38,7 @@ export default function SceneExplorer({
         alt=""
         draggable="false"
       />
-      <WorldScenery worldId={worldId} />
+      <WorldScenery worldId={worldId} active={Boolean(speakingId)} />
       <div
         className="discovery-viewport"
         ref={pager.scrollRef}

@@ -1,6 +1,6 @@
 # MINIK · Lernen mit Mino
 
-**1.69.0 Beta 72 · 14. September 2026**
+**1.70.0 Beta 73 · 14. September 2026**
 
 MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet große visuelle Spielflächen mit Mino als Helfer, getrennten Kinderprofilen, adaptivem Lernen, Belohnungen und einem offline-fähigen PWA-Kern.
 
@@ -8,7 +8,7 @@ MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet
 
 Die Startseite ist eine bildschirmfüllende Inselwelt mit großem Mino. Alle bestehenden Welten sind in fünf Themenreisen erreichbar. In den Entdeckerszenen steht ein großes Lernobjekt im Mittelpunkt: antippen, hören, weiterwischen. Pfeile und Tastatur bieten denselben Zugang. Profile, Empfehlungen und Lernfortschritt bleiben erhalten.
 
-Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei thematischen Landmarken. Die lokalen Illustrationen liegen räumlich hinter dem Lernobjekt, blockieren keine Eingabe und machen etwa Zuhause, Musik, Berufe, Wetter oder Spielzeug als unterschiedliche Orte erkennbar.
+Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei thematischen Landmarken. Die lokalen Illustrationen liegen räumlich hinter dem Lernobjekt, blockieren keine Eingabe und machen etwa Zuhause, Musik, Berufe, Wetter oder Spielzeug als unterschiedliche Orte erkennbar. Beim Anhören reagieren Objekt und Umgebung gemeinsam, sodass Kinder jederzeit sehen, welches Wort Mino gerade spricht.
 
 ## Aktueller Umfang
 
@@ -25,7 +25,7 @@ Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei th
 
 ## Entwickeln und prüfen
 
-Beta 72 erweitert die großen Entdeckerszenen um datengetriebene, lokale Landmarken für alle 25 Welten. Beta 71 behebt verspätete iOS-Audiofreigaben, hängende Audiojobs und unbegrenzten Audio-Pufferspeicher. PWA-Updates warten wieder auf den vorgesehenen Wechsel. Die 368 vorhandenen Audioquelldateien sind im Repository enthalten; die Sprach-Buildschritte benötigen dafür keine externen Downloads mehr.
+Beta 73 verbindet die freie Welterkundung sichtbar mit Minos tatsächlicher Sprechdauer und lässt die Landmarken währenddessen ruhig reagieren. Schnelle Wort-, Sprach- und Ansichtswechsel können keinen veralteten Sprechzustand hinterlassen. Beta 72 ergänzt die lokalen Landmarken; die Audio-/PWA-Härtung aus Beta 71 bleibt erhalten.
 
 Die vorhandenen 332 Sprachbausteine decken noch nicht alle 503 Lernobjekte ab. Die genaue [Sprachabdeckung](docs/VOICE_COVERAGE.md) trennt vorhandene Aufnahmen von den noch offenen Wortaufnahmen.
 

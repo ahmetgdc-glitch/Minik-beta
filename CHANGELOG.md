@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.70.0 Beta 73 — Sichtbare Sprache in der Entdeckerwelt
+
+- Auch die freie Weltansicht markiert jetzt das große Objekt exakt während Minos tatsächlicher Wortwiedergabe; zuvor war diese Verbindung nur im Entdeckerspiel sichtbar.
+- Die drei thematischen Landmarken reagieren während der Aussprache mit einer sanften, zeitversetzten Bewegung und machen die Szene lebendiger.
+- Schnelle Wortwechsel dürfen einen neueren Hervorhebungszustand nicht durch das verspätete Ende einer alten Wiedergabe löschen.
+- Ansichtswechsel, Sprachwechsel und Verlassen der Welt stoppen die alte Sprachausgabe und räumen den visuellen Sprechzustand auf.
+- Bewegungsreduktion deaktiviert die neuen Landmarkenanimationen vollständig.
+
 ## 1.69.0 Beta 72 — Eigene Landmarken für alle Lernwelten
 
 - Alle 25 Welten erhalten eine eigene, datengetriebene Kombination aus drei thematisch passenden Landmarken statt nur einer farblich veränderten Grundszene.

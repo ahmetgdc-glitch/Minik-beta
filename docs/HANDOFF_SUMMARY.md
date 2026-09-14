@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.69.0 Beta 72**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.70.0 Beta 73**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -65,6 +65,13 @@ Stand: **14. September 2026 · 1.69.0 Beta 72**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 73: Sprache und Szene verbunden
+
+- Die freie Weltansicht führt nun wie das Entdeckerspiel einen tokengebundenen `speakingId`. Das große Objekt bleibt genau für die echte Dauer der Wiedergabe hervorgehoben.
+- Spätes Ende eines alten Worts darf den Zustand eines neueren Worts nicht löschen. Wechsel von Ansicht oder Sprache sowie Unmount stoppen die alte Ausgabe und invalidieren ihren Lauf.
+- `WorldScenery` reagiert auf den aktiven Sprechzustand mit drei ruhigen Landmarkenbewegungen; `prefers-reduced-motion` schaltet sie ab.
+- Zwei neue Tests sichern Lebensdauer, Race-Schutz, Sprach-/Ansichtsbereinigung und die reduzierte Bewegung.
 
 ### Beta 72: individuelle Entdeckerorte
 

@@ -48,12 +48,27 @@ test("major preschool world families receive distinct visual moods", () => {
 });
 
 test("discovery scenes render non-interactive world landmarks behind the learning object", () => {
-  assert.match(explorer, /<WorldScenery worldId=\{worldId\}/);
+  assert.match(
+    explorer,
+    /<WorldScenery worldId=\{worldId\} active=\{Boolean\(speakingId\)\}/,
+  );
   assert.match(scenery, /decorationsForWorld\(worldId\)/);
   assert.match(scenery, /aria-hidden="true"/);
   assert.match(css, /\.world-scenery\s*\{[^}]*pointer-events:\s*none/);
   assert.match(css, /\.world-scenery \.scene-landmark/);
   assert.match(css, /contain:\s*layout paint/);
+});
+
+test("world landmarks wake only while the matching object is speaking", () => {
+  assert.match(scenery, /active \? "is-listening" : ""/);
+  assert.match(css, /\.world-scenery\.is-listening \.landmark-1/);
+  assert.match(css, /@keyframes landmarkWakeLeft/);
+  assert.match(css, /@keyframes landmarkWakeRight/);
+  assert.match(css, /@keyframes landmarkWakeSmall/);
+  assert.match(
+    css,
+    /prefers-reduced-motion[\s\S]*\.world-scenery\.is-listening \.scene-landmark[\s\S]*animation: none/,
+  );
 });
 
 test("spoken discovery words keep the matching object highlighted for the real speech lifetime", () => {
