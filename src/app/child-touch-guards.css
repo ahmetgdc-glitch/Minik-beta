@@ -90,6 +90,22 @@
   }
 }
 
+@media (max-width: 410px) {
+  /* On 390px-class iPhones the six essential utility controls plus the MINIK
+     wordmark exceed the available row width once all hit targets are kept at
+     44px. The bottom Home tab already provides navigation, so only the
+     redundant wordmark is removed while every functional control stays visible. */
+  .child-world-shell .mobile-brand {
+    display: none;
+  }
+
+  .child-world-shell .topbar-actions {
+    width: 100%;
+    min-width: 0;
+    justify-content: space-between;
+  }
+}
+
 @media (max-width: 390px) {
   .child-world-shell .topbar-actions {
     gap: 3px;
@@ -107,6 +123,23 @@
 }
 
 @media (max-width: 375px) {
+  .child-world-shell .topbar {
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  .child-world-shell .topbar-actions {
+    gap: 2px;
+  }
+
+  .child-world-shell .language-switch {
+    padding-inline: 2px;
+  }
+
+  .child-world-shell .language-switch span {
+    padding-inline: 4px;
+  }
+
   /* Five 44px chapter targets plus both arrow buttons cannot fit side-by-side
      on the narrowest iPhones. Let only the chapter strip scroll horizontally;
      the previous/next arrows remain fixed, large and immediately reachable. */
