@@ -3,6 +3,7 @@ import { sample, shuffle } from "../utils/random.js";
 import Visual, { Art } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
+import { difficultyProfile } from "./difficulty.js";
 
 export default function MemoryGame({
   items,
@@ -16,7 +17,8 @@ export default function MemoryGame({
   onWrong,
   onSolve,
 }) {
-  const [chosen] = useState(() => sample(items, difficulty === 2 ? 2 : difficulty === 4 ? 4 : 6));
+  const profile = difficultyProfile(difficulty);
+  const [chosen] = useState(() => sample(items, profile.memoryPairs));
   const [cards] = useState(() => shuffle(chosen.flatMap((item) => [
     { id: item.id + "a", item },
     { id: item.id + "b", item },
@@ -60,9 +62,6 @@ export default function MemoryGame({
     if (!a || !b) { lockedRef.current = false; setOpen([]); return; }
     const ok = a.item.id === b.item.id;
     const timer = setTimeout(() => {
-      // A parent transition can lock the session while the two-card timer is
-      // still running. Always release the local board lock before returning;
-      // otherwise a cancelled comparison can leave Memory permanently frozen.
       if (interactionBlocked()) {
         openRef.current = [];
         setOpen([]);
@@ -73,8 +72,6 @@ export default function MemoryGame({
         const next = [...matchedRef.current, a.item.id];
         matchedRef.current = next;
         setMatched(next);
-        // The second card has just spoken this same label. Do not restart the
-        // word here: that used to cut the child's pronunciation off halfway.
         if (next.length === chosen.length) onSolve(chosen.map((i) => i.id));
       } else {
         onWrong([a.item.id, b.item.id]);
@@ -82,9 +79,9 @@ export default function MemoryGame({
       openRef.current = [];
       setOpen([]);
       lockedRef.current = false;
-    }, ok ? 450 : 900);
+    }, ok ? 400 : profile.wrongRevealMs);
     return () => clearTimeout(timer);
-  }, [open, paused, cards, chosen, onSolve, onWrong, interactionBlocked]);
+  }, [open, paused, cards, chosen, onSolve, onWrong, interactionBlocked, profile.wrongRevealMs]);
 
   async function speakCard(card) {
     const run = ++speechRun.current;
@@ -109,7 +106,7 @@ export default function MemoryGame({
 
   const helpPair = chosen.find((i) => !matched.includes(i.id))?.id;
   return (
-    <section className="memory-playground" aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"} aria-disabled={controlsDisabled || undefined}>
+    <section className="memory-playground" data-difficulty={profile.id} aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"} aria-disabled={controlsDisabled || undefined}>
       <div className="memory-playground-status">{matched.length} / {chosen.length} {lang === "tr" ? "çift" : "Paare"}</div>
       <div className={`memory-grid cards-${cards.length}`}>
         {cards.map((card, index) => {
