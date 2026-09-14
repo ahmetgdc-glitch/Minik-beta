@@ -38,14 +38,11 @@ export default function SocialStepsGame({
     lang === "tr"
       ? `${round.title.tr}. Sonra ne yapmalıyız?`
       : `${round.title.de}. Was machen wir danach?`;
-  // The scenario title is dynamic and many social/routine labels do not have a
-  // fixed recording yet. Reuse MINIK's already-recorded "what comes next?"
-  // prompt so entering this game never produces a silent lesson on iPhone.
+  // The scenario title and most routine labels are dynamic. Reuse MINIK's
+  // existing natural next-step prompt for both the lesson and Mino help so
+  // this activity never turns completely silent when a label clip is absent.
   const spokenPrompt = lang === "tr" ? "Sonra ne gelir?" : "Was kommt danach?";
-  const help =
-    lang === "tr"
-      ? `${round.first.labels.tr}, sonra ${round.second.labels.tr}, ardından ${round.target.labels.tr}.`
-      : `${round.first.labels.de}, dann ${round.second.labels.de}, danach ${round.target.labels.de}.`;
+  const help = spokenPrompt;
 
   useLesson(
     onReady,
