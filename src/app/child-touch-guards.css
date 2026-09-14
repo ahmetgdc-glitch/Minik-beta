@@ -30,6 +30,20 @@
   }
 }
 
+@media (max-width: 540px) {
+  /* Legacy game styles used to shrink these below a child's comfortable hit
+     target on iPhone. Keep the visible icons compact, but never the hit box. */
+  .game-header .icon-button,
+  .replay-audio {
+    box-sizing: border-box;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+  }
+}
+
 @media (max-width: 390px) {
   .child-world-shell .topbar-actions {
     gap: 3px;
@@ -38,7 +52,9 @@
   /* Preserve the 44px hit box while keeping visual chrome compact. */
   .child-world-shell .audio-toggle svg,
   .child-world-shell .music-picker-trigger svg,
-  .child-world-shell .mobile-parents svg {
+  .child-world-shell .mobile-parents svg,
+  .game-header .icon-button svg,
+  .replay-audio svg {
     width: 18px;
     height: 18px;
   }
