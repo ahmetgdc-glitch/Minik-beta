@@ -1,13 +1,16 @@
 import { maxOptionsForAge } from "../learning/age.js";
 import { outfitById, normalizeOutfit } from "../rewards/outfits.js";
 export const STORAGE_KEY = "minik_progress_v3";
+// MINIK's primary audience is Turkish-speaking families. Existing explicit
+// language choices remain untouched; this only sets the first-run language.
+export const DEFAULT_LANGUAGE = "tr";
 export const MAX_WORLD_PROGRESS_ENTRIES = 128;
 export const MAX_MASTERY_ENTRIES = 2500;
 export const MAX_EVENT_IDS = 600;
 export const MAX_REWARD_IDS = 128;
 
 export const defaultSettings = {
-  lang: "de",
+  lang: DEFAULT_LANGUAGE,
   audio: true,
   systemVoiceFallback: false,
   sfx: true,
@@ -177,7 +180,9 @@ export function normalizeState(raw) {
   // persisted keys back into the live app. This keeps corrupt/oversized
   // localStorage and imported backups from growing the settings object forever.
   const settings = { ...defaultSettings, voices: { ...defaultSettings.voices } };
-  settings.lang = ["de", "tr"].includes(rawSettings.lang) ? rawSettings.lang : "de";
+  settings.lang = ["de", "tr"].includes(rawSettings.lang)
+    ? rawSettings.lang
+    : defaultSettings.lang;
   settings.audio = boolSetting(rawSettings.audio, defaultSettings.audio);
   settings.systemVoiceFallback = boolSetting(
     rawSettings.systemVoiceFallback,

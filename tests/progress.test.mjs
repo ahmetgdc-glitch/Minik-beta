@@ -60,6 +60,10 @@ test("fixed 2/4/6 choice settings override adaptive mode", () => {
   s.settings = { ...s.settings, adaptive: false, options: 4 };
   assert.equal(difficultyFor(s, "animals"), 4);
 });
+test("fresh families start in Turkish while an explicit German choice stays German", () => {
+  assert.equal(freshState().settings.lang, "tr");
+  assert.equal(normalizeState({ version: 3, settings: { lang: "de" } }).settings.lang, "de");
+});
 test("repeated mistakes lower difficulty even when no answer is solved", () => {
   let s = freshState();
   for (let i = 0; i < 12; i++) s = reduceProgress(s, answer(`ok-${i}`));
@@ -148,7 +152,7 @@ test("corrupt or disabled storage cannot crash app initialization", () => {
       stars: -99,
       settings: { lang: "xx", options: 99 },
     }).settings.lang,
-    "de",
+    "tr",
   );
 });
 test("progress reset retains preferences", () => {

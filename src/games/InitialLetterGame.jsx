@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { speak } from "../audio/voice.js";
+import { fixedNaturalVoicePlan } from "../audio/fixedNaturalVoicePlans.js";
 import Visual from "../components/Visual.jsx";
 import { sample, shuffle } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
@@ -49,7 +50,7 @@ export default function InitialLetterGame({
     prompt,
     () => speak(prompt, lang, settings),
     [target.id],
-    targetLetter,
+    prompt,
   );
   const controlsDisabled = paused || interactionBlocked();
 
@@ -59,7 +60,13 @@ export default function InitialLetterGame({
 
   function hearTarget() {
     if (blocked()) return;
-    speak(target.labels[lang], lang, settings);
+    // Keep the short word replay for covered vocabulary. Otherwise the full
+    // question reaches the shared recorded-instruction fallback.
+    if (fixedNaturalVoicePlan(target.labels[lang], lang).length) {
+      speak(target.labels[lang], lang, settings);
+      return;
+    }
+    speak(prompt, lang, settings);
   }
 
   function handleTargetKeyDown(event) {

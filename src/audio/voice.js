@@ -205,6 +205,26 @@ function playbackTimeout(duration) {
   return Math.min(VOICE_PLAYBACK_LIMIT_MS, Math.max(5000, duration * 1000 + 2000));
 }
 
+function prepareMediaClip(url) {
+  if (!url || !speechForegroundAllowed()) return;
+  const player = naturalPlayer();
+  if (!player) return;
+  try {
+    player.pause();
+    player.onended = null;
+    player.onerror = null;
+    player.onplaying = null;
+    player.preload = "auto";
+    if (player.src !== url) {
+      player.src = url;
+      player.currentTime = 0;
+      player.load?.();
+    } else if (player.readyState === 0) {
+      player.load?.();
+    }
+  } catch {}
+}
+
 async function decodeVoiceBuffer(url, context, token) {
   if (!url || !context || typeof fetch === "undefined") return null;
   if (voiceBufferCache.has(url)) {
@@ -285,10 +305,17 @@ async function speakMediaClip(url, token) {
     player.pause();
     player.onended = null;
     player.onerror = null;
-    player.preload = "metadata";
-    player.src = url;
-    player.currentTime = 0;
-    player.load?.();
+    // These recordings are short, bundled assets. Ask Safari to buffer the
+    // clip itself so the child hears the first syllable without waiting for a
+    // metadata-only round trip after the optional decoder budget expires.
+    player.preload = "auto";
+    if (player.src !== url) {
+      player.src = url;
+      player.currentTime = 0;
+      player.load?.();
+    } else {
+      player.currentTime = 0;
+    }
     return await new Promise((resolve) => {
       let done = false;
       let startTimer;
@@ -336,6 +363,10 @@ async function speakMediaClip(url, token) {
 
 async function speakGameClip(url, token) {
   if (!url || !speechForegroundAllowed()) return false;
+  // Start the browser's local media fetch in parallel with the optional
+  // WebAudio decode. If decoding reaches its 500 ms deadline, the same player
+  // is already warm and can begin the recording immediately.
+  prepareMediaClip(url);
   if (voiceContext?.state === "running") {
     const playedWebAudio = await speakWebAudioClip(url, token).catch(() => false);
     if (playedWebAudio || token !== sequence) return playedWebAudio;

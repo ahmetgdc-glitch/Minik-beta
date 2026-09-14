@@ -4,6 +4,8 @@ import fs from "node:fs";
 
 import {
   fixedNaturalVoiceCoverageCount,
+  fixedNaturalVoiceClip,
+  fixedNaturalVoiceFallbackPlan,
   fixedNaturalVoicePlan,
   isFixedNaturalVoiceClipUrl,
 } from "../src/audio/fixedNaturalVoicePlans.js";
@@ -32,6 +34,42 @@ test("dynamic narration is composed only from the fixed natural library", () => 
   assertFixedPlan("Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr", 3);
   assertFixedPlan("Was sieht Mino zum Schluss? Löwe", "de", 2);
   assertFixedPlan("Mino en son ne görüyor? Aslan", "tr", 2);
+});
+
+test("uncovered game words keep a recorded task instruction", () => {
+  const cases = [
+    ["Havuç nerede?", "tr", "Bu resmi bul."],
+    ["Havuç nerede? Bir kez daha hatırlayalım.", "tr", "Bir kez daha hatırlayalım."],
+    ["Hangi sepete ait? Havuç.", "tr", "Hangi sepete ait?"],
+    ["Havuç hangi harfle başlıyor?", "tr", "Bu kelime hangi harfle başlıyor?"],
+    ["Havuç. Bunun zıttı hangisi?", "tr", "Bunun zıttı hangisi?"],
+    ["Havuç sonrasında ne gelir?", "tr", "Sonra ne gelir?"],
+    ["Benimle söyle: Havuç", "tr", "Benimle söyle."],
+    ["Havuç", "tr", "Bu resmi bul."],
+    ["Mino en son ne görüyor? Havuç", "tr", "Mino en son ne görüyor?"],
+    ["Finde: Karotte.", "de", "Finde dieses Bild."],
+    ["Wo ist Karotte? Das wiederholen wir noch einmal.", "de", "Das wiederholen wir noch einmal."],
+    ["Mit welchem Buchstaben beginnt Karotte?", "de", "Mit welchem Buchstaben beginnt das Wort?"],
+    ["Karotte. Was ist das Gegenteil?", "de", "Was ist das Gegenteil?"],
+    ["Sprich mir nach: Karotte", "de", "Sprich mir nach."],
+    ["Karotte", "de", "Finde dieses Bild."],
+    ["Ziehe die Puzzleteile an die richtige Stelle.", "de", "Schau auf das kleine Vorbild."],
+  ];
+  for (const [text, lang, expected] of cases) {
+    const plan = fixedNaturalVoicePlan(text, lang);
+    assert.ok(plan.length > 0, `missing fallback plan: ${lang} ${text}`);
+    assert.ok(plan.every(isFixedNaturalVoiceClipUrl), `fallback must stay fixed: ${lang} ${text}`);
+    assert.equal(
+      fixedNaturalVoiceFallbackPlan(text, lang).length,
+      plan.length,
+      `fallback should be used for uncovered word: ${lang} ${text}`,
+    );
+    assert.ok(
+      plan.includes(fixedNaturalVoiceClip(expected, lang)),
+      `fallback should speak the recorded instruction: ${lang} ${expected}`,
+    );
+  }
+  assert.deepEqual(fixedNaturalVoiceFallbackPlan("This is unrelated text", "tr"), []);
 });
 
 test("runtime tries fixed natural narration before iOS Voice 4 fallback", () => {

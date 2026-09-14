@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.72.0 Beta 75**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.73.0 Beta 76**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -12,12 +12,15 @@ Stand: **14. September 2026 · 1.72.0 Beta 75**. Der langfristige Nutzerauftrag 
 - Sterne, XP, Tagesreise, Aquarium, Achievements und Mino-Outfits
 - Elternbereich mit Rechengate/PIN, Wochenanalyse, Backup/Restore und Einstellungen
 - feste natürliche DE/TR-MINIK-Stimme als primäre Erzählstimme; Apple Voice 4 bleibt kontrollierter Notfall-Fallback, beliebige Browser-/Default-/Roboterstimmen bleiben verboten und die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet
+- Neue Familien starten auf Türkisch; eine vorhandene ausdrückliche Sprachwahl wird bei der Normalisierung beibehalten
 - installierbare PWA, Offline-Service-Worker, Recovery-Speicher und Session-Checkpoints
 
 ## Sprach- und Audio-Härtung
 
 - Die gebündelte feste natürliche MINIK-Stimme ist der primäre Sprecher in Deutsch und Türkisch und wird für bekannte Begriffe, Anweisungen und zusammensetzbare Sätze zuerst versucht.
 - Die 332 bekannten Sprachbausteine werden beim Produktionsbuild lokalisiert; sie werden zur Laufzeit bedarfsgerecht geladen und gecacht, nicht vollständig beim Service-Worker-Install vorab geladen.
+- Der lokale HTML-Audioplayer beginnt bei jedem festen Clip parallel zum optionalen WebAudio-Decoder mit dem Puffern. So wartet ein Kind nicht erst auf einen vollständigen Decode, bevor dieselbe Aufnahme starten darf.
+- Fehlt bei einem dynamischen Lernwort noch die feste Wortaufnahme, bleibt die feste Aufgabenansage hörbar. Das gilt auch für direkt angetippte Wörter in Entdecken, Memory, Geschichte, Muster und Wiederholung; das sichtbare Wort wird nicht durch eine System- oder Roboterstimme ersetzt.
 - Apple Voice 4 bleibt als sekundärer Notfall-Fallback erreichbar, wenn kein fester Sprachplan vorhanden ist oder der feste Clip nicht abspielbar ist.
 - Safari behält für diesen Fallback die längere Voice-Listen-Bereitschaft, gecachte Voice-4-Auswahl, Sprachfilter, Watchdogs und den kontrollierten Retry.
 - **Kein Personal-/Roboter-Fallback:** Die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet; beliebige Browser-/Default-/Roboterstimmen bleiben ausgeschlossen.
@@ -65,6 +68,13 @@ Stand: **14. September 2026 · 1.72.0 Beta 75**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 76: türkischer Einstieg und hörbare Spielansagen
+
+- Neue Familien beginnen mit Türkisch als Erstsprache. Explizit gespeicherte deutsche Profile und Sprachwechsel bleiben unverändert.
+- Dynamische DE/TR-Aufgaben verwenden bei unvollständiger Wortabdeckung kurze, bereits gebündelte feste Anweisungen. Dadurch bleibt Mino auch bei einem noch offenen Wortclip im Spiel hörbar.
+- Der feste Audioplayer puffert lokale Aufnahmen parallel zum 500-ms-Decoderfenster. Die softwareseitige Wartezeit sinkt, ohne Sprecherwechsel oder neue Netzwerkabhängigkeit.
+- 547 automatisierte Tests sind grün; reale Tonstartzeiten sowie iPhone-/iPad-Touch bleiben Geräteprüfungen.
 
 ### Audio-Hotfix: gemeldete Verzögerung nach Antippen
 

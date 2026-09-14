@@ -1,4 +1,4 @@
-# MINIK 1.72.0 Beta 75 — Produktstand
+# MINIK 1.73.0 Beta 76 — Produktstand
 
 MINIK richtet sich an Kinder ungefähr zwischen zwei und sechs Jahren. Die Lernschleife ist kurz, visuell und wiederholbar: Welt wählen, Spiel starten, Mino zuhören oder Bilder betrachten, eine Aufgabe lösen, Stern erhalten, Aquarium erweitern.
 
@@ -17,7 +17,7 @@ Startlandschaft, 25 Lernwelten mit 503 DE/TR-Lernobjekten, Spielkiste mit 23 Spi
 
 ## Sprache und Medien
 
-DE/TR in Navigation, Inhalten, Anweisungen und Rückmeldungen. Die feste natürliche MINIK-Stimme ist der primäre Erzähler, Voice 4 ein kontrollierter Notfall-Fallback. Persönliche Aufnahmen und beliebige Systemstimmen werden nicht automatisch als Ersatz verwendet. Es fehlen noch feste Wortaufnahmen für einen Teil der Lernobjekte; die tatsächliche Abdeckung steht in `VOICE_COVERAGE.md`.
+DE/TR in Navigation, Inhalten, Anweisungen und Rückmeldungen. Neue Familien starten auf Türkisch, während eine ausdrücklich gespeicherte deutsche Wahl erhalten bleibt. Die feste natürliche MINIK-Stimme ist der primäre Erzähler, Voice 4 ein kontrollierter Notfall-Fallback. Persönliche Aufnahmen und beliebige Systemstimmen werden nicht automatisch als Ersatz verwendet. Fehlt bei einem dynamischen Spielwort noch die feste Aufnahme, bleibt die kurze feste Aufgabenansage hörbar. Die tatsächliche Wortabdeckung steht in `VOICE_COVERAGE.md`.
 
 Illustrationen liegen lokal vor. Die Gefühlswelt ergänzt sechs KI-erzeugte, fotorealistische Erwachsene; keine echten Personenidentitäten. Weitere Fotopakete für Alltag/Körper/Berufe sind geplant.
 

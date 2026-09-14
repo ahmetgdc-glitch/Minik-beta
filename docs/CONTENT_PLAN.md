@@ -1,4 +1,4 @@
-# Contentbibliothek — MINIK 1.72.0 Beta 75
+# Contentbibliothek — MINIK 1.73.0 Beta 76
 
 ## Vorhandene Welten
 

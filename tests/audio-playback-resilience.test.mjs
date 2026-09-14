@@ -13,6 +13,21 @@ class MediaAudio {
   }
 }
 
+test("local recordings begin buffering before the decoder fallback deadline", async (t) => {
+  let preload = "";
+  class Audio extends MediaAudio {
+    set preload(value) {
+      preload = value;
+    }
+    get preload() {
+      return preload;
+    }
+  }
+  const { voice } = await voiceRuntime(t, { Audio });
+  assert.equal(await voice.speak("Löwe", "de"), true);
+  assert.equal(preload, "auto");
+});
+
 function audioContext(overrides = {}) {
   return Object.assign(
     {

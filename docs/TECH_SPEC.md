@@ -1,4 +1,4 @@
-# MINIK 1.72.0 Beta 75 — Technische Dokumentation
+# MINIK 1.73.0 Beta 76 — Technische Dokumentation
 
 ## Laufzeit und Module
 
@@ -38,7 +38,7 @@ Die optionale Eltern-PIN ist eine lokale Kindersperre, keine Kontenauthentifizie
 
 ## Audio
 
-`audio/voice.js` verwendet die **feste natürliche MINIK-Stimme als primären Erzähler**. Für bekannte DE/TR-Begriffe, Anweisungen und modular zusammensetzbare Sätze wird zuerst der gebündelte feste Sprachplan aufgelöst und abgespielt. Der Produktionsbuild lokalisiert die 332 bekannten Sprachbausteine nach `assets/voice/`; die Laufzeit lädt und cached sie bedarfsgerecht, statt die gesamte Bibliothek beim Service-Worker-Install vorzuladen.
+`audio/voice.js` verwendet die **feste natürliche MINIK-Stimme als primären Erzähler**. Für bekannte DE/TR-Begriffe, Anweisungen und modular zusammensetzbare Sätze wird zuerst der gebündelte feste Sprachplan aufgelöst und abgespielt. Wenn ein Lernwort noch keinen festen Clip besitzt, liefern die Spielmuster eine kurze feste Aufgabenansage statt einer stillen Bedienfläche. Der Produktionsbuild lokalisiert die 332 bekannten Sprachbausteine nach `assets/voice/`; die Laufzeit lädt und cached sie bedarfsgerecht, statt die gesamte Bibliothek beim Service-Worker-Install vorzuladen.
 
 Apple Voice 4 bleibt als kontrollierter Notfall-Fallback erhalten, wenn für einen Satz kein fester Plan verfügbar ist oder die feste Audiodatei nicht abspielbar ist. Dafür bleiben Safari-Bereitschaft, gecachte Voice-4-Auswahl, Sprachfilter, Start-/Abschluss-Watchdogs und kontrollierter Retry erhalten. Die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet. Beliebige Default-, Browser- oder Roboterstimmen werden nicht als Ersatz gewählt. Vor neuem Sprechen werden laufende Jobs sauber abgebrochen; Audiojobs bleiben referenziert, damit Pause, Navigation, BFCache und Hintergrundwechsel sicher aufräumen können.
 
@@ -46,7 +46,7 @@ Apple Voice 4 bleibt als kontrollierter Notfall-Fallback erhalten, wenn für ein
 
 Seit Beta 71 sind die 334 vorhandenen festen MP3- und 34 älteren WAV-Quelldateien im Repository unter `public/assets/voice/` gespeichert. Die beiden Audio-Buildskripte verwenden diese Dateien zuerst; CI-Cache und externe Downloads bleiben nur für noch nicht gebündelte neue Quellen. `verify-build.mjs` verlangt alle erwarteten Quelldateien und prüft ihre bitgenaue Übernahme in `dist/`. Die separate persönliche Bibliothek wird im normalen Kinderfluss nicht automatisch verwendet.
 
-Audio-Unlock und Download-/Decode-Arbeit sind an den aktuellen Sprachauftrag gebunden. Pause, Navigation und Hintergrundwechsel lösen auch noch wartende Aufträge mit `false` auf. Nach vier Sekunden ohne Start/Ladeabschluss greift ein begrenzter Fallback; ein laufender Clip besitzt zusätzlich einen längenabhängigen Abschluss-Watchdog. Dekodierte Puffer werden nach letzter Nutzung auf höchstens 32 Einträge beziehungsweise 16 MiB begrenzt. Rohdateien können unabhängig davon im Service-Worker-/HTTP-Cache bleiben.
+Audio-Unlock und Download-/Decode-Arbeit sind an den aktuellen Sprachauftrag gebunden. Der lokale HTML-Audioplayer beginnt das Puffern parallel zum optionalen 500-ms-Decoderfenster und kann danach dieselbe Aufnahme direkt starten. Pause, Navigation und Hintergrundwechsel lösen auch noch wartende Aufträge mit `false` auf. Nach vier Sekunden ohne Start/Ladeabschluss greift ein begrenzter Fallback; ein laufender Clip besitzt zusätzlich einen längenabhängigen Abschluss-Watchdog. Dekodierte Puffer werden nach letzter Nutzung auf höchstens 32 Einträge beziehungsweise 16 MiB begrenzt. Rohdateien können unabhängig davon im Service-Worker-/HTTP-Cache bleiben.
 
 332 vorhandene Sprachbausteine bedeuten keine vollständige Vertonung aller Lernobjekte: aktuell besitzen 127 von 503 DE-Items und 128 TR-Items einen festen Wortplan. Details und benötigte Ergänzungen stehen in `VOICE_COVERAGE.md`.
 

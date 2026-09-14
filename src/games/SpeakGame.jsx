@@ -20,9 +20,12 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
 
   function repeat() {
     if (paused || blocked || listening) return;
-    speak(expected, lang, settings);
+    // Keep the task instruction with the word. If a future learning word has
+    // no fixed clip yet, the shared narrator can still play its recorded
+    // Turkish/German instruction instead of becoming silent.
+    speak(prompt, lang, settings);
   }
-  useLesson(onReady, prompt, repeat, [target?.id].filter(Boolean), expected);
+  useLesson(onReady, prompt, repeat, [target?.id].filter(Boolean), prompt);
 
   function stopRecognition() {
     const rec = recognitionRef.current;

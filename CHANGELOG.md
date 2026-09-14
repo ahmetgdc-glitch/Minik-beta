@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.73.0 Beta 76 — Türkischer Einstieg und hörbare Spielansagen
+
+- Neue Familien starten auf Türkisch; eine ausdrücklich gespeicherte deutsche Spracheinstellung bleibt bei Migration und Normalisierung erhalten.
+- Dynamische Spielaufgaben behalten eine feste DE/TR-Aufgabenansage, wenn das konkrete Lernwort noch keinen festen Sprachclip besitzt. Das gilt auch für direkt angetippte Wörter in Entdecken, Memory, Geschichte, Muster und Wiederholung.
+- Der lokale HTML-Audioplayer puffert jedes feste Clip-Asset parallel zum optionalen 500-ms-WebAudio-Decoderfenster. Nach dem Decoder-Timeout startet dieselbe Aufnahme ohne zusätzlichen vollständigen Download-/Decode-Warteweg.
+- Keine persönliche, geklonte oder beliebige Browserstimme wird automatisch aktiviert. Die exakten fehlenden Wortaufnahmen bleiben als externer Sprecher-Blocker in `docs/VOICE_COVERAGE.md` dokumentiert.
+- 547/547 automatisierte Tests decken die Änderungen ab; eine echte iPhone-/iPad-Tonstartmessung bleibt offen.
+
 ## Audio-Hotfix nach Beta 75
 
 - Langsames Laden oder Decodieren im optionalen WebAudio-Pfad blockiert den direkten Audioplayer höchstens 500 ms statt vier Sekunden. Dieser spielt dieselbe feste Aufnahme; die Sprecherwahl bleibt erhalten.

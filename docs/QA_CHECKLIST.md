@@ -1,10 +1,12 @@
 # MINIK Release-QA
 
-Stand: **2026-09-14 · 1.72.0 Beta 75**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
+Stand: **2026-09-14 · 1.73.0 Beta 76**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
 
 ## Automatisiert bestanden
 
-- [x] **538/538 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, persönliche Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **547/547 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] Beta 76: Türkisch ist die Erstsprache für neue Familien; eine ausdrücklich gespeicherte deutsche Auswahl bleibt erhalten.
+- [x] Beta 76: Lokale Sprachclips puffern parallel zum optionalen Decoder; bei fehlender Wortaufnahme bleibt eine feste Aufgabenansage hörbar.
 - [x] Die feste natürliche MINIK-Stimme ist primär; Voice 4 bleibt ein kontrollierter Notfall-Fallback. Beliebige Systemstimmen und automatische persönliche Aufnahmen bleiben ausgeschlossen.
 - [x] 368 vorhandene Quelldateien (334 feste MP3-Clips und 34 ältere WAV-Clips) liegen nun im Repository; der Build übernimmt ihre Bytes unverändert. Die 298 bereits vorhandenen persönlichen Dateien bleiben separat erhalten.
 - [x] `validate-content.mjs`: 25 Lernwelten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets vorhanden.

@@ -1,6 +1,6 @@
-# Feste Wortaufnahmen — MINIK 1.72.0 Beta 75
+# Feste Wortaufnahmen — MINIK 1.73.0 Beta 76
 
-Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-14. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label über `fixedNaturalVoicePlan` einen festen Sprachplan liefert. Anweisungen, zusammengesetzte Hilfesätze und Voice 4 werden nicht als zusätzliche Wortaufnahmen gezählt.
+Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-14. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label einen **exakten festen Wortclip** in der bestehenden Sprachbibliothek besitzt. Kurze Aufgaben-Fallbacks, zusammengesetzte Hilfesätze und Voice 4 werden nicht als Wortaufnahmen gezählt. Beta 76 hält bei einem fehlenden Wortclip eine kurze feste Aufgabenansage hörbar; die Zählung der exakten Wortaufnahmen bleibt deshalb unverändert.
 
 | Lernwelt | Items | DE mit festem Plan | TR mit festem Plan |
 | --- | ---: | ---: | ---: |
@@ -45,7 +45,7 @@ Für **Soziale Schritte** wird die vorhandene feste türkische Nächster-Schritt
 
 Die originale feste DE/TR-Sprecherkonfiguration wiederherstellen oder passende freigegebene Aufnahmen bereitstellen und zuerst türkisch **Gefühle, Kleidung, Zuhause, Menschen, Mein Tag und Alltagsaktionen** ergänzen. Im Repository ist für die vorhandenen generierten festen Clips kein reproduzierbares Sprecherprofil/Generator-Setup dokumentiert. Ein anderer Sprecher oder die persönliche Nutzerstimme wäre keine gleichwertige automatische Ergänzung.
 
-Ein **allein gesprochenes Lernwort** ohne feste Aufnahme kann weiterhin nur den kontrollierten Voice-4-Notfallpfad nutzen und bei nicht verfügbarem Voice 4 stumm bleiben. Zusammengesetzte Spielanweisungen verlieren dagegen seit der Laufzeit-Härtung nicht mehr automatisch ihre bereits vorhandenen festen Satzbausteine. Ein vorhandener Lautsprecherknopf oder eine große Zahl zugeordneter Sprachbausteine beweist daher weiterhin keine vollständige Vertonung aller 503 Lernobjekte.
+Fehlende feste Wortpläne nutzen bei dynamischen Spielaufgaben zuerst eine kurze feste Aufgabenansage und danach ausschließlich den kontrollierten Voice-4-Notfallpfad. Wenn beides nicht verfügbar ist, bleibt das Wort stumm. Ein vorhandener Lautsprecherknopf oder 332 zugeordnete Sprachbausteine beweist daher keine vollständige Vertonung aller 503 Lernobjekte.
 
 ## Vorhandene Quellen gesichert
 

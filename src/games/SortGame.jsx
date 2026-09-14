@@ -64,7 +64,7 @@ export default function SortGame({
     paused,
     interactionBlocked,
     onDrop: place,
-    onSelect: () => speak(target.labels[lang], lang, settings),
+    onSelect: () => speak(`${text} ${target.labels[lang]}.`, lang, settings),
   });
 
   return (

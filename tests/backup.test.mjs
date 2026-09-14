@@ -39,7 +39,7 @@ test("backup normalizes corrupted child progress instead of trusting arbitrary d
   });
   assert.equal(restored.profiles[0].name.length <= 18, true);
   assert.equal(restored.profiles[0].progress.stars, 0);
-  assert.equal(restored.profiles[0].progress.settings.lang, "de");
+  assert.equal(restored.profiles[0].progress.settings.lang, "tr");
 });
 
 

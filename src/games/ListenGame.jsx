@@ -1,6 +1,7 @@
 import React from "react";
 import { Headphones, Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
+import { fixedNaturalVoicePlan } from "../audio/fixedNaturalVoicePlans.js";
 import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useSelection, useLesson } from "./shared.jsx";
 
@@ -27,7 +28,7 @@ export default function ListenGame({
     text,
     () => speak(text, lang, settings),
     [target.id],
-    target.labels[lang],
+    text,
   );
   const controlsDisabled = paused || interactionBlocked();
   const quietOption = options.find((item) => item.id !== target.id);
@@ -39,7 +40,14 @@ export default function ListenGame({
 
   function repeatWord() {
     if (controlsDisabled) return;
-    speak(target.labels[lang], lang, settings);
+    // Keep the short word replay for covered vocabulary. For a new word that
+    // has no fixed clip yet, use the full question so the shared narrator can
+    // still play its recorded task instruction.
+    if (fixedNaturalVoicePlan(target.labels[lang], lang).length) {
+      speak(target.labels[lang], lang, settings);
+      return;
+    }
+    speak(text, lang, settings);
   }
 
   return (
