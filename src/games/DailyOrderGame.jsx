@@ -4,6 +4,7 @@ import { choicesFor, sample } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { orderPairs } from "./dailyOrder.js";
+import { difficultyProfile } from "./difficulty.js";
 
 export default function DailyOrderGame({
   items,
@@ -17,17 +18,19 @@ export default function DailyOrderGame({
   onWrong,
   onSolve,
 }) {
+  const profile = difficultyProfile(difficulty);
   const { prompt, target, options } = useMemo(() => {
     const pair = sample(orderPairs(items), 1)[0] || [items[0], items[1]];
     return {
       prompt: pair[0],
       target: pair[1],
-      options: choicesFor(pair[1], items.filter((x) => x.id !== pair[0].id), difficulty),
+      options: choicesFor(pair[1], items.filter((x) => x.id !== pair[0].id), profile.options),
     };
-  }, [items, difficulty]);
+  }, [items, profile.options]);
 
   const text = lang === "tr" ? `${prompt.labels.tr} sonrasında ne gelir?` : `Was kommt nach ${prompt.labels.de}?`;
   const help = lang === "tr" ? `${prompt.labels.tr} sonrasında ${target.labels.tr} gelir.` : `Nach ${prompt.labels.de} kommt ${target.labels.de}.`;
+  const showAnswerLabels = profile.id !== "hard" || hint >= 1;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
   const controlsDisabled = paused || interactionBlocked();
@@ -43,7 +46,7 @@ export default function DailyOrderGame({
   }
 
   return (
-    <div className="concept-game routine-order-game" aria-disabled={controlsDisabled || undefined}>
+    <div className="concept-game routine-order-game" aria-disabled={controlsDisabled || undefined} data-difficulty={profile.id}>
       <section className="routine-journey-stage" aria-label={lang === "tr" ? "Şimdi olan" : "Was jetzt passiert"}>
         <span className="routine-scene-label">{lang === "tr" ? "Şimdi" : "Jetzt"}</span>
         <button
@@ -71,7 +74,7 @@ export default function DailyOrderGame({
               aria-label={item.labels[lang]}
             >
               <Visual item={item} lang={lang} photos={settings.photos} />
-              <b>{item.labels[lang]}</b>
+              {showAnswerLabels && <b>{item.labels[lang]}</b>}
             </button>
           ))}
         </div>
