@@ -4,6 +4,7 @@ import { fixedNaturalVoicePlan } from "../audio/fixedNaturalVoicePlans.js";
 import Visual from "../components/Visual.jsx";
 import { sample, shuffle } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
+import { difficultyProfile } from "./difficulty.js";
 
 const FALLBACK = {
   de: ["A", "B", "D", "E", "F", "G", "H", "K", "L", "M", "N", "P", "R", "S", "T", "W"],
@@ -33,9 +34,10 @@ export default function InitialLetterGame({
   onWrong,
   onSolve,
 }) {
+  const profile = difficultyProfile(difficulty);
   const [target] = useState(() => sample(items.filter((i) => i.labels?.[lang]), 1)[0]);
   const targetLetter = initialLetter(target?.labels?.[lang], lang);
-  const optionCount = difficulty >= 6 ? 6 : difficulty >= 4 ? 4 : 3;
+  const optionCount = profile.options;
   const options = useMemo(
     () => choices(targetLetter, items, lang, optionCount),
     [targetLetter, items, lang, optionCount],
@@ -85,7 +87,7 @@ export default function InitialLetterGame({
     : `${target.labels.de} noch einmal anhören`;
 
   return (
-    <div className="initial-letter-game" aria-disabled={controlsDisabled || undefined}>
+    <div className="initial-letter-game" aria-disabled={controlsDisabled || undefined} data-difficulty={profile.id}>
       <div
         className="initial-letter-target"
         role="button"
