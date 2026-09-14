@@ -58,6 +58,12 @@ test("guided coloring has dedicated mobile and reduced-motion styling", () => {
   assert.match(main, /\.\/games\/draw-coloring\.css/);
 });
 
+test("mobile drawing controls keep at least a 44px child touch target", () => {
+  assert.match(css, /\.draw-colors button\{width:44px;height:44px;min-width:44px;min-height:44px\}/);
+  assert.match(css, /\.draw-sizes button,\.tool-button\{width:44px;height:44px;min-width:44px;min-height:44px\}/);
+  assert.match(css, /\.draw-toolbar:has\(\.smart-color-toggle\.active\) \.tool-button\{width:48px;height:48px\}/);
+});
+
 test("automatic coloring removes controls that no longer affect region filling", () => {
   assert.ok(css.includes(".draw-colors.automatic{display:none}"));
   assert.match(css, /smart-color-toggle\.active\) \.draw-sizes/);
