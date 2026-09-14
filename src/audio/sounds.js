@@ -248,12 +248,18 @@ function soundForegroundAllowed() {
   return typeof document === "undefined" ||
     (!document.hidden && document.visibilityState !== "hidden");
 }
-export async function playNote(note) {
+export async function prepareSoundPlayback() {
   stopSounds();
   const token = soundSequence;
-  if (speechActive || !soundForegroundAllowed()) return false;
+  if (speechActive || !soundForegroundAllowed()) return null;
   const c = await ensureAudioReady();
-  if (!c || token !== soundSequence || speechActive || !soundForegroundAllowed()) return false;
+  return c && token === soundSequence && !speechActive && soundForegroundAllowed()
+    ? c
+    : null;
+}
+export async function playNote(note) {
+  const c = await prepareSoundPlayback();
+  if (!c) return false;
   tone([261.6, 329.6, 392, 523.2][note % 4], 0, 0.34, "triangle", 0.14);
   return true;
 }

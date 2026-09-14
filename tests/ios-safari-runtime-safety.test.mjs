@@ -14,10 +14,10 @@ test("cold boot never re-enters a crashed active game route", () => {
 
 test("SoundsGame waits for running audio and keeps its learning cue independent from reward SFX", () => {
   const sounds = read("src/games/SoundsGame.jsx");
-  assert.match(sounds, /ensureAudioReady/);
-  assert.match(sounds, /const context = await ensureAudioReady\(\)/);
+  assert.match(sounds, /prepareSoundPlayback/);
+  assert.match(sounds, /const context = await prepareSoundPlayback\(\)/);
   assert.match(sounds, /if \(!context \|\| paused \|\| interactionBlocked\(\)\)/);
-  const readyIndex = sounds.indexOf("const context = await ensureAudioReady()");
+  const readyIndex = sounds.indexOf("const context = await prepareSoundPlayback()");
   const playIndex = sounds.indexOf("const duration = playSound(target.sound");
   assert.ok(readyIndex >= 0 && playIndex > readyIndex, "learning sound must start only after WebAudio is running");
   assert.match(sounds, /playSound\(target\.sound,\s*\{[\s\S]*\.\.\.settings,[\s\S]*sfx: settings\?\.audio !== false,[\s\S]*\}\)/);

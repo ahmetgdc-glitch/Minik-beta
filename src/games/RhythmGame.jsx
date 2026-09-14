@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Play, Music2, Sparkles } from "lucide-react";
-import { playNote, stopSounds, ensureAudioReady } from "../audio/sounds.js";
+import { playNote, stopSounds, prepareSoundPlayback } from "../audio/sounds.js";
 import { stopSpeech } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
 
@@ -32,8 +32,8 @@ export default function RhythmGame({
   async function repeat() {
     if (paused || playing || interactionBlocked()) return;
     stopSpeech();
-    await ensureAudioReady();
-    if (paused || interactionBlocked()) return;
+    const context = await prepareSoundPlayback();
+    if (!context || paused || interactionBlocked()) return;
     setInput([]);
     setCursor(0);
     setPlaying(true);

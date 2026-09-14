@@ -1,5 +1,12 @@
 # Changelog
 
+## Audio-Hotfix nach Beta 78 · Lernklänge nach Audiofreigabe
+
+- Geräusch- und Rhythmusaufträge, die noch auf ein verzögertes Audio-Resume warten, lassen sich jetzt gemeinsam abbrechen.
+- Navigation, Pause, ein neuer Tap, beginnende Mino-Sprache oder eine versteckte Seite verhindern, dass ein altes Lern- oder Vorschaugeräusch später unerwartet startet.
+- Bei schnellen Wiederholungen bleibt nur der jüngste Auftrag gültig; ein frischer Vordergrund-Tap funktioniert anschließend normal.
+- Vier zusätzliche Verhaltenstests erhöhen den Stand auf 591 Tests. Feste DE/TR-Stimme, drei Musikstimmungen und die bestehenden visuellen Lernwelten bleiben unverändert.
+
 ## Audio-Hotfix nach Beta 78 · 14. September 2026
 
 - Rhythmusnoten, die noch auf die Audiofreigabe warten, bleiben nach Pause, Navigation oder beginnender Mino-Sprache abgebrochen.
