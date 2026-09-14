@@ -66,6 +66,12 @@ Stand: **14. September 2026 · 1.72.0 Beta 75**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### Audio-Hotfix: gemeldete Verzögerung nach Antippen
+
+- Nutzer bestätigt passende Stimme, meldet aber langen Tonstart. Gefundener Wartepfad: vollständiger Download/Decode vor HTML-Audio-Fallback konnte vier Sekunden dauern.
+- Der optionale Decode-Pfad erhält nun 500 ms Budget; danach übernimmt der normale Audioplayer dieselbe Aufnahme. Kein Sprecherwechsel. Zwei Verhaltenstests prüfen Deadline und späte Ergebnisse.
+- Das begrenzt die softwareseitige Vorwartezeit, nicht Netzwerk-/Geräte-Latenz oder Voice-4-Ladezeit. Reale iPhone-Messung bleibt erforderlich.
+
 ### Beta 75: CSS passend zum Spiel aufteilen
 
 - 21 spielspezifische Stylesheets wurden aus `main.jsx` in den zentralen Loader `gameStyles.js` verschoben. Gemeinsame Session-, Welt-, Navigations- und Belohnungsstile bleiben im Einstieg.

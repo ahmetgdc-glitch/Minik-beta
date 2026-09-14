@@ -23,6 +23,9 @@ let settle = null,
 const voiceBufferCache = new Map();
 const pendingVoiceLoads = new Set();
 const VOICE_START_TIMEOUT_MS = 4000;
+// Decoding is an optional fast path, not a reason to keep a child waiting.
+// The media player can stream the same recording without decoding it in JS.
+const VOICE_DECODE_BUDGET_MS = 500;
 const VOICE_PLAYBACK_LIMIT_MS = 45000;
 const VOICE_BUFFER_LIMIT_BYTES = 16 * 1024 * 1024;
 const VOICE_BUFFER_LIMIT_COUNT = 32;
@@ -222,7 +225,7 @@ async function decodeVoiceBuffer(url, context, token) {
       resolve(buffer);
     };
     const cancel = () => { controller.abort(); finish(null); };
-    const timer = setTimeout(cancel, VOICE_START_TIMEOUT_MS);
+    const timer = setTimeout(cancel, VOICE_DECODE_BUDGET_MS);
     pendingVoiceLoads.add(cancel);
     void (async () => {
       const response = await fetch(url, { cache: "force-cache", signal: controller.signal });

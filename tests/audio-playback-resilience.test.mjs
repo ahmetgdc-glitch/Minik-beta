@@ -182,6 +182,51 @@ test("decoded voice buffers stay within a bounded memory budget", async (t) => {
   );
 });
 
+for (const slowStage of ["download", "decode"]) {
+  test(`slow ${slowStage} starts the same local recording within the decode budget`, async (t) => {
+    t.mock.timers.enable({ apis: ["setTimeout"] });
+    let release;
+    let sources = 0;
+    let signal;
+    const delayed = new Promise((resolve) => { release = resolve; });
+    const buffer = { duration: 1, length: 44100, numberOfChannels: 1 };
+    const response = { ok: true, arrayBuffer: async () => new ArrayBuffer(16) };
+    const context = audioContext({
+      decodeAudioData: () => slowStage === "decode" ? delayed : Promise.resolve(buffer),
+      createBufferSource() { sources++; throw new Error("late decoder must not play"); },
+    });
+    const window = Object.assign(new EventTarget(), { AudioContext: function () { return context; } });
+    const media = [];
+    class Audio extends MediaAudio {
+      play() {
+        if (!this.src.startsWith("data:")) media.push(this.src);
+        return super.play();
+      }
+    }
+    const fetch = async (_url, options) => {
+      signal = options.signal;
+      return slowStage === "download" ? delayed : response;
+    };
+    const { voice } = await voiceRuntime(t, { Audio, window, fetch });
+    await voice.unlockVoiceAudio();
+    const speaking = voice.speak("Löwe", "de");
+    await nextTurn();
+    t.mock.timers.tick(499);
+    await nextTurn();
+    assert.equal(media.length, 0);
+    t.mock.timers.tick(1);
+    await nextTurn();
+    assert.equal(await speaking, true);
+    assert.equal(signal.aborted, true);
+    assert.equal(media.length, 1);
+    assert.match(media[0], /^https:\/\/minik\.example\/Minik-beta\/assets\/voice\//);
+    release(slowStage === "download" ? response : buffer);
+    await nextTurn();
+    assert.equal(sources, 0, "late work cannot start a second voice");
+    assert.equal(media.length, 1);
+  });
+}
+
 for (const failure of ["decode-stall", "source-stall", "source-error"]) {
   test(`fixed narration survives a WebAudio ${failure} using the same recorded clip`, async (t) => {
     t.mock.timers.enable({ apis: ["setTimeout"] });

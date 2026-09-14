@@ -1,5 +1,10 @@
 # Changelog
 
+## Audio-Hotfix nach Beta 75
+
+- Langsames Laden oder Decodieren im optionalen WebAudio-Pfad blockiert den direkten Audioplayer höchstens 500 ms statt vier Sekunden. Dieser spielt dieselbe feste Aufnahme; die Sprecherwahl bleibt erhalten.
+- Verhaltenstests simulieren langsamen Download und Decoder, prüfen den Start des Ersatzplayers nach 500 ms und verhindern doppelte Wiedergabe durch verspätete Ergebnisse. Die tatsächliche Tonstartzeit auf dem iPhone muss noch gemessen werden.
+
 ## 1.72.0 Beta 75 — Spielgestaltung erst beim Spielen laden
 
 - 21 große, spielspezifische Stylesheets werden passend zum jeweiligen lazy Spielmodul geladen, statt die Startwelt auf jedem App-Start zu belasten.
