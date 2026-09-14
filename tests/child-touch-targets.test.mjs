@@ -36,6 +36,13 @@ test("320px phones keep the star counter inside a 44px utility target", () => {
   assert.match(guards, /\.child-world-shell \.star-pill b[\s\S]*?position: absolute[\s\S]*?max-width: 30px[\s\S]*?text-overflow: ellipsis/);
 });
 
+test("320px bottom navigation keeps Turkish tab labels on one line", () => {
+  assert.match(guards, /@media \(max-width: 340px\)/);
+  assert.match(guards, /\.child-world-shell \.bottom-nav button[\s\S]*?min-width: 0[\s\S]*?padding-inline: 2px/);
+  assert.match(guards, /\.child-world-shell \.bottom-nav button svg[\s\S]*?width: 24px[\s\S]*?height: 24px/);
+  assert.match(guards, /\.child-world-shell \.bottom-nav button span[\s\S]*?font-size: \.75rem[\s\S]*?white-space: nowrap/);
+});
+
 test("atlas chapter navigation never collapses below a child-safe width", () => {
   assert.match(atlas, /className="atlas-chapters"/);
   assert.match(guards, /\.child-world-shell \.atlas-chapters button[\s\S]*?min-width: 44px[\s\S]*?min-height: 44px[\s\S]*?flex-shrink: 0/);
