@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
-// Ordered motor paths: success needs progression along the actual numeral, not arbitrary scribbling.
+import { difficultyProfile } from "./difficulty.js";
 export const tracePaths = {
   1: [[125, 90], [200, 35], [200, 300]],
   2: [[85, 95], [95, 55], [150, 30], [220, 45], [255, 85], [245, 130], [200, 180], [100, 290], [260, 290]],
@@ -19,17 +19,14 @@ export const letterTracePaths = {
 function densify(points) {
   return points.flatMap((p, i) => {
     if (!i) return [p];
-    const prev = points[i - 1],
-      n = Math.ceil(Math.hypot(p[0] - prev[0], p[1] - prev[1]) / 14);
-    return Array.from({ length: n }, (_, j) => [
-      prev[0] + ((p[0] - prev[0]) * (j + 1)) / n,
-      prev[1] + ((p[1] - prev[1]) * (j + 1)) / n,
-    ]);
+    const prev = points[i - 1], n = Math.ceil(Math.hypot(p[0] - prev[0], p[1] - prev[1]) / 14);
+    return Array.from({ length: n }, (_, j) => [prev[0] + ((p[0] - prev[0]) * (j + 1)) / n, prev[1] + ((p[1] - prev[1]) * (j + 1)) / n]);
   });
 }
 export default function TraceGame({
   world,
   round,
+  difficulty,
   lang,
   settings,
   hint,
@@ -38,6 +35,9 @@ export default function TraceGame({
   onReady,
   onSolve,
 }) {
+  const profile = difficultyProfile(difficulty);
+  const tolerance = profile.id === "easy" ? 42 : profile.id === "medium" ? 32 : 24;
+  const guideWidth = profile.id === "easy" ? 56 : profile.id === "medium" ? 48 : 40;
   const isLetter = world?.id === "letters";
   const [target] = useState(() => {
     if (isLetter) {
@@ -47,54 +47,26 @@ export default function TraceGame({
     return 1 + Math.floor(Math.random() * 5);
   });
   const sourcePath = isLetter ? letterTracePaths[target] : tracePaths[target];
-  const points = densify(sourcePath),
-    [index, setIndex] = useState(0),
-    [stroke, setStroke] = useState([]),
-    down = useRef(false),
-    last = useRef(0);
+  const points = densify(sourcePath), [index, setIndex] = useState(0), [stroke, setStroke] = useState([]), down = useRef(false), last = useRef(0);
   const text = isLetter
-    ? lang === "tr"
-      ? `${target} harfini çiz. Yeşil noktadan başla.`
-      : `Fahre den Buchstaben ${target} nach. Starte am grünen Punkt.`
-    : lang === "tr"
-      ? `${target} sayısını çiz. Yeşil noktadan başla.`
-      : `Fahre die ${target} nach. Starte am grünen Punkt.`;
+    ? lang === "tr" ? `${target} harfini çiz. Yeşil noktadan başla.` : `Fahre den Buchstaben ${target} nach. Starte am grünen Punkt.`
+    : lang === "tr" ? `${target} sayısını çiz. Yeşil noktadan başla.` : `Fahre die ${target} nach. Starte am grünen Punkt.`;
   const itemId = isLetter ? `letters.${String(target).toLowerCase()}` : `numbers.${target}`;
-  useLesson(
-    onReady,
-    text,
-    () => speak(text, lang, settings),
-    [itemId],
-    lang === "tr" ? "Yeşil noktayı takip et." : "Folge dem grünen Punkt.",
-  );
+  useLesson(onReady, text, () => speak(text, lang, settings), [itemId], lang === "tr" ? "Yeşil noktayı takip et." : "Folge dem grünen Punkt.");
   const controlsDisabled = paused || interactionBlocked();
 
-  useEffect(() => {
-    if (paused || interactionBlocked()) down.current = false;
-  }, [paused, interactionBlocked]);
+  useEffect(() => { if (paused || interactionBlocked()) down.current = false; }, [paused, interactionBlocked]);
 
   function follow(e) {
-    if (!down.current || paused || interactionBlocked()) {
-      down.current = false;
-      return;
-    }
-    const rect = e.currentTarget.getBoundingClientRect(),
-      x = ((e.clientX - rect.left) * 340) / rect.width,
-      y = ((e.clientY - rect.top) * 340) / rect.height;
+    if (!down.current || paused || interactionBlocked()) { down.current = false; return; }
+    const rect = e.currentTarget.getBoundingClientRect(), x = ((e.clientX - rect.left) * 340) / rect.width, y = ((e.clientY - rect.top) * 340) / rect.height;
     let next = last.current;
-    while (
-      next < points.length &&
-      Math.hypot(x - points[next][0], y - points[next][1]) < 32
-    )
-      next++;
+    while (next < points.length && Math.hypot(x - points[next][0], y - points[next][1]) < tolerance) next++;
     if (next !== last.current) {
       last.current = next;
       setIndex(next);
       setStroke(points.slice(0, next));
-      if (next >= points.length) {
-        down.current = false;
-        onSolve([itemId]);
-      }
+      if (next >= points.length) { down.current = false; onSolve([itemId]); }
     }
   }
 
@@ -114,63 +86,15 @@ export default function TraceGame({
   }
 
   return (
-    <div className="trace-wrap" aria-disabled={controlsDisabled || undefined}>
-      <svg
-        className="trace-board"
-        viewBox="0 0 340 340"
-        role="img"
-        aria-label={text}
-        aria-disabled={controlsDisabled || undefined}
-        style={{ pointerEvents: controlsDisabled ? "none" : undefined }}
-        onPointerDown={start}
-        onPointerMove={follow}
-        onPointerUp={() => (down.current = false)}
-        onPointerCancel={() => (down.current = false)}
-        onLostPointerCapture={() => (down.current = false)}
-      >
-        <polyline
-          points={sourcePath.map((p) => p.join(",")).join(" ")}
-          fill="none"
-          stroke="#d9e7ed"
-          strokeWidth="48"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-        <polyline
-          points={sourcePath.map((p) => p.join(",")).join(" ")}
-          fill="none"
-          stroke="#8bafc4"
-          strokeWidth="3"
-          strokeDasharray="3 12"
-          strokeLinecap="round"
-        />
-        {stroke.length > 1 && (
-          <polyline
-            points={stroke.map((p) => p.join(",")).join(" ")}
-            fill="none"
-            stroke="#40bda1"
-            strokeWidth="35"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-          />
-        )}
-        {index < points.length && (
-          <circle
-            cx={points[index][0]}
-            cy={points[index][1]}
-            r={hint >= 2 ? 20 : 15}
-            fill="#169d74"
-            stroke="white"
-            strokeWidth="4"
-          />
-        )}
+    <div className="trace-wrap" data-difficulty={profile.id} aria-disabled={controlsDisabled || undefined}>
+      <svg className="trace-board" viewBox="0 0 340 340" role="img" aria-label={text} aria-disabled={controlsDisabled || undefined} style={{ pointerEvents: controlsDisabled ? "none" : undefined }} onPointerDown={start} onPointerMove={follow} onPointerUp={() => (down.current = false)} onPointerCancel={() => (down.current = false)} onLostPointerCapture={() => (down.current = false)}>
+        <polyline points={sourcePath.map((p) => p.join(",")).join(" ")} fill="none" stroke="#d9e7ed" strokeWidth={guideWidth} strokeLinejoin="round" strokeLinecap="round" />
+        <polyline points={sourcePath.map((p) => p.join(",")).join(" ")} fill="none" stroke="#8bafc4" strokeWidth="3" strokeDasharray="3 12" strokeLinecap="round" />
+        {stroke.length > 1 && <polyline points={stroke.map((p) => p.join(",")).join(" ")} fill="none" stroke="#40bda1" strokeWidth={Math.max(28, guideWidth - 13)} strokeLinejoin="round" strokeLinecap="round" />}
+        {index < points.length && <circle cx={points[index][0]} cy={points[index][1]} r={hint >= 2 ? 20 : profile.id === "easy" ? 18 : profile.id === "medium" ? 15 : 12} fill="#169d74" stroke="white" strokeWidth="4" />}
       </svg>
-      <div className="trace-progress">
-        <span style={{ width: `${(index / points.length) * 100}%` }} />
-      </div>
-      <button className="secondary" onClick={reset} disabled={controlsDisabled}>
-        {lang === "tr" ? "Baştan başla" : "Noch einmal beginnen"}
-      </button>
+      <div className="trace-progress"><span style={{ width: `${(index / points.length) * 100}%` }} /></div>
+      <button className="secondary" onClick={reset} disabled={controlsDisabled}>{lang === "tr" ? "Baştan başla" : "Noch einmal beginnen"}</button>
     </div>
   );
 }
