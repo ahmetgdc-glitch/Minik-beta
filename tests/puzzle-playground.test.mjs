@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { difficultyProfile } from "../src/games/difficulty.js";
 
 const css = readFileSync(new URL("../src/games/puzzle-playground.css", import.meta.url), "utf8");
 const entry = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
@@ -16,8 +17,13 @@ test("puzzle uses loose pieces and a real destination board instead of tile swap
 });
 
 test("puzzle adapts from four to six to nine pieces", () => {
-  assert.match(game, /difficulty === 6[^\n]+count: 9/);
-  assert.match(game, /difficulty === 4[^\n]+count: 6/);
+  assert.deepEqual(
+    [difficultyProfile(2).puzzlePieces, difficultyProfile(4).puzzlePieces, difficultyProfile(6).puzzlePieces],
+    [4, 6, 9],
+  );
+  assert.match(game, /difficultyProfile\(difficulty\)\.puzzlePieces/);
+  assert.match(game, /count >= 9[^\n]+count: 9/);
+  assert.match(game, /count >= 6[^\n]+count: 6/);
   assert.match(game, /count: 4/);
   assert.match(game, /backgroundSize: `\$\{cols \* 100\}% \$\{rows \* 100\}%`/);
 });
