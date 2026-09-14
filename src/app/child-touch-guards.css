@@ -28,6 +28,16 @@
   .child-world-shell .bottom-nav button {
     min-height: 61px;
   }
+
+  /* Profile maintenance still happens on a touch device. Keep edit/delete
+     controls large enough even though these screens are adult-facing. */
+  .profile-actions button {
+    box-sizing: border-box;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
 }
 
 @media (max-width: 540px) {
