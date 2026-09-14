@@ -1,5 +1,5 @@
 .music-picker { position:relative; flex:0 0 auto; }
-.music-picker-trigger { width:42px; height:42px; display:grid; grid-template-columns:auto auto; place-content:center; gap:2px; border-radius:15px; background:#fff; color:#2b6e7d; box-shadow:0 4px 0 #1d687515,0 8px 20px #234d6412; padding:0 5px; }
+.music-picker-trigger { width:44px; min-width:44px; height:44px; min-height:44px; display:grid; grid-template-columns:auto auto; place-content:center; gap:2px; border-radius:15px; background:#fff; color:#2b6e7d; box-shadow:0 4px 0 #1d687515,0 8px 20px #234d6412; padding:0 5px; }
 .music-picker-trigger > span { font-size:.7rem; line-height:1; transform:translateY(-6px); margin-left:-5px; }
 .music-picker-trigger.is-off { opacity:.68; }
 .music-picker-panel { position:absolute; top:calc(100% + 10px); right:0; z-index:80; width:min(350px,calc(100vw - 24px)); padding:14px; border-radius:24px; background:#fffef9; border:2px solid #fff; box-shadow:0 18px 50px #183f5230; }
@@ -7,7 +7,7 @@
 .music-picker-head > div { display:grid; gap:2px; color:#214e5e; }
 .music-picker-head b { font-size:1rem; }
 .music-picker-head small { color:#6e858d; font-weight:700; }
-.music-picker-head > button { width:38px; height:38px; display:grid; place-items:center; border-radius:50%; background:#edf8fa; color:#2b6e7d; }
+.music-picker-head > button { width:44px; min-width:44px; height:44px; min-height:44px; display:grid; place-items:center; border-radius:50%; background:#edf8fa; color:#2b6e7d; }
 .music-picker-options { display:grid; gap:8px; }
 .music-picker-options > button { width:100%; min-height:64px; display:grid; grid-template-columns:48px 1fr; align-items:center; gap:10px; padding:9px 12px; border-radius:18px; text-align:left; background:#f3fbfb; color:#254f5f; border:2px solid transparent; }
 .music-picker-options > button.selected { background:#e7fbf4; border-color:#79d4c6; box-shadow:0 3px 0 #2c8d7f1f; }
@@ -16,7 +16,7 @@
 .music-picker-options b { font-size:.94rem; }
 .music-picker-options small { color:#6d8189; font-size:.74rem; line-height:1.25; font-weight:700; }
 @media (max-width:760px) {
-  .music-picker-trigger { width:36px; height:40px; border-radius:13px; }
+  .music-picker-trigger { width:44px; height:44px; border-radius:13px; }
   .music-picker-trigger svg { width:18px; }
   .music-picker-panel { position:fixed; top:calc(80px + env(safe-area-inset-top)); right:12px; left:12px; width:auto; max-height:calc(100dvh - 180px - env(safe-area-inset-bottom)); overflow:auto; }
 }
@@ -31,7 +31,7 @@
   .star-pill { padding-inline:8px; }
 }
 @media (max-width:390px) {
-  .music-picker-trigger { width:34px; padding:0 3px; }
+  .music-picker-trigger { width:44px; min-width:44px; padding:0 3px; }
   .music-picker-trigger > span { display:none; }
   .music-picker-panel { right:8px; left:8px; }
   .topbar-actions { gap:3px; }
