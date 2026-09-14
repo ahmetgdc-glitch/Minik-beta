@@ -185,9 +185,50 @@
 }
 
 @media (max-width: 430px) {
-  .routine-next-scenes { grid-template-columns: 1fr; }
-  .routine-next-scene { grid-template-columns: minmax(120px,.8fr) 1fr; min-height: 150px; text-align: left; }
-  .routine-next-scene .visual { width: min(38vw,145px); height: min(38vw,145px); }
+  .routine-journey-stage {
+    min-height: 350px;
+    padding: 16px;
+  }
+
+  .routine-now-scene {
+    min-height: 190px;
+  }
+
+  .routine-now-scene .visual {
+    width: min(54vw, 180px);
+    height: min(54vw, 180px);
+  }
+
+  .routine-next-scenes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .routine-next-scene {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    padding: 10px;
+    border-radius: 22px;
+    text-align: center;
+  }
+
+  .routine-next-scene .visual {
+    width: min(68%, 140px);
+    height: min(68%, 140px);
+  }
+
+  .routine-next-scene b {
+    max-width: 100%;
+    font-size: clamp(.88rem, 4.2vw, 1.05rem);
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+
+  .routine-order-game[data-difficulty="hard"] .routine-next-scene .visual {
+    width: min(82%, 150px);
+    height: min(82%, 150px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
