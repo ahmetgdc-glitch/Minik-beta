@@ -1,4 +1,4 @@
-# MINIK 1.71.0 Beta 74 auf GitHub testen
+# MINIK 1.72.0 Beta 75 auf GitHub testen
 
 Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelten, 503 DE/TR-Inhalten und 23 Spieltypen**.
 

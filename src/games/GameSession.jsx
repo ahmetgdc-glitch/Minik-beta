@@ -31,31 +31,36 @@ import { maxOptionsForAge } from "../learning/age.js";
 import { shouldAcceptWrongTap, shouldBlockGameInteraction } from "./inputGuard.js";
 import { loadCheckpoint, saveCheckpoint, clearCheckpoint, checkpointMatchesProfile, checkpointForGame, checkpointDifficulty } from "./sessionCheckpoint.js";
 import { useModalSafety } from "../app/useModalSafety.js";
+import { gameStyles } from "../gameStyles.js";
+
+const lazyGame = (component, styles) => lazy(() =>
+  Promise.all([component(), styles()]).then(([module]) => module),
+);
 
 const components = {
-  speak: lazy(() => import("./SpeakGame.jsx")),
-  socialsteps: lazy(() => import("./SocialStepsGame.jsx")),
-  different: lazy(() => import("./DifferentGame.jsx")),
-  dailyorder: lazy(() => import("./DailyOrderGame.jsx")),
-  opposites: lazy(() => import("./OppositesGame.jsx")),
-  initialletter: lazy(() => import("./InitialLetterGame.jsx")),
-  story: lazy(() => import("./StoryGame.jsx")),
-  review: lazy(() => import("./ReviewGame.jsx")),
-  explore: lazy(() => import("./ExploreGame.jsx")),
-  draw: lazy(() => import("./DrawGame.jsx")),
-  listen: lazy(() => import("./ListenGame.jsx")),
-  memory: lazy(() => import("./MemoryGame.jsx")),
-  match: lazy(() => import("./MatchGame.jsx")),
-  sort: lazy(() => import("./SortGame.jsx")),
-  count: lazy(() => import("./CountGame.jsx")),
-  sounds: lazy(() => import("./SoundsGame.jsx")),
-  puzzle: lazy(() => import("./PuzzleGame.jsx")),
-  shadow: lazy(() => import("./ShadowGame.jsx")),
-  missing: lazy(() => import("./MissingGame.jsx")),
-  pattern: lazy(() => import("./PatternGame.jsx")),
-  trace: lazy(() => import("./TraceGame.jsx")),
-  lettertrace: lazy(() => import("./TraceGame.jsx")),
-  rhythm: lazy(() => import("./RhythmGame.jsx")),
+  speak: lazyGame(() => import("./SpeakGame.jsx"), gameStyles.speak),
+  socialsteps: lazyGame(() => import("./SocialStepsGame.jsx"), gameStyles.socialsteps),
+  different: lazyGame(() => import("./DifferentGame.jsx"), gameStyles.different),
+  dailyorder: lazyGame(() => import("./DailyOrderGame.jsx"), gameStyles.dailyorder),
+  opposites: lazyGame(() => import("./OppositesGame.jsx"), gameStyles.opposites),
+  initialletter: lazyGame(() => import("./InitialLetterGame.jsx"), gameStyles.initialletter),
+  story: lazyGame(() => import("./StoryGame.jsx"), gameStyles.story),
+  review: lazyGame(() => import("./ReviewGame.jsx"), gameStyles.review),
+  explore: lazyGame(() => import("./ExploreGame.jsx"), gameStyles.explore),
+  draw: lazyGame(() => import("./DrawGame.jsx"), gameStyles.draw),
+  listen: lazyGame(() => import("./ListenGame.jsx"), gameStyles.listen),
+  memory: lazyGame(() => import("./MemoryGame.jsx"), gameStyles.memory),
+  match: lazyGame(() => import("./MatchGame.jsx"), gameStyles.match),
+  sort: lazyGame(() => import("./SortGame.jsx"), gameStyles.sort),
+  count: lazyGame(() => import("./CountGame.jsx"), gameStyles.count),
+  sounds: lazyGame(() => import("./SoundsGame.jsx"), gameStyles.sounds),
+  puzzle: lazyGame(() => import("./PuzzleGame.jsx"), gameStyles.puzzle),
+  shadow: lazyGame(() => import("./ShadowGame.jsx"), gameStyles.shadow),
+  missing: lazyGame(() => import("./MissingGame.jsx"), gameStyles.missing),
+  pattern: lazyGame(() => import("./PatternGame.jsx"), gameStyles.pattern),
+  trace: lazyGame(() => import("./TraceGame.jsx"), gameStyles.trace),
+  lettertrace: lazyGame(() => import("./TraceGame.jsx"), gameStyles.lettertrace),
+  rhythm: lazyGame(() => import("./RhythmGame.jsx"), gameStyles.rhythm),
 };
 
 function GameLoading({ lang }) {

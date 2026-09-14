@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../src/games/puzzle-playground.css", import.meta.url), "utf8");
-const entry = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const entry = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 const game = readFileSync(new URL("../src/games/PuzzleGame.jsx", import.meta.url), "utf8");
 
 test("puzzle uses loose pieces and a real destination board instead of tile swapping", () => {

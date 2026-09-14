@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/CountGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/count-meadow.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("counting uses an immersive Mino meadow", () => {
   assert.match(game, /count-playground count-meadow/);

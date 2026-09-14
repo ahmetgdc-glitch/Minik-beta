@@ -14,15 +14,22 @@ for (const match of html.matchAll(/(?:src|href)="([^"#]+)"/g)) {
 
 const builtJavaScript = (await fs.readdir(path.join(root, "assets")))
   .filter((file) => file.endsWith(".js"));
+const builtStyles = (await fs.readdir(path.join(root, "assets")))
+  .filter((file) => file.endsWith(".css"));
 assert.ok(builtJavaScript.length >= 24, `Expected split game modules, found ${builtJavaScript.length} JavaScript files`);
+assert.ok(builtStyles.length >= 22, `Expected split game styles, found ${builtStyles.length} CSS files`);
 const entryScript = html.match(/<script[^>]+src="\.\/(assets\/index-[^"]+\.js)"/u)?.[1];
+const entryStyle = html.match(/<link[^>]+href="\.\/(assets\/index-[^"]+\.css)"/u)?.[1];
 assert.ok(entryScript, "Production HTML must reference the hashed app entry");
+assert.ok(entryStyle, "Production HTML must reference the hashed app stylesheet");
 const entryBytes = (await fs.stat(path.join(root, entryScript))).size;
+const entryStyleBytes = (await fs.stat(path.join(root, entryStyle))).size;
 assert.ok(entryBytes < 400_000, `Initial JavaScript must stay below 400 KB, found ${entryBytes} bytes`);
+assert.ok(entryStyleBytes < 200_000, `Initial CSS must stay below 200 KB, found ${entryStyleBytes} bytes`);
 const coreFiles = JSON.parse(worker.match(/const CORE=(\[[^;]+\]);/u)?.[1] || "null");
 assert.ok(Array.isArray(coreFiles), "Service worker must publish a readable CORE list");
-for (const file of builtJavaScript) {
-  assert.ok(coreFiles.includes(`./assets/${file}`), `Offline boot cache must include JavaScript chunk: ${file}`);
+for (const file of [...builtJavaScript, ...builtStyles]) {
+  assert.ok(coreFiles.includes(`./assets/${file}`), `Offline boot cache must include code chunk: ${file}`);
 }
 
 const legacyVoiceSourcePattern = /https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/([a-f0-9-]+\.mp3)/g;
@@ -196,6 +203,10 @@ for (const scope of ["https://example.test/", "https://example.test/Minik-beta/"
   for (const script of builtJavaScript) {
     const chunk = await request(scope + `assets/${script}`);
     assert.ok(chunk?.body.byteLength > 100, `Split module must work offline: ${script}`);
+  }
+  for (const stylesheet of builtStyles) {
+    const chunk = await request(scope + `assets/${stylesheet}`);
+    assert.ok(chunk?.body.byteLength > 100, `Split game style must work offline: ${stylesheet}`);
   }
   for (const scene of ["archipelago", "meadow", "playroom"]) {
     const landscape = await request(scope + `assets/scenes/${scene}.webp`);

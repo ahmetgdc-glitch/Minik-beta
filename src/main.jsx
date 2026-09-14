@@ -21,27 +21,6 @@ import "./app/playground.css";
 import "./app/playground-guards.css";
 import "./rewards/immersive-rewards.css";
 import "./rewards/achievement-trail.css";
-import "./games/story-journey.css";
-import "./games/routine-journey.css";
-import "./games/memory-playground.css";
-import "./games/difference-playground.css";
-import "./games/missing-stage.css";
-import "./games/opposites-playground.css";
-import "./games/pattern-path.css";
-import "./games/letter-playground.css";
-import "./games/listen-playground.css";
-import "./games/shadow-playground.css";
-import "./games/sound-stage.css";
-import "./games/review-island.css";
-import "./games/puzzle-playground.css";
-import "./games/social-journey.css";
-import "./games/trace-playground.css";
-import "./games/speak-stage.css";
-import "./games/rhythm-playground.css";
-import "./games/sort-workshop.css";
-import "./games/count-meadow.css";
-import "./games/match-playground.css";
-import "./games/draw-coloring.css";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -1,10 +1,10 @@
 # MINIK Release-QA
 
-Stand: **2026-09-14 · 1.71.0 Beta 74**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
+Stand: **2026-09-14 · 1.72.0 Beta 75**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
 
 ## Automatisiert bestanden
 
-- [x] **537/537 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, persönliche Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **538/538 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, persönliche Stimme, Eltern-Gate, Dialoge und Release-Härtung.
 - [x] Die feste natürliche MINIK-Stimme ist primär; Voice 4 bleibt ein kontrollierter Notfall-Fallback. Beliebige Systemstimmen und automatische persönliche Aufnahmen bleiben ausgeschlossen.
 - [x] 368 vorhandene Quelldateien (334 feste MP3-Clips und 34 ältere WAV-Clips) liegen nun im Repository; der Build übernimmt ihre Bytes unverändert. Die 298 bereits vorhandenen persönlichen Dateien bleiben separat erhalten.
 - [x] `validate-content.mjs`: 25 Lernwelten, 503 DE/TR-Items, 23 Spieltypen und alle lokalen Assets vorhanden.
@@ -22,10 +22,17 @@ Stand: **2026-09-14 · 1.71.0 Beta 74**. „Bestanden“ bedeutet automatisiert 
 
 ## Browser-/Quelllogik abgedeckt
 
+### Beta 75: zusätzlich geprüft
+
+- [x] 21 unterschiedliche spielspezifische Stylesheets werden dynamisch geladen; Nachfahren teilt bewusst denselben Stil für Zahlen und Buchstaben.
+- [x] Komponente und Stil werden gemeinsam erwartet, bevor React die Spielfläche rendert.
+- [x] Initiales Produktions-CSS bleibt unter 200 KB (aktuell 163,35 KB statt 252,56 KB).
+- [x] Jeder erzeugte CSS-Chunk liegt im Offline-Kern und antwortet unter `/`, `/Minik-beta/` und `/Minik-2.0-/`.
+
 ### Beta 74: zusätzlich geprüft
 
 - [x] Alle 23 Spielzuordnungen verwenden dynamische Importe; kein Spielmodul hängt mehr statisch am Einstieg.
-- [x] Produktionsbuild besitzt mindestens 24 JavaScript-Dateien und der initiale Einstieg bleibt unter 400 KB (aktuell 331,60 KB statt 503,09 KB).
+- [x] Produktionsbuild besitzt mindestens 24 JavaScript-Dateien und der initiale Einstieg bleibt unter 400 KB (aktuell 334,18 KB statt 503,09 KB).
 - [x] Jeder erzeugte JavaScript-Chunk liegt im Service-Worker-Kern und antwortet offline unter `/`, `/Minik-beta/` und `/Minik-2.0-/`.
 - [x] Ladeansicht besitzt DE/TR-Statussemantik; reduzierte Bewegung schaltet die Mino-Animation aus.
 

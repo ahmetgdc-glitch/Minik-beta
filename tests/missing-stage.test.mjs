@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/MissingGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/missing-stage.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("missing-object game uses an immersive memory stage instead of the legacy remember row", () => {
   assert.match(game, /missing-stage-game/);

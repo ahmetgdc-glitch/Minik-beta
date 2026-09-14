@@ -1,4 +1,4 @@
-# Contentbibliothek — MINIK 1.71.0 Beta 74
+# Contentbibliothek — MINIK 1.72.0 Beta 75
 
 ## Vorhandene Welten
 
@@ -57,4 +57,4 @@ Bezeichnungen und Motive mit einer DE/TR-sprachigen pädagogischen Fachperson pr
 
 Die 503 Lernobjekte verteilen sich bereits auf 25 Welten. Als nächster Inhaltsschritt fehlen feste DE/TR-Wortaufnahmen und eigene Fotos für konkrete Körperteile, Tätigkeiten und Alltagssituationen. Tiergeräusche benötigen eindeutige eigene/lizenzierte Aufnahmen.
 
-Größere Pakete erst bei Auswahl laden. Die kleinen Spielmodule werden getrennt erzeugt und für vollständiges Erstbesuch-Offline-Spiel vorab gecacht; weitere Illustrationen, Fotos und Sprachclips werden bei Nutzung gecacht.
+Größere Pakete erst bei Auswahl laden. Die kleinen Spielmodule und ihre 21 eigenen Stylesheets werden getrennt erzeugt und für vollständiges Erstbesuch-Offline-Spiel vorab gecacht; weitere Illustrationen, Fotos und Sprachclips werden bei Nutzung gecacht.

@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 const story = fs.readFileSync(new URL("../src/games/StoryGame.jsx", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../src/games/story-journey.css", import.meta.url), "utf8");
-const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = fs.readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("story game uses large picture-book pages instead of small scene cards", () => {
   assert.match(story, /className="story-journey"/);
@@ -62,5 +62,5 @@ test("picture-book scenes remain large and clearly tappable on phones", () => {
 });
 
 test("story journey stylesheet is loaded in production", () => {
-  assert.match(main, /import "\.\/games\/story-journey\.css";/);
+  assert.match(main, /import\("\.\/games\/story-journey\.css"\)/);
 });

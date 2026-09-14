@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../src/games/review-island.css", import.meta.url), "utf8");
-const entry = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const entry = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 const game = readFileSync(new URL("../src/games/ReviewGame.jsx", import.meta.url), "utf8");
 
 test("review rounds use an immersive Mino training island without revealing the target image", () => {

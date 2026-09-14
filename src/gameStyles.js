@@ -1,0 +1,28 @@
+// Keep the large, game-specific presentation layers out of the initial app CSS.
+// GameSession awaits the matching stylesheet together with the lazy component,
+// preventing an unstyled frame while preserving Vite's static import analysis.
+export const gameStyles = {
+  speak: () => import("./games/speak-stage.css"),
+  socialsteps: () => import("./games/social-journey.css"),
+  different: () => import("./games/difference-playground.css"),
+  dailyorder: () => import("./games/routine-journey.css"),
+  opposites: () => import("./games/opposites-playground.css"),
+  initialletter: () => import("./games/letter-playground.css"),
+  story: () => import("./games/story-journey.css"),
+  review: () => import("./games/review-island.css"),
+  explore: () => Promise.resolve(),
+  draw: () => import("./games/draw-coloring.css"),
+  listen: () => import("./games/listen-playground.css"),
+  memory: () => import("./games/memory-playground.css"),
+  match: () => import("./games/match-playground.css"),
+  sort: () => import("./games/sort-workshop.css"),
+  count: () => import("./games/count-meadow.css"),
+  sounds: () => import("./games/sound-stage.css"),
+  puzzle: () => import("./games/puzzle-playground.css"),
+  shadow: () => import("./games/shadow-playground.css"),
+  missing: () => import("./games/missing-stage.css"),
+  pattern: () => import("./games/pattern-path.css"),
+  trace: () => import("./games/trace-playground.css"),
+  lettertrace: () => import("./games/trace-playground.css"),
+  rhythm: () => import("./games/rhythm-playground.css"),
+};

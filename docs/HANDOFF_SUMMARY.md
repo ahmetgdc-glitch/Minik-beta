@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.71.0 Beta 74**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.72.0 Beta 75**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -66,9 +66,16 @@ Stand: **14. September 2026 · 1.71.0 Beta 74**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### Beta 75: CSS passend zum Spiel aufteilen
+
+- 21 spielspezifische Stylesheets wurden aus `main.jsx` in den zentralen Loader `gameStyles.js` verschoben. Gemeinsame Session-, Welt-, Navigations- und Belohnungsstile bleiben im Einstieg.
+- `lazyGame` wartet mit `Promise.all` auf React-Modul und passendes CSS. Damit wird die Spielkomponente erst nach ihrem Stil gerendert; die vorhandene `Suspense`-Ansicht deckt die Ladezeit ab.
+- Das initiale Produktions-CSS fiel von 252,56 KB auf 163,35 KB (gzip 51,17 KB auf 34,94 KB). Der JS-Einstieg bleibt mit 334,18 KB deutlich unter dem 400-KB-Gate.
+- Alle 21 CSS-Chunks und alle JS-Chunks werden weiterhin vorab offline gecacht. 70 Bootdateien bleiben unter dem Safari-Gate von 120; die Sprachbibliotheken werden weiterhin nur bei Nutzung gecacht.
+
 ### Beta 74: schneller Start bei vollständig offline-fähigen Spielen
 
-- `GameSession` lädt die 22 konkreten React-Spielmodule für 23 Spieltypen mit `React.lazy` erst beim Öffnen. Der initiale JS-Einstieg fiel im Produktionsbuild von 503,09 KB auf 331,60 KB.
+- `GameSession` lädt die 22 konkreten React-Spielmodule für 23 Spieltypen mit `React.lazy` erst beim Öffnen. Der initiale JS-Einstieg fiel im Produktionsbuild von 503,09 KB auf rund 334 KB.
 - `Suspense` zeigt währenddessen Mino und einen kurzen DE/TR-Status. Die einzige Bewegung ist über `prefers-reduced-motion` vollständig abschaltbar.
 - Der Service Worker nimmt weiterhin alle erzeugten JS-Chunks in `CORE` auf. `verify-build.mjs` verlangt getrennte Chunks, begrenzt den Einstieg auf unter 400 KB und ruft jeden Chunk offline unter allen drei getesteten Installationspfaden ab.
 - Die Zahl der Bootdateien steigt von 22 auf 49, bleibt deutlich unter dem bestehenden Safari-Limit von 120; große Bilder und sämtliche Sprachbibliotheken werden weiterhin nicht beim Install vorgeladen.

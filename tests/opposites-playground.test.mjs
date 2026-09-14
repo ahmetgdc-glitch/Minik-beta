@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/OppositesGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/opposites-playground.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("opposites uses a visual two-sided playground instead of the legacy concept prompt", () => {
   assert.match(game, /opposites-playground/);

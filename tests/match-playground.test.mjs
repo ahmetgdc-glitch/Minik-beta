@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/MatchGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/match-playground.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("matching uses a large twin playground with progress", () => {
   assert.match(game, /match-playground/);

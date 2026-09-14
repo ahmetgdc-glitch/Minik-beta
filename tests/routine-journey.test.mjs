@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/DailyOrderGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/routine-journey.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("daily order uses an immersive routine scene instead of the legacy answer card grid", () => {
   assert.match(game, /routine-journey-stage/);

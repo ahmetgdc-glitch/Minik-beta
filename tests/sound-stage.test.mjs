@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../src/games/sound-stage.css", import.meta.url), "utf8");
-const entry = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const entry = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 const game = readFileSync(new URL("../src/games/SoundsGame.jsx", import.meta.url), "utf8");
 
 test("real-sound game uses an immersive sound stage", () => {

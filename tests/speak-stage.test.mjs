@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 const css = readFileSync(new URL("../src/games/speak-stage.css", import.meta.url), "utf8");
-const entry = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const entry = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 const game = readFileSync(new URL("../src/games/SpeakGame.jsx", import.meta.url), "utf8");
 
 test("speaking game uses a large visual speech stage", () => {

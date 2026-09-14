@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/SortGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/sort-workshop.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("sorting uses an immersive Mino workshop", () => {
   assert.match(game, /sort-playground sort-workshop/);

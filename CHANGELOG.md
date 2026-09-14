@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.72.0 Beta 75 — Spielgestaltung erst beim Spielen laden
+
+- 21 große, spielspezifische Stylesheets werden passend zum jeweiligen lazy Spielmodul geladen, statt die Startwelt auf jedem App-Start zu belasten.
+- Das initiale CSS sinkt von 252,56 KB auf 163,35 KB (rund 35 Prozent); komprimiert sind es 34,94 KB statt 51,17 KB.
+- `GameSession` wartet gleichzeitig auf Komponente und Stil. Dadurch erscheint kein ungestalteter Zwischenframe; die vorhandene zweisprachige Mino-Ladeansicht bleibt sichtbar.
+- Sämtliche CSS-Chunks bleiben im Service-Worker-Kern. Die Build-Verifikation begrenzt das Start-CSS auf unter 200 KB und prüft jeden Stil offline unter Root- und GitHub-Pages-Unterpfaden.
+
 ## 1.71.0 Beta 74 — Schnellerer Start auf iPhone und iPad
 
 - Die 23 Spieltypen werden nicht mehr gemeinsam mit der Startwelt geladen, sondern erst beim Öffnen des jeweiligen Spiels. Der initiale JavaScript-Build sinkt dadurch von 503,09 KB auf 331,60 KB (rund 34 Prozent).

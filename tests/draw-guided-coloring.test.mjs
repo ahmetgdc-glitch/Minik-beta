@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/DrawGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/draw-coloring.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("drawing offers a spill-proof smart coloring mode for templates", () => {
   assert.match(game, /smartColor/);

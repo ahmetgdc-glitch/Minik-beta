@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/MemoryGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/memory-playground.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("memory renders inside the immersive playground shell", () => {
   assert.match(game, /memory-playground/);

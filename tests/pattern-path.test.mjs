@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 
 const game = readFileSync(new URL("../src/games/PatternGame.jsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("../src/games/pattern-path.css", import.meta.url), "utf8");
-const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const main = readFileSync(new URL("../src/gameStyles.js", import.meta.url), "utf8");
 
 test("pattern game uses a large visual path instead of the legacy row and option grid", () => {
   assert.match(game, /pattern-path-game/);
