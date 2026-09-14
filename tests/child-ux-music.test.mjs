@@ -52,9 +52,10 @@ test("music picker is mounted in the child top bar and audio-off also stops musi
   assert.match(app, /stopMusic\(\);/);
 });
 
-test("narrow iPhones keep the extra music control from crowding the child top bar", () => {
+test("narrow iPhones keep the extra music control from crowding any top bar", () => {
   assert.match(pickerCss, /@media \(max-width:520px\)/);
-  assert.match(pickerCss, /\.child-world-shell \.profile-chip b \{ display:none; \}/);
-  assert.match(pickerCss, /\.child-world-shell \.mobile-brand \.mino \{ display:none; \}/);
+  assert.match(pickerCss, /\.profile-chip b \{ display:none; \}/);
+  assert.match(pickerCss, /\.mobile-brand \.mino \{ display:none; \}/);
+  assert.match(pickerCss, /\.topbar-actions \{ gap:5px; \}/);
   assert.match(pickerCss, /max-height:calc\(100dvh - 180px - env\(safe-area-inset-bottom\)\)/);
 });
