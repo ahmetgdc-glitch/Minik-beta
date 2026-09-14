@@ -289,7 +289,7 @@ export default function App() {
               </button>
             </div>
           )}
-          {!online && (
+          {!online && route === "parents" && (
             <p role="status" className="offline-message">
               {t(
                 "Offline-Modus · MINIK läuft mit den gespeicherten Inhalten weiter.",
@@ -297,7 +297,7 @@ export default function App() {
               )}
             </p>
           )}
-          {getStorageFailure() && (
+          {getStorageFailure() && route === "parents" && (
             <p role="status" className="storage-message">
               {t(
                 "Fortschritt kann auf diesem Gerät gerade nicht gespeichert werden.",
@@ -305,7 +305,7 @@ export default function App() {
               )}
             </p>
           )}
-          {getStorageRecovery() && !getStorageFailure() && (
+          {getStorageRecovery() && !getStorageFailure() && route === "parents" && (
             <p role="status" className="storage-message">
               {t(
                 "MINIK hat den letzten sicheren Lernstand automatisch wiederhergestellt.",
