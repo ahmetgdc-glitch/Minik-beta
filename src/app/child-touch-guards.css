@@ -216,4 +216,42 @@
     letter-spacing: -.02em;
     white-space: nowrap;
   }
+
+  /* Zor discovery can show six progress dots. The default footer is wider
+     than a 320px scene once Mino and the position badge are included. Compact
+     only the decoration while keeping Mino a generous 72px touch target. */
+  .child-world-shell .discovery-footer {
+    left: 8px;
+    right: 8px;
+    gap: 4px;
+  }
+
+  .child-world-shell .scene-mino {
+    width: 72px;
+    min-width: 72px;
+    height: 72px;
+    min-height: 72px;
+    flex-shrink: 0;
+  }
+
+  .child-world-shell .discovery-position {
+    padding: 6px 9px;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+
+  .child-world-shell .discovery-progress {
+    gap: 4px;
+    padding: 8px;
+    flex-shrink: 0;
+  }
+
+  .child-world-shell .discovery-progress i {
+    box-sizing: border-box;
+    width: 14px;
+    min-width: 14px;
+    height: 14px;
+    border-width: 2px;
+    flex: 0 0 14px;
+  }
 }
