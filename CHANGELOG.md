@@ -1,5 +1,12 @@
 # Changelog
 
+## Audio-Hotfix nach Beta 78 · 14. September 2026
+
+- Rhythmusnoten, die noch auf die Audiofreigabe warten, bleiben nach Pause, Navigation oder beginnender Mino-Sprache abgebrochen.
+- Schnelle Taps können keine veralteten Noten nachträglich gleichzeitig starten. Versteckte Seiten starten keine wartende Note; neue Vordergrund-Taps bleiben möglich.
+- Abgebrochene Tonversuche werden im Rhythmusspiel nicht als Kinderantwort gewertet.
+- Sieben neue Verhaltenstests; feste DE/TR-Stimme, Grafik-/Wischkorrekturen und die drei Musikstimmungen bleiben unverändert.
+
 ## 1.75.0 Beta 78 — Offline-Sprache mit korrekten Tonabschnitten
 
 - Gespeicherte Sprachaufnahmen beantworten Media-Teilanfragen jetzt mit dem angeforderten Bytebereich und korrekten HTTP-206-Headern. Zuvor lieferte der Worker unabhängig von der Anfrage die vollständige Datei mit HTTP 200.

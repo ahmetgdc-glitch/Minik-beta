@@ -4,7 +4,9 @@ Stand: **2026-09-14 · 1.75.0 Beta 78**. „Bestanden“ bedeutet automatisiert 
 
 ## Automatisiert bestanden
 
-- [x] **561/561 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Schwierigkeitsprofile, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] Audio-Hotfix nach Beta 78: wartende Rhythmusnoten werden durch Stop, neue Taps, Mino-Sprache und Hintergrundwechsel invalidiert; eine neue gültige Note kann danach weiter starten.
+- [x] Audio-Hotfix nach Beta 78: vollständige npm-Gates auf isoliertem GitHub-Prüfzweig vor Übernahme auf main; keine lokale oder physische Geräteprüfung behauptet.
+- [x] **587/587 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Schwierigkeitsprofile, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
 - [x] Beta 78: Bytebereiche, ungültige Positionen, If-Range, Offline-Wiederholung, paralleles Speichern, Download-Deduplizierung, Quota, Timeout und Retry verhaltensgeprüft.
 - [x] Beta 78: Lokale türkische Aufnahme nutzt CORS; externer Ersatz und anschließende Rückkehr zur lokalen Aufnahme bleiben spielbar.
 - [x] Beta 78: Erzeugter Worker liefert bitgenaue MP3-/WAV-Teilstücke unter drei Installationspfaden; vollständige Aufnahme bleibt offline erhalten.

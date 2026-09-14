@@ -27,6 +27,8 @@ Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei th
 
 ## Entwickeln und prüfen
 
+Der Audio-Hotfix vom 14. September schützt auch Rhythmusnoten, die noch auf die Audiofreigabe warten: Pause, neue Taps oder Mino-Sprache verwerfen den alten Auftrag. Abgebrochene Taps zählen nicht als Antwort. Die feste DE/TR-Stimme und die drei Hintergrundmusik-Stimmungen bleiben erhalten.
+
 Beta 78 repariert Teilanfragen an gespeicherte Sprachaufnahmen: Der Audioplayer kann passende Tonabschnitte auch offline abrufen. Bei einer neuen gestreamten Aufnahme wird die vollständige Datei im Hintergrund gespeichert, ohne den Tonstart auf diesen Zusatzdownload warten zu lassen. Die feste türkische/deutsche Stimme und der kleine PWA-Startkern bleiben erhalten. Echte Tonstartzeiten auf iPhone/iPad müssen weiterhin am Gerät gemessen werden.
 
 Beta 77 verbindet drei gemeinsame Schwierigkeitsprofile mit allen Spielrunden und Minos zentraler Hilfe. Beta 76 startet neue Familien auf Türkisch, puffert lokale Sprachclips schon parallel zum optionalen Decoder und hält die feste Aufgabenansage auch bei einem noch nicht vertonten Lernwort hörbar. Beta 75 lädt zusätzlich 21 spielspezifische Gestaltungsdateien erst mit dem passenden Spiel. Das Start-CSS sinkt von 252,56 KB auf 163,35 KB, ohne ungestalteten Zwischenframe oder Verlust der Offline-Fähigkeit. Beta 74 reduzierte bereits den initialen JavaScript-Build von 503,09 KB auf rund 334 KB; die zweisprachige Mino-Ansicht überbrückt langsames Laden. Die Audio-/PWA-Härtung bleibt erhalten.

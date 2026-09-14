@@ -96,8 +96,9 @@ export default function RhythmGame({
 
   async function tap(i) {
     if (playing || paused || interactionBlocked()) return;
-    await playNote(i);
+    const played = await playNote(i);
     if (paused || interactionBlocked()) return;
+    if (!played) return;
     if (i !== sequence[input.length]) {
       onWrong(["sounds.piano"]);
       setInput([]);

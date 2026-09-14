@@ -69,6 +69,15 @@ Stand: **14. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### Audio-Hotfix nach Beta 78 · 14. September 2026
+
+- Ausgangspunkt: `6602d2f`, 580 Tests und CI/Pages grün; jüngste Grafik-, Wischschutz- und Musikauswahländerungen bleiben erhalten.
+- Im echten Sound-Modul mit verzögertem Audio-Resume reproduziert: `stopSounds()` stoppte bestehende Oszillatoren, aber keine noch wartende Rhythmusnote. Auch Mino-Sprache konnte eine solche Note nicht dauerhaft abbrechen; zwei schnelle Taps starteten später beide.
+- Eine gemeinsame Abbruchgeneration invalidiert jetzt auch wartende Noten. Vor und nach Audio-Resume werden Auftrag, Sichtbarkeit und Minos aktive Sprache geprüft. Abgebrochene Tonversuche werden im Rhythmusspiel nicht mehr als Antwort gewertet; frische Taps funktionieren weiter.
+- Sieben neue Verhaltenstests prüfen Stop, Sprecherpriorität, schnelle Taps, Hintergrundwechsel, neuere Effekte und erneute Wiedergabe.
+- Die lokale Entwicklungsumgebung war in diesem Durchlauf nicht verfügbar. Die vollständigen npm-Test-, Preflight-, Build- und Offline-Gates werden deshalb vor Übernahme auf `main` auf einem isolierten Prüfzweig im selben Repository ausgeführt; dessen Prüfworkflow veröffentlicht keine Pages.
+- Weiterhin extern offen: physische iPhone-/iPad-Touch- und Tonstartprüfung sowie fehlende feste Wortaufnahmen mit dem ursprünglichen Sprecherprofil. Nächster sinnvoller Schritt: die neuen Musik-/Wischbedienelemente in einer echten Browser-/Gerätesitzung prüfen.
+
 ### Beta 78: gespeicherte Sprache mit Media-Teilanfragen
 
 - Aktuelles `main` und CI waren vor der Änderung grün. Im erzeugten Worker reproduziert: `Range: bytes=0-1` erhielt die gesamte Aufnahme mit HTTP 200; gestreamte HTTP-206-Antworten konnten zudem nicht in den Cache geschrieben werden.
