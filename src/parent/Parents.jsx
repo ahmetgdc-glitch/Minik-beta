@@ -3,6 +3,7 @@ import { Lock, Volume2, Settings2, Star, Check, Trash2, Download, Upload, Smartp
 import { worlds, allItems, itemById } from "../data/content.js";
 import { dispatch, setSettings, getStorageFailure, createFamilyBackup, restoreFamilyBackup } from "../progress/store.js";
 import { difficultyFor } from "../progress/model.js";
+import { difficultyLabel } from "../games/difficulty.js";
 import { gameCatalog } from "../games/registry.js";
 import { APP_VERSION_LABEL } from "../app/meta.js";
 import { dueCount } from "../learning/schedule.js";
@@ -312,7 +313,7 @@ export default function Parents({ progress }) {
             </select>
           </label>
           <label>
-            {t("Antwortmöglichkeiten", "Cevap seçenekleri")}
+            {t("Schwierigkeitsstufe", "Zorluk seviyesi")}
             <select
               value={s.options}
               disabled={s.adaptive}
@@ -320,7 +321,7 @@ export default function Parents({ progress }) {
             >
               {[2, 4, 6].map((x) => (
                 <option key={x} value={x}>
-                  {x} {t("Bilder", "resim")}
+                  {difficultyLabel(x, lang)} · {x} {t("Bilder", "resim")}
                 </option>
               ))}
             </select>
@@ -330,8 +331,8 @@ export default function Parents({ progress }) {
           "adaptive",
           t("Schwierigkeit automatisch anpassen", "Zorluk otomatik ayarlansın"),
           t(
-            "Beginnt mit 2 Bildern. Sichere Antworten führen zu 4 oder 6 Bildern.",
-            "2 resimle başlar. Başarıya göre 4 veya 6 resme çıkar.",
+            "Startet leicht und passt Auswahl, Hilfen und Aufgabenlänge bis Mittel oder Schwer an.",
+            "Kolay başlar; seçenekleri, yardım zamanını ve görev uzunluğunu Orta veya Zor seviyeye göre ayarlar.",
           ),
         )}
         {toggle(
@@ -433,7 +434,7 @@ export default function Parents({ progress }) {
                 <th>{t("Lernwelt", "Dünya")}</th>
                 <th>{t("Geübt", "Deneme")}</th>
                 <th>{t("Richtig", "Doğru")}</th>
-                <th>{t("Auswahl", "Seçenek")}</th>
+                <th>{t("Stufe", "Seviye")}</th>
               </tr>
             </thead>
             <tbody>
@@ -448,7 +449,7 @@ export default function Parents({ progress }) {
                         ? `${Math.round((p.correct / p.answers) * 100)}%`
                         : "–"}
                     </td>
-                    <td>{difficultyFor(progress, w.id, lang)}</td>
+                    <td>{difficultyLabel(difficultyFor(progress, w.id, lang), lang)}</td>
                   </tr>
                 );
               })}
