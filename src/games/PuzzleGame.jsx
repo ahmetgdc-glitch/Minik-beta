@@ -50,12 +50,17 @@ export default function PuzzleGame({
     lang === "tr"
       ? "Puzzle parçalarını doğru yere sürükle."
       : "Ziehe die Puzzleteile an die richtige Stelle.";
+  const help = lang === "tr" ? "Küçük resme bak." : "Schau auf das kleine Vorbild.";
   useLesson(
     onReady,
     text,
-    () => speak(text, lang, settings),
+    async () => {
+      const played = await speak(text, lang, settings);
+      if (!played) return speak(help, lang, settings);
+      return played;
+    },
     [target.id],
-    lang === "tr" ? "Küçük resme bak." : "Schau auf das kleine Vorbild.",
+    help,
   );
   const url = assetUrl(
     settings.photos && target.variants.photo
