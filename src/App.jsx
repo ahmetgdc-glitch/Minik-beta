@@ -20,7 +20,7 @@ import { useRoute, navigate } from "./app/router.js";
 import { worlds, worldById } from "./data/content.js";
 import { gameById } from "./games/registry.js";
 import { stopSpeech } from "./audio/voice.js";
-import { stopSounds, stopMusic } from "./audio/sounds.js";
+import { stopSounds } from "./audio/sounds.js";
 import { useGameWakeLock } from "./app/useGameWakeLock.js";
 import { useOnlineStatus } from "./app/useOnlineStatus.js";
 import { applyOfflineUpdate, consumeOfflineReloadRequest, onOfflineUpdateReady } from "./app/offline.js";
@@ -49,10 +49,7 @@ export default function App() {
       : "full";
   }, [lang, progress.settings.reducedMotion]);
   const gameRoute = route === "play" || route === "replay";
-  useAudioPrime(
-    progress.settings.audio || progress.settings.sfx,
-    progress.settings.audio,
-  );
+  useAudioPrime(progress.settings.audio, progress.settings.sfx);
   const online = useOnlineStatus();
   const [updateReady, setUpdateReady] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -214,7 +211,6 @@ export default function App() {
                 setSettings({ audio: !progress.settings.audio });
                 stopSpeech();
                 stopSounds();
-                stopMusic();
               }}
               aria-label={
                 progress.settings.audio
@@ -228,7 +224,7 @@ export default function App() {
                 <VolumeX size={22} />
               )}
             </button>
-            <MusicPicker lang={lang} enabled={progress.settings.audio} />
+            <MusicPicker lang={lang} />
             <button
               className="language-switch"
               onClick={() => {
