@@ -24,7 +24,7 @@ export default function Profiles({progress,onNavigate,onChoose,chooserOnly=false
     <div className="profile-grid">
       {progress.profiles.map(p=>{
         const active=p.id===progress.activeProfileId;
-        return <article className={`profile-card ${active?"active":""}`} key={p.id}>
+        return <article className={`profile-card ${active?"active":""} ${editing===p.id?"editing":""}`} key={p.id}>
           <button className="profile-main" onClick={()=>choose(p.id)}>
             <span className="profile-avatar">{p.avatar}</span>
             <b>{p.name}</b>
