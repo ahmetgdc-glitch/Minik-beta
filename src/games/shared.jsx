@@ -1,16 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import Visual from "../components/Visual.jsx";
 import { choicesFor, sample } from "../utils/random.js";
+import { difficultyProfile } from "./difficulty.js";
 export function useSelection(items, difficulty) {
+  const profile = difficultyProfile(difficulty);
   const [target] = useState(() => sample(items, 1)[0]);
-  const [options] = useState(() => choicesFor(target, items, difficulty));
+  const [options] = useState(() => choicesFor(target, items, profile.options));
   return { target, options };
 }
 export function useLesson(onReady, text, repeat, ids, help) {
-  // Keep the callback itself stable for GameSession, while forwarding to the
-  // newest render. This matters when voice/audio settings change in another
-  // tab: the replay button must never keep speaking with stale settings just
-  // because the visible lesson text stayed the same.
   const repeatRef = useRef(repeat);
   repeatRef.current = repeat;
   useEffect(() => {
@@ -20,7 +18,7 @@ export function useLesson(onReady, text, repeat, ids, help) {
       ids,
       help,
     });
-  }, [text, onReady]);
+  }, [text, help, ids?.join("|"), onReady]);
 }
 export function OptionGrid({
   options,
