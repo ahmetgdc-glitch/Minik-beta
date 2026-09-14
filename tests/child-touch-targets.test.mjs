@@ -80,6 +80,14 @@ test("profile edit and delete controls stay touch-safe on narrow devices", () =>
   assert.match(guards, /\.profile-actions button[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
 });
 
+test("mobile profile editor expands before compact avatar and age controls can shrink", () => {
+  assert.match(profiles, /editing===p\.id\?"editing":""/);
+  assert.match(profiles, /className="avatar-picker compact"/);
+  assert.match(profiles, /className="age-picker compact"/);
+  assert.match(guards, /\.profile-card\.editing[\s\S]*?grid-column: 1 \/ -1/);
+  assert.match(guards, /\.profile-card\.editing \.avatar-picker\.compact button,[\s\S]*?\.profile-card\.editing \.age-picker\.compact button[\s\S]*?min-width: 44px[\s\S]*?min-height: 44px/);
+});
+
 test("profile creation modal remains reachable above iPhone keyboard and safe areas", () => {
   assert.match(profiles, /className="profile-modal-backdrop"/);
   assert.match(profiles, /className="profile-modal"/);
