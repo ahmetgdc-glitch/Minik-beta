@@ -157,3 +157,43 @@
     display: none;
   }
 }
+
+@media (max-width: 340px) {
+  /* At the supported 320px minimum width, a normal icon + multi-digit star
+     count is the last topbar item that can push the row over its budget. Keep
+     the full 44px tap target and turn the count into a small visual badge. */
+  .child-world-shell .star-pill {
+    position: relative;
+    box-sizing: border-box;
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+    padding: 0;
+    gap: 0;
+  }
+
+  .child-world-shell .star-pill svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .child-world-shell .star-pill b {
+    position: absolute;
+    right: 1px;
+    bottom: 3px;
+    min-width: 17px;
+    max-width: 30px;
+    padding: 1px 2px;
+    border-radius: 999px;
+    background: #fff9e5;
+    font-size: .58rem;
+    line-height: 1.1;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
