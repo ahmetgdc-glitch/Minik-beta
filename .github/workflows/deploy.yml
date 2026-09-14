@@ -132,12 +132,15 @@ jobs:
           page="${PAGE_URL}?minik_sha=${GITHUB_SHA}"
           html="$(curl --fail --silent --show-error --location --retry 8 --retry-all-errors --retry-delay 5 "$page")"
 
-          if echo "$html" | grep -qE "src=['\"]/src/main\.jsx"; then
+          if grep -qE "src=['\"]/src/main\.jsx" <<<"$html"; then
             echo "::error::Published Pages site is serving the Vite source entry instead of the production build."
             exit 1
           fi
 
-          asset="$(echo "$html" | grep -oE 'src="\./assets/index-[^"]+\.js"' | head -n 1 | sed -E 's/^src="\.\///; s/"$//')"
+          asset=""
+          if [[ "$html" =~ src="\./(assets/index-[^"]+\.js)" ]]; then
+            asset="${BASH_REMATCH[1]}"
+          fi
           if [ -z "$asset" ]; then
             echo "::error::Published Pages HTML does not reference the expected hashed Vite JavaScript entry."
             exit 1
