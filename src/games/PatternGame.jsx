@@ -3,6 +3,7 @@ import { sample, choicesFor } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
+import { difficultyProfile } from "./difficulty.js";
 export default function PatternGame({
   items,
   difficulty,
@@ -15,19 +16,17 @@ export default function PatternGame({
   onWrong,
   onSolve,
 }) {
-  const [base] = useState(() => sample(items, difficulty === 6 ? 3 : 2));
-  const sequence =
-    difficulty === 4
-      ? [0, 0, 1, 0, 0]
-      : difficulty === 6
-        ? [0, 1, 2, 0, 1]
-        : [0, 1, 0, 1, 0];
-  const target = base[difficulty === 6 ? 2 : 1],
-    [options] = useState(() => choicesFor(target, items, difficulty));
+  const profile = difficultyProfile(difficulty);
+  const [base] = useState(() => sample(items, profile.id === "hard" ? 3 : 2));
+  const sequence = profile.id === "medium"
+    ? [0, 0, 1, 0, 0]
+    : profile.id === "hard"
+      ? [0, 1, 2, 0, 1]
+      : [0, 1, 0, 1];
+  const target = base[profile.id === "hard" ? 2 : profile.id === "medium" ? 1 : 0];
+  const [options] = useState(() => choicesFor(target, items, profile.options));
   const text = lang === "tr" ? "Sırada hangi resim var?" : "Welches Bild kommt als Nächstes?";
-  const help = lang === "tr"
-    ? "Hangi resmin tekrar ettiğine bak."
-    : "Schau, welches Bild sich wiederholt.";
+  const help = lang === "tr" ? "Hangi resmin tekrar ettiğine bak." : "Schau, welches Bild sich wiederholt.";
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
   const controlsDisabled = paused || interactionBlocked();
 
@@ -42,7 +41,7 @@ export default function PatternGame({
   }
 
   return (
-    <div className="pattern-path-game" aria-disabled={controlsDisabled || undefined}>
+    <div className="pattern-path-game" data-difficulty={profile.id} aria-disabled={controlsDisabled || undefined}>
       <section className="pattern-path-stage" aria-label={text}>
         <span className="pattern-path-label">{lang === "tr" ? "Deseni takip et" : "Folge dem Muster"}</span>
         <div className="pattern-path-sequence">
@@ -75,13 +74,7 @@ export default function PatternGame({
         <h2 className="pattern-choice-title">{lang === "tr" ? "Sonraki durak hangisi?" : "Was kommt auf den nächsten Platz?"}</h2>
         <div className="pattern-choice-grid">
           {options.map((x) => (
-            <button
-              key={x.id}
-              className={`pattern-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`}
-              onClick={() => pick(x)}
-              disabled={controlsDisabled}
-              aria-label={x.labels[lang]}
-            >
+            <button key={x.id} className={`pattern-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`} onClick={() => pick(x)} disabled={controlsDisabled} aria-label={x.labels[lang]}>
               <Visual item={x} lang={lang} photos={settings.photos} />
               <b>{x.labels[lang]}</b>
             </button>
