@@ -33,6 +33,17 @@ test("every game session applies the selected level to Mino help and error suppo
   assert.match(session, /difficultyRules\.demoAfterMistakes/u);
 });
 
+test("parent controls describe the real difficulty levels instead of only image counts", () => {
+  const parents = read("src/parent/Parents.jsx");
+  assert.match(parents, /import \{ difficultyLabel \} from "\.\.\/games\/difficulty\.js"/u);
+  assert.match(parents, /t\("Schwierigkeitsstufe", "Zorluk seviyesi"\)/u);
+  assert.match(parents, /difficultyLabel\(x, lang\)/u);
+  assert.match(parents, /t\("Stufe", "Seviye"\)/u);
+  assert.match(parents, /difficultyLabel\(difficultyFor\(progress, w\.id, lang\), lang\)/u);
+  assert.match(parents, /"Kolay başlar; seçenekleri, yardım zamanını ve görev uzunluğunu Orta veya Zor seviyeye göre ayarlar\."/u);
+  assert.doesNotMatch(parents, /t\("Antwortmöglichkeiten", "Cevap seçenekleri"\)/u);
+});
+
 test("core game families consume shared difficulty profiles instead of isolated magic numbers", () => {
   for (const path of [
     "src/games/shared.jsx",
