@@ -50,15 +50,13 @@ export default function PuzzleGame({
     lang === "tr"
       ? "Puzzle parçalarını doğru yere sürükle."
       : "Ziehe die Puzzleteile an die richtige Stelle.";
+  // The complete drag instruction has no matching fixed clip yet. Speak the
+  // already-recorded visual hint immediately instead of waiting on Voice 4.
   const help = lang === "tr" ? "Küçük resme bak." : "Schau auf das kleine Vorbild.";
   useLesson(
     onReady,
     text,
-    async () => {
-      const played = await speak(text, lang, settings);
-      if (!played) return speak(help, lang, settings);
-      return played;
-    },
+    () => speak(help, lang, settings),
     [target.id],
     help,
   );
