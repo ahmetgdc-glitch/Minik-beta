@@ -47,9 +47,13 @@ test("voice remains more important than background music", () => {
   assert.match(sounds, /setTargetAtTime\(level/);
 });
 
-test("music picker is mounted in the child top bar and audio-off also stops music", () => {
-  assert.match(app, /<MusicPicker lang=\{lang\} enabled=\{progress\.settings\.audio\} \/>/);
-  assert.match(app, /stopMusic\(\);/);
+test("music picker is independent from the narration toggle", () => {
+  assert.match(app, /<MusicPicker lang=\{lang\} \/>/);
+  assert.doesNotMatch(app, /<MusicPicker[^>]*enabled=/);
+  assert.doesNotMatch(picker, /if \(!enabled\) stopMusic\(\)/);
+  assert.match(picker, /if \(selected !== "off"\) startMusic\(\{ style: selected \}\)/);
+  const voiceToggle = app.match(/className="audio-toggle"[\s\S]*?<\/button>/)?.[0] || "";
+  assert.doesNotMatch(voiceToggle, /stopMusic\(\)/);
 });
 
 test("narrow iPhones keep the extra music control from crowding any top bar", () => {
