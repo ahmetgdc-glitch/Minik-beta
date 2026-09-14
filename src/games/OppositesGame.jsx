@@ -4,6 +4,7 @@ import { choicesFor, sample } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { pairsForWorld } from "./opposites.js";
+import { difficultyProfile } from "./difficulty.js";
 
 export default function OppositesGame({
   items,
@@ -17,6 +18,7 @@ export default function OppositesGame({
   onWrong,
   onSolve,
 }) {
+  const profile = difficultyProfile(difficulty);
   const pairs = useMemo(() => pairsForWorld(items[0]?.category, items), [items]);
   const { prompt, target, options } = useMemo(() => {
     const pair = sample(pairs, 1)[0] || [items[0], items[1]];
@@ -26,12 +28,13 @@ export default function OppositesGame({
     return {
       prompt,
       target,
-      options: choicesFor(target, items.filter((x) => x.id !== prompt.id), difficulty),
+      options: choicesFor(target, items.filter((x) => x.id !== prompt.id), profile.options),
     };
-  }, [pairs, items, difficulty]);
+  }, [pairs, items, profile.options]);
 
   const text = lang === "tr" ? `${prompt.labels.tr}. Bunun zıttı hangisi?` : `${prompt.labels.de}. Was ist das Gegenteil?`;
   const help = lang === "tr" ? `${target.labels.tr}, ${prompt.labels.tr} kelimesinin zıttıdır.` : `${target.labels.de} ist das Gegenteil von ${prompt.labels.de}.`;
+  const showAnswerLabels = profile.id !== "hard" || hint >= 1;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
   const controlsDisabled = paused || interactionBlocked();
@@ -47,7 +50,7 @@ export default function OppositesGame({
   }
 
   return (
-    <div className="opposites-playground" aria-disabled={controlsDisabled || undefined}>
+    <div className="opposites-playground" aria-disabled={controlsDisabled || undefined} data-difficulty={profile.id}>
       <section className="opposites-stage" aria-label={prompt.labels[lang]}>
         <button
           type="button"
@@ -77,7 +80,7 @@ export default function OppositesGame({
               aria-label={item.labels[lang]}
             >
               <Visual item={item} lang={lang} photos={settings.photos} />
-              <b>{item.labels[lang]}</b>
+              {showAnswerLabels && <b>{item.labels[lang]}</b>}
             </button>
           ))}
         </div>
