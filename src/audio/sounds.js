@@ -1,3 +1,5 @@
+import { musicStyleProfile } from "./musicProfiles.js";
+
 let context = null,
   nodes = [],
   activeTimers = [],
@@ -50,31 +52,42 @@ export function stopSounds() {
   activeTimers = [];
 }
 /** Start a very quiet, deterministic child-friendly loop after a real gesture. */
-export function startMusic({ enabled = true } = {}) {
-  if (!enabled || musicPaused || musicTimer || !unlockAudio()) return false;
+export function startMusic({ enabled = true, style } = {}) {
+  const profile = musicStyleProfile(style);
+  if (!enabled || profile.id === "off" || musicPaused || musicTimer || !unlockAudio()) return false;
   if (!musicBus) {
     musicBus = context.createGain();
     musicBus.gain.value = speechActive ? 0.18 : 1;
     musicBus.connect(context.destination);
   }
-  const notes = [261.6, 329.6, 392, 329.6, 293.7, 349.2, 440, 349.2];
   let index = 0;
   const playBar = () => {
     if (!context || context.state !== "running") return;
-    const frequency = notes[index++ % notes.length];
+    const frequency = profile.notes[index++ % profile.notes.length];
     const o = context.createOscillator(), g = context.createGain();
     const now = context.currentTime;
-    o.type = "triangle";
+    o.type = profile.type;
     o.frequency.setValueAtTime(frequency, now);
     g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(0.018, now + 0.04);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
-    o.connect(g); g.connect(musicBus); o.start(now); o.stop(now + 0.66);
+    g.gain.exponentialRampToValueAtTime(profile.volume, now + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration);
+    o.connect(g); g.connect(musicBus); o.start(now); o.stop(now + profile.duration + 0.04);
     musicNodes.push(o);
+    if (profile.octaveEcho > 0) {
+      const echo = context.createOscillator(), echoGain = context.createGain();
+      echo.type = "sine";
+      echo.frequency.setValueAtTime(frequency * 2, now);
+      echoGain.gain.setValueAtTime(0.0001, now);
+      echoGain.gain.exponentialRampToValueAtTime(profile.volume * profile.octaveEcho, now + 0.08);
+      echoGain.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration * 0.82);
+      echo.connect(echoGain); echoGain.connect(musicBus); echo.start(now); echo.stop(now + profile.duration);
+      musicNodes.push(echo);
+      echo.onended = () => { echo.disconnect(); echoGain.disconnect(); musicNodes = musicNodes.filter((n) => n !== echo); };
+    }
     o.onended = () => { o.disconnect(); g.disconnect(); musicNodes = musicNodes.filter((n) => n !== o); };
   };
   playBar();
-  musicTimer = window.setInterval(playBar, 720);
+  musicTimer = window.setInterval(playBar, profile.intervalMs);
   return true;
 }
 export function stopMusic() {
