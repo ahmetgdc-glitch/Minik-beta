@@ -4,7 +4,7 @@ import { MUSIC_STYLES, MUSIC_OFF, getMusicStyle, setMusicStyle } from "../audio/
 import { startMusic, stopMusic, unlockAudio } from "../audio/sounds.js";
 import "./music-picker.css";
 
-export default function MusicPicker({ lang = "tr", enabled = true }) {
+export default function MusicPicker({ lang = "tr" }) {
   const [open, setOpen] = useState(false);
   const [style, setStyle] = useState(() => getMusicStyle());
   const root = useRef(null);
@@ -20,16 +20,12 @@ export default function MusicPicker({ lang = "tr", enabled = true }) {
     return () => document.removeEventListener("pointerdown", close);
   }, [open]);
 
-  useEffect(() => {
-    if (!enabled) stopMusic();
-  }, [enabled]);
-
   function choose(next) {
     unlockAudio();
     const selected = setMusicStyle(next);
     setStyle(selected);
     stopMusic();
-    if (enabled && selected !== "off") startMusic({ enabled: true, style: selected });
+    if (selected !== "off") startMusic({ style: selected });
     setOpen(false);
   }
 
