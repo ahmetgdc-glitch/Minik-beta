@@ -196,4 +196,24 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  /* Four tabs share roughly 70px each at 320px. Keep Turkish labels such as
+     “Ana sayfa” on one line without shrinking the button itself. */
+  .child-world-shell .bottom-nav button {
+    min-width: 0;
+    padding-inline: 2px;
+  }
+
+  .child-world-shell .bottom-nav button svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .child-world-shell .bottom-nav button span {
+    max-width: 100%;
+    font-size: .75rem;
+    line-height: 1;
+    letter-spacing: -.02em;
+    white-space: nowrap;
+  }
 }
