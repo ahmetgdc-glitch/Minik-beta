@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const picker = fs.readFileSync(new URL("../src/components/MusicPicker.jsx", import.meta.url), "utf8");
+const pickerCss = fs.readFileSync(new URL("../src/components/music-picker.css", import.meta.url), "utf8");
 const profiles = fs.readFileSync(new URL("../src/audio/musicProfiles.js", import.meta.url), "utf8");
 const sounds = fs.readFileSync(new URL("../src/audio/sounds.js", import.meta.url), "utf8");
 
@@ -17,7 +18,7 @@ test("MINIK offers at least three distinct selectable music moods plus music off
     assert.match(profiles, new RegExp(`id: "${id}"`));
   }
   assert.match(profiles, /id: "off"/);
-  const styleCount = [...profiles.matchAll(/\nid: "(?:playful|calm|adventure)"/g)].length;
+  const styleCount = [...profiles.matchAll(/\s+id: "(?:playful|calm|adventure)"/g)].length;
   assert.ok(styleCount >= 3);
   assert.match(picker, /MUSIC_STYLES/);
   assert.match(picker, /MUSIC_OFF/);
@@ -41,4 +42,11 @@ test("voice remains more important than background music", () => {
 test("music picker is mounted in the child top bar and audio-off also stops music", () => {
   assert.match(app, /<MusicPicker lang=\{lang\} enabled=\{progress\.settings\.audio\} \/>/);
   assert.match(app, /stopMusic\(\);/);
+});
+
+test("narrow iPhones keep the extra music control from crowding the child top bar", () => {
+  assert.match(pickerCss, /@media \(max-width:520px\)/);
+  assert.match(pickerCss, /\.child-world-shell \.profile-chip b \{ display:none; \}/);
+  assert.match(pickerCss, /\.child-world-shell \.mobile-brand \.mino \{ display:none; \}/);
+  assert.match(pickerCss, /max-height:calc\(100dvh - 180px - env\(safe-area-inset-bottom\)\)/);
 });
