@@ -64,6 +64,7 @@ test("music trigger and dialog close control keep child-safe hit targets", () =>
 
 test("narrow iPhones keep the extra music control from crowding any top bar", () => {
   assert.match(pickerCss, /@media \(max-width:520px\)/);
+  assert.match(pickerCss, /\.profile-chip \{ min-width:44px; width:44px; min-height:44px;/u);
   assert.match(pickerCss, /\.profile-chip b \{ display:none; \}/);
   assert.match(pickerCss, /\.mobile-brand \.mino \{ display:none; \}/);
   assert.match(pickerCss, /\.topbar-actions \{ gap:5px; \}/);
