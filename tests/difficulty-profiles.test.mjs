@@ -31,7 +31,21 @@ test("core game families consume shared difficulty profiles instead of isolated 
     "src/games/PatternGame.jsx",
     "src/games/MissingGame.jsx",
     "src/games/TraceGame.jsx",
+    "src/games/StoryGame.jsx",
+    "src/games/DailyOrderGame.jsx",
+    "src/games/SocialStepsGame.jsx",
   ]) {
     assert.match(read(path), /difficultyProfile/iu, `${path} must use shared difficulty profiles`);
   }
+});
+
+test("hard story and routine games increase memory load and reduce visual text cues", () => {
+  const story = read("src/games/StoryGame.jsx");
+  const daily = read("src/games/DailyOrderGame.jsx");
+  const social = read("src/games/SocialStepsGame.jsx");
+  assert.match(story, /profile\.id === "easy" \? 2 : profile\.id === "medium" \? 3 : 4/);
+  assert.match(story, /choicesFor\(target, items, profile\.options\)/);
+  assert.match(daily, /profile\.id !== "hard" \|\| hint >= 1/);
+  assert.match(social, /profile\.id !== "hard" \|\| hint >= 1/);
+  assert.match(social, /profile\.id === "easy" \|\| hint >= 1/);
 });
