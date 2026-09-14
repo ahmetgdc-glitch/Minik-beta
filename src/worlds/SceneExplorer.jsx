@@ -5,6 +5,8 @@ import { sceneForWorld } from "./scenes.js";
 import { useScenePager } from "./useScenePager.js";
 import WorldScenery from "./WorldScenery.jsx";
 
+const DRAG_THRESHOLD_PX = 14;
+
 export default function SceneExplorer({
   items,
   worldId,
@@ -63,7 +65,24 @@ export default function SceneExplorer({
                 disabled={controlsDisabled}
                 onPointerDown={(event) => {
                   if (controlsDisabled) return;
-                  pointer.current = { x: event.clientX, y: event.clientY };
+                  pointer.current = {
+                    x: event.clientX,
+                    y: event.clientY,
+                    pointerId: event.pointerId,
+                    dragged: false,
+                  };
+                }}
+                onPointerMove={(event) => {
+                  const start = pointer.current;
+                  if (!start || start.pointerId !== event.pointerId || start.dragged) return;
+                  if (
+                    Math.hypot(
+                      event.clientX - start.x,
+                      event.clientY - start.y,
+                    ) > DRAG_THRESHOLD_PX
+                  ) {
+                    start.dragged = true;
+                  }
                 }}
                 onPointerCancel={() => {
                   pointer.current = null;
@@ -75,10 +94,11 @@ export default function SceneExplorer({
                   if (
                     event.detail > 0 &&
                     start &&
-                    Math.hypot(
-                      event.clientX - start.x,
-                      event.clientY - start.y,
-                    ) > 14
+                    (start.dragged ||
+                      Math.hypot(
+                        event.clientX - start.x,
+                        event.clientY - start.y,
+                      ) > DRAG_THRESHOLD_PX)
                   )
                     return;
                   onDiscover(item);
