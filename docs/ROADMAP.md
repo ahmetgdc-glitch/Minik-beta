@@ -75,6 +75,7 @@ Stand **1.75.0 Beta 78 · 2026-09-14**. Beta 66 bleibt das technische Fundament.
 - [x] Modal-Fokus, Scroll-Lock und Touch-Sicherheit
 - [x] Crash-Recovery DE/TR
 - [x] GitHub-Pages-Workflow mit Node 22, Tests, Preflight, Build und Verifikation
+- [x] Öffentlichen Pages-Smoke-Test gegen kurzzeitig alte HTML-Antworten nach erfolgreichem Deployment härten
 - [x] Fertiger Produktionsbuild wird im Workflow zusätzlich als `minik-production-build` archiviert
 - [x] Release-Preflight verhindert veraltete Versionen/Dokumentation/Deployment-Metadaten
 

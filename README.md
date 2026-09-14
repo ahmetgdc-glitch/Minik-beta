@@ -27,6 +27,8 @@ Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei th
 
 ## Entwickeln und prüfen
 
+Der veröffentlichte Pages-Smoke-Test berücksichtigt jetzt eine kurze Umschaltzeit nach dem Deployment: Er fragt den Produktions-Einstieg mit getrennten Cache-Schlüsseln erneut ab, bevor er eine alte Quellseite als Fehler meldet. Das Zeitfenster ist auf zwölf Versuche begrenzt; fehlende Hash-Assets bleiben ein harter Releasefehler.
+
 Wartende Lernklänge im Geräusche- und Rhythmusspiel besitzen nun denselben Abbruchschutz wie einzelne Rhythmusnoten. Verlässt das Kind die Runde, beginnt Mino zu sprechen, wird die App verborgen oder folgt ein neuer Tap, kann ein alter Auftrag nach der iPhone-Audiofreigabe nicht mehr verspätet erklingen. Bei schneller Wiederholung gilt nur der jüngste Auftrag.
 
 Der Audio-Hotfix vom 14. September schützt auch Rhythmusnoten, die noch auf die Audiofreigabe warten: Pause, neue Taps oder Mino-Sprache verwerfen den alten Auftrag. Abgebrochene Taps zählen nicht als Antwort. Die feste DE/TR-Stimme und die drei Hintergrundmusik-Stimmungen bleiben erhalten.

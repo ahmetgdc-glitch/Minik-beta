@@ -1,5 +1,11 @@
 # Changelog
 
+## CI-Hotfix nach Beta 78 · Pages-Propagation
+
+- Der öffentliche Smoke-Test wartet jetzt begrenzt auf den Produktions-Einstieg, wenn GitHub Pages direkt nach erfolgreichem Deployment noch kurz die gültige alte Quellseite ausliefert.
+- Zwölf cache-getrennte Versuche im Abstand von fünf Sekunden überbrücken ausschließlich die Veröffentlichungslatenz. Nach dem Fenster bleiben Quell-HTML, fehlender Hash-Einstieg und fehlende Kernassets harte Fehler.
+- Ein zusätzlicher Workflow-Vertragstest erhöht den Stand auf 592 Tests; Build-, Deployment- und Offline-Anforderungen bleiben unverändert.
+
 ## Audio-Hotfix nach Beta 78 · Lernklänge nach Audiofreigabe
 
 - Geräusch- und Rhythmusaufträge, die noch auf ein verzögertes Audio-Resume warten, lassen sich jetzt gemeinsam abbrechen.
