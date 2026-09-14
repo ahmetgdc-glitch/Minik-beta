@@ -5,6 +5,7 @@ import fs from "node:fs";
 const guards = fs.readFileSync(new URL("../src/app/child-touch-guards.css", import.meta.url), "utf8");
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
+const profiles = fs.readFileSync(new URL("../src/parent/Profiles.jsx", import.meta.url), "utf8");
 
 test("narrow-phone child controls keep at least a 44px hit target", () => {
   assert.match(guards, /@media \(max-width: 760px\)/);
@@ -15,6 +16,11 @@ test("narrow-phone child controls keep at least a 44px hit target", () => {
   assert.match(guards, /min-width: 44px/);
   assert.match(guards, /height: 44px/);
   assert.match(guards, /min-height: 44px/);
+});
+
+test("profile edit and delete controls stay touch-safe on narrow devices", () => {
+  assert.match(profiles, /className="profile-actions"/);
+  assert.match(guards, /\.profile-actions button[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
 });
 
 test("in-game utility controls do not shrink below 44px on narrow iPhones", () => {
