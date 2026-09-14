@@ -20,7 +20,7 @@ import { useRoute, navigate } from "./app/router.js";
 import { worlds, worldById } from "./data/content.js";
 import { gameById } from "./games/registry.js";
 import { stopSpeech } from "./audio/voice.js";
-import { stopSounds } from "./audio/sounds.js";
+import { stopSounds, stopMusic } from "./audio/sounds.js";
 import { useGameWakeLock } from "./app/useGameWakeLock.js";
 import { useOnlineStatus } from "./app/useOnlineStatus.js";
 import { applyOfflineUpdate, consumeOfflineReloadRequest, onOfflineUpdateReady } from "./app/offline.js";
@@ -28,6 +28,7 @@ import { useAudioPrime } from "./app/useAudioPrime.js";
 import { gameFitsAge } from "./learning/age.js";
 import { Mino } from "./components/Visual.jsx";
 import StarBar from "./components/StarBar.jsx";
+import MusicPicker from "./components/MusicPicker.jsx";
 import WorldAtlas from "./worlds/WorldAtlas.jsx";
 import Home from "./app/Home.jsx";
 import GamesScreen from "./app/GamesScreen.jsx";
@@ -213,6 +214,7 @@ export default function App() {
                 setSettings({ audio: !progress.settings.audio });
                 stopSpeech();
                 stopSounds();
+                stopMusic();
               }}
               aria-label={
                 progress.settings.audio
@@ -226,6 +228,7 @@ export default function App() {
                 <VolumeX size={22} />
               )}
             </button>
+            <MusicPicker lang={lang} enabled={progress.settings.audio} />
             <button
               className="language-switch"
               onClick={() => {
@@ -260,7 +263,7 @@ export default function App() {
           </div>
         </header>
         <main className="main-content">
-          {updateReady && !playing && (
+          {updateReady && !playing && route === "parents" && (
             <div role="status" className="update-message">
               <span>
                 {t(
