@@ -1,10 +1,12 @@
 # MINIK Release-QA
 
-Stand: **2026-09-14 · 1.73.0 Beta 76**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
+Stand: **2026-09-14 · 1.74.0 Beta 77**. „Bestanden“ bedeutet automatisiert beziehungsweise in der verfügbaren Quell-/Node-Umgebung geprüft. Die CI-Reparatur auf `5412e0a` wurde zusätzlich in GitHub Actions vollständig erfolgreich veröffentlicht (Run `34787323737`). Physische Gerätetests werden separat ausgewiesen.
 
 ## Automatisiert bestanden
 
-- [x] **547/547 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] **551/551 Node-Tests**: Inhalte, Lernlogik, Altersfreigaben, Schwierigkeitsprofile, Profile, Speicher, Backup, Sessions, Checkpoints, PWA, feste DE/TR-Stimme, Eltern-Gate, Dialoge und Release-Härtung.
+- [x] Beta 77: Drei gemeinsame Profile skalieren Antwortmenge, Paare, Puzzleteile, Zählraum, Sequenzen, Merkbelastung und Zeichengenauigkeit.
+- [x] Beta 77: Minos automatische Hilfe und Demonstration folgen in allen 23 Spielen der gewählten beziehungsweise adaptiven Stufe.
 - [x] Beta 76: Türkisch ist die Erstsprache für neue Familien; eine ausdrücklich gespeicherte deutsche Auswahl bleibt erhalten.
 - [x] Beta 76: Lokale Sprachclips puffern parallel zum optionalen Decoder; bei fehlender Wortaufnahme bleibt eine feste Aufgabenansage hörbar.
 - [x] Die feste natürliche MINIK-Stimme ist primär; Voice 4 bleibt ein kontrollierter Notfall-Fallback. Beliebige Systemstimmen und automatische persönliche Aufnahmen bleiben ausgeschlossen.

@@ -32,6 +32,7 @@ import { shouldAcceptWrongTap, shouldBlockGameInteraction } from "./inputGuard.j
 import { loadCheckpoint, saveCheckpoint, clearCheckpoint, checkpointMatchesProfile, checkpointForGame, checkpointDifficulty } from "./sessionCheckpoint.js";
 import { useModalSafety } from "../app/useModalSafety.js";
 import { gameStyles } from "../gameStyles.js";
+import { difficultyProfile } from "./difficulty.js";
 
 const lazyGame = (component, styles) => lazy(() =>
   Promise.all([component(), styles()]).then(([module]) => module),
@@ -100,6 +101,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         maxOptionsForAge(progress.activeProfile?.ageGroup),
       ),
     ),
+    difficultyRules = difficultyProfile(difficulty),
     [round, setRound] = useState(() => Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1))),
     [phase, setPhase] = useState(() => checkpoint?.phase || "active"),
     [paused, setPaused] = useState(false),
@@ -341,7 +343,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     const move = setTimeout(() => {
       if (!stillInteractive()) return;
       setHint((h) => Math.max(h, 1));
-    }, 6000);
+    }, difficultyRules.hintDelayMs);
     const help = setTimeout(() => {
       if (!stillInteractive()) return;
       setMessage(
@@ -355,12 +357,12 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
           lang,
           settings,
         );
-    }, 11000);
+    }, difficultyRules.helpDelayMs);
     return () => {
       clearTimeout(move);
       clearTimeout(help);
     };
-  }, [round, activity, paused, phase, settings.autoHelp, settings.audio, lang]);
+  }, [round, activity, paused, phase, settings.autoHelp, settings.audio, lang, difficultyRules]);
 
   function record(correct, ids, meta = {}) {
     const id = `${sessionId}:${round}:${++attempt.current}`;
@@ -396,11 +398,11 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       const text = lang === "tr" ? "Bir daha bak." : "Schau noch einmal.";
       setMessage(text);
       speak(text, lang, settings);
-      if (mistakes.current >= 2) {
+      if (mistakes.current >= difficultyRules.hintAfterMistakes) {
         setHint(2);
         hintRef.current = 2;
       }
-      if (mistakes.current >= 3) {
+      if (mistakes.current >= difficultyRules.demoAfterMistakes) {
         locked.current = true;
         setHint(3);
         hintRef.current = 3;
@@ -414,7 +416,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
         speak(lesson.help || lesson.text, lang, settings);
       }
     },
-    [round, paused, lesson, lang, settings],
+    [round, paused, lesson, lang, settings, difficultyRules],
   );
 
   const solve = useCallback(

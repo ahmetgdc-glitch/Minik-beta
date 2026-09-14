@@ -1,6 +1,6 @@
-# MINIK 1.73.0 Beta 76 auf GitHub testen
+# MINIK 1.74.0 Beta 77 auf GitHub testen
 
-Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelten, 503 DE/TR-Inhalten und 23 Spieltypen**. Neue Familien starten auf Türkisch; gespeicherte Sprachwahl bleibt erhalten. Bei noch fehlenden Wortaufnahmen bleibt die feste Aufgabenansage hörbar.
+Dieses Paket enthält den vollständigen Quellstand von MINIK mit **25 Lernwelten, 503 DE/TR-Inhalten und 23 Spieltypen**. Drei gemeinsame Schwierigkeitsstufen verändern Aufgaben und Minos Hilfe im ganzen Spiel. Neue Familien starten auf Türkisch; gespeicherte Sprachwahl bleibt erhalten. Bei noch fehlenden Wortaufnahmen bleibt die feste Aufgabenansage hörbar.
 
 ## Empfohlen: über GitHub Actions veröffentlichen
 

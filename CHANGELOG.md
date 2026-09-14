@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.74.0 Beta 77 — Drei echte Schwierigkeitsstufen im ganzen Spiel
+
+- Ein gemeinsames Profil steuert jetzt leichte, mittlere und schwere Runden statt verteilter Einzelwerte.
+- Memory wächst von zwei auf vier auf sechs Paare, Puzzle von vier auf sechs auf neun Teile und Zählen von 1–5 über 1–10 bis 1–20.
+- Muster, „Was fehlt?“ und Nachfahren erhöhen schrittweise Sequenzlänge, Merkbelastung und benötigte Zeichengenauigkeit; Antwortspiele bleiben bei zwei, vier oder sechs Auswahlmöglichkeiten.
+- Minos Hilfesystem gilt für alle 23 Spiele: Auf „Kolay“ kommen Hinweis und Demonstration früher, auf „Orta“ ausgewogen und auf „Zor“ erst nach mehr Zeit beziehungsweise Fehlversuchen.
+- Die Altersgrenze bleibt vorrangig: Ein Profil für 2–3 Jahre kann auch über alte Links oder gespeicherte Sitzungen nicht auf eine zu schwere Stufe gelangen.
+- 551/551 automatisierte Tests, Preflight, Build und Offline-Verifikation decken den integrierten Stand ab.
+
 ## 1.73.0 Beta 76 — Türkischer Einstieg und hörbare Spielansagen
 
 - Neue Familien starten auf Türkisch; eine ausdrücklich gespeicherte deutsche Spracheinstellung bleibt bei Migration und Normalisierung erhalten.

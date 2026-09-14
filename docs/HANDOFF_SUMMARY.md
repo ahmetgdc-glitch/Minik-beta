@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.73.0 Beta 76**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **14. September 2026 · 1.74.0 Beta 77**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -68,6 +68,13 @@ Stand: **14. September 2026 · 1.73.0 Beta 76**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Beta 77: drei Stufen im ganzen Spiel
+
+- `games/difficulty.js` ist die gemeinsame Quelle für Kolay/Leicht (2), Orta/Mittel (4) und Zor/Schwer (6). Alterslimit, adaptive Auswahl und gespeicherte Sessionstufe bleiben vorgeschaltet.
+- Memory, Puzzle, Zählen, Muster, „Was fehlt?“ und Nachfahren verändern ihre eigentliche Mechanik; Auswahlspiele verwenden weiterhin zwei, vier oder sechs eindeutige Antworten.
+- `GameSession` verwendet dasselbe Profil nun für alle 23 Spiele: automatische visuelle Hilfe, gesprochene Mino-Hilfe, Hinweis nach Fehlversuchen und Demonstrationsschwelle unterscheiden sich pro Stufe.
+- 551 automatisierte Tests sind grün; reale Kinderbeobachtung und iPhone-/iPad-Touch bleiben Geräteprüfungen.
 
 ### Beta 76: türkischer Einstieg und hörbare Spielansagen
 

@@ -1,6 +1,6 @@
 # MINIK · Lernen mit Mino
 
-**1.73.0 Beta 76 · 14. September 2026**
+**1.74.0 Beta 77 · 14. September 2026**
 
 MINIK ist eine deutsch-türkische Lernwelt für kleine Kinder. Die App verbindet große visuelle Spielflächen mit Mino als Helfer, getrennten Kinderprofilen, adaptivem Lernen, Belohnungen und einem offline-fähigen PWA-Kern.
 
@@ -20,13 +20,14 @@ Jede der 25 Welten besitzt jetzt zusätzlich eine eigene Kombination aus drei th
 - Elternbereich mit Rechengate/optionaler 4-stelliger PIN, Wochenstatistik, schwierigen Begriffen, Sitzungen, Backup/Restore und Einstellungen.
 - **Die feste natürliche MINIK-Stimme ist der primäre DE/TR-Erzähler.** Die 332 gebündelten Sprachclips werden beim Produktionsbuild lokalisiert und im Betrieb bedarfsgerecht offline gecacht. Apple Voice 4 bleibt ausschließlich ein kontrollierter Notfall-Fallback, wenn ein passender fester Clip nicht verfügbar oder nicht abspielbar ist. Die persönliche/gekloonte Nutzerstimme wird im normalen Kinderfluss nicht automatisch verwendet. Beliebige Browser-/Roboterstimmen werden nicht als Ersatz akzeptiert.
 - **Türkisch ist die Sprache für neue Familien.** Bestehende ausdrückliche Sprachwahl bleibt erhalten. Wenn für ein neues Lernwort noch keine feste Wortaufnahme existiert, spielt Mino trotzdem eine passende feste Aufgabenansage; das Wort bleibt sichtbar und kann nachgereicht werden.
+- **Drei echte Spielstufen:** Kolay/Leicht, Orta/Mittel und Zor/Schwer verändern Antwortmenge, Memory-Paare, Puzzlegröße, Zählraum, Musterlänge, Merkbelastung, Zeichengenauigkeit sowie Minos Hilfezeit und Fehlerschwellen. Die Altersgrenze schützt kleine Kinder weiterhin zentral.
 - Safari-/iOS-Härtung für Audio, synchrone Interaktionssperren, Pausen, BFCache, App-Unterbrechungen, Session-Checkpoints und PWA-Updates.
 - Robuste lokale Familien-Persistenz mit Recovery-Snapshot und atomar gespeicherter aktiver Profilauswahl.
 - Offline-Service-Worker, installierbare PWA und GitHub-Pages-Deployment.
 
 ## Entwickeln und prüfen
 
-Beta 76 startet neue Familien auf Türkisch, puffert lokale Sprachclips schon parallel zum optionalen Decoder und hält die feste Aufgabenansage auch bei einem noch nicht vertonten Lernwort hörbar. Beta 75 lädt zusätzlich 21 spielspezifische Gestaltungsdateien erst mit dem passenden Spiel. Das Start-CSS sinkt von 252,56 KB auf 163,35 KB, ohne ungestalteten Zwischenframe oder Verlust der Offline-Fähigkeit. Beta 74 reduzierte bereits den initialen JavaScript-Build von 503,09 KB auf rund 334 KB; die zweisprachige Mino-Ansicht überbrückt langsames Laden. Die Audio-/PWA-Härtung bleibt erhalten.
+Beta 77 verbindet drei gemeinsame Schwierigkeitsprofile mit allen Spielrunden und Minos zentraler Hilfe. Beta 76 startet neue Familien auf Türkisch, puffert lokale Sprachclips schon parallel zum optionalen Decoder und hält die feste Aufgabenansage auch bei einem noch nicht vertonten Lernwort hörbar. Beta 75 lädt zusätzlich 21 spielspezifische Gestaltungsdateien erst mit dem passenden Spiel. Das Start-CSS sinkt von 252,56 KB auf 163,35 KB, ohne ungestalteten Zwischenframe oder Verlust der Offline-Fähigkeit. Beta 74 reduzierte bereits den initialen JavaScript-Build von 503,09 KB auf rund 334 KB; die zweisprachige Mino-Ansicht überbrückt langsames Laden. Die Audio-/PWA-Härtung bleibt erhalten.
 
 Beta 76 startet neue Familien auf Türkisch und hält auch bei noch offenen Wortaufnahmen die Spielansage hörbar. Die vorhandenen 332 Sprachbausteine decken noch nicht alle 503 Lernobjekte ab. Die genaue [Sprachabdeckung](docs/VOICE_COVERAGE.md) trennt vorhandene Aufnahmen von den noch offenen Wortaufnahmen.
 

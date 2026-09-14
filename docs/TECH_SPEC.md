@@ -1,4 +1,4 @@
-# MINIK 1.73.0 Beta 76 — Technische Dokumentation
+# MINIK 1.74.0 Beta 77 — Technische Dokumentation
 
 ## Laufzeit und Module
 
@@ -22,7 +22,7 @@ Während Pause, Erfolg oder Demonstration ist der Spielbereich inert. Pointer- u
 
 Eine richtige Aufgabe gibt einen Stern und zehn XP. Fehler geben keine Sterne und ziehen vorhandene Sterne nicht ab. „Sicher gelernt“ erfordert drei selbstständige Lösungen pro Sprache/Begriff. Geholfene oder nach Fehlern gelöste Aufgaben zählen als Übung.
 
-Adaptive Schwierigkeit betrachtet die letzten zwölf Versuche pro Welt und Sprache. Unter acht Versuchen beginnt sie mit zwei Optionen; ab 75 % unabhängigen Treffern vier, ab zwölf Versuchen und 90 % sechs. Fehler werden auch berücksichtigt, wenn danach keine Lösung erfolgt. Die Schwierigkeit wird für die nächste Session gewählt, damit eine laufende Aufgabe nicht umspringt. Spiele übersetzen die Stufe in Antwortzahl, Paarzahl, Zahlenraum oder Sequenzlänge.
+Adaptive Schwierigkeit betrachtet die letzten zwölf Versuche pro Welt und Sprache. Unter acht Versuchen beginnt sie mit zwei Optionen; ab 75 % unabhängigen Treffern vier, ab zwölf Versuchen und 90 % sechs. Fehler werden auch berücksichtigt, wenn danach keine Lösung erfolgt. Die Schwierigkeit wird für die nächste Session gewählt, damit eine laufende Aufgabe nicht umspringt. Spiele übersetzen die Stufe in Antwortzahl, Paarzahl, Puzzleteile, Zahlenraum, Sequenzlänge, Merkbelastung oder Zeichengenauigkeit. `GameSession` verwendet dasselbe unveränderliche Profil für alle 23 Spiele auch bei Minos visueller/gesprochener Hilfe sowie den Hinweis- und Demonstrationsschwellen nach Fehlern.
 
 Jede Antwort wird sofort gespeichert. Sitzungszusammenfassungen werden beim Abschluss oder Verlassen innerhalb der App gespeichert. Nach hartem Schließen/Neuladen beginnt ein neues Spielbrett; bereits verdiente Sterne und Antworten bleiben erhalten, eine unvollständige Sitzungszusammenfassung ist dabei nicht garantiert. Kein geräteübergreifender Sync.
 

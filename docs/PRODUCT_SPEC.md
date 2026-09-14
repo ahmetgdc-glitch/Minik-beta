@@ -1,6 +1,8 @@
-# MINIK 1.73.0 Beta 76 — Produktstand
+# MINIK 1.74.0 Beta 77 — Produktstand
 
 MINIK richtet sich an Kinder ungefähr zwischen zwei und sechs Jahren. Die Lernschleife ist kurz, visuell und wiederholbar: Welt wählen, Spiel starten, Mino zuhören oder Bilder betrachten, eine Aufgabe lösen, Stern erhalten, Aquarium erweitern.
+
+Kolay/Leicht, Orta/Mittel und Zor/Schwer verändern nicht nur die Zahl sichtbarer Antworten, sondern auch Memory-Umfang, Puzzlegröße, Zählraum, Sequenzen, Merkbelastung, Zeichengenauigkeit und Minos Hilfeschwellen. Die Stufe bleibt während einer Runde stabil und wird durch die Altersgrenze des aktiven Kinderprofils begrenzt.
 
 ## Navigation
 

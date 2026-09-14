@@ -1,4 +1,4 @@
-# Feste Wortaufnahmen — MINIK 1.73.0 Beta 76
+# Feste Wortaufnahmen — MINIK 1.74.0 Beta 77
 
 Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-14. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label einen **exakten festen Wortclip** in der bestehenden Sprachbibliothek besitzt. Kurze Aufgaben-Fallbacks, zusammengesetzte Hilfesätze und Voice 4 werden nicht als Wortaufnahmen gezählt. Beta 76 hält bei einem fehlenden Wortclip eine kurze feste Aufgabenansage hörbar; die Zählung der exakten Wortaufnahmen bleibt deshalb unverändert.
 

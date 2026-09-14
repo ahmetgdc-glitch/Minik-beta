@@ -19,7 +19,18 @@ test("difficulty profiles expose three distinct child-facing stages", () => {
   assert.ok(easy.puzzlePieces < medium.puzzlePieces && medium.puzzlePieces < hard.puzzlePieces);
   assert.ok(easy.countMax < medium.countMax && medium.countMax < hard.countMax);
   assert.ok(easy.hintDelayMs < medium.hintDelayMs && medium.hintDelayMs < hard.hintDelayMs);
+  assert.ok(easy.helpDelayMs < medium.helpDelayMs && medium.helpDelayMs < hard.helpDelayMs);
+  assert.ok(easy.hintAfterMistakes < medium.hintAfterMistakes && medium.hintAfterMistakes < hard.hintAfterMistakes);
   assert.ok(easy.demoAfterMistakes < medium.demoAfterMistakes && medium.demoAfterMistakes < hard.demoAfterMistakes);
+});
+
+test("every game session applies the selected level to Mino help and error support", () => {
+  const session = read("src/games/GameSession.jsx");
+  assert.match(session, /difficultyRules = difficultyProfile\(difficulty\)/u);
+  assert.match(session, /difficultyRules\.hintDelayMs/u);
+  assert.match(session, /difficultyRules\.helpDelayMs/u);
+  assert.match(session, /difficultyRules\.hintAfterMistakes/u);
+  assert.match(session, /difficultyRules\.demoAfterMistakes/u);
 });
 
 test("core game families consume shared difficulty profiles instead of isolated magic numbers", () => {

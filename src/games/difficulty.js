@@ -14,6 +14,7 @@ export const DIFFICULTY_LEVELS = Object.freeze({
     wrongRevealMs: 1100,
     hintDelayMs: 4500,
     helpDelayMs: 8000,
+    hintAfterMistakes: 1,
     demoAfterMistakes: 2,
   }),
   4: Object.freeze({
@@ -31,6 +32,7 @@ export const DIFFICULTY_LEVELS = Object.freeze({
     wrongRevealMs: 850,
     hintDelayMs: 6500,
     helpDelayMs: 11000,
+    hintAfterMistakes: 2,
     demoAfterMistakes: 3,
   }),
   6: Object.freeze({
@@ -48,6 +50,7 @@ export const DIFFICULTY_LEVELS = Object.freeze({
     wrongRevealMs: 650,
     hintDelayMs: 9000,
     helpDelayMs: 15000,
+    hintAfterMistakes: 3,
     demoAfterMistakes: 4,
   }),
 });
