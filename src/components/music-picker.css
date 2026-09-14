@@ -30,6 +30,10 @@
   .profile-chip b { display:none; }
   .star-pill { padding-inline:8px; }
 }
+@media (max-width:440px) {
+  .child-world-shell .mobile-brand { display:none; }
+  .child-world-shell .topbar-actions { width:100%; min-width:0; justify-content:space-between; }
+}
 @media (max-width:390px) {
   .music-picker-trigger { width:44px; min-width:44px; padding:0 3px; }
   .music-picker-trigger > span { display:none; }
