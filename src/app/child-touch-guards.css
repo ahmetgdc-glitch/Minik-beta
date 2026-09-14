@@ -1,0 +1,45 @@
+/* Child UX guardrails: compact artwork may shrink, touch targets may not.
+   Keep primary navigation and utility controls large enough for imprecise taps. */
+@media (max-width: 760px) {
+  .child-world-shell .audio-toggle,
+  .child-world-shell .music-picker-trigger,
+  .child-world-shell .profile-chip,
+  .child-world-shell .mobile-parents {
+    box-sizing: border-box;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 0 0 44px;
+  }
+
+  .child-world-shell .language-switch,
+  .child-world-shell .star-pill {
+    min-height: 44px;
+  }
+
+  .child-world-shell .scene-round-button {
+    width: 48px;
+    min-width: 48px;
+    height: 48px;
+    min-height: 48px;
+  }
+
+  .child-world-shell .bottom-nav button {
+    min-height: 61px;
+  }
+}
+
+@media (max-width: 390px) {
+  .child-world-shell .topbar-actions {
+    gap: 3px;
+  }
+
+  /* Preserve the 44px hit box while keeping visual chrome compact. */
+  .child-world-shell .audio-toggle svg,
+  .child-world-shell .music-picker-trigger svg,
+  .child-world-shell .mobile-parents svg {
+    width: 18px;
+    height: 18px;
+  }
+}
