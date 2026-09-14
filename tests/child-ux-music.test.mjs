@@ -70,3 +70,9 @@ test("narrow iPhones keep the extra music control from crowding any top bar", ()
   assert.match(pickerCss, /\.topbar-actions \{ gap:5px; \}/);
   assert.match(pickerCss, /max-height:calc\(100dvh - 180px - env\(safe-area-inset-bottom\)\)/);
 });
+
+test("430px child surfaces reserve the entire topbar row for functional controls", () => {
+  assert.match(pickerCss, /@media \(max-width:440px\)/);
+  assert.match(pickerCss, /@media \(max-width:440px\)[\s\S]*?\.child-world-shell \.mobile-brand \{ display:none; \}/);
+  assert.match(pickerCss, /@media \(max-width:440px\)[\s\S]*?\.child-world-shell \.topbar-actions \{ width:100%; min-width:0; justify-content:space-between; \}/);
+});
