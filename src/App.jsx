@@ -20,7 +20,6 @@ import { useRoute, navigate } from "./app/router.js";
 import { worlds, worldById } from "./data/content.js";
 import { gameById } from "./games/registry.js";
 import { stopSpeech } from "./audio/voice.js";
-import { stopSounds } from "./audio/sounds.js";
 import { useGameWakeLock } from "./app/useGameWakeLock.js";
 import { useOnlineStatus } from "./app/useOnlineStatus.js";
 import { applyOfflineUpdate, consumeOfflineReloadRequest, onOfflineUpdateReady } from "./app/offline.js";
@@ -210,7 +209,6 @@ export default function App() {
               onClick={() => {
                 setSettings({ audio: !progress.settings.audio });
                 stopSpeech();
-                stopSounds();
               }}
               aria-label={
                 progress.settings.audio
