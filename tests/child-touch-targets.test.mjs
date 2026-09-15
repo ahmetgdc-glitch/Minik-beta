@@ -9,6 +9,7 @@ const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.
 const atlas = fs.readFileSync(new URL("../src/worlds/WorldAtlas.jsx", import.meta.url), "utf8");
 const explore = fs.readFileSync(new URL("../src/games/ExploreGame.jsx", import.meta.url), "utf8");
 const profiles = fs.readFileSync(new URL("../src/parent/Profiles.jsx", import.meta.url), "utf8");
+const aquarium = fs.readFileSync(new URL("../src/rewards/Aquarium.jsx", import.meta.url), "utf8");
 
 test("narrow-phone child controls keep at least a 44px hit target", () => {
   assert.match(guards, /@media \(max-width: 760px\)/);
@@ -31,10 +32,12 @@ test("390px-class iPhones keep every essential topbar action without horizontal 
   assert.match(guards, /@media \(max-width: 375px\)[\s\S]*?\.child-world-shell \.language-switch span[\s\S]*?padding-inline: 4px/);
 });
 
-test("320px phones keep the star counter inside a 44px utility target", () => {
+test("320px phones keep only the interactive topbar star counter inside a 44px utility target", () => {
+  assert.match(aquarium, /<span className="star-pill">/);
   assert.match(guards, /@media \(max-width: 340px\)/);
-  assert.match(guards, /\.child-world-shell \.star-pill[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?max-width: 44px[\s\S]*?flex: 0 0 44px/);
-  assert.match(guards, /\.child-world-shell \.star-pill b[\s\S]*?position: absolute[\s\S]*?max-width: 30px[\s\S]*?text-overflow: ellipsis/);
+  assert.match(guards, /\.child-world-shell \.topbar-actions \.star-pill[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?max-width: 44px[\s\S]*?flex: 0 0 44px/);
+  assert.match(guards, /\.child-world-shell \.topbar-actions \.star-pill b[\s\S]*?position: absolute[\s\S]*?max-width: 30px[\s\S]*?text-overflow: ellipsis/);
+  assert.doesNotMatch(guards, /@media \(max-width: 340px\)[\s\S]*?\.child-world-shell \.star-pill\s*\{/);
 });
 
 test("320px bottom navigation keeps Turkish tab labels on one line", () => {
