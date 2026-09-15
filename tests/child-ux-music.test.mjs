@@ -47,13 +47,16 @@ test("voice remains more important than background music", () => {
   assert.match(sounds, /setTargetAtTime\(level/);
 });
 
-test("music picker is independent from the narration toggle", () => {
+test("narration toggle is independent from music and game effects", () => {
   assert.match(app, /<MusicPicker lang=\{lang\} \/>/);
   assert.doesNotMatch(app, /<MusicPicker[^>]*enabled=/);
   assert.doesNotMatch(picker, /if \(!enabled\) stopMusic\(\)/);
   assert.match(picker, /if \(selected !== "off"\) startMusic\(\{ style: selected \}\)/);
   const voiceToggle = app.match(/className="audio-toggle"[\s\S]*?<\/button>/)?.[0] || "";
+  assert.match(voiceToggle, /stopSpeech\(\)/);
   assert.doesNotMatch(voiceToggle, /stopMusic\(\)/);
+  assert.doesNotMatch(voiceToggle, /stopSounds\(\)/);
+  assert.doesNotMatch(app, /import \{ stopSounds \} from "\.\/audio\/sounds\.js"/);
 });
 
 test("music trigger and dialog close control keep child-safe hit targets", () => {
