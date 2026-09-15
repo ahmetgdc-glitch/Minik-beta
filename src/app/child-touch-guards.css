@@ -14,7 +14,7 @@
   }
 
   .child-world-shell .language-switch,
-  .child-world-shell .star-pill {
+  .child-world-shell .topbar-actions .star-pill {
     min-height: 44px;
   }
 
@@ -209,7 +209,7 @@
   /* At the supported 320px minimum width, a normal icon + multi-digit star
      count is the last topbar item that can push the row over its budget. Keep
      the full 44px tap target and turn the count into a small visual badge. */
-  .child-world-shell .star-pill {
+  .child-world-shell .topbar-actions .star-pill {
     position: relative;
     box-sizing: border-box;
     width: 44px;
@@ -222,12 +222,12 @@
     gap: 0;
   }
 
-  .child-world-shell .star-pill svg {
+  .child-world-shell .topbar-actions .star-pill svg {
     width: 20px;
     height: 20px;
   }
 
-  .child-world-shell .star-pill b {
+  .child-world-shell .topbar-actions .star-pill b {
     position: absolute;
     right: 1px;
     bottom: 3px;
