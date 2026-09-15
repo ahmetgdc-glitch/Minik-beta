@@ -1,11 +1,22 @@
 import React from "react";
 import { MinoAvatar } from "./Visual.jsx";
-export default function FishGuide({ message, onHelp, stage = 0, lang = "de", outfit }) {
+
+export default function FishGuide({
+  message,
+  onHelp,
+  stage = 0,
+  hint,
+  lang = "de",
+  outfit,
+  disabled = false,
+}) {
+  const visualStage = Number.isFinite(hint) ? hint : stage;
   return (
-    <div className={`fish-guide stage-${stage}`}>
+    <div className={`fish-guide stage-${visualStage}`}>
       <button
         className="mino-help"
         onClick={onHelp}
+        disabled={disabled}
         aria-label={
           lang === "tr" ? "Mino’dan yardım iste" : "Mino um Hilfe bitten"
         }
