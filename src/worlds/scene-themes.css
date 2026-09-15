@@ -129,6 +129,105 @@
   }
 }
 
+/* Listening moments give each topic family its own body language. Individual
+   transform properties preserve the landmark's base placement/rotation. */
+.world-scenery.moment-bounce.is-listening .scene-landmark {
+  animation: landmarkMomentBounce 0.52s cubic-bezier(.2,.75,.35,1) infinite alternate;
+}
+.world-scenery.moment-drift.is-listening .scene-landmark {
+  animation: landmarkMomentDrift 1.35s ease-in-out infinite alternate;
+}
+.world-scenery.moment-spark.is-listening .scene-landmark {
+  animation: landmarkMomentSpark 0.66s ease-in-out infinite alternate;
+}
+.world-scenery.moment-drive.is-listening .scene-landmark {
+  animation: landmarkMomentDrive 0.92s ease-in-out infinite alternate;
+}
+.world-scenery.moment-pulse.is-listening .scene-landmark {
+  animation: landmarkMomentPulse 0.68s ease-in-out infinite alternate;
+}
+.world-scenery.moment-float.is-listening .scene-landmark {
+  animation: landmarkMomentFloat 1.15s ease-in-out infinite alternate;
+}
+.world-scenery.moment-tick.is-listening .scene-landmark {
+  animation: landmarkMomentTick 0.82s steps(2, end) infinite alternate;
+}
+.world-scenery.moment-orbit.is-listening .scene-landmark {
+  animation: landmarkMomentOrbit 1.28s ease-in-out infinite alternate;
+}
+.world-scenery[class*="moment-"].is-listening .landmark-2 {
+  animation-delay: 0.08s;
+}
+.world-scenery[class*="moment-"].is-listening .landmark-3 {
+  animation-delay: 0.16s;
+}
+@keyframes landmarkMomentBounce {
+  to {
+    translate: 0 -13px;
+    scale: 1.06;
+    opacity: 0.68;
+  }
+}
+@keyframes landmarkMomentDrift {
+  to {
+    translate: 11px -4px;
+    scale: 1.025;
+    opacity: 0.62;
+  }
+}
+@keyframes landmarkMomentSpark {
+  to {
+    translate: 0 -5px;
+    scale: 1.09;
+    opacity: 0.72;
+  }
+}
+@keyframes landmarkMomentDrive {
+  from {
+    translate: -7px 0;
+  }
+  to {
+    translate: 9px -2px;
+    opacity: 0.65;
+  }
+}
+@keyframes landmarkMomentPulse {
+  to {
+    scale: 1.095;
+    opacity: 0.7;
+  }
+}
+@keyframes landmarkMomentFloat {
+  to {
+    translate: 0 -10px;
+    rotate: 2deg;
+    scale: 1.035;
+    opacity: 0.64;
+  }
+}
+@keyframes landmarkMomentTick {
+  from {
+    rotate: -2deg;
+  }
+  to {
+    rotate: 2deg;
+    translate: 0 -3px;
+    opacity: 0.64;
+  }
+}
+@keyframes landmarkMomentOrbit {
+  from {
+    translate: -5px 3px;
+    rotate: -2deg;
+  }
+  to {
+    translate: 7px -8px;
+    rotate: 3deg;
+    scale: 1.05;
+    opacity: 0.72;
+  }
+}
+
 /* Meadow family: each topic gets a recognisable outdoor mood. */
 .world-animals {
   --world-accent: #276d47;
@@ -335,7 +434,11 @@
   .discovery-stage .discovery-word {
     transition: none;
   }
-  .world-scenery.is-listening .scene-landmark {
+  .world-scenery.is-listening .scene-landmark,
+  .world-scenery[class*="moment-"].is-listening .scene-landmark {
     animation: none;
+    translate: none;
+    rotate: none;
+    scale: none;
   }
 }
