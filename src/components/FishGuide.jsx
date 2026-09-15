@@ -1,5 +1,6 @@
 import React from "react";
 import { MinoAvatar } from "./Visual.jsx";
+import { useProgress } from "../progress/store.js";
 
 export default function FishGuide({
   message,
@@ -10,7 +11,9 @@ export default function FishGuide({
   outfit,
   disabled = false,
 }) {
+  const progress = useProgress();
   const visualStage = Number.isFinite(hint) ? hint : stage;
+  const activeOutfit = outfit || progress.minoOutfit || "classic";
   return (
     <div className={`fish-guide stage-${visualStage}`}>
       <button
@@ -21,7 +24,7 @@ export default function FishGuide({
           lang === "tr" ? "Mino’dan yardım iste" : "Mino um Hilfe bitten"
         }
       >
-        <MinoAvatar outfit={outfit} />
+        <MinoAvatar outfit={activeOutfit} />
         <span className="mino-help-symbol">?</span>
       </button>
       <div className="speech-bubble" aria-live="polite">
