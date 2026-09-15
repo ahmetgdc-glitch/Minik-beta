@@ -14,11 +14,43 @@ const scenery = readFileSync(
   new URL("../src/worlds/WorldScenery.jsx", import.meta.url),
   "utf8",
 );
+const sceneData = readFileSync(
+  new URL("../src/worlds/scenes.js", import.meta.url),
+  "utf8",
+);
 const css = readFileSync(
   new URL("../src/worlds/scene-themes.css", import.meta.url),
   "utf8",
 );
 const main = readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+
+const worldIds = [
+  "animals",
+  "nature",
+  "food",
+  "weather",
+  "sports",
+  "colors",
+  "shapes",
+  "numbers",
+  "letters",
+  "school",
+  "vehicles",
+  "places",
+  "jobs",
+  "safety",
+  "home",
+  "body",
+  "feelings",
+  "clothes",
+  "people",
+  "routines",
+  "space",
+  "music",
+  "sounds",
+  "actions",
+  "toys",
+];
 
 test("discovery scenes expose the active world for visual theming without changing world ids", () => {
   assert.match(explorer, /world-\$\{worldId\}/);
@@ -59,15 +91,39 @@ test("discovery scenes render non-interactive world landmarks behind the learnin
   assert.match(css, /contain:\s*layout paint/);
 });
 
+test("all 25 worlds receive a characteristic listening moment without touching learning ids", () => {
+  assert.match(sceneData, /export const sceneMoments = Object\.freeze\(\{/);
+  assert.match(sceneData, /export function sceneMomentForWorld\(worldId\)/);
+  for (const id of worldIds) {
+    assert.match(
+      sceneData,
+      new RegExp(`${id}: "(?:bounce|drift|spark|calm|drive|pulse|float|tick|orbit)"`),
+      `${id} should have a discovery moment`,
+    );
+  }
+  const moments = new Set(
+    [...sceneData.matchAll(/:\s*"(bounce|drift|spark|calm|drive|pulse|float|tick|orbit)"/g)].map(
+      (match) => match[1],
+    ),
+  );
+  assert.ok(moments.size >= 8, "discovery should use several distinct motion characters");
+  assert.match(scenery, /sceneMomentForWorld\(worldId\)/);
+  assert.match(scenery, /moment-\$\{moment\}/);
+});
+
 test("world landmarks wake only while the matching object is speaking", () => {
   assert.match(scenery, /active \? "is-listening" : ""/);
   assert.match(css, /\.world-scenery\.is-listening \.landmark-1/);
   assert.match(css, /@keyframes landmarkWakeLeft/);
   assert.match(css, /@keyframes landmarkWakeRight/);
   assert.match(css, /@keyframes landmarkWakeSmall/);
+  assert.match(css, /moment-bounce\.is-listening/);
+  assert.match(css, /moment-drift\.is-listening/);
+  assert.match(css, /moment-pulse\.is-listening/);
+  assert.match(css, /moment-orbit\.is-listening/);
   assert.match(
     css,
-    /prefers-reduced-motion[\s\S]*\.world-scenery\.is-listening \.scene-landmark[\s\S]*animation: none/,
+    /prefers-reduced-motion[\s\S]*\.world-scenery\[class\*="moment-"\]\.is-listening \.scene-landmark[\s\S]*animation: none/,
   );
 });
 
