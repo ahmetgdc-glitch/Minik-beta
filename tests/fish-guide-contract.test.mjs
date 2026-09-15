@@ -17,3 +17,10 @@ test("blocked game transitions disable Mino help instead of relying only on oute
   assert.match(guide, /disabled = false/);
   assert.match(guide, /disabled=\{disabled\}/);
 });
+
+test("the global game helper keeps the child's selected Mino outfit", () => {
+  assert.match(guide, /import \{ useProgress \} from "\.\.\/progress\/store\.js"/);
+  assert.match(guide, /const progress = useProgress\(\)/);
+  assert.match(guide, /const activeOutfit = outfit \|\| progress\.minoOutfit \|\| "classic"/);
+  assert.match(guide, /<MinoAvatar outfit=\{activeOutfit\} \/>/);
+});
