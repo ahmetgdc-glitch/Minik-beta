@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 
@@ -7,6 +7,7 @@ import { buildDifferenceRound } from "./different.js";
 
 export default function DifferentGame({
   items,
+  progress,
   lang,
   settings,
   hint,
@@ -41,6 +42,11 @@ export default function DifferentGame({
 
   return (
     <section className="different-game difference-playground" aria-label={prompt} aria-disabled={controlsDisabled || undefined}>
+      <div className="difference-detective" aria-hidden="true">
+        <span className="difference-spotlight" />
+        <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        <span className="difference-lens" />
+      </div>
       <div className="different-grid">
         {cells.map((cell) => (
           <button
