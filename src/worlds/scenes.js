@@ -54,6 +54,41 @@ export function sceneForWorld(worldId) {
       : "playroom";
 }
 
+// Each destination also has a characteristic listening motion. This stays
+// presentation-only: it makes discovery feel different without changing any
+// learning content, progress, routing or audio decisions.
+export const sceneMoments = Object.freeze({
+  animals: "bounce",
+  nature: "drift",
+  food: "bounce",
+  weather: "drift",
+  sports: "bounce",
+  colors: "spark",
+  shapes: "spark",
+  numbers: "spark",
+  letters: "spark",
+  school: "calm",
+  vehicles: "drive",
+  places: "calm",
+  jobs: "calm",
+  safety: "pulse",
+  home: "calm",
+  body: "pulse",
+  feelings: "float",
+  clothes: "float",
+  people: "calm",
+  routines: "tick",
+  space: "orbit",
+  music: "pulse",
+  sounds: "pulse",
+  actions: "bounce",
+  toys: "float",
+});
+
+export function sceneMomentForWorld(worldId) {
+  return sceneMoments[worldId] || "calm";
+}
+
 // Lightweight landmarks give every destination its own place identity while
 // reusing the existing local illustration library. They are presentation-only:
 // no content, progress or routing IDs depend on this map.
