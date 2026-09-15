@@ -1,11 +1,12 @@
 import React from "react";
 import { Art } from "../components/Visual.jsx";
-import { decorationsForWorld } from "./scenes.js";
+import { decorationsForWorld, sceneMomentForWorld } from "./scenes.js";
 
 export default function WorldScenery({ worldId, active = false }) {
+  const moment = sceneMomentForWorld(worldId);
   return (
     <div
-      className={`world-scenery ${active ? "is-listening" : ""}`}
+      className={`world-scenery moment-${moment} ${active ? "is-listening" : ""}`}
       aria-hidden="true"
     >
       {decorationsForWorld(worldId).map((asset, index) => (
