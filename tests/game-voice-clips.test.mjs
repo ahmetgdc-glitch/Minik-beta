@@ -80,7 +80,6 @@ test("dynamic common game prompts are composed only from recorded clips", () => 
     ["In welchen Korb gehört das? Katze.", "de", 2], ["Hangi sepete ait? Kedi.", "tr", 2],
     ["Mit welchem Buchstaben beginnt Hund?", "de", 2], ["Köpek hangi harfle başlıyor?", "tr", 2],
     ["Sprich mir nach: Löwe", "de", 2], ["Benimle söyle: Aslan", "tr", 2],
-    ["Fahre den Buchstaben A nach. Starte am grünen Punkt.", "de", 1], ["A harfini çiz. Yeşil noktadan başla.", "tr", 1],
     ["Wo ist Hund? Das wiederholen wir noch einmal.", "de", 3], ["Köpek nerede? Bir kez daha hatırlayalım.", "tr", 3],
     ["Hund. Tippe auf dieses Bild.", "de", 2], ["Köpek. Bu resmi seç.", "tr", 2],
     ["Hund. Was ist das Gegenteil?", "de", 2], ["Köpek. Bunun zıttı hangisi?", "tr", 2],
@@ -91,6 +90,11 @@ test("dynamic common game prompts are composed only from recorded clips", () => 
     assert.ok(plan.length >= minParts, `expected natural plan for ${lang}: ${text}`);
     assert.ok(plan.every((url) => /\.(?:mp3|wav)$/iu.test(url)), `plan must contain recordings: ${text}`);
   }
+});
+
+test("trace prompts never use a partial natural plan that drops the target", () => {
+  assert.deepEqual(naturalVoicePlan("Fahre den Buchstaben A nach. Starte am grünen Punkt.", "de"), []);
+  assert.deepEqual(naturalVoicePlan("A harfini çiz. Yeşil noktadan başla.", "tr"), []);
 });
 
 test("all color vocabulary uses natural Mino voice in both languages", () => {
