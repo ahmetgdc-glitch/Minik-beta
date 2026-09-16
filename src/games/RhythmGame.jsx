@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Play, Music2, Sparkles } from "lucide-react";
 import { playNote, stopSounds, prepareSoundPlayback } from "../audio/sounds.js";
-import { stopSpeech } from "../audio/voice.js";
+import { speak, stopSpeech } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
 
 const colors = ["#ee8470", "#eac856", "#71b5de", "#a193d9"];
@@ -10,6 +10,7 @@ const symbols = ["●", "▲", "■", "★"];
 export default function RhythmGame({
   difficulty,
   lang,
+  settings,
   hint,
   paused,
   interactionBlocked = () => false,
@@ -44,10 +45,17 @@ export default function RhythmGame({
       ? "Dinle ve aynı melodiyi çal."
       : "Hör zu und spiele die Melodie nach.";
 
+  async function playLesson() {
+    if (paused || interactionBlocked()) return;
+    await speak(text, lang, settings);
+    if (paused || interactionBlocked()) return;
+    await repeat();
+  }
+
   useLesson(
     onReady,
     text,
-    repeat,
+    playLesson,
     ["sounds.piano"],
     lang === "tr"
       ? "Parlayan tuşları takip et."
