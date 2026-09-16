@@ -50,7 +50,26 @@ export default function MatchGame({
       if (result.matched.length === chosen.length) onSolve(chosen.map(x => x.id));
     } else if (result.outcome === "retry") onWrong([source]);
   }
-  const placement = useDragPlacement({ paused, interactionBlocked, onDrop: drop, onSelect: selectSource });
+
+  function tapTarget(item) {
+    if (paused || interactionBlocked() || matchedRef.current.includes(item.id)) return;
+    if (selected) {
+      drop(selected, item.id);
+      return;
+    }
+    // A child may explore either copy first. Speak the exact visible learning
+    // word instead of doing nothing; voice.js keeps the natural MINIK clip
+    // first and falls back to Voice 4 with this same exact label when needed.
+    speak(item.labels[lang], lang, settings);
+  }
+
+  const placement = useDragPlacement({
+    paused,
+    interactionBlocked,
+    onDragStart: setSelected,
+    onDrop: drop,
+    onSelect: selectSource,
+  });
   const help = selected || chosen.find((x) => !matched.includes(x.id))?.id;
   const progressLabel = lang === "tr" ? `${matched.length} / ${chosen.length} eş bulundu` : `${matched.length} / ${chosen.length} Paare gefunden`;
   return (
@@ -91,7 +110,7 @@ export default function MatchGame({
                 data-drop-id={item.id}
                 disabled={controlsDisabled || matched.includes(item.id)}
                 className={`match-slot ${placement.drag?.over === item.id ? "drop-hover" : ""} ${matched.includes(item.id) ? "filled" : ""} ${hint >= 2 && help === item.id ? "hint-target" : ""}`}
-                onClick={() => drop(selected, item.id)}
+                onClick={() => tapTarget(item)}
                 aria-label={`${item.labels[lang]} ${lang === "tr" ? "yerleştir" : "ablegen"}`}
               >
                 <Visual item={item} lang={lang} photos={settings.photos} />

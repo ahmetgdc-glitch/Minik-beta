@@ -8,7 +8,7 @@ const game = fs.readFileSync(new URL("../src/games/MatchGame.jsx", import.meta.u
 test("mobile match keeps sources and targets visible side by side without losing tap fallback", () => {
   assert.match(game, /useDragPlacement/);
   assert.match(game, /sourceProps\(item\.id\)/);
-  assert.match(game, /onClick=\{\(\) => drop\(selected, item\.id\)\}/);
+  assert.match(game, /onClick=\{\(\) => tapTarget\(item\)\}/);
   assert.match(game, /Önce resmi, sonra eşini seç\./);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*?\.matching-board\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) 46px minmax\(0, 1fr\)[\s\S]*?align-items: start/);
   assert.match(css, /@media \(max-width: 620px\)[\s\S]*?\.matching-board\s*\{[\s\S]*?grid-template-columns: minmax\(0, 1fr\) 34px minmax\(0, 1fr\)/);

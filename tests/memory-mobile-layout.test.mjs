@@ -15,6 +15,6 @@ test("hard memory keeps twelve card positions visible in a three-column mobile b
   assert.match(game, /className={`memory-grid cards-\$\{cards\.length\}`}/);
   assert.match(mobileCss, /\.memory-playground \.memory-grid\.cards-12\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\);[^}]*gap:\s*8px;/);
   assert.match(mobileCss, /\.memory-playground \.memory-grid\.cards-12 \.memory-card\s*\{[^}]*border-radius:\s*18px;/);
-  assert.match(mobileCss, /\.memory-playground \.memory-grid\.cards-12 \.memory-card \.visual\s*\{[^}]*width:\s*80%;[^}]*height:\s*80%;/);
+  assert.match(mobileCss, /\.memory-playground \.memory-grid\.cards-12 \.memory-card \.item-visual\s*\{[^}]*width:\s*80%;[^}]*height:\s*80%;/);
   assert.doesNotMatch(mobileCss, /\.memory-playground \.memory-grid\.cards-12\s*\{[^}]*grid-template-columns:\s*repeat\(2,/);
 });

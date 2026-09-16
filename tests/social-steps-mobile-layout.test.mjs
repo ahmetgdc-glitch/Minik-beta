@@ -13,6 +13,6 @@ test("narrow iPhones keep social safety steps as a compact vertical story", () =
   assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.social-step-card\s*\{[\s\S]*?min-height: 118px[\s\S]*?grid-template-columns: minmax\(78px, 96px\) minmax\(0, 1fr\) 34px/);
   assert.match(css, /\.social-step-card\.question\s*\{[\s\S]*?min-height: 98px/);
   assert.match(css, /\.social-steps-game \.answer-grid\s*\{[\s\S]*?gap: 10px/);
-  assert.match(css, /\.social-steps-game\[data-difficulty="hard"\] \.social-step-card\.complete \.visual[\s\S]*?width: min\(100%, 106px\)[\s\S]*?max-height: 106px/);
+  assert.match(css, /\.social-steps-game\[data-difficulty="hard"\] \.social-step-card\.complete \.item-visual[\s\S]*?width: min\(100%, 106px\)[\s\S]*?max-height: 106px/);
   assert.doesNotMatch(css, /@media \(max-width: 430px\)[\s\S]*?\.social-sequence-strip\s*\{[\s\S]*?grid-template-columns: repeat\(/);
 });

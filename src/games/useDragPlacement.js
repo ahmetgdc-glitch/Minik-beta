@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { createDragSession } from "./dragSession.js";
 
-export function useDragPlacement({ paused, interactionBlocked, onSelect, onDrop }) {
+export function useDragPlacement({ paused, interactionBlocked, onDragStart, onSelect, onDrop }) {
   const boardRef = useRef(null);
   const session = useRef(createDragSession());
   const owner = useRef(null);
   const suppressClick = useRef(false);
-  const selectedOnDown = useRef(false);
   const latest = useRef(null);
-  latest.current = { paused, interactionBlocked, onSelect, onDrop };
+  latest.current = { paused, interactionBlocked, onDragStart, onSelect, onDrop };
   const [drag, setDrag] = useState(null);
   const blocked = () => latest.current.paused || latest.current.interactionBlocked?.();
   function release() {
@@ -36,7 +35,7 @@ export function useDragPlacement({ paused, interactionBlocked, onSelect, onDrop 
     const accepted = session.current.begin({ ...coordinates(event), id, isPrimary: event.isPrimary, button: event.button });
     if (!accepted) return;
     suppressClick.current = false;
-    selectedOnDown.current = true;
+    latest.current.onDragStart?.(id);
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
       owner.current = { element: event.currentTarget, pointerId: event.pointerId };
@@ -44,7 +43,6 @@ export function useDragPlacement({ paused, interactionBlocked, onSelect, onDrop 
       // Tap-to-place remains available when capture is unavailable.
       session.current.cancel();
     }
-    latest.current.onSelect?.(id);
   }
   function move(event) {
     if (blocked()) { cancel(); return; }
@@ -54,10 +52,17 @@ export function useDragPlacement({ paused, interactionBlocked, onSelect, onDrop 
   function end(event) {
     const next = session.current.finish(coordinates(event));
     if (!next) return;
-    suppressClick.current = next.moved;
+    // Pointer-driven taps and drags both produce a follow-up click in many
+    // browsers. Handle the pointer gesture here and suppress that duplicate;
+    // keyboard/programmatic clicks (detail === 0) still use onClick below.
+    suppressClick.current = true;
     release();
     setDrag(null);
-    if (!next.moved || blocked()) return;
+    if (blocked()) return;
+    if (!next.moved) {
+      latest.current.onSelect?.(next.id);
+      return;
+    }
     const target = dropTarget(next.x, next.y);
     if (target) latest.current.onDrop(next.id, target);
   }
@@ -86,8 +91,10 @@ export function useDragPlacement({ paused, interactionBlocked, onSelect, onDrop 
       onLostPointerCapture: event => cancel(event.pointerId),
       onClick: event => {
         if (blocked()) return;
-        if (event.detail !== 0 && suppressClick.current) { suppressClick.current = false; return; }
-        if (event.detail !== 0 && selectedOnDown.current) { selectedOnDown.current = false; return; }
+        if (event.detail !== 0 && suppressClick.current) {
+          suppressClick.current = false;
+          return;
+        }
         latest.current.onSelect?.(id);
       },
     }),

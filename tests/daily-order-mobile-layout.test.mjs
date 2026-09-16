@@ -12,6 +12,6 @@ test("narrow iPhones keep daily-order choices in a compact two-column visual gri
   assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.routine-journey-stage\s*\{[\s\S]*?min-height: 350px[\s\S]*?padding: 16px/);
   assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.routine-next-scenes\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)[\s\S]*?gap: 10px/);
   assert.match(css, /\.routine-next-scene\s*\{[\s\S]*?aspect-ratio: 1 \/ 1[\s\S]*?padding: 10px[\s\S]*?border-radius: 22px/);
-  assert.match(css, /\.routine-order-game\[data-difficulty="hard"\] \.routine-next-scene \.visual[\s\S]*?width: min\(82%, 150px\)[\s\S]*?height: min\(82%, 150px\)/);
+  assert.match(css, /\.routine-order-game\[data-difficulty="hard"\] \.routine-next-scene \.item-visual[\s\S]*?width: min\(82%, 150px\)[\s\S]*?height: min\(82%, 150px\)/);
   assert.doesNotMatch(css, /@media \(max-width: 430px\)[\s\S]*?\.routine-next-scenes\s*\{\s*grid-template-columns:\s*1fr/);
 });

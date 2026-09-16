@@ -86,7 +86,13 @@ export default function PuzzleGame({
     if (next.length === count) onSolve([target.id]);
   }
 
-  const placement = useDragPlacement({ paused, interactionBlocked, onSelect: setSelected, onDrop: drop });
+  const placement = useDragPlacement({
+    paused,
+    interactionBlocked,
+    onDragStart: setSelected,
+    onSelect: setSelected,
+    onDrop: drop,
+  });
   const selectedIndex = parseIndex(selected, "piece-");
   const progressLabel = lang === "tr" ? `${placed.length} / ${count} parça tamamlandı` : `${placed.length} / ${count} Teile eingesetzt`;
   const baseGuide = profile.id === "easy" ? .16 : profile.id === "medium" ? .11 : .06;

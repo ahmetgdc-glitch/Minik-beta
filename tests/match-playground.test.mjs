@@ -19,13 +19,23 @@ test("matching preserves safe drag and tap placement", () => {
   assert.match(game, /placePair/);
   assert.match(game, /paused \|\| interactionBlocked\(\)/);
   assert.match(game, /data-drop-id/);
+  assert.match(game, /onDragStart: setSelected/);
+  assert.match(game, /onSelect: selectSource/);
+  assert.doesNotMatch(game, /onDragStart: selectSource/);
 });
 
-test("matching speaks the exact visible learning label when a source is selected", () => {
+test("matching speaks the exact visible learning label when a source is tapped", () => {
   assert.match(game, /function selectSource\(id\)/);
   assert.match(game, /const item = chosen\.find\(\(entry\) => entry\.id === id\)/);
   assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onSelect: selectSource/);
+});
+
+test("matching lets a child hear an unselected target without replacing its exact word", () => {
+  assert.match(game, /function tapTarget\(item\)/);
+  assert.match(game, /if \(selected\) \{[\s\S]*?drop\(selected, item\.id\);[\s\S]*?return;[\s\S]*?\}/);
+  assert.match(game, /function tapTarget\(item\)[\s\S]*?speak\(item\.labels\[lang\], lang, settings\);/);
+  assert.match(game, /onClick=\{\(\) => tapTarget\(item\)\}/);
 });
 
 test("matching makes artwork substantially larger and stays phone friendly", () => {

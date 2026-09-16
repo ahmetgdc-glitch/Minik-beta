@@ -20,7 +20,7 @@ test("memory keeps the visible card linked to its spoken word", () => {
   assert.match(game, /setOpen\(next\);[\s\S]*?speakCard\(card\);/);
   assert.doesNotMatch(game, /setMatched\(next\);\s*speak\(a\.item\.labels\[lang\], lang, settings\)/);
   assert.match(css, /\.memory-playground \.memory-card\.speaking\s*\{/);
-  assert.match(css, /\.memory-playground \.memory-card\.speaking \.visual\s*\{[\s\S]*?animation:\s*memory-speaking/);
+  assert.match(css, /\.memory-playground \.memory-card\.speaking \.item-visual\s*\{[\s\S]*?animation:\s*memory-speaking/);
   assert.match(css, /@keyframes memory-speaking/);
 });
 
@@ -29,7 +29,7 @@ test("memory playground keeps large touch targets and responsive layouts", () =>
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /@media \(max-width: 700px\)/);
   assert.match(css, /prefers-reduced-motion/);
-  assert.match(css, /prefers-reduced-motion:[\s\S]*?memory-card\.speaking \.visual/);
+  assert.match(css, /prefers-reduced-motion:[\s\S]*?memory-card\.speaking \.item-visual/);
 });
 
 test("memory playground stylesheet is part of the production entry", () => {
