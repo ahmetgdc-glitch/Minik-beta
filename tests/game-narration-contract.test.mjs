@@ -14,6 +14,7 @@ const dailyOrder = readGame("DailyOrderGame.jsx");
 const story = readGame("StoryGame.jsx");
 const trace = readGame("TraceGame.jsx");
 const socialSteps = readGame("SocialStepsGame.jsx");
+const puzzle = readGame("PuzzleGame.jsx");
 
 function mustContain(source, snippets, game) {
   for (const snippet of snippets) {
@@ -106,4 +107,13 @@ test("social safety speaks the actual scenario instead of a generic next-step se
   ], "socialsteps");
   assert.doesNotMatch(socialSteps, /const spokenPrompt\s*=/u);
   assert.match(socialSteps, /round\.items\.map\(\(item\) => item\.id\),\s*text,/u);
+});
+
+test("puzzle speaks the real task first and reserves the short cue for Mino help", () => {
+  mustContain(puzzle, [
+    "const text = lang === \"tr\" ? \"Puzzle parçalarını doğru yere sürükle.\" : \"Ziehe die Puzzleteile an die richtige Stelle.\";",
+    "const help = lang === \"tr\" ? \"Küçük resme bak.\" : \"Schau auf das kleine Vorbild.\";",
+    "useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help)",
+  ], "puzzle");
+  assert.doesNotMatch(puzzle, /useLesson\(onReady, text, \(\) => speak\(help,/u);
 });
