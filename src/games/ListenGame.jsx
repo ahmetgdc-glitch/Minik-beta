@@ -1,7 +1,6 @@
 import React from "react";
 import { Headphones, Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
-import { fixedNaturalVoicePlan } from "../audio/fixedNaturalVoicePlans.js";
 import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useSelection, useLesson } from "./shared.jsx";
 
@@ -40,14 +39,10 @@ export default function ListenGame({
 
   function repeatWord() {
     if (controlsDisabled) return;
-    // Keep the short word replay for covered vocabulary. For a new word that
-    // has no fixed clip yet, use the full question so the shared narrator can
-    // still play its recorded task instruction.
-    if (fixedNaturalVoicePlan(target.labels[lang], lang).length) {
-      speak(target.labels[lang], lang, settings);
-      return;
-    }
-    speak(text, lang, settings);
+    // Replay means replay the learning word itself. If that exact word has no
+    // fixed MINIK recording yet, voice.js uses the approved exact-text Voice 4
+    // fallback instead of substituting or expanding the child's request.
+    speak(target.labels[lang], lang, settings);
   }
 
   return (
