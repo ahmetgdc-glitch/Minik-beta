@@ -129,6 +129,40 @@
   }
 }
 
+/* Three translated finish actions cannot share one row on 320–390px phones
+   without either overflowing or becoming tiny. Stack the real buttons instead
+   so a child gets large, predictable targets after every completed game. */
+@media (max-width: 430px) {
+  .session-finish .finish-actions {
+    box-sizing: border-box;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .session-finish .finish-actions .secondary {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+    font-size: .92rem;
+  }
+
+  .session-finish > .next-adventure-button {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .session-finish > .next-adventure-button span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
 @media (max-width: 410px) {
   /* On 390px-class iPhones the six essential utility controls plus the MINIK
      wordmark exceed the available row width once all hit targets are kept at
