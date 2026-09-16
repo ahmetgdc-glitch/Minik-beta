@@ -373,13 +373,16 @@ async function speakMediaClip(url, token) {
 
 async function speakGameClip(url, token) {
   if (!url || !speechForegroundAllowed()) return false;
-  // Start the browser's local media fetch in parallel with the optional
-  // WebAudio decode. If decoding reaches its 500 ms deadline, the same player
-  // is already warm and can begin the recording immediately.
   prepareMediaClip(url);
-  if (voiceContext?.state === "running") {
+  if (voiceContext?.state === "running" && voiceBufferCache.has(url)) {
     const playedWebAudio = await speakWebAudioClip(url, token).catch(() => false);
     if (playedWebAudio || token !== sequence) return playedWebAudio;
+  }
+  // First playback must never wait for optional JS decoding. Start the same
+  // bundled clip through HTML Audio immediately and warm the decoded cache in
+  // parallel so a later replay can use WebAudio with effectively no startup.
+  if (voiceContext?.state === "running" && !voiceBufferCache.has(url)) {
+    void decodeVoiceBuffer(url, voiceContext, token).catch(() => null);
   }
   return speakMediaClip(url, token);
 }
