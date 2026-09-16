@@ -15,3 +15,16 @@ test("SpeakGame cannot replay Voice 4 while the microphone is listening", () => 
   assert.match(source, /if \(paused \|\| blocked \|\| listening\) return;/);
   assert.match(source, /className="speak-repeat"[^>]*disabled=\{listening \|\| paused \|\| blocked\}/s);
 });
+
+test("SpeakGame separates the full lesson from exact target-word replay", () => {
+  assert.match(
+    source,
+    /function playLesson\(\)\s*\{[\s\S]*?speak\(prompt, lang, settings\);[\s\S]*?\}/,
+  );
+  assert.match(
+    source,
+    /function repeatWord\(\)\s*\{[\s\S]*?speak\(expected, lang, settings\);[\s\S]*?\}/,
+  );
+  assert.match(source, /useLesson\(onReady, prompt, playLesson,/);
+  assert.match(source, /className="speak-repeat" onClick=\{repeatWord\}/);
+});
