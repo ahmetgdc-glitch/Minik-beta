@@ -155,7 +155,6 @@ export function naturalVoicePlan(text, lang = "de") {
     if (match) return resolve([stripEnd(match[1]), "Sırada:", stripEnd(match[2])], lang);
     match = value.match(/^(.+?),\s*sonra\s+(.+?),\s*ardından\s+(.+?)\.?$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
-    if (/Yeşil noktadan başla\.?$/u.test(value)) return resolve(["İzi takip et. Yeşil noktadan başla."], lang);
   } else {
     // German dynamic narration follows the same all-or-nothing rule so a
     // missing target can never leave only a generic instruction behind.
@@ -187,7 +186,6 @@ export function naturalVoicePlan(text, lang = "de") {
     if (match) return resolve([stripEnd(match[1]), "Als Nächstes kommt:", stripEnd(match[2])], lang);
     match = value.match(/^(.+?),\s*dann\s+(.+?),\s*danach\s+(.+?)\.?$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
-    if (/Starte am grünen Punkt\.?$/u.test(value)) return resolve(["Fahre die Spur nach. Starte am grünen Punkt."], lang);
   }
   return [];
 }
