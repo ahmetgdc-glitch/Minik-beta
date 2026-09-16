@@ -13,9 +13,12 @@ test("initial-letter game keeps a large visual target and toy-like letter choice
   assert.match(css, /font:900 clamp\(2\.8rem,9vw,5\.4rem\)/);
 });
 
-test("initial-letter target can replay the spoken learning word", () => {
-  assert.match(game, /function hearTarget\(\)/);
-  assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
+test("initial-letter target always replays the exact spoken learning word", () => {
+  assert.match(
+    game,
+    /function hearTarget\(\)\s*\{[\s\S]*?if \(blocked\(\)\) return;[\s\S]*?speak\(target\.labels\[lang\], lang, settings\);[\s\S]*?\}/,
+  );
+  assert.doesNotMatch(game, /fixedNaturalVoicePlan/);
   assert.match(game, /onClick=\{hearTarget\}/);
   assert.match(game, /onKeyDown=\{handleTargetKeyDown\}/);
   assert.match(game, /aria-label=\{replayLabel\}/);
