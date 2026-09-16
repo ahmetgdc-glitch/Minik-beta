@@ -3,7 +3,7 @@ import { Volume2 } from "lucide-react";
 import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
 import { itemsForWorld } from "../data/content.js";
 import { prepareSoundPlayback, playSound, stopSounds } from "../audio/sounds.js";
-import { stopSpeech } from "../audio/voice.js";
+import { speak, stopSpeech } from "../audio/voice.js";
 export default function SoundsGame({
   difficulty,
   lang,
@@ -40,7 +40,17 @@ export default function SoundsGame({
   const help = lang === "tr"
     ? "Sesi bir kez daha dikkatle dinle."
     : "Hör das Geräusch noch einmal genau an.";
-  useLesson(onReady, text, repeat, [target.id], help);
+
+  async function playLesson() {
+    if (paused || interactionBlocked()) return;
+    await speak(text, lang, settings);
+    if (paused || interactionBlocked()) return;
+    await repeat();
+  }
+
+  // On entry, explain the task first and then play the learning sound. The
+  // replay button itself still replays only the sound, exactly as its label says.
+  useLesson(onReady, text, playLesson, [target.id], help);
   useEffect(() => {
     if (controlsDisabled) {
       stopSounds();
