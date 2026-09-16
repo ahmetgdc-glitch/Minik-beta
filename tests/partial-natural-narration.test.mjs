@@ -6,30 +6,36 @@ import {
   isFixedNaturalVoiceClipUrl,
 } from "../src/audio/fixedNaturalVoicePlans.js";
 
-function assertFixedPlan(text, lang, expectedLength) {
-  const plan = fixedNaturalVoicePlan(text, lang);
-  assert.equal(
-    plan.length,
-    expectedLength,
-    `${lang} should keep ${expectedLength} recorded fragment(s) for: ${text}`,
+function assertNoPartialPlan(text, lang) {
+  assert.deepEqual(
+    fixedNaturalVoicePlan(text, lang),
+    [],
+    `${lang} must keep the complete requested speech for the exact Voice 4 fallback: ${text}`,
   );
-  assert.ok(plan.every(isFixedNaturalVoiceClipUrl));
 }
 
-test("Turkish dynamic lessons keep recorded instructions when a vocabulary clip is missing", () => {
+test("Turkish dynamic lessons never drop a missing vocabulary target", () => {
   const missing = "HenüzKaydıOlmayanKelime";
-  assertFixedPlan(`${missing} nerede?`, "tr", 1);
-  assertFixedPlan(`${missing} nerede? Bir kez daha hatırlayalım.`, "tr", 2);
-  assertFixedPlan(`${missing}. Bunun zıttı hangisi?`, "tr", 1);
-  assertFixedPlan(`${missing} sonrasında ne gelir?`, "tr", 1);
+  assertNoPartialPlan(`${missing} nerede?`, "tr");
+  assertNoPartialPlan(`${missing} nerede? Bir kez daha hatırlayalım.`, "tr");
+  assertNoPartialPlan(`Hangi sepete ait? ${missing}.`, "tr");
+  assertNoPartialPlan(`${missing} hangi harfle başlıyor?`, "tr");
+  assertNoPartialPlan(`Benimle söyle: ${missing}.`, "tr");
+  assertNoPartialPlan(`${missing}. Bunun zıttı hangisi?`, "tr");
+  assertNoPartialPlan(`${missing} sonrasında ne gelir?`, "tr");
+  assertNoPartialPlan(`Mino en son ne görüyor? ${missing}`, "tr");
 });
 
-test("German dynamic lessons keep recorded instructions when a vocabulary clip is missing", () => {
+test("German dynamic lessons never drop a missing vocabulary target", () => {
   const missing = "NochNichtAufgenommenesWort";
-  assertFixedPlan(`Finde: ${missing}.`, "de", 1);
-  assertFixedPlan(`Wo ist ${missing}? Das wiederholen wir noch einmal.`, "de", 2);
-  assertFixedPlan(`${missing}. Was ist das Gegenteil?`, "de", 1);
-  assertFixedPlan(`Was kommt nach ${missing}?`, "de", 1);
+  assertNoPartialPlan(`Finde: ${missing}.`, "de");
+  assertNoPartialPlan(`Wo ist ${missing}? Das wiederholen wir noch einmal.`, "de");
+  assertNoPartialPlan(`In welchen Korb gehört das? ${missing}.`, "de");
+  assertNoPartialPlan(`Mit welchem Buchstaben beginnt ${missing}?`, "de");
+  assertNoPartialPlan(`Sprich mir nach: ${missing}.`, "de");
+  assertNoPartialPlan(`${missing}. Was ist das Gegenteil?`, "de");
+  assertNoPartialPlan(`Was kommt nach ${missing}?`, "de");
+  assertNoPartialPlan(`Was sieht Mino zum Schluss? ${missing}`, "de");
 });
 
 test("existing fully recorded Turkish vocabulary still keeps the full composed narration", () => {
