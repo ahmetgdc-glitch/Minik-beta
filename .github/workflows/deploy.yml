@@ -50,6 +50,7 @@ jobs:
 
   drain-legacy-pages:
     needs: build
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 7
     permissions:
@@ -161,3 +162,102 @@ jobs:
           curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}manifest.webmanifest" >/dev/null
           curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}sw.js" >/dev/null
           echo "Published MINIK Pages smoke test passed: ${PAGE_URL}"
+
+  recover-last-good-pages:
+    needs: [build, drain-legacy-pages]
+    if: ${{ always() && needs.build.result == 'failure' && needs['drain-legacy-pages'].result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.recovery_deployment.outputs.page_url }}
+    steps:
+      - name: Restore last verified production build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          good_run_id=""
+          artifact_id=""
+
+          for run_id in $(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/deploy.yml/runs?branch=${GITHUB_REF_NAME}&status=success&per_page=30" --jq '.workflow_runs[].id'); do
+            if [ "$run_id" = "$GITHUB_RUN_ID" ]; then
+              continue
+            fi
+
+            artifact_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/artifacts?per_page=100" --jq '[.artifacts[] | select(.name == "minik-production-build" and .expired == false)][0].id // empty')"
+            if [ -n "$artifact_id" ]; then
+              good_run_id="$run_id"
+              break
+            fi
+          done
+
+          if [ -z "$good_run_id" ]; then
+            echo "::error::No previous verified MINIK production artifact is available for recovery."
+            exit 1
+          fi
+
+          echo "Restoring verified MINIK artifact from successful run ${good_run_id}."
+          rm -rf dist
+          mkdir -p dist
+          gh run download "$good_run_id" --repo "$GITHUB_REPOSITORY" --name minik-production-build --dir dist
+
+          test -s dist/index.html
+          test -s dist/manifest.webmanifest
+          test -s dist/sw.js
+          if grep -qE "src=['\"]/src/main\.jsx" dist/index.html; then
+            echo "::error::Recovery artifact unexpectedly contains the Vite source entry."
+            exit 1
+          fi
+          if ! grep -qE 'src="\./assets/index-[^"]+\.js"' dist/index.html; then
+            echo "::error::Recovery artifact does not contain the expected hashed Vite JavaScript entry."
+            exit 1
+          fi
+
+          echo "Last-known-good MINIK build is validated and ready to republish."
+
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - name: Republish last verified MINIK
+        id: recovery_deployment
+        uses: actions/deploy-pages@v4
+      - name: Verify recovered live site
+        env:
+          PAGE_URL: ${{ steps.recovery_deployment.outputs.page_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          asset=""
+          html=""
+          asset_re='src="\./(assets/index-[^"]+\.js)"'
+          for attempt in {1..12}; do
+            html="$(curl --fail --silent --show-error --location --retry 3 --retry-all-errors --retry-delay 2 "${PAGE_URL}?recovery=${GITHUB_RUN_ID}&attempt=${attempt}" || true)"
+            if ! grep -qE "src=['\"]/src/main\.jsx" <<<"$html"; then
+              if [[ $html =~ $asset_re ]]; then
+                asset="${BASH_REMATCH[1]}"
+                break
+              fi
+            fi
+            [ "$attempt" -lt 12 ] && sleep 5
+          done
+
+          if [ -z "$asset" ] || grep -qE "src=['\"]/src/main\.jsx" <<<"$html"; then
+            echo "::error::Emergency republish did not restore a production Vite entry."
+            exit 1
+          fi
+
+          base="${PAGE_URL%/}/"
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}${asset}" >/dev/null
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}manifest.webmanifest" >/dev/null
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors "${base}sw.js" >/dev/null
+          echo "Recovered MINIK Pages from the last verified production build."
