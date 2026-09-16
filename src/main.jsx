@@ -17,6 +17,7 @@ import "./games/games.css";
 import "./worlds/worlds.css";
 import "./worlds/scene-themes.css";
 import "./games/immersive.css";
+import "./games/pause-overlay.css";
 import "./app/playground.css";
 import "./app/playground-guards.css";
 import "./rewards/immersive-rewards.css";
