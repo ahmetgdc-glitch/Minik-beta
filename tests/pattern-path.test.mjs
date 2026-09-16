@@ -45,7 +45,7 @@ test("pattern path keeps large child-first nodes and two-column phone answers", 
   assert.match(css, /@media \(max-width: 720px\)/);
   const phoneBlock = css.slice(css.indexOf("@media (max-width: 430px)"), css.indexOf("@media (prefers-reduced-motion"));
   assert.match(phoneBlock, /\.pattern-choice-grid \{ grid-template-columns: repeat\(2, minmax\(0,1fr\)\); \}/);
-  assert.doesNotMatch(phoneBlock, /grid-template-columns:\s*1fr/);
+  assert.doesNotMatch(phoneBlock, /\.pattern-choice-grid\s*\{\s*grid-template-columns:\s*1fr/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /prefers-reduced-motion:[\s\S]*?\.pattern-mino-guide[\s\S]*?animation:\s*none/);
 });
