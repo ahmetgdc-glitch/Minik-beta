@@ -91,7 +91,7 @@
   line-height: 1;
 }
 
-.social-step-card .visual {
+.social-step-card .item-visual {
   width: min(100%, 190px);
   max-height: 190px;
 }
@@ -162,7 +162,7 @@
     text-align: center;
     min-height: 125px;
   }
-  .social-step-card .visual { max-height: 130px; }
+  .social-step-card .item-visual { max-height: 130px; }
   .social-step-arrow {
     transform: rotate(90deg);
     justify-self: center;
@@ -197,7 +197,7 @@
     border-radius: 22px;
   }
 
-  .social-step-card .visual {
+  .social-step-card .item-visual {
     width: min(100%, 96px);
     max-height: 96px;
   }
@@ -246,7 +246,7 @@
     border-radius: 22px;
   }
 
-  .social-steps-game[data-difficulty="hard"] .social-step-card.complete .visual {
+  .social-steps-game[data-difficulty="hard"] .social-step-card.complete .item-visual {
     width: min(100%, 106px);
     max-height: 106px;
   }
