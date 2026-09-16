@@ -8,6 +8,7 @@ const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const scene = fs.readFileSync(new URL("../src/worlds/SceneExplorer.jsx", import.meta.url), "utf8");
 const atlas = fs.readFileSync(new URL("../src/worlds/WorldAtlas.jsx", import.meta.url), "utf8");
 const explore = fs.readFileSync(new URL("../src/games/ExploreGame.jsx", import.meta.url), "utf8");
+const gameSession = fs.readFileSync(new URL("../src/games/GameSession.jsx", import.meta.url), "utf8");
 const profiles = fs.readFileSync(new URL("../src/parent/Profiles.jsx", import.meta.url), "utf8");
 const aquarium = fs.readFileSync(new URL("../src/rewards/Aquarium.jsx", import.meta.url), "utf8");
 
@@ -108,6 +109,23 @@ test("320px profile modal stacks long action labels instead of overflowing", () 
 test("in-game utility controls do not shrink below 44px on narrow iPhones", () => {
   assert.match(guards, /@media \(max-width: 540px\)/);
   assert.match(guards, /\.game-header \.icon-button,[\s\S]*?\.replay-audio[\s\S]*?width: 44px[\s\S]*?min-width: 44px[\s\S]*?height: 44px[\s\S]*?min-height: 44px/);
+});
+
+test("narrow iPhones stack translated finish actions instead of squeezing three buttons into one row", () => {
+  assert.match(gameSession, /className="session-finish"/);
+  assert.match(gameSession, /className="finish-actions"/);
+  for (const label of ["Ödüllerim", "Tekrar oyna", "Dünyama dön"]) {
+    assert.ok(gameSession.includes(label), `${label} should remain a visible Turkish finish action`);
+  }
+  assert.match(guards, /@media \(max-width: 430px\)/);
+  assert.match(guards, /\.session-finish \.finish-actions[\s\S]*?width: 100%[\s\S]*?flex-direction: column[\s\S]*?align-items: stretch[\s\S]*?gap: 8px/);
+  assert.match(guards, /\.session-finish \.finish-actions \.secondary[\s\S]*?width: 100%[\s\S]*?min-width: 0[\s\S]*?min-height: 48px[\s\S]*?justify-content: center/);
+});
+
+test("narrow finish recommendation owns a shrinkable text lane", () => {
+  assert.match(gameSession, /className="primary next-adventure-button"/);
+  assert.match(guards, /\.session-finish > \.next-adventure-button[\s\S]*?min-width: 0[\s\S]*?max-width: 100%[\s\S]*?grid-template-columns: auto minmax\(0, 1fr\) auto/);
+  assert.match(guards, /\.session-finish > \.next-adventure-button span[\s\S]*?min-width: 0[\s\S]*?overflow-wrap: anywhere/);
 });
 
 test("scene navigation gets an even larger child-friendly target", () => {
