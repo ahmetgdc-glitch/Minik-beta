@@ -13,3 +13,9 @@ test("tracing blocks pointer progress and reset while paused or stale", () => {
   assert.match(source, /onLostPointerCapture/);
   assert.match(source, /disabled=\{controlsDisabled\}/);
 });
+
+test("Mino trace help repeats the complete number or letter lesson", () => {
+  assert.match(source, /`\$\{target\} harfini çiz\. Yeşil noktadan başla\.`/);
+  assert.match(source, /`\$\{target\} sayısını çiz\. Yeşil noktadan başla\.`/);
+  assert.match(source, /useLesson\(onReady, text, \(\) => speak\(text, lang, settings\), \[itemId\], text\)/);
+});
