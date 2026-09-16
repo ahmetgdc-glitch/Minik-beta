@@ -1,6 +1,6 @@
 # Feste Wortaufnahmen — MINIK 1.75.0 Beta 78
 
-Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-14. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label einen **exakten festen Wortclip** in der bestehenden Sprachbibliothek besitzt. Kurze Aufgaben-Fallbacks, zusammengesetzte Hilfesätze und Voice 4 werden nicht als Wortaufnahmen gezählt. Beta 76 hält bei einem fehlenden Wortclip eine kurze feste Aufgabenansage hörbar; die Zählung der exakten Wortaufnahmen bleibt deshalb unverändert.
+Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-16. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label einen **exakten festen Wortclip** in der bestehenden Sprachbibliothek besitzt. Kurze Aufgaben-Fallbacks, zusammengesetzte Hilfesätze und Voice 4 werden nicht als Wortaufnahmen gezählt. Bei dynamischen Aufgaben darf ein fehlender Wortclip nicht mehr dazu führen, dass nur ein allgemeiner Satzbaustein ohne das eigentliche Lernziel abgespielt wird; die Zählung der exakten Wortaufnahmen bleibt dadurch unverändert.
 
 | Lernwelt | Items | DE mit festem Plan | TR mit festem Plan |
 | --- | ---: | ---: | ---: |
@@ -33,19 +33,21 @@ Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-14.
 
 Damit fehlen feste Wortpläne für **376 DE-Items** und **375 TR-Items**. Mehrere Items können dieselbe Wortaufnahme verwenden; dies ist keine Zahl eindeutiger fehlender Audiodateien.
 
-## Laufzeit-Härtung 2026-09-14
+## Laufzeit-Härtung 2026-09-16
 
-Dynamische Spielansagen sind nicht mehr nach dem Alles-oder-nichts-Prinzip aufgebaut. Wenn zum Beispiel das konkrete Lernwort noch keine feste Aufnahme hat, bleiben vorhandene feste Satzbausteine trotzdem hörbar. Ein unbekanntes türkisches Wort in `… nerede?` darf daher nicht mehr die vorhandene natürliche Ansage `Bu resmi bul.` mit stummschalten. Dasselbe gilt unter anderem für Wiederholung, Gegensätze, Anfangsbuchstaben, Sortieren und Tagesabläufe.
+Dynamische Spielansagen mit einem konkreten Lernziel folgen jetzt bewusst einem **Alles-oder-nichts-Prinzip**. Nur wenn alle semantischen Bestandteile – insbesondere das eigentliche Lernwort, die Zahl oder der Buchstabe – als feste Aufnahme verfügbar sind, wird ein zusammengesetzter fester Sprachplan verwendet. Fehlt auch nur ein solcher Bestandteil, liefert die feste Planung keinen Teilplan und `voice.js` gibt stattdessen den vollständigen Originaltext an den kontrollierten Voice-4-Fallback weiter.
 
-Für **Soziale Schritte** wird die vorhandene feste türkische Nächster-Schritt-Ansage verwendet, damit sowohl der Spieleinstieg als auch Mino-Hilfe hörbar bleiben, obwohl viele Alltagsbegriffe noch keine eigene Wortaufnahme haben. Beim **Puzzle** startet sofort die vorhandene feste visuelle Hilfe, statt zuerst auf einen nicht aufgenommenen vollständigen Satz beziehungsweise den Voice-4-Notfallpfad zu warten.
+Damit kann zum Beispiel `Oyuncak ayı nerede?` nicht mehr zu lediglich `Bu resmi bul.` verkürzt werden. Dasselbe Schutzprinzip gilt unter anderem für Wiederholung, Mino-Training, Anfangsbuchstaben, Nachsprechen, Sortieren, Gegensätze, Tagesabläufe, Story-Sätze sowie Zahlen- und Buchstaben-Nachfahren. Eine Ansage wie `C harfini çiz. Yeşil noktadan başla.` darf also niemals nur als allgemeines `İzi takip et. Yeşil noktadan başla.` übrig bleiben.
 
-`tests/partial-natural-narration.test.mjs` schützt die Teilplan-Logik. `tests/turkish-game-voice-smoke.test.mjs` prüft repräsentativ alle aktuellen Spielfamilien darauf, dass ihre türkische Startansage oder ihr expliziter fester Fallback einen hörbaren festen MINIK-Sprachplan besitzt.
+Rein allgemeine Spielanweisungen ohne konkretes verborgenes Lernziel bleiben weiterhin feste MINIK-Aufnahmen, wenn das pädagogisch korrekt ist. Dazu gehören zum Beispiel Memory, Puzzle, Schatten, Geräusche oder andere Aufgaben, bei denen das Aussprechen der Lösung die Antwort verraten würde. Die Sprachlogik unterscheidet damit zwischen einer absichtlich allgemeinen Spielanweisung und einer dynamischen Ansage, deren Zielbegriff erhalten bleiben muss.
+
+`tests/partial-natural-narration.test.mjs` schützt die verlustfreie Alles-oder-nichts-Regel für dynamische Zielansagen. `tests/turkish-game-voice-smoke.test.mjs` deckt alle 23 registrierten Spielfamilien ab und trennt bewusst zwischen zielhaltigen Ansagen, die bei fehlender Aufnahme vollständig an Voice 4 gehen müssen, und allgemeinen festen Spielanweisungen. Zusätzliche Tests sichern exakte Wiederholungen in Hören, Anfangsbuchstaben und Nachsprechen.
 
 ## Nächster P1-Schritt
 
 Die originale feste DE/TR-Sprecherkonfiguration wiederherstellen oder passende freigegebene Aufnahmen bereitstellen und zuerst türkisch **Gefühle, Kleidung, Zuhause, Menschen, Mein Tag und Alltagsaktionen** ergänzen. Im Repository ist für die vorhandenen generierten festen Clips kein reproduzierbares Sprecherprofil/Generator-Setup dokumentiert. Ein anderer Sprecher oder die persönliche Nutzerstimme wäre keine gleichwertige automatische Ergänzung.
 
-Fehlende feste Wortpläne nutzen bei dynamischen Spielaufgaben zuerst eine kurze feste Aufgabenansage und danach ausschließlich den kontrollierten Voice-4-Notfallpfad. Wenn beides nicht verfügbar ist, bleibt das Wort stumm. Ein vorhandener Lautsprecherknopf oder 332 zugeordnete Sprachbausteine beweist daher keine vollständige Vertonung aller 503 Lernobjekte.
+Fehlende feste Wortpläne nutzen bei dynamischen Spielaufgaben ausschließlich den vollständigen kontrollierten Voice-4-Notfallpfad, statt vorhandene allgemeine Satzteile alleine abzuspielen. Wenn Voice 4 auf dem Gerät nicht verfügbar ist, bleibt dieser nicht aufgenommene vollständige Text stumm; MINIK darf ihn aber niemals durch einen anderen oder verkürzten Kindersatz ersetzen. Ein vorhandener Lautsprecherknopf oder 332 zugeordnete Sprachbausteine beweist daher keine vollständige Vertonung aller 503 Lernobjekte.
 
 ## Vorhandene Quellen gesichert
 
