@@ -40,17 +40,15 @@ export default function SocialStepsGame({
     lang === "tr"
       ? `${round.title.tr}. Sonra ne yapmalıyız?`
       : `${round.title.de}. Was machen wir danach?`;
-  const spokenPrompt = lang === "tr" ? "Sonra ne gelir?" : "Was kommt danach?";
-  const help = spokenPrompt;
   const showAnswerLabels = profile.id !== "hard" || hint >= 1;
   const showSequenceLabels = profile.id === "easy" || hint >= 1;
 
   useLesson(
     onReady,
     text,
-    () => speak(spokenPrompt, lang, settings),
+    () => speak(text, lang, settings),
     round.items.map((item) => item.id),
-    help,
+    text,
   );
   const controlsDisabled = paused || interactionBlocked();
 
