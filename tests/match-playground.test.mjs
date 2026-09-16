@@ -21,6 +21,13 @@ test("matching preserves safe drag and tap placement", () => {
   assert.match(game, /data-drop-id/);
 });
 
+test("matching speaks the exact visible learning label when a source is selected", () => {
+  assert.match(game, /function selectSource\(id\)/);
+  assert.match(game, /const item = chosen\.find\(\(entry\) => entry\.id === id\)/);
+  assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /onSelect: selectSource/);
+});
+
 test("matching makes artwork substantially larger and stays phone friendly", () => {
   assert.match(css, /min-height:\s*clamp\(500px,\s*58svh,\s*650px\)/);
   assert.match(css, /height:\s*clamp\(185px,\s*24svh,\s*270px\)/);
