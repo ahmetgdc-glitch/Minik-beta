@@ -51,7 +51,9 @@ export default function PuzzleGame({
   const [selected, setSelected] = useState(null);
   const text = lang === "tr" ? "Puzzle parçalarını doğru yere sürükle." : "Ziehe die Puzzleteile an die richtige Stelle.";
   const help = lang === "tr" ? "Küçük resme bak." : "Schau auf das kleine Vorbild.";
-  useLesson(onReady, text, () => speak(help, lang, settings), [target.id], help);
+  // The first narration must match the actual task. The shorter recorded
+  // visual cue belongs only to Mino help and must never replace the lesson.
+  useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
   const url = assetUrl(settings.photos && target.variants.photo ? target.variants.photo : `assets/illustrations/${target.asset}.svg`);
   const controlsDisabled = paused || interactionBlocked();
 
