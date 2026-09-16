@@ -13,6 +13,15 @@ test("counting uses an immersive Mino meadow", () => {
   assert.match(game, /Zähl mit Mino|Mino ile say/);
 });
 
+test("Mino is visibly present in the counting world without stealing touches", () => {
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(game, /Dokun • Dinle • Say/);
+  assert.match(css, /\.count-mino-guide\s*\{[^}]*pointer-events:none/s);
+  assert.match(css, /\.count-mino-guide \.mino-avatar/);
+  assert.match(css, /\.count-meadow \.count-field::before/);
+  assert.match(css, /\.count-meadow \.count-field::after/);
+});
+
 test("counting keeps one-tap-per-object progression and natural number speech", () => {
   assert.match(game, /countedRef\.current\.includes\(i\)/);
   assert.match(game, /itemsForWorld\("numbers"\)\[countedRef\.current\.length\]\.labels\[lang\]/);
@@ -36,9 +45,12 @@ test("counting blocks object and answer interactions while paused or lifecycle-b
 
 test("count meadow keeps large responsive touch targets", () => {
   assert.match(css, /min-height:min\(72vh,820px\)|min-height: min\(72vh, 820px\)/);
+  assert.match(css, /\.count-meadow \.count-object\s*\{[\s\S]*?min-height:min\(var\(--count-height\),210px\)/);
+  assert.match(css, /@media \(max-width:700px\)[\s\S]*?\.count-meadow \.count-object \{ min-height:min\(var\(--count-height\),150px\)/);
   assert.match(css, /touch-action:manipulation|touch-action: manipulation/);
   assert.match(css, /@media \(max-width:700px\)|@media \(max-width: 700px\)/);
   assert.match(css, /prefers-reduced-motion:reduce|prefers-reduced-motion: reduce/);
+  assert.match(css, /prefers-reduced-motion:reduce[\s\S]*?\.count-mino-guide \{ animation:none/);
 });
 
 test("count meadow stylesheet is loaded in production", () => {
