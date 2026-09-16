@@ -38,6 +38,13 @@ test("German dynamic lessons never drop a missing vocabulary target", () => {
   assertNoPartialPlan(`Was sieht Mino zum Schluss? ${missing}`, "de");
 });
 
+test("trace lessons never replace their number or letter with a generic trace instruction", () => {
+  assertNoPartialPlan("3 sayısını çiz. Yeşil noktadan başla.", "tr");
+  assertNoPartialPlan("C harfini çiz. Yeşil noktadan başla.", "tr");
+  assertNoPartialPlan("Fahre die 3 nach. Starte am grünen Punkt.", "de");
+  assertNoPartialPlan("Fahre den Buchstaben C nach. Starte am grünen Punkt.", "de");
+});
+
 test("existing fully recorded Turkish vocabulary still keeps the full composed narration", () => {
   const plan = fixedNaturalVoicePlan("Kedi nerede?", "tr");
   assert.equal(plan.length, 2);
