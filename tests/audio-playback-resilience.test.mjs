@@ -147,7 +147,7 @@ for (const stall of ["start", "end"]) {
   });
 }
 
-test("cancelling a stalled download resolves speech and allows the same clip to retry", async (t) => {
+test("cancelling a stalled background decode aborts it and allows the same clip to retry", async (t) => {
   const context = audioContext();
   const window = Object.assign(new EventTarget(), {
     AudioContext: function () {
@@ -165,25 +165,21 @@ test("cancelling a stalled download resolves speech and allows the same clip to 
   };
   const { voice } = await voiceRuntime(t, { Audio: MediaAudio, window, fetch });
   assert.equal(await voice.unlockVoiceAudio(), true);
-  let result;
-  voice.speak("Löwe", "de").then((value) => {
-    result = value;
-  });
-  await nextTurn();
+  assert.equal(
+    await voice.speak("Löwe", "de"),
+    true,
+    "media playback must not wait for a stalled optional decoder",
+  );
+  assert.equal(downloadSignal?.aborted, false);
   voice.stopSpeech();
   await nextTurn();
-  assert.equal(
-    result,
-    false,
-    "stopSpeech must also settle speech still waiting for a download",
-  );
   assert.equal(downloadSignal?.aborted, true);
   stalled = false;
   assert.equal(await voice.speak("Löwe", "de"), true);
   assert.equal(
     downloads,
     2,
-    "a cancelled promise must not poison the decoded audio cache",
+    "a cancelled background decode must not poison the decoded audio cache",
   );
 });
 
@@ -210,6 +206,7 @@ test("decoded voice buffers stay within a bounded memory budget", async (t) => {
   await voice.unlockVoiceAudio();
   for (const word of ["Löwe", "Hund", "Katze", "Löwe"]) {
     assert.equal(await voice.speak(word, "de"), true);
+    await nextTurn();
   }
   assert.equal(
     downloads,
@@ -219,7 +216,7 @@ test("decoded voice buffers stay within a bounded memory budget", async (t) => {
 });
 
 for (const slowStage of ["download", "decode"]) {
-  test(`slow ${slowStage} starts the same local recording within the decode budget`, async (t) => {
+  test(`slow ${slowStage} does not delay the first local recording`, async (t) => {
     t.mock.timers.enable({ apis: ["setTimeout"] });
     let release;
     let sources = 0;
@@ -229,7 +226,7 @@ for (const slowStage of ["download", "decode"]) {
     const response = { ok: true, arrayBuffer: async () => new ArrayBuffer(16) };
     const context = audioContext({
       decodeAudioData: () => slowStage === "decode" ? delayed : Promise.resolve(buffer),
-      createBufferSource() { sources++; throw new Error("late decoder must not play"); },
+      createBufferSource() { sources++; throw new Error("background decoder must not play"); },
     });
     const window = Object.assign(new EventTarget(), { AudioContext: function () { return context; } });
     const media = [];
@@ -247,42 +244,53 @@ for (const slowStage of ["download", "decode"]) {
     await voice.unlockVoiceAudio();
     const speaking = voice.speak("Löwe", "de");
     await nextTurn();
-    t.mock.timers.tick(499);
-    await nextTurn();
-    assert.equal(media.length, 0);
-    t.mock.timers.tick(1);
-    await nextTurn();
-    assert.equal(await speaking, true);
-    assert.equal(signal.aborted, true);
-    assert.equal(media.length, 1);
+    assert.equal(media.length, 1, "HTML Audio must start without waiting for the decoder budget");
     assert.match(media[0], /^https:\/\/minik\.example\/Minik-beta\/assets\/voice\//);
+    assert.equal(await speaking, true);
+    assert.equal(signal?.aborted, false);
+    t.mock.timers.tick(500);
+    await nextTurn();
+    assert.equal(signal?.aborted, true, "the optional background decode still respects its budget");
     release(slowStage === "download" ? response : buffer);
     await nextTurn();
-    assert.equal(sources, 0, "late work cannot start a second voice");
+    assert.equal(sources, 0, "background decode can warm the cache but cannot start a second voice");
     assert.equal(media.length, 1);
   });
 }
 
-for (const failure of ["decode-stall", "source-stall", "source-error"]) {
-  test(`fixed narration survives a WebAudio ${failure} using the same recorded clip`, async (t) => {
+test("fixed narration survives a stalled background decode using the same recorded clip", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const context = audioContext({ decodeAudioData: () => new Promise(() => {}) });
+  const window = Object.assign(new EventTarget(), { AudioContext: function () { return context; } });
+  const media = [];
+  class Audio extends MediaAudio {
+    play() {
+      if (!this.src.startsWith("data:")) media.push(this.src);
+      return super.play();
+    }
+  }
+  const fetch = async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) });
+  const { voice } = await voiceRuntime(t, { Audio, window, fetch });
+  await voice.unlockVoiceAudio();
+  assert.equal(await voice.speak("Löwe", "de"), true);
+  assert.equal(media.length, 1);
+  t.mock.timers.tick(500);
+  await nextTurn();
+  assert.equal(media.length, 1, "a late decoder must never start a second copy of the word");
+});
+
+for (const failure of ["source-stall", "source-error"]) {
+  test(`cached fixed narration survives a WebAudio ${failure} using the same recorded clip`, async (t) => {
     t.mock.timers.enable({ apis: ["setTimeout"] });
+    let decoded;
+    const decodedReady = new Promise((resolve) => { decoded = resolve; });
     let sourceStopped = false;
-    const context = audioContext();
-    if (failure === "decode-stall")
-      context.decodeAudioData = () => new Promise(() => {});
-    if (failure === "source-error")
-      context.createBufferSource = () => {
-        throw new Error("interrupted audio engine");
-      };
-    if (failure === "source-stall")
-      context.createBufferSource = () => ({
-        connect() {},
-        disconnect() {},
-        start() {},
-        stop() {
-          sourceStopped = true;
-        },
-      });
+    const context = audioContext({
+      decodeAudioData: async () => {
+        decoded();
+        return { duration: 1, length: 44100, numberOfChannels: 1 };
+      },
+    });
     const window = Object.assign(new EventTarget(), {
       AudioContext: function () {
         return context;
@@ -301,10 +309,31 @@ for (const failure of ["decode-stall", "source-stall", "source-error"]) {
     });
     const { voice } = await voiceRuntime(t, { Audio, window, fetch });
     await voice.unlockVoiceAudio();
+    assert.equal(await voice.speak("Löwe", "de"), true);
+    await decodedReady;
+    await nextTurn();
+    media.length = 0;
+
+    if (failure === "source-error")
+      context.createBufferSource = () => {
+        throw new Error("interrupted audio engine");
+      };
+    if (failure === "source-stall")
+      context.createBufferSource = () => ({
+        connect() {},
+        disconnect() {},
+        start() {},
+        stop() {
+          sourceStopped = true;
+        },
+      });
+
     const speaking = voice.speak("Löwe", "de");
     await nextTurn();
-    t.mock.timers.tick(5000);
-    await nextTurn();
+    if (failure === "source-stall") {
+      t.mock.timers.tick(5000);
+      await nextTurn();
+    }
     assert.equal(await speaking, true);
     assert.equal(
       media.length,
