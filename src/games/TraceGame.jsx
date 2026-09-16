@@ -52,7 +52,7 @@ export default function TraceGame({
     ? lang === "tr" ? `${target} harfini çiz. Yeşil noktadan başla.` : `Fahre den Buchstaben ${target} nach. Starte am grünen Punkt.`
     : lang === "tr" ? `${target} sayısını çiz. Yeşil noktadan başla.` : `Fahre die ${target} nach. Starte am grünen Punkt.`;
   const itemId = isLetter ? `letters.${String(target).toLowerCase()}` : `numbers.${target}`;
-  useLesson(onReady, text, () => speak(text, lang, settings), [itemId], lang === "tr" ? "Yeşil noktayı takip et." : "Folge dem grünen Punkt.");
+  useLesson(onReady, text, () => speak(text, lang, settings), [itemId], text);
   const controlsDisabled = paused || interactionBlocked();
 
   useEffect(() => { if (paused || interactionBlocked()) down.current = false; }, [paused, interactionBlocked]);
