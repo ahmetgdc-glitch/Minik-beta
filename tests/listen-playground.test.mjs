@@ -36,9 +36,12 @@ test("listening choices preserve lifecycle locks and Mino hint emphasis", () => 
   assert.match(game, /quiet-option/);
 });
 
-test("listening replay speaks only the target word and keeps lifecycle safety", () => {
-  assert.match(game, /function repeatWord\(\)/);
-  assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
+test("listening replay always speaks only the exact target word", () => {
+  assert.match(
+    game,
+    /function repeatWord\(\)\s*\{[\s\S]*?if \(controlsDisabled\) return;[\s\S]*?speak\(target\.labels\[lang\], lang, settings\);[\s\S]*?\}/,
+  );
+  assert.doesNotMatch(game, /fixedNaturalVoicePlan/);
   assert.match(game, /onClick=\{repeatWord\}/);
 });
 
