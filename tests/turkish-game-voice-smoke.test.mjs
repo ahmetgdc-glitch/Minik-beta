@@ -6,6 +6,7 @@ import {
   fixedNaturalVoicePlan,
   isFixedNaturalVoiceClipUrl,
 } from "../src/audio/fixedNaturalVoicePlans.js";
+import { gameCatalog } from "../src/games/registry.js";
 
 const missingLabel = "HenüzKaydıOlmayanKelime";
 
@@ -17,7 +18,9 @@ const exactFallbackPrompts = [
   ["speak", `Benimle söyle: ${missingLabel}.`],
   ["opposites", `${missingLabel}. Bunun zıttı hangisi?`],
   ["dailyorder", `${missingLabel} sonrasında ne gelir?`],
-  ["story-target", `Mino en son ne görüyor? ${missingLabel}`],
+  ["story", `Mino en son ne görüyor? ${missingLabel}`],
+  ["trace", "3 sayısını çiz. Yeşil noktadan başla."],
+  ["lettertrace", "C harfini çiz. Yeşil noktadan başla."],
 ];
 
 const fixedTurkishGamePrompts = [
@@ -29,16 +32,25 @@ const fixedTurkishGamePrompts = [
   ["missing", "Hangi resim kayboldu?"],
   ["pattern", "Sırada hangi resim var?"],
   ["different", "Üç resim aynı. Farklı olanı bul."],
-  ["trace", "İzi takip et. Yeşil noktadan başla."],
   ["rhythm", "Dinle ve aynı melodiyi çal."],
   ["explore", "Bak bakalım! Resme dokun."],
   ["draw", "Büyük tuvalde boya, çiz ve hayal et."],
-  ["puzzle-fallback", "Küçük resme bak."],
-  ["socialsteps-fallback", "Sonra ne gelir?"],
+  ["puzzle", "Küçük resme bak."],
+  ["socialsteps", "Sonra ne gelir?"],
   ["story", "Mino en son ne görüyor?"],
 ];
 
-test("Turkish game prompts with a missing target preserve the complete requested speech", () => {
+test("semantic Turkish audio QA explicitly covers every registered game family", () => {
+  const covered = new Set([
+    ...exactFallbackPrompts.map(([game]) => game),
+    ...fixedTurkishGamePrompts.map(([game]) => game),
+  ]);
+  const registered = new Set(gameCatalog.map((game) => game.id));
+  assert.deepEqual([...covered].sort(), [...registered].sort());
+  assert.equal(registered.size, 23);
+});
+
+test("Turkish game prompts with semantic targets preserve the complete requested speech", () => {
   const genericPictureInstruction = fixedNaturalVoiceClip("Bu resmi bul.", "tr");
   assert.ok(genericPictureInstruction);
 
@@ -47,11 +59,11 @@ test("Turkish game prompts with a missing target preserve the complete requested
     assert.deepEqual(
       plan,
       [],
-      `${game} must use the exact Voice 4 fallback instead of dropping ${missingLabel}`,
+      `${game} must use exact Voice 4 speech instead of dropping target details: ${text}`,
     );
     assert.ok(
       !plan.includes(genericPictureInstruction),
-      `${game} must never replace the missing target with Bu resmi bul.`,
+      `${game} must never replace its target with Bu resmi bul.`,
     );
   }
 });
