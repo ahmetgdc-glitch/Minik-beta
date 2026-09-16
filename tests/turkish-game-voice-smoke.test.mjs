@@ -21,6 +21,7 @@ const exactFallbackPrompts = [
   ["story", `Mino en son ne görüyor? ${missingLabel}`],
   ["trace", "3 sayısını çiz. Yeşil noktadan başla."],
   ["lettertrace", "C harfini çiz. Yeşil noktadan başla."],
+  ["socialsteps", "Yoldan güvenle geç. Sonra ne yapmalıyız?"],
 ];
 
 const fixedTurkishGamePrompts = [
@@ -36,7 +37,6 @@ const fixedTurkishGamePrompts = [
   ["explore", "Bak bakalım! Resme dokun."],
   ["draw", "Büyük tuvalde boya, çiz ve hayal et."],
   ["puzzle", "Küçük resme bak."],
-  ["socialsteps", "Sonra ne gelir?"],
   ["story", "Mino en son ne görüyor?"],
 ];
 
