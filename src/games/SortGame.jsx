@@ -44,13 +44,17 @@ export default function SortGame({
         )[0],
     );
   const text = lang === "tr" ? "Hangi sepete ait?" : "In welchen Korb gehört das?";
+  const lessonText = `${text} ${target.labels[lang]}.`;
+  const help = lang === "tr"
+    ? `${target.labels.tr}, ${group.labels.tr} grubuna ait.`
+    : `${target.labels.de} gehört in die Gruppe ${group.labels.de}.`;
 
   useLesson(
     onReady,
     text,
-    () => speak(`${text} ${target.labels[lang]}.`, lang, settings),
+    () => speak(lessonText, lang, settings),
     [target.id],
-    group.labels[lang],
+    help,
   );
   const controlsDisabled = paused || interactionBlocked();
 
@@ -64,7 +68,7 @@ export default function SortGame({
     paused,
     interactionBlocked,
     onDrop: place,
-    onSelect: () => speak(`${text} ${target.labels[lang]}.`, lang, settings),
+    onSelect: () => speak(lessonText, lang, settings),
   });
 
   return (
