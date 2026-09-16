@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { sample, choicesFor } from "../utils/random.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 import { difficultyProfile } from "./difficulty.js";
 export default function MissingGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -57,9 +58,15 @@ export default function MissingGame({
   return (
     <div className="missing-stage-game" data-difficulty={profile.id} aria-disabled={controlsDisabled || undefined}>
       <section className="missing-stage" aria-label={text}>
-        <span className="missing-stage-label">
-          {hidden ? (lang === "tr" ? "Hangisi kayboldu?" : "Was ist verschwunden?") : (lang === "tr" ? "İyi bak ve hatırla" : "Gut anschauen und merken")}
-        </span>
+        <div className="missing-stage-head">
+          <div className={`missing-mino-guide ${hidden ? "searching" : "remembering"}`} aria-hidden="true">
+            <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+            <span className="missing-mino-cue">{hidden ? "?" : "★"}</span>
+          </div>
+          <span className="missing-stage-label">
+            {hidden ? (lang === "tr" ? "Hangisi kayboldu?" : "Was ist verschwunden?") : (lang === "tr" ? "İyi bak ve hatırla" : "Gut anschauen und merken")}
+          </span>
+        </div>
         <div className="missing-object-row">
           {row.map((x) => {
             const vanished = hidden && x.id === target.id && hint < 3;
