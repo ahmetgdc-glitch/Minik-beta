@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { speak } from "../audio/voice.js";
-import { fixedNaturalVoicePlan } from "../audio/fixedNaturalVoicePlans.js";
 import Visual from "../components/Visual.jsx";
 import { sample, shuffle } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
@@ -62,13 +61,9 @@ export default function InitialLetterGame({
 
   function hearTarget() {
     if (blocked()) return;
-    // Keep the short word replay for covered vocabulary. Otherwise the full
-    // question reaches the shared recorded-instruction fallback.
-    if (fixedNaturalVoicePlan(target.labels[lang], lang).length) {
-      speak(target.labels[lang], lang, settings);
-      return;
-    }
-    speak(prompt, lang, settings);
+    // The replay affordance names the learning target itself. Missing fixed
+    // recordings are handled centrally by voice.js with exact-text Voice 4.
+    speak(target.labels[lang], lang, settings);
   }
 
   function handleTargetKeyDown(event) {
