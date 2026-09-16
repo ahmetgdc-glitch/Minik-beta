@@ -24,8 +24,13 @@ test("all sorting basket category labels have natural Mino voice in DE and TR", 
   assert.equal(categoryVoiceClipCount, 14);
 });
 
-test("SortGame continues to use the destination world label as help", () => {
-  assert.match(sort, /group\.labels\[lang\]/);
+test("SortGame help names both the learning target and destination group", () => {
+  assert.match(sort, /const lessonText = `\$\{text\} \$\{target\.labels\[lang\]\}\.``?;/);
+  assert.match(sort, /target\.labels\.tr/);
+  assert.match(sort, /target\.labels\.de/);
+  assert.match(sort, /group\.labels\.tr/);
+  assert.match(sort, /group\.labels\.de/);
+  assert.match(sort, /useLesson\([\s\S]*?\[target\.id\],[\s\S]*?help,/);
 });
 
 test("category voice participates in offline production localization", () => {
