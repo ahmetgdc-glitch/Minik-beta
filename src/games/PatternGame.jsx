@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { sample, choicesFor } from "../utils/random.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 import { difficultyProfile } from "./difficulty.js";
 export default function PatternGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -43,7 +44,13 @@ export default function PatternGame({
   return (
     <div className="pattern-path-game" data-difficulty={profile.id} aria-disabled={controlsDisabled || undefined}>
       <section className="pattern-path-stage" aria-label={text}>
-        <span className="pattern-path-label">{lang === "tr" ? "Deseni takip et" : "Folge dem Muster"}</span>
+        <div className="pattern-path-head">
+          <div className="pattern-mino-guide" aria-hidden="true">
+            <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+            <span className="pattern-mino-thought">?</span>
+          </div>
+          <span className="pattern-path-label">{lang === "tr" ? "Deseni takip et" : "Folge dem Muster"}</span>
+        </div>
         <div className="pattern-path-sequence">
           {sequence.map((i, k) => (
             <React.Fragment key={k}>
