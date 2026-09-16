@@ -33,6 +33,13 @@ export default function MatchGame({
   );
   const controlsDisabled = paused || interactionBlocked();
 
+  function selectSource(id) {
+    if (paused || interactionBlocked() || matchedRef.current.includes(id)) return;
+    setSelected(id);
+    const item = chosen.find((entry) => entry.id === id);
+    if (item) speak(item.labels[lang], lang, settings);
+  }
+
   function drop(source, target) {
     if (paused || interactionBlocked()) return;
     const result = placePair(matchedRef.current, source, target, chosen.map(x => x.id));
@@ -43,7 +50,7 @@ export default function MatchGame({
       if (result.matched.length === chosen.length) onSolve(chosen.map(x => x.id));
     } else if (result.outcome === "retry") onWrong([source]);
   }
-  const placement = useDragPlacement({ paused, interactionBlocked, onDrop: drop, onSelect: setSelected });
+  const placement = useDragPlacement({ paused, interactionBlocked, onDrop: drop, onSelect: selectSource });
   const help = selected || chosen.find((x) => !matched.includes(x.id))?.id;
   const progressLabel = lang === "tr" ? `${matched.length} / ${chosen.length} eş bulundu` : `${matched.length} / ${chosen.length} Paare gefunden`;
   return (
