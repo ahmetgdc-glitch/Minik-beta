@@ -15,6 +15,8 @@ const story = readGame("StoryGame.jsx");
 const trace = readGame("TraceGame.jsx");
 const socialSteps = readGame("SocialStepsGame.jsx");
 const puzzle = readGame("PuzzleGame.jsx");
+const sounds = readGame("SoundsGame.jsx");
+const rhythm = readGame("RhythmGame.jsx");
 
 function mustContain(source, snippets, game) {
   for (const snippet of snippets) {
@@ -116,4 +118,24 @@ test("puzzle speaks the real task first and reserves the short cue for Mino help
     "useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help)",
   ], "puzzle");
   assert.doesNotMatch(puzzle, /useLesson\(onReady, text, \(\) => speak\(help,/u);
+});
+
+test("sound and rhythm games explain the task before playing the nonverbal cue", () => {
+  mustContain(sounds, [
+    "lang === \"tr\" ? \"Dinle. Bu ne sesi?\" : \"Hör genau hin. Was klingt so?\"",
+    "async function playLesson()",
+    "await speak(text, lang, settings)",
+    "await repeat()",
+    "useLesson(onReady, text, playLesson, [target.id], help)",
+    "onClick={repeat}",
+  ], "sounds");
+  mustContain(rhythm, [
+    "? \"Dinle ve aynı melodiyi çal.\"",
+    ": \"Hör zu und spiele die Melodie nach.\";",
+    "async function playLesson()",
+    "await speak(text, lang, settings)",
+    "await repeat()",
+    "playLesson,",
+    "onClick={repeat}",
+  ], "rhythm");
 });
