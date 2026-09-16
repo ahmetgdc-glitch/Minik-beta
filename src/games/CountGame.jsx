@@ -3,12 +3,13 @@ import { Sparkles } from "lucide-react";
 import { sample, choicesFor } from "../utils/random.js";
 import { itemsForWorld } from "../data/content.js";
 import { useLesson, OptionGrid } from "./shared.jsx";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 import { difficultyProfile } from "./difficulty.js";
 
 export default function CountGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -38,8 +39,12 @@ export default function CountGame({
   return (
     <section className="count-playground count-meadow" data-difficulty={profile.id} aria-label={text} aria-disabled={controlsDisabled || undefined}>
       <header className="count-meadow-header">
-        <span className="count-meadow-badge" aria-hidden="true"><Sparkles size={24} /></span>
-        <div>
+        <div className={`count-mino-guide ${allCounted ? "ready" : ""}`} aria-hidden="true">
+          <span className="count-mino-spark"><Sparkles size={23} /></span>
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
+        <div className="count-meadow-copy">
+          <span className="count-meadow-kicker">{lang === "tr" ? "Dokun • Dinle • Say" : "Tippen • Hören • Zählen"}</span>
           <strong>{lang === "tr" ? "Mino ile say" : "Zähl mit Mino"}</strong>
           <span aria-live="polite">{allCounted ? (lang === "tr" ? "Hepsini saydın! Şimdi sayıyı seç." : "Alle gezählt! Wähle jetzt die Zahl.") : (lang === "tr" ? `${countProgress} sayıldı` : `${countProgress} gezählt`)}</span>
         </div>
