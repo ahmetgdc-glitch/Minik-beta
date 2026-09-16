@@ -91,11 +91,12 @@ function recordedClip(text, lang) {
 }
 
 function resolve(parts, lang) {
-  // A dynamic lesson must not become completely silent just because one
-  // vocabulary item has no fixed recording yet. Keep every recorded fragment
-  // in order; this preserves the natural MINIK instruction/help voice while
-  // untranslated vocabulary coverage is expanded separately.
-  return parts.map((part) => recordedClip(part, lang)).filter(Boolean);
+  // Never drop a missing learning word from a dynamic sentence. Partial audio
+  // can turn "Oyuncak ayı nerede?" into only "Bu resmi bul.", which teaches
+  // the wrong thing. If any semantic part is missing, return no fixed plan so
+  // voice.js speaks the complete original text through the approved fallback.
+  const clips = parts.map((part) => recordedClip(part, lang));
+  return clips.length && clips.every(Boolean) ? clips : [];
 }
 
 export function naturalVoicePlan(text, lang = "de") {
@@ -124,8 +125,8 @@ export function naturalVoicePlan(text, lang = "de") {
   let match;
   if (lang === "tr") {
     // Story narration is assembled at runtime from one, two, or three labels.
-    // Keep every spoken word on the owner's recorded track whenever those
-    // labels are available, instead of sending the whole sentence to iOS.
+    // Use fixed clips only when every spoken label is available; otherwise the
+    // complete original sentence stays intact for the exact fallback voice.
     match = value.match(/^Mino\s+önce\s+(.+?),\s*sonra\s+(.+?)\s+ve en son\s+(.+?)\s+görüyor\.$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
     match = value.match(/^Mino\s+önce\s+(.+?)\s+ve sonra\s+(.+?)\s+görüyor\.$/u);
@@ -156,9 +157,8 @@ export function naturalVoicePlan(text, lang = "de") {
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
     if (/Yeşil noktadan başla\.?$/u.test(value)) return resolve(["İzi takip et. Yeşil noktadan başla."], lang);
   } else {
-    // Story narration is assembled at runtime from one, two, or three labels.
-    // Resolve the labels separately so available personal recordings remain
-    // the first choice even when the sentence itself is dynamic.
+    // German dynamic narration follows the same all-or-nothing rule so a
+    // missing target can never leave only a generic instruction behind.
     match = value.match(/^Mino sieht zuerst\s+(.+?),\s*dann\s+(.+?)\s+und zum Schluss\s+(.+?)\.$/u);
     if (match) return resolve([stripEnd(match[1]), stripEnd(match[2]), stripEnd(match[3])], lang);
     match = value.match(/^Mino sieht zuerst\s+(.+?)\s+und dann\s+(.+?)\.$/u);
