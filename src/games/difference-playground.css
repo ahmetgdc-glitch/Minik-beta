@@ -113,7 +113,7 @@
   transform: scale(.97);
 }
 
-.difference-playground .different-tile .visual {
+.difference-playground .different-tile .item-visual {
   position: relative;
   z-index: 1;
   width: min(72%, 250px);
@@ -174,7 +174,7 @@
     aspect-ratio: 1 / 1;
     border-radius: 24px;
   }
-  .difference-playground .different-tile .visual {
+  .difference-playground .different-tile .item-visual {
     width: 78%;
     height: 78%;
   }
