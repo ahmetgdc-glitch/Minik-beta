@@ -18,14 +18,19 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
   const blocked = interactionBlocked();
   const showAssistedFallback = Boolean(issue && issue.kind !== "silence");
 
-  function repeat() {
+  function playLesson() {
     if (paused || blocked || listening) return;
-    // Keep the task instruction with the word. If a future learning word has
-    // no fixed clip yet, the shared narrator can still play its recorded
-    // Turkish/German instruction instead of becoming silent.
     speak(prompt, lang, settings);
   }
-  useLesson(onReady, prompt, repeat, [target?.id].filter(Boolean), prompt);
+
+  function repeatWord() {
+    if (paused || blocked || listening) return;
+    // The replay button promises the word itself. Missing fixed recordings are
+    // handled centrally by the exact-text Voice 4 fallback.
+    speak(expected, lang, settings);
+  }
+
+  useLesson(onReady, prompt, playLesson, [target?.id].filter(Boolean), prompt);
 
   function stopRecognition() {
     const rec = recognitionRef.current;
@@ -112,7 +117,7 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
       <div className="speak-hero">
         <Visual item={target} lang={lang} photos={settings.photos} />
         <strong>{expected}</strong>
-        <button className="speak-repeat" onClick={repeat} disabled={listening || paused || blocked} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
+        <button className="speak-repeat" onClick={repeatWord} disabled={listening || paused || blocked} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
           <Volume2 size={28} />
         </button>
       </div>
