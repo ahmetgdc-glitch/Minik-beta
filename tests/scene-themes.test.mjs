@@ -82,7 +82,7 @@ test("major preschool world families receive distinct visual moods", () => {
 test("discovery scenes render non-interactive world landmarks behind the learning object", () => {
   assert.match(
     explorer,
-    /<WorldScenery worldId=\{worldId\} active=\{Boolean\(speakingId\)\}/,
+    /<WorldScenery[\s\S]*?worldId=\{worldId\}[\s\S]*?active=\{Boolean\(speakingId\)\}[\s\S]*?discovered=\{found\.length\}[\s\S]*?\/>/,
   );
   assert.match(scenery, /decorationsForWorld\(worldId\)/);
   assert.match(scenery, /aria-hidden="true"/);
