@@ -73,8 +73,9 @@ test("hard story and routine games increase memory load and reduce visual text c
   assert.match(story, /choicesFor\(target, items, profile\.options\)/);
   assert.match(daily, /const showAnswerLabels = hint >= 3/);
   assert.match(daily, /choicesFor\(pair\[1\], items\.filter\(\(x\) => x\.id !== pair\[0\]\.id\), profile\.options\)/);
-  assert.match(social, /profile\.id !== "hard" \|\| hint >= 1/);
+  assert.match(social, /const showAnswerLabels = hint >= 3/);
   assert.match(social, /profile\.id === "easy" \|\| hint >= 1/);
+  assert.match(social, /aria-label=\{item\.labels\[lang\]\}/);
   assert.match(opposites, /const showAnswerLabels = hint >= 3/);
   assert.match(opposites, /aria-label=\{item\.labels\[lang\]\}/);
   assert.match(initialLetter, /const optionCount = profile\.options/);
