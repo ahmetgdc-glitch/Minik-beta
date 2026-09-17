@@ -53,7 +53,9 @@ const bundleCache = new Map();
 const assetCache = new Set();
 const ASSET_TIMEOUT_MS = 9000;
 const PRELOAD_CONCURRENCY = 6;
-const MIN_LOADING_MS = 450;
+// Keep the prepared state visible long enough to be perceived on fast/cached
+// phones. Without this, a ~450 ms transition can look like no loader at all.
+const MIN_LOADING_MS = 900;
 
 function baseAssetUrl(path) {
   const base = import.meta.env?.BASE_URL || "/";
