@@ -65,7 +65,7 @@ test("background return rearms voice and WebAudio on the next real gesture witho
   assert.doesNotMatch(resume, /unlockVoiceAudio\(\)/);
   assert.doesNotMatch(resume, /startMusic\(\)/);
 
-  assert.match(prime, /if \(wantsEffects \|\| wantsMusic\) unlockAudio\(\)/);
+  assert.match(prime, /if \(wantsVoice \|\| wantsEffects \|\| wantsMusic\) unlockAudio\(\)/);
   assert.match(prime, /unlockVoiceAudio\(\)\.then/);
   assert.match(source, /window\.addEventListener\("pointerdown", prime, true\)/);
 });
