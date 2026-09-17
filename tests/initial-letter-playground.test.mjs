@@ -29,8 +29,8 @@ test("initial-letter target always replays the exact spoken learning word", () =
     game,
     /function hearTarget\(\)\s*\{[\s\S]*?if \(blocked\(\)\) return;[\s\S]*?speak\(target\.labels\[lang\], lang, settings\);[\s\S]*?\}/,
   );
-  assert.match(game, /`${target\.labels\.tr} hangi harfle başlıyor\?`/);
-  assert.match(game, /`Mit welchem Buchstaben beginnt \${target\.labels\.de}\?`/);
+  assert.match(game, /`\$\{target\.labels\.tr\} hangi harfle başlıyor\?`/);
+  assert.match(game, /`Mit welchem Buchstaben beginnt \$\{target\.labels\.de\}\?`/);
   assert.doesNotMatch(game, /fixedNaturalVoicePlan/);
   assert.match(game, /onClick=\{hearTarget\}/);
   assert.match(game, /onKeyDown=\{handleTargetKeyDown\}/);
