@@ -37,12 +37,13 @@ test("failed assets keep the child behind the loader instead of starting half-lo
   assert.match(wrapper, /Noch einmal versuchen/);
 });
 
-test("loading screen is Turkish-first capable, progressive and motion-safe", () => {
+test("loading screen is Turkish-first capable, progressive, perceptible and motion-safe", () => {
   assert.match(wrapper, /Oyun hazırlanıyor/);
   assert.match(wrapper, /Resimler, sesler ve oyun alanı yükleniyor/);
   assert.match(wrapper, /role="progressbar"/);
   assert.match(wrapper, /aria-valuenow=\{percent\}/);
-  assert.match(wrapper, /MIN_LOADING_MS = 450/);
+  assert.match(wrapper, /MIN_LOADING_MS = 900/);
+  assert.match(wrapper, /Math\.max\(0, MIN_LOADING_MS - \(Date\.now\(\) - started\)\)/);
   assert.match(styles, /\.game-preload-screen/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
 });
