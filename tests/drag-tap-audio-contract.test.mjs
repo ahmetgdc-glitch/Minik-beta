@@ -41,6 +41,11 @@ test("matching highlights on pointer start but only speaks through the tap callb
   assert.match(match, /speak\(item\.labels\[lang\], lang, settings\)/);
 });
 
+test("matching clears a stale source after a wrong pair", () => {
+  const drop = between(match, "function drop", "function tapTarget");
+  assert.match(drop, /result\.outcome === "retry"[\s\S]*?setSelected\(null\)[\s\S]*?onWrong\(\[source\]\)/);
+});
+
 test("matching keeps its explicit iOS drag guard as defense in depth", () => {
   const sourceButton = between(match, "className={`match-source", "aria-pressed={selected === item.id}");
   assert.match(sourceButton, /style=\{\{ touchAction: "none" \}\}/);
