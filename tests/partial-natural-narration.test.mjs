@@ -1,10 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import {
-  fixedNaturalVoicePlan,
-  isFixedNaturalVoiceClipUrl,
-} from "../src/audio/fixedNaturalVoicePlans.js";
+import { fixedNaturalVoicePlan } from "../src/audio/fixedNaturalVoicePlans.js";
 
 function assertNoPartialPlan(text, lang) {
   assert.deepEqual(
@@ -45,8 +42,7 @@ test("trace lessons never replace their number or letter with a generic trace in
   assertNoPartialPlan("Fahre den Buchstaben C nach. Starte am grünen Punkt.", "de");
 });
 
-test("existing fully recorded Turkish vocabulary still keeps the full composed narration", () => {
-  const plan = fixedNaturalVoicePlan("Kedi nerede?", "tr");
-  assert.equal(plan.length, 2);
-  assert.ok(plan.every(isFixedNaturalVoiceClipUrl));
+test("recorded vocabulary still uses Voice 4 when the complete dynamic sentence is not recorded", () => {
+  assertNoPartialPlan("Kedi nerede?", "tr");
+  assertNoPartialPlan("Finde: Katze.", "de");
 });
