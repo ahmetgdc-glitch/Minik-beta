@@ -63,13 +63,14 @@ export function useDragPlacement({ paused, interactionBlocked, onDragStart, onSe
     suppressClick.current = true;
     release();
     setDrag(null);
-    if (blocked()) return;
+    if (blocked()) { clearDragSelection(); return; }
     if (!next.moved) {
       latest.current.onSelect?.(next.id);
       return;
     }
     const target = dropTarget(next.x, next.y);
     if (target) latest.current.onDrop(next.id, target);
+    else clearDragSelection();
   }
   useEffect(() => { if (paused) cancel(); }, [paused]);
   useEffect(() => {
