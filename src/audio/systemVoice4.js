@@ -346,12 +346,17 @@ export function stopSystemVoice4() {
   voice4Sequence += 1;
   const synth = activeSynth;
   const finish = activeAttemptFinish;
+  const hadActiveAttempt = Boolean(synth || finish || activeUtterance);
   activeSynth = null;
   activeAttemptFinish = null;
   finish?.(false);
   try { synth?.cancel?.(); } catch {}
   const currentSynth = engine();
-  if (currentSynth && currentSynth !== synth) {
+  // Do not cancel an otherwise idle Safari speech engine. MINIK deliberately
+  // primes that engine synchronously inside the child's gesture; cancelling it
+  // here before any Voice 4 attempt exists can erase the gesture authorization
+  // that fallback-only game prompts need after the loading screen.
+  if (hadActiveAttempt && currentSynth && currentSynth !== synth) {
     try { currentSynth.cancel?.(); } catch {}
   }
   activeUtterance = null;
@@ -413,7 +418,8 @@ function playVoice4Attempt(text, lang, settings, voice, isCurrent) {
       };
       utterance.onend = () => finish(true);
       utterance.onerror = () => finish(false);
-      synth.cancel();
+      // A fresh Voice 4 attempt must not clear Safari's untracked silent
+      // gesture-prime. Any previous MINIK attempt was already cancelled above.
       watchdog = setTimeout(() => {
         try { synth.cancel(); } catch {}
         finish(false);

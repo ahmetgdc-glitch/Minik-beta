@@ -1,4 +1,6 @@
 let primedSynth = null;
+let primedAt = 0;
+const REPRIME_AFTER_MS = 15000;
 
 function isIOSSpeechEnvironment() {
   if (typeof navigator === "undefined") return false;
@@ -16,13 +18,16 @@ function isIOSSpeechEnvironment() {
  *
  * This deliberately does not choose a fallback voice and never cancels active
  * narration. It only removes Safari's first-speech gesture restriction.
+ * A long-idle PWA is allowed to re-prime on a later real gesture because iOS
+ * may revoke media/speech readiness after sleep without replacing the engine.
  */
 export function primeSystemSpeechForIOS() {
   if (!isIOSSpeechEnvironment()) return true;
   const synth = typeof globalThis !== "undefined" ? globalThis.speechSynthesis || null : null;
   const Utterance = typeof globalThis !== "undefined" ? globalThis.SpeechSynthesisUtterance || null : null;
   if (!synth || !Utterance || typeof synth.speak !== "function") return false;
-  if (primedSynth === synth) return true;
+  const now = Date.now();
+  if (primedSynth === synth && now - primedAt < REPRIME_AFTER_MS) return true;
 
   try {
     const utterance = new Utterance(" ");
@@ -30,6 +35,7 @@ export function primeSystemSpeechForIOS() {
     utterance.rate = 10;
     synth.speak(utterance);
     primedSynth = synth;
+    primedAt = now;
     return true;
   } catch {
     return false;

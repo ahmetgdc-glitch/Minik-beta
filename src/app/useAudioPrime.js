@@ -35,7 +35,11 @@ export function useAudioPrime(voiceEnabled = true, sfxEnabled = true) {
       // iOS requires the speech prime to happen inside the real gesture.
       if (wantsVoice) primeSystemSpeechForIOS();
 
-      if (wantsEffects || wantsMusic) unlockAudio();
+      // Some learning content (Geräusche/Rhythmus) uses WebAudio even when the
+      // optional reward-SFX switch is off. Main narration audio therefore also
+      // primes WebAudio so those games never create a suspended context later,
+      // outside the child's real gesture.
+      if (wantsVoice || wantsEffects || wantsMusic) unlockAudio();
       if (wantsMusic) startMusic();
 
       // Keep lightweight gesture listeners mounted. Settings can change while
