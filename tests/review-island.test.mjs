@@ -26,6 +26,14 @@ test("review target can be replayed as speech without leaking visual answer", ()
   assert.match(game, /kelimesini tekrar dinle|noch einmal anhören/);
 });
 
+test("review keeps the visible Mino guide generic while narration names the target", () => {
+  assert.match(game, /const displayText = lang === "tr"/);
+  assert.match(game, /"Kelimeyi dinle ve doğru resmi bul\."/);
+  assert.match(game, /"Hör das Wort und finde das richtige Bild\."/);
+  assert.match(game, /useLesson\(onReady, displayText, \(\) => speak\(text, lang, settings\), \[target\.id\], help\)/);
+  assert.match(game, /<p className="review-island__subtitle">\{displayText\}<\/p>/);
+});
+
 test("review answers use dedicated visual training islands instead of shared answer cards", () => {
   assert.match(game, /review-island__choices/);
   assert.match(game, /className=\{`review-island__choice review-choice-/);
@@ -34,6 +42,12 @@ test("review answers use dedicated visual training islands instead of shared ans
   assert.match(css, /\.review-island__choice \{/);
   assert.match(css, /min-height: clamp\(200px, 29svh, 310px\)/);
   assert.match(css, /\.review-island__choices\.choices-6 \{ grid-template-columns: repeat\(3, minmax\(0, 1fr\)\); \}/);
+});
+
+test("review answers stay visually label-free until demonstration help", () => {
+  assert.match(game, /\{hint >= 3 && <b>\{item\.labels\[lang\]\}<\/b>\}/);
+  assert.doesNotMatch(game, /<Visual item=\{item\}[^>]*\/\>\s*<b>\{item\.labels\[lang\]\}<\/b>/);
+  assert.match(game, /aria-label=\{item\.labels\[lang\]\}/);
 });
 
 test("review choices preserve lifecycle locks and Mino hint emphasis", () => {

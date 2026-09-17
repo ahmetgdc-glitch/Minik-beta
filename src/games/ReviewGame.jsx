@@ -31,6 +31,12 @@ export default function ReviewGame({
   const text = lang === "tr"
     ? `${target.labels.tr} nerede? Bir kez daha hatırlayalım.`
     : `Wo ist ${target.labels.de}? Das wiederholen wir noch einmal.`;
+  // Review is listening-first too: keep the visible guide generic so the
+  // target word is learned from Mino's voice instead of being readable before
+  // the child answers. The exact target-specific sentence is still narrated.
+  const displayText = lang === "tr"
+    ? "Kelimeyi dinle ve doğru resmi bul."
+    : "Hör das Wort und finde das richtige Bild.";
   const help = lang === "tr" ? `${target.labels.tr}. Bu resmi seç.` : `${target.labels.de}. Tippe auf dieses Bild.`;
   const badge = state.level === "practice"
     ? (lang === "tr" ? "Biraz daha çalışalım" : "Das üben wir noch")
@@ -38,7 +44,7 @@ export default function ReviewGame({
       ? (lang === "tr" ? "Öğreniyorum" : "Lerne ich")
       : (lang === "tr" ? "Tekrar turu" : "Wiederholungsrunde");
 
-  useLesson(onReady, text, () => speak(text, lang, settings), [target.id], help);
+  useLesson(onReady, displayText, () => speak(text, lang, settings), [target.id], help);
   const controlsDisabled = paused || interactionBlocked();
   const quietOption = options.find((item) => item.id !== target.id);
 
@@ -69,11 +75,7 @@ export default function ReviewGame({
           <h3 className="review-island__title">
             {lang === "tr" ? "Mino ile tekrar zamanı" : "Trainingszeit mit Mino"}
           </h3>
-          <p className="review-island__subtitle">
-            {lang === "tr"
-              ? "Kelimeyi dinle, doğru resmi bul ve öğrendiğini güçlendir."
-              : "Hör das Wort, finde das richtige Bild und festige, was du schon gelernt hast."}
-          </p>
+          <p className="review-island__subtitle">{displayText}</p>
         </div>
         <div className="review-island__mino" aria-hidden="true">
           <span className="review-island__mino-glow" />
@@ -97,7 +99,7 @@ export default function ReviewGame({
             >
               <span className="review-island__choice-glow" aria-hidden="true" />
               <Visual item={item} lang={lang} photos={settings.photos} />
-              <b>{item.labels[lang]}</b>
+              {hint >= 3 && <b>{item.labels[lang]}</b>}
             </button>
           );
         })}

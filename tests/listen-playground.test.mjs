@@ -27,6 +27,14 @@ test("listening choices are dedicated visual islands instead of the shared answe
   assert.match(css, /\.listen-choice-field\.choices-6\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)\}/);
 });
 
+test("listening keeps the visible Mino guide generic while narration names the target", () => {
+  assert.match(game, /const displayText = lang === "tr"/);
+  assert.match(game, /"İyi dinle ve doğru resmi bul\."/);
+  assert.match(game, /"Hör genau hin und finde das passende Bild\."/);
+  assert.match(game, /useLesson\(\s*onReady,\s*displayText,\s*\(\) => speak\(text, lang, settings\),\s*\[target\.id\],\s*text,/);
+  assert.match(game, /<small>\{displayText\}<\/small>/);
+});
+
 test("listening choices preserve lifecycle locks and Mino hint emphasis", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
   assert.match(game, /if \(controlsDisabled\) return/);

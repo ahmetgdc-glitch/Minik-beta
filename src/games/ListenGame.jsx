@@ -22,9 +22,15 @@ export default function ListenGame({
     lang === "tr"
       ? `${target.labels.tr} nerede?`
       : `Finde: ${target.labels.de}.`;
+  // Keep the on-screen Mino bubble from spelling out the answer. The narrator
+  // still speaks the complete target-specific sentence below; stronger help can
+  // reveal that concrete text only after the child actually needs assistance.
+  const displayText = lang === "tr"
+    ? "İyi dinle ve doğru resmi bul."
+    : "Hör genau hin und finde das passende Bild.";
   useLesson(
     onReady,
-    text,
+    displayText,
     () => speak(text, lang, settings),
     [target.id],
     text,
@@ -51,7 +57,7 @@ export default function ListenGame({
         <div className="listen-stage-copy">
           <span className="listen-badge"><Headphones size={20} /> {lang === "tr" ? "Kulaklarını aç" : "Ohren auf"}</span>
           <strong>{lang === "tr" ? "Mino bir kelime söylüyor" : "Mino sagt dir ein Wort"}</strong>
-          <small>{lang === "tr" ? "İyi dinle ve doğru resmi bul." : "Hör genau hin und finde das passende Bild."}</small>
+          <small>{displayText}</small>
         </div>
         <div className="listen-mino" aria-hidden="true">
           <span className="listen-mino-ring" />
