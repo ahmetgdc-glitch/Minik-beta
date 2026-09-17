@@ -1,0 +1,88 @@
+.game-preload-screen {
+  min-height: 100svh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  padding: calc(22px + env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background:
+    radial-gradient(circle at 22% 18%, #fff9c8 0 8%, transparent 9%),
+    radial-gradient(circle at 82% 20%, #d8f3ff 0 10%, transparent 11%),
+    linear-gradient(180deg, #e7faf4, #dff4ff);
+}
+
+.game-preload-card {
+  width: min(560px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: clamp(24px, 5vw, 44px);
+  border-radius: 38px;
+  background: #fffffff0;
+  box-shadow: 0 22px 54px #315d6b26;
+  text-align: center;
+  color: #245b69;
+}
+
+.game-preload-card .mino {
+  width: clamp(150px, 34vw, 250px);
+  height: clamp(150px, 34vw, 250px);
+  animation: minik-preload-bob 1.05s ease-in-out infinite alternate;
+}
+
+.game-preload-card h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 5vw, 2rem);
+}
+
+.game-preload-card p {
+  margin: 0;
+  max-width: 420px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.game-preload-progress {
+  width: min(380px, 90%);
+  height: 18px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dcebed;
+  box-shadow: inset 0 2px 5px #234d5a1f;
+}
+
+.game-preload-progress > span {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #5ec8b1, #5cb8ef);
+  transition: width .18s ease-out;
+}
+
+.game-preload-card > b {
+  min-width: 58px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: #eef9f7;
+  font-variant-numeric: tabular-nums;
+}
+
+.game-preload-card .primary {
+  margin-top: 4px;
+}
+
+@keyframes minik-preload-bob {
+  to { transform: translateY(-8px) rotate(2deg); }
+}
+
+@media (max-width: 520px) {
+  .game-preload-card {
+    border-radius: 30px;
+    padding: 24px 18px 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-preload-card .mino { animation: none; }
+  .game-preload-progress > span { transition: none; }
+}

@@ -35,7 +35,7 @@ import WorldScreen from "./worlds/WorldScreen.jsx";
 import Aquarium from "./rewards/Aquarium.jsx";
 import Parents from "./parent/Parents.jsx";
 import Profiles from "./parent/Profiles.jsx";
-import GameSession from "./games/GameSession.jsx";
+import PreparedGameSession from "./games/PreparedGameSession.jsx";
 export default function App() {
   const progress = useProgress(),
     lang = progress.settings.lang,
@@ -128,7 +128,7 @@ export default function App() {
   if (playing && validGame)
     return (
       <main className="game-shell">
-        <GameSession
+        <PreparedGameSession
           key={`${progress.activeProfileId}-${progress.activeProfile?.ageGroup}-${progress.settings.adaptive ? "adaptive" : `fixed-${progress.settings.options}`}-${arg}-${third}-${fourth || route}-${lang}`}
           gameId={arg}
           worldId={third}
