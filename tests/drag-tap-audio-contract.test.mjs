@@ -36,6 +36,11 @@ test("matching highlights on pointer start but only speaks through the tap callb
   assert.match(match, /speak\(item\.labels\[lang\], lang, settings\)/);
 });
 
+test("matching source owns its touch gesture so iOS does not turn a drag into page scrolling", () => {
+  const sourceButton = between(match, "className={`match-source", "aria-pressed={selected === item.id}");
+  assert.match(sourceButton, /style=\{\{ touchAction: "none" \}\}/);
+});
+
 test("sorting no longer narrates just because a child starts dragging", () => {
   assert.match(sort, /onSelect: \(\) => speak\(lessonText, lang, settings\)/);
   assert.doesNotMatch(sort, /onDragStart:/);

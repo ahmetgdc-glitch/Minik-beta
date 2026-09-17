@@ -57,9 +57,6 @@ export default function MatchGame({
       drop(selected, item.id);
       return;
     }
-    // A child may explore either copy first. Speak the exact visible learning
-    // word instead of doing nothing; voice.js keeps the natural MINIK clip
-    // first and falls back to Voice 4 with this same exact label when needed.
     speak(item.labels[lang], lang, settings);
   }
 
@@ -91,6 +88,7 @@ export default function MatchGame({
                 className={`match-source ${matched.includes(item.id) ? "placed" : ""} ${selected === item.id ? "selected" : ""}`}
                 disabled={controlsDisabled || matched.includes(item.id)}
                 aria-label={`${item.labels[lang]} ${lang === "tr" ? "seç" : "auswählen"}`}
+                style={{ touchAction: "none" }}
                 {...placement.sourceProps(item.id)}
                 aria-pressed={selected === item.id}
               >
