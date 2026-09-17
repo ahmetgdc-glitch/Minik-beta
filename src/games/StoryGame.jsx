@@ -160,6 +160,7 @@ export default function StoryGame({
           </div>
           <OptionGrid
             {...{ options, target, hint, lang, settings }}
+            hiddenLabels={hint < 3}
             disabled={controlsDisabled}
             onPick={pick}
           />
