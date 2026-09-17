@@ -47,7 +47,7 @@ export default function InitialLetterGame({
       : `Mit welchem Buchstaben beginnt ${target.labels.de}?`;
   // Do not print the target word before the child has listened: showing it
   // would reveal the correct first letter. The full word still stays in the
-  // spoken prompt, and becomes visible once Mino's stronger help is active.
+  // spoken prompt, and becomes visible only with Mino's demonstration help.
   const displayPrompt =
     lang === "tr"
       ? "Bu kelime hangi harfle başlıyor?"
@@ -100,7 +100,7 @@ export default function InitialLetterGame({
         onKeyDown={handleTargetKeyDown}
       >
         <Visual item={target} lang={lang} photos={settings.photos} />
-        {hint >= 2 && <strong className="initial-letter-word-hint">{target.labels[lang]}</strong>}
+        {hint >= 3 && <strong className="initial-letter-word-hint">{target.labels[lang]}</strong>}
       </div>
       <div className={`letter-choice-grid options-${options.length}`}>
         {options.map((letter) => (
