@@ -33,6 +33,13 @@ test("missing-object preview lets children hear visible words before the memory 
   assert.match(game, /onKeyDown=\{\(event\) => previewKeyDown\(event, x\)\}/);
 });
 
+test("missing-object answers stay visual-first until demonstration help", () => {
+  assert.match(game, /\{hint >= 3 && <b>\{x\.labels\[lang\]\}<\/b>\}/);
+  assert.doesNotMatch(game, /<Visual item=\{x\}[^>]*\/\>\s*<b>\{x\.labels\[lang\]\}<\/b>/);
+  assert.match(game, /const vanished = hidden && x\.id === target\.id && hint < 3/);
+  assert.match(game, /aria-label=\{x\.labels\[lang\]\}/);
+});
+
 test("missing-object choices and continue button are truly disabled while locked", () => {
   assert.match(game, /disabled=\{controlsDisabled\}/);
   assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
