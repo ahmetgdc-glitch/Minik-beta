@@ -22,7 +22,7 @@ test("preloader warms code, styles, scene, visuals and exact fixed voice clips",
   assert.match(wrapper, /gameStyles\[gameId\]/);
   assert.match(wrapper, /assets\/scenes\/\$\{sceneForWorld\(worldId\)\}\.webp/);
   assert.match(wrapper, /assets\/illustrations\/\$\{item\.asset\}\.svg/);
-  assert.match(wrapper, /item\.variants\?\.photo/);
+  assert.match(wrapper, /item\?\.variants\?\.photo/);
   assert.match(wrapper, /fixedNaturalVoicePlan\(text, lang\)/);
   assert.match(wrapper, /assets\/voice\/\$\{filename\}/);
   assert.match(wrapper, /cache: "force-cache"/);
