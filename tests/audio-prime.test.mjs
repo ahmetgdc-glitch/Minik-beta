@@ -235,7 +235,7 @@ test("background music follows its own profile instead of narration audio", () =
 test("audio priming re-arms readiness after returning from the background without autoplaying", () => {
   const hook = read("src/app/useAudioPrime.js");
   assert.match(hook, /visibilitychange/);
-  assert.match(hook, /document\.visibilityState === "visible"\) voiceReady = false/);
+  assert.match(hook, /document\.visibilityState === "visible"\) \{[\s\S]*voiceReady = false;[\s\S]*lastPrimeAt = 0;/);
   assert.doesNotMatch(hook, /resumeAfterBackground[\s\S]*unlockVoiceAudio\(\)/);
   assert.doesNotMatch(hook, /resumeAfterBackground[\s\S]*startMusic\(\)/);
 });
