@@ -60,7 +60,7 @@ test("background return rearms voice and WebAudio on the next real gesture witho
   const prime = source.match(/const prime = \(\) => \{([\s\S]*?)\n    \};/)?.[1] || "";
 
   assert.match(resume, /stopMusic\(\)/);
-  assert.match(resume, /document\.visibilityState === "visible"\) voiceReady = false/);
+  assert.match(resume, /document\.visibilityState === "visible"\) \{[\s\S]*voiceReady = false;[\s\S]*lastPrimeAt = 0;/);
   assert.doesNotMatch(resume, /unlockAudio\(\)/);
   assert.doesNotMatch(resume, /unlockVoiceAudio\(\)/);
   assert.doesNotMatch(resume, /startMusic\(\)/);
