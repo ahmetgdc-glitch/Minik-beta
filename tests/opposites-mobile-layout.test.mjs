@@ -8,7 +8,9 @@ const game = fs.readFileSync(new URL("../src/games/OppositesGame.jsx", import.me
 test("narrow iPhones keep opposites choices in a compact two-column visual grid", () => {
   assert.match(game, /data-difficulty=\{profile\.id\}/);
   assert.match(game, /profile\.options/);
-  assert.match(game, /profile\.id !== "hard" \|\| hint >= 1/);
+  assert.match(game, /const showAnswerLabels = hint >= 3/);
+  assert.match(game, /\{showAnswerLabels && <b>\{item\.labels\[lang\]\}<\/b>\}/);
+  assert.match(game, /aria-label=\{item\.labels\[lang\]\}/);
   assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.opposites-stage\s*\{[\s\S]*?min-height: 390px[\s\S]*?padding: 16px/);
   assert.match(css, /@media \(max-width: 430px\)[\s\S]*?\.opposites-choice-grid\s*\{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)[\s\S]*?gap: 10px/);
   assert.match(css, /\.opposites-choice\s*\{[\s\S]*?aspect-ratio: 1 \/ 1[\s\S]*?padding: 10px[\s\S]*?border-radius: 22px/);
