@@ -61,6 +61,15 @@ function speechForegroundAllowed() {
   return !document.hidden && document.visibilityState !== "hidden";
 }
 
+function isIOSVoiceEnvironment() {
+  if (typeof window === "undefined") return false;
+  const nav = window.navigator || {};
+  const ua = String(nav.userAgent || "");
+  const platform = String(nav.platform || "");
+  const touchPoints = Number(nav.maxTouchPoints || 0);
+  return /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
+}
+
 export function holdVoice4DuringEngineGap() {
   // A transient iOS speech-engine gap must never block the authorized bundled
   // MINIK narrator. Voice 4 is only consulted after fixed narration cannot play.
@@ -101,34 +110,60 @@ export async function unlockVoiceAudio() {
     timer = setTimeout(cancel, VOICE_START_TIMEOUT_MS);
     const current = () => !done && token === sequence && speechForegroundAllowed();
     void (async () => {
-      let contextReady = false;
-      if (context) {
+      let mediaStart = null;
+      let silentSource = "";
+
+      // On iOS the media element must consume the real gesture synchronously.
+      // Waiting for AudioContext.resume() first can move play() outside Safari's
+      // activation window and leave later automatic narration silent.
+      if (player) {
         try {
-          if (context.state !== "running") await context.resume();
-          contextReady = context.state === "running";
+          player.pause();
+          player.onended = null;
+          player.onerror = null;
+          player.preload = "none";
+          player.src = SILENT_WAV;
+          silentSource = player.src;
+          player.currentTime = 0;
+          player.volume = 1;
+          mediaStart = player.play();
         } catch {}
       }
-      // A delayed Safari resume belongs to the gesture that started it. It
-      // must never replace a newer word with the silent unlock clip.
-      if (!current()) return finish(false);
-      if (!player) return finish(contextReady || systemVoice4Available());
-      try {
-        player.pause();
-        player.onended = null;
-        player.onerror = null;
-        player.preload = "none";
-        player.src = SILENT_WAV;
-        player.currentTime = 0;
-        player.volume = 1;
-        const started = player.play();
-        if (started?.then) await started;
-        if (!current()) return finish(false);
-        player.pause();
-        player.currentTime = 0;
-        finish(true);
-      } catch {
-        finish(contextReady);
+
+      let contextReady = context?.state === "running";
+      let contextStart = null;
+      if (context && !contextReady) {
+        try {
+          contextStart = Promise.resolve(context.resume()).then(
+            () => context.state === "running",
+            () => false,
+          );
+        } catch {
+          contextStart = Promise.resolve(false);
+        }
       }
+
+      if (mediaStart !== null) {
+        try {
+          if (mediaStart?.then) await mediaStart;
+          if (!current()) return finish(false);
+          // A newer word may already own the shared player. Never let a late
+          // unlock pause or rewind that narration.
+          if (player?.src === silentSource) {
+            player.pause();
+            player.currentTime = 0;
+          }
+          finish(true);
+          return;
+        } catch {}
+      }
+
+      if (contextStart) contextReady = await contextStart;
+      if (!current()) return finish(false);
+      // If a media element existed but Safari rejected its gesture play, do
+      // not claim success merely because Voice 4 exists. The next real gesture
+      // must be allowed to retry the recorded narrator unlock.
+      finish(Boolean(contextReady || (!player && systemVoice4Available())));
     })();
   });
   unlockPending = pending;
@@ -374,14 +409,22 @@ async function speakMediaClip(url, token) {
 async function speakGameClip(url, token) {
   if (!url || !speechForegroundAllowed()) return false;
   prepareMediaClip(url);
-  if (voiceContext?.state === "running" && voiceBufferCache.has(url)) {
+  const iosMediaPath = isIOSVoiceEnvironment();
+
+  // iOS Safari can keep an AudioContext in the nominal "running" state after
+  // an interruption while buffer sources produce no audible output. Waiting
+  // for that source's timeout made repeated MINIK words arrive seconds late.
+  // Keep iPhone/iPad narration on the already gesture-primed HTMLAudio player;
+  // it is the exact same bundled recording and supports the service-worker
+  // byte-range path. Other platforms retain the decoded replay optimization.
+  if (!iosMediaPath && voiceContext?.state === "running" && voiceBufferCache.has(url)) {
     const playedWebAudio = await speakWebAudioClip(url, token).catch(() => false);
     if (playedWebAudio || token !== sequence) return playedWebAudio;
   }
   // First playback must never wait for optional JS decoding. Start the same
   // bundled clip through HTML Audio immediately and warm the decoded cache in
   // parallel so a later replay can use WebAudio with effectively no startup.
-  if (voiceContext?.state === "running" && !voiceBufferCache.has(url)) {
+  if (!iosMediaPath && voiceContext?.state === "running" && !voiceBufferCache.has(url)) {
     void decodeVoiceBuffer(url, voiceContext, token).catch(() => null);
   }
   return speakMediaClip(url, token);

@@ -75,7 +75,7 @@ function audioContext(overrides = {}) {
   );
 }
 
-test("a late iOS unlock cannot replace a newer spoken word with silence", async (t) => {
+test("iOS gesture unlock primes recorded narration before waiting for WebAudio", async (t) => {
   let resume;
   const resumed = new Promise((resolve) => {
     resume = resolve;
@@ -89,29 +89,85 @@ test("a late iOS unlock cannot replace a newer spoken word with silence", async 
     }
   }
   const window = Object.assign(new EventTarget(), {
+    navigator: {
+      userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X)",
+      platform: "iPhone",
+      maxTouchPoints: 5,
+    },
     AudioContext: function () {
       return context;
     },
   });
   const { voice } = await voiceRuntime(t, { Audio, window });
   const unlocking = voice.unlockVoiceAudio();
+  assert.equal(played.length, 1, "the shared media element must consume the real gesture immediately");
+  assert.match(played[0], /^data:audio\/wav/);
+
   const speaking = voice.speak("Löwe", "de");
-  assert.equal(played.length, 1);
+  assert.equal(played.length, 2, "the requested word must start without waiting for AudioContext.resume()");
+  assert.match(played[1], /\/assets\/voice\//);
+
   context.state = "running";
   resume();
   assert.equal(
     await unlocking,
     false,
-    "a cancelled unlock must not report readiness",
+    "a superseded unlock must not report readiness for its old gesture",
   );
   await nextTurn();
   assert.equal(
     played.length,
-    1,
+    2,
     "the old resume must not play SILENT_WAV over the new word",
   );
   voice.stopSpeech();
   assert.equal(await speaking, false);
+});
+
+test("iOS fixed narration stays on HTML Audio instead of waiting on cached WebAudio", async (t) => {
+  let sources = 0;
+  let downloads = 0;
+  const media = [];
+  const context = audioContext({
+    createBufferSource() {
+      sources++;
+      return {
+        connect() {},
+        disconnect() {},
+        stop() {},
+        start() {
+          queueMicrotask(() => this.onended?.());
+        },
+      };
+    },
+  });
+  const window = Object.assign(new EventTarget(), {
+    navigator: {
+      userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 26_5 like Mac OS X)",
+      platform: "iPhone",
+      maxTouchPoints: 5,
+    },
+    AudioContext: function () {
+      return context;
+    },
+  });
+  class Audio extends MediaAudio {
+    play() {
+      if (!String(this.src || "").startsWith("data:")) media.push(this.src);
+      return super.play();
+    }
+  }
+  const fetch = async () => {
+    downloads++;
+    return { ok: true, arrayBuffer: async () => new ArrayBuffer(16) };
+  };
+  const { voice } = await voiceRuntime(t, { Audio, window, fetch });
+  assert.equal(await voice.unlockVoiceAudio(), true);
+  assert.equal(await voice.speak("Löwe", "de"), true);
+  assert.equal(await voice.speak("Löwe", "de"), true);
+  assert.equal(media.length, 2, "each iOS replay must start through the gesture-primed media player");
+  assert.equal(sources, 0, "iOS narration must not enter a potentially stalled AudioBufferSource path");
+  assert.equal(downloads, 0, "iOS narration must not spend time warming an unused decoded voice cache");
 });
 
 for (const stall of ["start", "end"]) {
