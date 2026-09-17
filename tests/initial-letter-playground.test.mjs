@@ -15,12 +15,13 @@ test("initial-letter game keeps a large visual target and toy-like letter choice
   assert.match(css, /font:900 clamp\(2\.8rem,9vw,5\.4rem\)/);
 });
 
-test("initial-letter keeps the answer hidden until Mino gives stronger help", () => {
+test("initial-letter keeps the answer hidden until Mino gives demonstration help", () => {
   assert.match(game, /const displayPrompt =/);
   assert.match(game, /"Bu kelime hangi harfle başlıyor\?"/);
   assert.match(game, /"Mit welchem Buchstaben beginnt das Wort\?"/);
   assert.match(game, /useLesson\(\s*onReady,\s*displayPrompt,\s*\(\) => speak\(prompt, lang, settings\)/);
-  assert.match(game, /hint >= 2 && <strong className="initial-letter-word-hint">\{target\.labels\[lang\]\}<\/strong>/);
+  assert.match(game, /hint >= 3 && <strong className="initial-letter-word-hint">\{target\.labels\[lang\]\}<\/strong>/);
+  assert.doesNotMatch(game, /hint >= 2 && <strong className="initial-letter-word-hint"/);
   assert.doesNotMatch(game, /<strong>\{target\.labels\[lang\]\}<\/strong>/);
 });
 
