@@ -29,6 +29,14 @@ test("preloader warms code, styles, scene, visuals and exact fixed voice clips",
   assert.match(wrapper, /image\.decode/);
 });
 
+test("failed assets keep the child behind the loader instead of starting half-loaded", () => {
+  assert.match(wrapper, /if \(!ok\) failed \+= 1/);
+  assert.match(wrapper, /if \(failed\) throw new Error\(`failed to preload \$\{failed\} game assets`\)/);
+  assert.match(wrapper, /setStatus\(\(current\) => \(\{ \.\.\.current, failed: true \}\)\)/);
+  assert.match(wrapper, /Tekrar dene/);
+  assert.match(wrapper, /Noch einmal versuchen/);
+});
+
 test("loading screen is Turkish-first capable, progressive and motion-safe", () => {
   assert.match(wrapper, /Oyun hazırlanıyor/);
   assert.match(wrapper, /Resimler, sesler ve oyun alanı yükleniyor/);
