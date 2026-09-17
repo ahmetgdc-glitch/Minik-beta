@@ -29,6 +29,13 @@ test("shadow stage replays only the spoken task and keeps the answer hidden", ()
   assert.doesNotMatch(game, /speak\(target\.labels/);
 });
 
+test("shadow answers stay visual-first until demonstration help", () => {
+  assert.match(game, /\{hint >= 3 && <b>\{item\.labels\[lang\]\}<\/b>\}/);
+  assert.doesNotMatch(game, /<Visual item=\{item\}[^>]*\/\>\s*<b>\{item\.labels\[lang\]\}<\/b>/);
+  assert.match(game, /silhouette=\{hint < 3\}/);
+  assert.match(game, /aria-label=\{item\.labels\[lang\]\}/);
+});
+
 test("shadow answers use cave stones instead of shared answer cards", () => {
   assert.match(game, /shadow-choice-field/);
   assert.match(game, /className=\{`shadow-choice shadow-choice-/);

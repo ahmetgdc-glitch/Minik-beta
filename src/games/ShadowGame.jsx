@@ -76,7 +76,7 @@ export default function ShadowGame({
             >
               <span className="shadow-choice-glow" aria-hidden="true" />
               <Visual item={item} lang={lang} photos={settings.photos} />
-              <b>{item.labels[lang]}</b>
+              {hint >= 3 && <b>{item.labels[lang]}</b>}
             </button>
           );
         })}
