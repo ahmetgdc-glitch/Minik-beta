@@ -30,7 +30,7 @@ export default function DailyOrderGame({
 
   const text = lang === "tr" ? `${prompt.labels.tr} sonrasında ne gelir?` : `Was kommt nach ${prompt.labels.de}?`;
   const help = lang === "tr" ? `${prompt.labels.tr} sonrasında ${target.labels.tr} gelir.` : `Nach ${prompt.labels.de} kommt ${target.labels.de}.`;
-  const showAnswerLabels = profile.id !== "hard" || hint >= 1;
+  const showAnswerLabels = hint >= 3;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
   const controlsDisabled = paused || interactionBlocked();
