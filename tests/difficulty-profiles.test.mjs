@@ -71,7 +71,8 @@ test("hard story and routine games increase memory load and reduce visual text c
   const initialLetter = read("src/games/InitialLetterGame.jsx");
   assert.match(story, /profile\.id === "easy" \? 2 : profile\.id === "medium" \? 3 : 4/);
   assert.match(story, /choicesFor\(target, items, profile\.options\)/);
-  assert.match(daily, /profile\.id !== "hard" \|\| hint >= 1/);
+  assert.match(daily, /const showAnswerLabels = hint >= 3/);
+  assert.match(daily, /choicesFor\(pair\[1\], items\.filter\(\(x\) => x\.id !== pair\[0\]\.id\), profile\.options\)/);
   assert.match(social, /profile\.id !== "hard" \|\| hint >= 1/);
   assert.match(social, /profile\.id === "easy" \|\| hint >= 1/);
   assert.match(opposites, /profile\.id !== "hard" \|\| hint >= 1/);
