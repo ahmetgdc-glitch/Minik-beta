@@ -37,7 +37,7 @@ for (const event of ["visibilitychange", "pagehide"]) {
       }
     }
     const { voice: api, document, window } = await voiceRuntime(t, { Audio });
-    const pending = api.speak("Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de");
+    const pending = api.speak("Finde dieses Bild.", "de");
     assert.equal(played.length, 1);
     assert.match(played[0], /^https:\/\/minik\.example\/Minik-beta\/assets\/voice\//);
 

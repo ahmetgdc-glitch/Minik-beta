@@ -70,7 +70,7 @@ test("every legacy natural clip still has an exact personal asset mapping", () =
   assert.equal(checked.size, 332);
 });
 
-test("legacy composition may know personal assets but runtime converts to fixed natural narration", () => {
+test("legacy composition may know personal assets but runtime converts exact requests to fixed natural narration", () => {
   const rawDe = naturalVoicePlan("Hallo! Komm, wir entdecken die Welt!", "de");
   const rawTr = naturalVoicePlan("Merhaba! Haydi dünyayı keşfedelim!", "tr");
   assert.equal(rawDe.length, 1);
@@ -115,16 +115,18 @@ test("personal assets remain buildable for explicit preview without becoming aut
   assert.ok(downloader.includes("personal-manifest.json"));
 });
 
-test("dynamic story narration resolves to fixed natural clips at runtime", () => {
-  for (const [text, lang, expected] of [
-    ["Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de", 3],
-    ["Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr", 3],
-    ["Was sieht Mino zum Schluss? Löwe", "de", 2],
-    ["Mino en son ne görüyor? Aslan", "tr", 2],
+test("dynamic story narration uses exact-text Voice 4 fallback instead of stitched clips", () => {
+  for (const [text, lang] of [
+    ["Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de"],
+    ["Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr"],
+    ["Was sieht Mino zum Schluss? Löwe", "de"],
+    ["Mino en son ne görüyor? Aslan", "tr"],
   ]) {
-    const plan = fixedNaturalVoicePlan(text, lang);
-    assert.equal(plan.length, expected, `unexpected fixed story plan: ${lang} ${text}`);
-    assert.ok(plan.every(isFixedNaturalVoiceClipUrl));
+    assert.deepEqual(
+      fixedNaturalVoicePlan(text, lang),
+      [],
+      `dynamic story must preserve the complete requested text for Voice 4: ${lang} ${text}`,
+    );
   }
 });
 

@@ -30,11 +30,23 @@ test("fixed natural narrator covers all 332 known DE/TR voice entries", () => {
   assertFixedPlan("Aslan", "tr");
 });
 
-test("dynamic narration is composed only when every semantic part is recorded", () => {
-  assertFixedPlan("Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de", 3);
-  assertFixedPlan("Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr", 3);
-  assertFixedPlan("Was sieht Mino zum Schluss? Löwe", "de", 2);
-  assertFixedPlan("Mino en son ne görüyor? Aslan", "tr", 2);
+test("dynamic narration falls back unless the complete requested sentence is recorded", () => {
+  for (const [text, lang] of [
+    ["Mino sieht zuerst Löwe, dann Hund und zum Schluss Katze.", "de"],
+    ["Mino önce Aslan, sonra Köpek ve en son Kedi görüyor.", "tr"],
+    ["Was sieht Mino zum Schluss? Löwe", "de"],
+    ["Mino en son ne görüyor? Aslan", "tr"],
+    ["Kedi nerede?", "tr"],
+    ["Finde: Katze.", "de"],
+    ["Hangi sepete ait? Aslan.", "tr"],
+    ["In welchen Korb gehört das? Löwe.", "de"],
+  ]) {
+    assert.deepEqual(
+      fixedNaturalVoicePlan(text, lang),
+      [],
+      `${lang} ${text} must be spoken verbatim by Voice 4 instead of assembled from different clips`,
+    );
+  }
 
   // Regression from real child QA: the old resolver dropped an uncovered
   // target and left only "Bu resmi bul." behind.

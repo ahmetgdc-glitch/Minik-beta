@@ -4,7 +4,7 @@ import { helpVoiceClip } from "./helpVoiceClips.js";
 import { categoryVoiceClip } from "./categoryVoiceClips.js";
 import { vehicleVoiceClip } from "./vehicleVoiceClips.js";
 import { bodyVoiceClip } from "./bodyVoiceClips.js";
-import { naturalPhraseClip, naturalVoicePlan } from "./naturalVoicePlans.js";
+import { naturalPhraseClip } from "./naturalVoicePlans.js";
 import { personalVoiceEntries } from "./personalVoiceClips.js";
 
 const FIXED_NATURAL_RE = /^https:\/\/storage\.googleapis\.com\/adm--audio-playback--7d--public\/mcp-preview\/[a-f0-9-]+\.mp3$/iu;
@@ -53,16 +53,13 @@ const personalToFixed = Object.fromEntries(
 );
 
 export function fixedNaturalVoicePlan(text, lang = "de") {
-  const sourcePlan = naturalVoicePlan(text, lang);
-  if (!sourcePlan.length) return fixedNaturalVoiceFallbackPlan(text, lang);
-  const replacements = personalToFixed[lang] || new Map();
-  const plan = sourcePlan.map((url) => {
-    if (isFixedNaturalVoiceClipUrl(url)) return url;
-    return replacements.get(url) || "";
-  });
-  return plan.length && plan.every(isFixedNaturalVoiceClipUrl)
-    ? plan
-    : fixedNaturalVoiceFallbackPlan(text, lang);
+  // Production narration is exact-text only. Legacy naturalVoicePlan can
+  // compose semantic fragments for previews/tests, but a child must never hear
+  // a rewritten sentence such as "Bu resmi bul. Ayı." when MINIK requested
+  // "Ayı nerede?". If the complete requested sentence is not recorded as one
+  // approved fixed clip, return no plan so voice.js speaks the complete original
+  // text through the controlled Voice 4 fallback.
+  return fixedNaturalVoiceFallbackPlan(text, lang);
 }
 
 export function fixedNaturalVoiceClip(text, lang = "de") {
