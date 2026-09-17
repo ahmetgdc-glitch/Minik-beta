@@ -39,6 +39,7 @@ test("Voice 4 stop cancels the original Safari speech engine after replacement",
       new Promise((_, reject) => setTimeout(() => reject(new Error("old Safari engine did not start Voice 4")), 250)),
     ]);
 
+    assert.equal(oldCancelCount, 0, "a fresh Voice 4 attempt must preserve Safari's gesture-prime before speaking");
     synth = newSynth;
     mod.stopSystemVoice4();
 
@@ -47,7 +48,7 @@ test("Voice 4 stop cancels the original Safari speech engine after replacement",
       new Promise((_, reject) => setTimeout(() => reject(new Error("Voice 4 did not resolve after engine replacement stop")), 250)),
     ]);
     assert.equal(result, false);
-    assert.ok(oldCancelCount >= 2, "the original engine must be cancelled after replacement");
+    assert.ok(oldCancelCount >= 1, "the original active engine must be cancelled after replacement");
     assert.ok(newCancelCount >= 1, "the current engine should also be cleared to prevent queued speech");
   } finally {
     if (previousSynth === undefined) delete globalThis.speechSynthesis;
