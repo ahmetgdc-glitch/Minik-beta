@@ -114,7 +114,6 @@ function preloadImage(url) {
   return new Promise((resolve) => {
     const image = new Image();
     let done = false;
-    const timer = setTimeout(() => finish(false), ASSET_TIMEOUT_MS);
     const finish = (ok) => {
       if (done) return;
       done = true;
@@ -124,6 +123,7 @@ function preloadImage(url) {
       if (ok) assetCache.add(url);
       resolve(ok);
     };
+    const timer = setTimeout(() => finish(false), ASSET_TIMEOUT_MS);
     image.onload = () => {
       const decoded = typeof image.decode === "function" ? image.decode() : Promise.resolve();
       Promise.resolve(decoded).catch(() => {}).finally(() => finish(true));
@@ -162,12 +162,15 @@ async function preloadTasks(tasks, onProgress) {
   }
   let cursor = 0;
   let complete = 0;
+  let failed = 0;
   const worker = async () => {
     while (cursor < pending.length) {
       const index = cursor++;
       const task = pending[index];
-      if (task.type === "image") await preloadImage(task.url);
-      else await preloadRequest(task.url);
+      const ok = task.type === "image"
+        ? await preloadImage(task.url)
+        : await preloadRequest(task.url);
+      if (!ok) failed += 1;
       complete += 1;
       onProgress?.(complete / pending.length);
     }
@@ -175,6 +178,7 @@ async function preloadTasks(tasks, onProgress) {
   await Promise.all(
     Array.from({ length: Math.min(PRELOAD_CONCURRENCY, pending.length) }, worker),
   );
+  if (failed) throw new Error(`failed to preload ${failed} game assets`);
 }
 
 async function preloadGameBundle(gameId) {
@@ -203,9 +207,13 @@ function LoadingScreen({ lang, progress, failed, onRetry }) {
         <Mino />
         <h1>{lang === "tr" ? "Oyun hazırlanıyor" : "Spiel wird vorbereitet"}</h1>
         <p>
-          {lang === "tr"
-            ? "Resimler, sesler ve oyun alanı yükleniyor…"
-            : "Bilder, Stimmen und Spielfeld werden geladen…"}
+          {failed
+            ? lang === "tr"
+              ? "Bir içerik yüklenemedi. Bağlantıyı kontrol edip tekrar deneyebilirsin."
+              : "Ein Inhalt konnte nicht geladen werden. Prüfe die Verbindung und versuche es erneut."
+            : lang === "tr"
+              ? "Resimler, sesler ve oyun alanı yükleniyor…"
+              : "Bilder, Stimmen und Spielfeld werden geladen…"}
         </p>
         <div
           className="game-preload-progress"
