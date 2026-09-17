@@ -34,7 +34,7 @@ export default function OppositesGame({
 
   const text = lang === "tr" ? `${prompt.labels.tr}. Bunun zıttı hangisi?` : `${prompt.labels.de}. Was ist das Gegenteil?`;
   const help = lang === "tr" ? `${target.labels.tr}, ${prompt.labels.tr} kelimesinin zıttıdır.` : `${target.labels.de} ist das Gegenteil von ${prompt.labels.de}.`;
-  const showAnswerLabels = profile.id !== "hard" || hint >= 1;
+  const showAnswerLabels = hint >= 3;
 
   useLesson(onReady, text, () => speak(text, lang, settings), [prompt.id, target.id], help);
   const controlsDisabled = paused || interactionBlocked();
