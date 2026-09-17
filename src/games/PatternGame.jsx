@@ -83,7 +83,7 @@ export default function PatternGame({
           {options.map((x) => (
             <button key={x.id} className={`pattern-choice ${hint >= 2 && x.id === target.id ? "hint-target" : ""}`} onClick={() => pick(x)} disabled={controlsDisabled} aria-label={x.labels[lang]}>
               <Visual item={x} lang={lang} photos={settings.photos} />
-              <b>{x.labels[lang]}</b>
+              {hint >= 3 && <b>{x.labels[lang]}</b>}
             </button>
           ))}
         </div>

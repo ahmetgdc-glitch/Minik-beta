@@ -32,6 +32,12 @@ test("pattern path nodes can replay their spoken labels without bypassing lifecy
   assert.match(game, /disabled=\{controlsDisabled\}/);
 });
 
+test("pattern answers stay visual-first until demonstration help", () => {
+  assert.match(game, /\{hint >= 3 && <b>\{x\.labels\[lang\]\}<\/b>\}/);
+  assert.doesNotMatch(game, /<Visual item=\{x\}[^>]*\/\>\s*<b>\{x\.labels\[lang\]\}<\/b>/);
+  assert.match(game, /aria-label=\{x\.labels\[lang\]\}/);
+});
+
 test("pattern artwork rules target the actual Visual component class", () => {
   assert.match(css, /\.pattern-path-node \.item-visual\s*\{/);
   assert.match(css, /\.pattern-choice \.item-visual\s*\{/);
