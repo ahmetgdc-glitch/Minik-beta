@@ -13,7 +13,8 @@ test("shadow game renders inside an immersive cave playground", () => {
   assert.match(game, /shadow-mino-guide/);
   assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\}/);
   assert.match(css, /min-height:clamp\(330px,50svh,520px\)/);
-  assert.match(css, /width:min\(56vw,340px\)/);
+  assert.match(css, /\.shadow-playground \.shadow-stage>\.item-visual\{[^}]*width:min\(56vw,340px\)/s);
+  assert.doesNotMatch(css, /\.shadow-playground \.shadow-stage>\.visual/);
 });
 
 test("shadow stage replays only the spoken task and keeps the answer hidden", () => {
@@ -47,12 +48,14 @@ test("shadow cave choices preserve lifecycle locks and hint emphasis", () => {
 
 test("shadow playground keeps large answer choices on narrow phones", () => {
   assert.match(css, /@media\(max-width:700px\)/);
+  assert.match(css, /\.shadow-playground \.shadow-stage>\.item-visual\{width:min\(62vw,255px\);height:min\(62vw,255px\)\}/);
   assert.match(css, /\.shadow-choice-field,\.shadow-choice-field\.choices-6\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /min-height:clamp\(150px,24svh,220px\)/);
 });
 
 test("shadow playground respects reduced motion and is loaded in production", () => {
   assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /\.shadow-playground \.shadow-stage>\.item-visual/);
   assert.match(css, /\.shadow-mino-guide/);
   assert.match(entry, /\.\/games\/shadow-playground\.css/);
 });

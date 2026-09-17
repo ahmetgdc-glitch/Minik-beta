@@ -11,7 +11,11 @@ const activeVisualStyles = [
   "difference-playground.css",
   "pattern-path.css",
   "missing-stage.css",
+  "letter-playground.css",
+  "listen-playground.css",
+  "review-island.css",
   "sound-stage.css",
+  "shadow-playground.css",
 ];
 
 test("active immersive game styles target Visual.jsx through item-visual", () => {
