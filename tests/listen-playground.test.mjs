@@ -36,6 +36,12 @@ test("listening choices preserve lifecycle locks and Mino hint emphasis", () => 
   assert.match(game, /quiet-option/);
 });
 
+test("listening keeps written answer labels hidden until demonstration help", () => {
+  assert.match(game, /\{hint >= 3 && <b>\{item\.labels\[lang\]\}<\/b>\}/);
+  assert.doesNotMatch(game, /<Visual item=\{item\}[^>]*\/\>\s*<b>\{item\.labels\[lang\]\}<\/b>/);
+  assert.match(game, /aria-label=\{item\.labels\[lang\]\}/);
+});
+
 test("listening replay always speaks only the exact target word", () => {
   assert.match(
     game,

@@ -83,7 +83,7 @@ export default function ListenGame({
             >
               <span className="listen-choice-glow" aria-hidden="true" />
               <Visual item={item} lang={lang} photos={settings.photos} />
-              <b>{item.labels[lang]}</b>
+              {hint >= 3 && <b>{item.labels[lang]}</b>}
             </button>
           );
         })}
