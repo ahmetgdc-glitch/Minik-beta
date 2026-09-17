@@ -29,6 +29,11 @@ test("pointer-generated click is suppressed while keyboard click keeps the tap c
   assert.match(hook, /latest\.current\.onSelect\?\.\(id\)/);
 });
 
+test("every drag source owns its touch gesture before pointerdown", () => {
+  const props = between(hook, "sourceProps: (id)", "onPointerDown:");
+  assert.match(props, /touchAction: "none"/);
+});
+
 test("matching highlights on pointer start but only speaks through the tap callback", () => {
   assert.match(match, /onDragStart: setSelected/);
   assert.match(match, /onSelect: selectSource/);
@@ -36,7 +41,7 @@ test("matching highlights on pointer start but only speaks through the tap callb
   assert.match(match, /speak\(item\.labels\[lang\], lang, settings\)/);
 });
 
-test("matching source owns its touch gesture so iOS does not turn a drag into page scrolling", () => {
+test("matching keeps its explicit iOS drag guard as defense in depth", () => {
   const sourceButton = between(match, "className={`match-source", "aria-pressed={selected === item.id}");
   assert.match(sourceButton, /style=\{\{ touchAction: "none" \}\}/);
 });
@@ -44,9 +49,11 @@ test("matching source owns its touch gesture so iOS does not turn a drag into pa
 test("sorting no longer narrates just because a child starts dragging", () => {
   assert.match(sort, /onSelect: \(\) => speak\(lessonText, lang, settings\)/);
   assert.doesNotMatch(sort, /onDragStart:/);
+  assert.match(sort, /\.\.\.placement\.sourceProps\(target\.id\)/);
 });
 
 test("puzzle keeps immediate visual piece selection without adding narration", () => {
   assert.match(puzzle, /onDragStart: setSelected/);
   assert.match(puzzle, /onSelect: setSelected/);
+  assert.match(puzzle, /\.\.\.placement\.sourceProps\(id\)/);
 });

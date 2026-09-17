@@ -84,6 +84,9 @@ export function useDragPlacement({ paused, interactionBlocked, onDragStart, onSe
   return {
     boardRef, drag,
     sourceProps: (id) => ({
+      // A draggable child must own the touch gesture before pointerdown.
+      // This prevents iOS Safari from converting a real drag into page scroll.
+      touchAction: "none",
       onPointerDown: event => begin(event, id),
       onPointerMove: move,
       onPointerUp: end,
