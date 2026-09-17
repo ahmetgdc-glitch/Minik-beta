@@ -17,11 +17,15 @@ export function useDragPlacement({ paused, interactionBlocked, onDragStart, onSe
       if (captured?.element.hasPointerCapture(captured.pointerId)) captured.element.releasePointerCapture(captured.pointerId);
     } catch { /* WebKit may release capture before pagehide reaches React. */ }
   }
+  function clearDragSelection() {
+    if (latest.current.onDragStart) latest.current.onSelect?.(null);
+  }
   function cancel(pointerId) {
     if (!session.current.cancel(pointerId)) return;
     suppressClick.current = true;
     release();
     setDrag(null);
+    clearDragSelection();
   }
   function dropTarget(x, y) {
     const target = document.elementFromPoint(x, y)?.closest("[data-drop-id]");
@@ -42,6 +46,7 @@ export function useDragPlacement({ paused, interactionBlocked, onDragStart, onSe
     } catch {
       // Tap-to-place remains available when capture is unavailable.
       session.current.cancel();
+      clearDragSelection();
     }
   }
   function move(event) {

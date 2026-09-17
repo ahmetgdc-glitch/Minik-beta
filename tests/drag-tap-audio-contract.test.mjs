@@ -24,6 +24,18 @@ test("drag placement separates pointer-start feedback from tap selection", () =>
   assert.match(end, /if \(target\) latest\.current\.onDrop\(next\.id, target\)/);
 });
 
+test("cancelled visual drags clear stale tap selection without narrating sort", () => {
+  const clear = between(hook, "function clearDragSelection", "function cancel");
+  const cancel = between(hook, "function cancel", "function dropTarget");
+  const begin = between(hook, "function begin", "function move");
+  assert.match(clear, /if \(latest\.current\.onDragStart\) latest\.current\.onSelect\?\.\(null\)/);
+  assert.match(cancel, /clearDragSelection\(\)/);
+  assert.match(begin, /catch \{[\s\S]*?session\.current\.cancel\(\)[\s\S]*?clearDragSelection\(\)/);
+  assert.match(match, /onDragStart: setSelected/);
+  assert.match(puzzle, /onDragStart: setSelected/);
+  assert.doesNotMatch(sort, /onDragStart:/);
+});
+
 test("pointer-generated click is suppressed while keyboard click keeps the tap callback", () => {
   assert.match(hook, /event\.detail !== 0 && suppressClick\.current/);
   assert.match(hook, /latest\.current\.onSelect\?\.\(id\)/);
