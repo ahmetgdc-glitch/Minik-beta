@@ -18,6 +18,11 @@ test("real-sound choices stay visual-first until demonstration help", () => {
   assert.match(game, /<OptionGrid/);
 });
 
+test("real-sound answer sizing targets the live Visual.jsx class", () => {
+  assert.match(css, /\.sounds-playground \.answer-card \.item-visual\{/);
+  assert.doesNotMatch(css, /\.sounds-playground \.answer-card \.visual\{/);
+});
+
 test("real-sound stage stops active effects when it unmounts", () => {
   assert.match(game, /useEffect\(\(\) => \(\) => \{/);
   assert.match(game, /stopSounds\(\)/);
@@ -28,6 +33,7 @@ test("real-sound stage keeps large answer choices on phones", () => {
   assert.match(css, /@media\(max-width:700px\)/);
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /min-height:clamp\(150px,24svh,220px\)/);
+  assert.match(css, /\.sounds-playground \.answer-card \.item-visual\{width:min\(38vw,170px\);height:min\(38vw,170px\)\}/);
 });
 
 test("real-sound stage stylesheet is loaded in production", () => {
