@@ -40,7 +40,7 @@ export default function SocialStepsGame({
     lang === "tr"
       ? `${round.title.tr}. Sonra ne yapmalıyız?`
       : `${round.title.de}. Was machen wir danach?`;
-  const showAnswerLabels = profile.id !== "hard" || hint >= 1;
+  const showAnswerLabels = hint >= 3;
   const showSequenceLabels = profile.id === "easy" || hint >= 1;
 
   useLesson(
