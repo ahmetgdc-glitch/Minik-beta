@@ -48,7 +48,10 @@ export default function MatchGame({
       setMatched(result.matched);
       setSelected(null);
       if (result.matched.length === chosen.length) onSolve(chosen.map(x => x.id));
-    } else if (result.outcome === "retry") onWrong([source]);
+    } else if (result.outcome === "retry") {
+      setSelected(null);
+      onWrong([source]);
+    }
   }
 
   function tapTarget(item) {
