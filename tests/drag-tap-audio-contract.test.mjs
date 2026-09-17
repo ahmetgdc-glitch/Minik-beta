@@ -36,6 +36,12 @@ test("cancelled visual drags clear stale tap selection without narrating sort", 
   assert.doesNotMatch(sort, /onDragStart:/);
 });
 
+test("a drag released outside every target clears the temporary source selection", () => {
+  const end = between(hook, "function end", "useEffect");
+  assert.match(end, /const target = dropTarget\(next\.x, next\.y\);[\s\S]*?if \(target\) latest\.current\.onDrop\(next\.id, target\);[\s\S]*?else clearDragSelection\(\)/);
+  assert.match(end, /if \(blocked\(\)\) \{ clearDragSelection\(\); return; \}/);
+});
+
 test("pointer-generated click is suppressed while keyboard click keeps the tap callback", () => {
   assert.match(hook, /event\.detail !== 0 && suppressClick\.current/);
   assert.match(hook, /latest\.current\.onSelect\?\.\(id\)/);
