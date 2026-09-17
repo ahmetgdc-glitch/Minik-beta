@@ -30,6 +30,11 @@ test("story journey keeps the recall question and scoring behavior", () => {
   assert.match(story, /item\.id === target\.id \? onSolve\(\[target\.id\]\) : onWrong\(\[target\.id\]\)/);
 });
 
+test("story recall stays visual-first until demonstration help", () => {
+  assert.match(story, /hiddenLabels=\{hint < 3\}/);
+  assert.match(story, /<OptionGrid/);
+});
+
 test("story pages replay their spoken labels only before recall begins", () => {
   assert.match(story, /async function hearStoryItem\(item\)/);
   assert.match(story, /if \(blocked\(\) \|\| question\) return/);
