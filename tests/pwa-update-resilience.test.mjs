@@ -4,6 +4,7 @@ import fs from "node:fs";
 import {
   UPDATE_CHECK_INTERVAL_MS,
   shouldCheckForOfflineUpdate,
+  safeOfflineUpdateRoute,
 } from "../src/app/offline.js";
 
 const offline = fs.readFileSync("src/app/offline.js", "utf8");
@@ -17,6 +18,20 @@ test("installed PWA update checks are throttled to avoid foreground network spam
   assert.match(offline, /updateViaCache:\s*"none"/);
   assert.match(offline, /registration\.update\(\)/);
   assert.match(offline, /document\.visibilityState === "visible"/);
+});
+
+test("waiting PWA updates activate automatically only outside active games", () => {
+  assert.equal(safeOfflineUpdateRoute("#/"), true);
+  assert.equal(safeOfflineUpdateRoute("#/world/animals"), true);
+  assert.equal(safeOfflineUpdateRoute("#/parents"), true);
+  assert.equal(safeOfflineUpdateRoute("#/play/listen/animals"), false);
+  assert.equal(safeOfflineUpdateRoute("#/replay/listen/animals/123"), false);
+  assert.match(offline, /if \(safeOfflineUpdateRoute\(\)\)[\s\S]*queueMicrotask/);
+  assert.match(offline, /const onRouteChange = \(\) => announceUpdate\(registration\)/);
+  assert.match(offline, /window\.addEventListener\("hashchange", onRouteChange\)/);
+  assert.match(offline, /requestWaitingUpdate\(registration\)/);
+  assert.match(offline, /armUpdateReload\(\)/);
+  assert.match(offline, /navigator\.serviceWorker\.addEventListener\("controllerchange"/);
 });
 
 test("an explicitly accepted PWA update cannot leave the UI stuck forever on WebKit", () => {

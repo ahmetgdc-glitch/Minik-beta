@@ -20,19 +20,24 @@ export function useAudioPrime(voiceEnabled = true, sfxEnabled = true) {
 
     let disposed = false;
     let voiceReady = false;
-    const ua = String(window.navigator?.userAgent || "");
-    const platform = String(window.navigator?.platform || "");
-    const touchPoints = Number(window.navigator?.maxTouchPoints || 0);
-    const ios = /iPad|iPhone|iPod/iu.test(ua) || (platform === "MacIntel" && touchPoints > 1);
+    let lastPrimeAt = 0;
+    const PRIME_DEDUP_MS = 120;
 
     const prime = () => {
       if (disposed || document.visibilityState !== "visible") return;
+      const now = Date.now();
+      // Modern iOS can emit touchstart and pointerdown for the same physical
+      // tap. Running the shared HTMLAudio unlock twice can pause the natural
+      // MINIK recording that the first event just allowed to play.
+      if (lastPrimeAt && now - lastPrimeAt < PRIME_DEDUP_MS) return;
+      lastPrimeAt = now;
 
       const wantsVoice = voiceEnabledRef.current;
       const wantsEffects = sfxEnabledRef.current;
       const wantsMusic = getMusicStyle() !== "off";
 
       // iOS requires the speech prime to happen inside the real gesture.
+      // iosSpeechPrime itself keeps this cheap and idempotent between retries.
       if (wantsVoice) primeSystemSpeechForIOS();
 
       // Some learning content (Geräusche/Rhythmus) uses WebAudio even when the
@@ -42,10 +47,11 @@ export function useAudioPrime(voiceEnabled = true, sfxEnabled = true) {
       if (wantsVoice || wantsEffects || wantsMusic) unlockAudio();
       if (wantsMusic) startMusic();
 
-      // Keep lightweight gesture listeners mounted. Settings can change while
-      // the app stays open, so a later tap must be able to re-enable narration
-      // without requiring a reload. iOS may also revoke readiness after sleep.
-      if (wantsVoice && (!voiceReady || ios)) {
+      // The recorded MINIK narrator shares one HTMLAudio player with actual
+      // speech. Once that player has been unlocked, do NOT feed it another
+      // silent unlock clip on every tap: doing so pauses/replaces live speech.
+      // Returning from the background explicitly rearms this flag below.
+      if (wantsVoice && !voiceReady) {
         unlockVoiceAudio().then((ok) => {
           if (!disposed) voiceReady ||= ok;
         }).catch(() => {});
@@ -54,7 +60,10 @@ export function useAudioPrime(voiceEnabled = true, sfxEnabled = true) {
 
     const resumeAfterBackground = () => {
       stopMusic();
-      if (document.visibilityState === "visible") voiceReady = false;
+      if (document.visibilityState === "visible") {
+        voiceReady = false;
+        lastPrimeAt = 0;
+      }
     };
 
     window.addEventListener("pointerdown", prime, true);
