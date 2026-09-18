@@ -31,13 +31,17 @@ export default function RhythmGame({
     [input, setInput] = useState([]),
     [lit, setLit] = useState(-1);
   const controlsDisabled = paused || interactionBlocked();
+  // The melody is this game's learning content, not a reward effect. It stays
+  // audible whenever the main audio setting is on, but a family that switched
+  // the global sound off must never be surprised by silent pads or by notes.
+  const audioDisabled = settings?.audio === false;
   const tapRun = useRef(0);
 
   async function repeat() {
     if (paused || playing || interactionBlocked()) return;
     stopSpeech();
     const context = await prepareSoundPlayback();
-    if (!context || paused || interactionBlocked()) return;
+    if (!context || paused || interactionBlocked() || audioDisabled) return;
     setInput([]);
     setCursor(0);
     setPlaying(true);
@@ -107,7 +111,7 @@ export default function RhythmGame({
   }, [controlsDisabled]);
 
   async function tap(i) {
-    if (playing || paused || interactionBlocked()) return;
+    if (playing || paused || interactionBlocked() || audioDisabled) return;
     const run = ++tapRun.current;
     const played = await playNote(i);
     if (run !== tapRun.current || paused || interactionBlocked()) return;
@@ -123,7 +127,11 @@ export default function RhythmGame({
   }
 
   const heardCount = playing ? Math.max(0, Math.min(sequence.length, cursor)) : 0;
-  const status = playing
+  const status = audioDisabled
+    ? lang === "tr"
+      ? "Ses kapalı"
+      : "Ton aus"
+    : playing
     ? lang === "tr"
       ? "Mino çalıyor…"
       : "Mino spielt vor…"

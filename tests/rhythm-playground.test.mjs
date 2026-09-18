@@ -35,14 +35,14 @@ test("rhythm controls are blocked while paused, stale or during playback", () =>
   assert.match(game, /interactionBlocked = \(\) => false/);
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
   assert.match(game, /if \(paused \|\| playing \|\| interactionBlocked\(\)\) return/);
-  assert.match(game, /if \(playing \|\| paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /if \(playing \|\| paused \|\| interactionBlocked\(\)(?:\s*\|\| audioDisabled)?\) return/);
   assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
   assert.match(game, /disabled=\{playing \|\| controlsDisabled\}/);
   assert.match(game, /if \(!controlsDisabled\) return;[\s\S]*setPlaying\(false\)[\s\S]*stopSounds\(\)/);
 });
 
 test("rhythm async audio rechecks lifecycle state before mutating progress", () => {
-  assert.match(game, /const context = await prepareSoundPlayback\(\);[\s\S]*if \(!context \|\| paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /const context = await prepareSoundPlayback\(\);[\s\S]*if \(!context \|\| paused \|\| interactionBlocked\(\)(?:\s*\|\| audioDisabled)?\) return/);
   assert.match(game, /await playNote\(i\);[\s\S]*if \(run !== tapRun\.current \|\| paused \|\| interactionBlocked\(\)\) return/);
   assert.match(game, /setTimeout\(\(\) => \{[\s\S]*if \(paused \|\| interactionBlocked\(\)\)/);
 });
