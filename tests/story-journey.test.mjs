@@ -30,6 +30,17 @@ test("story journey keeps the recall question and scoring behavior", () => {
   assert.match(story, /item\.id === target\.id \? onSolve\(\[target\.id\]\) : onWrong\(\[target\.id\]\)/);
 });
 
+test("story recall stays inside a large Mino memory world instead of a plain answer area", () => {
+  assert.match(story, /import Visual, \{ MinoAvatar \}/);
+  assert.match(story, /progress,/);
+  assert.match(story, /className="story-recall-scene"/);
+  assert.match(story, /className="story-recall-guide" aria-hidden="true"/);
+  assert.match(story, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(css, /\.story-recall-stage \{[\s\S]*?min-height: clamp\(560px, 72svh, 820px\)/);
+  assert.match(css, /\.story-recall-stage \.answer-card \{[\s\S]*?min-height: clamp\(205px, 29svh, 320px\)/);
+  assert.match(css, /\.story-recall-stage \.answer-grid\.options-6 \{[\s\S]*?repeat\(3, minmax\(0, 1fr\)\)/);
+});
+
 test("story recall stays visual-first until demonstration help", () => {
   assert.match(story, /hiddenLabels=\{hint < 3\}/);
   assert.match(story, /<OptionGrid/);
@@ -63,6 +74,7 @@ test("picture-book scenes remain large and clearly tappable on phones", () => {
   assert.match(css, /\.story-page-listenable\s*\{[\s\S]*?touch-action:\s*manipulation/);
   assert.match(css, /\.story-hear-cue/);
   assert.match(css, /@media \(max-width: 640px\)/);
+  assert.match(css, /\.story-recall-stage \.answer-grid,[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(css, /@media \(max-width: 360px\)/);
 });
 

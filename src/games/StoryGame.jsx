@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowDown, ArrowRight, Volume2 } from "lucide-react";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { sample, choicesFor } from "../utils/random.js";
 import { useLesson, OptionGrid } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
@@ -29,6 +29,7 @@ function storySentence(labels, lang) {
 
 export default function StoryGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -150,13 +151,19 @@ export default function StoryGame({
         </>
       ) : (
         <div className="story-recall-stage">
-          <div className="story-memory-cue story-large-cue" aria-hidden="true">
-            {storyItems.slice(0, -1).map((item, index) => (
-              <React.Fragment key={item.id}>
-                <span>{index + 1}</span><i />
-              </React.Fragment>
-            ))}
-            <span className={hint >= 2 ? "hinted" : ""}>?</span>
+          <div className="story-recall-scene">
+            <div className="story-recall-guide" aria-hidden="true">
+              <span className="story-thought-bubble">?</span>
+              <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+            </div>
+            <div className="story-memory-cue story-large-cue" aria-hidden="true">
+              {storyItems.slice(0, -1).map((item, index) => (
+                <React.Fragment key={item.id}>
+                  <span>{index + 1}</span><i />
+                </React.Fragment>
+              ))}
+              <span className={hint >= 2 ? "hinted" : ""}>?</span>
+            </div>
           </div>
           <OptionGrid
             {...{ options, target, hint, lang, settings }}
