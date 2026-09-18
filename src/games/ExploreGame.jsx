@@ -52,12 +52,12 @@ export default function ExploreGame({ items, world, progress, difficulty, lang, 
   }, []);
 
   useEffect(() => {
-    if (sessionDisabled || targetCount === 0 || found.length < targetCount) return;
+    if (sessionDisabled || targetCount === 0 || found.length < targetCount || speakingId !== null) return;
     const timer = setTimeout(() => {
       if (!interactionBlocked()) onSolve(found);
-    }, 350);
+    }, 180);
     return () => clearTimeout(timer);
-  }, [sessionDisabled, found, targetCount, onSolve, interactionBlocked]);
+  }, [sessionDisabled, found, targetCount, speakingId, onSolve, interactionBlocked]);
 
   return <SceneExplorer items={sceneItems} worldId={world.id} {...{lang, settings, found, speakingId, hint, paused}}
     interactionBlocked={sceneInteractionBlocked}

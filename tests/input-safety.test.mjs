@@ -23,9 +23,10 @@ test("a different wrong choice is not blocked by the duplicate-tap guard", () =>
 test("explore completion is cancellable when the game is paused or lifecycle-stale", () => {
   const source = read("src/games/ExploreGame.jsx");
   assert.match(source, /const sessionDisabled = paused \|\| interactionBlocked\(\)/);
-  assert.match(source, /if \(sessionDisabled \|\| targetCount === 0 \|\| found\.length < targetCount\) return/);
+  assert.match(source, /if \(sessionDisabled \|\| targetCount === 0 \|\| found\.length < targetCount \|\| speakingId !== null\) return/);
   assert.match(source, /if \(!interactionBlocked\(\)\) onSolve\(found\)/);
   assert.match(source, /return \(\) => clearTimeout\(timer\)/);
+  assert.match(source, /\[sessionDisabled, found, targetCount, speakingId, onSolve, interactionBlocked\]/);
   assert.doesNotMatch(source, /if \(next\.length >= targetCount\) setTimeout/);
 });
 

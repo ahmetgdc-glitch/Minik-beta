@@ -22,8 +22,9 @@ test("discovery completion locks immediately and still rechecks the live session
   assert.match(explore, /const sceneInteractionBlocked = \(\) => completionLock\.current \|\| interactionBlocked\(\);/);
   assert.match(explore, /if \(paused \|\| interactionBlocked\(\) \|\| completionLock\.current\) return;/);
   assert.match(explore, /if \(targetCount > 0 && next\.length >= targetCount\) completionLock\.current = true;/);
-  assert.match(explore, /if \(sessionDisabled \|\| targetCount === 0 \|\| found\.length < targetCount\) return;/);
+  assert.match(explore, /if \(sessionDisabled \|\| targetCount === 0 \|\| found\.length < targetCount \|\| speakingId !== null\) return;/);
   assert.match(explore, /if \(!interactionBlocked\(\)\) onSolve\(found\)/);
+  assert.match(explore, /\[sessionDisabled, found, targetCount, speakingId, onSolve, interactionBlocked\]/);
   assert.match(explore, /interactionBlocked=\{sceneInteractionBlocked\}/);
   assert.match(explore, /if \(controlsDisabled\) return;/);
 });
