@@ -37,7 +37,7 @@ export default function DifferentGame({
 
   function pick(cell) {
     if (controlsDisabled) return;
-    cell.odd ? onSolve([cell.item.id]) : onWrong([cell.item.id, round.odd.id]);
+    cell.odd ? onSolve([round.odd.id]) : onWrong([round.odd.id]);
   }
 
   return (
