@@ -1,6 +1,6 @@
 # MINIK Roadmap
 
-Stand **1.75.0 Beta 78 · 2026-09-14**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
 
 ## Immersive Kinderwelt
 
@@ -28,8 +28,10 @@ Stand **1.75.0 Beta 78 · 2026-09-14**. Beta 66 bleibt das technische Fundament.
 - [x] Eigene lokale Landmarken-Kombination für jede der 25 Lernwelten
 - [x] Sichtbare Wortwiedergabe und reagierende Umgebung auch in der freien Weltansicht
 - [ ] Eigenständige Szenen und Entdeckungsmomente für weitere Themenwelten
+  - [x] Entdecker-Kulissen reagieren bei 1, 3 und 6 Funden sichtbar auf den Lernfortschritt, ohne zusätzliche Touch-Ziele zu erzeugen
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
+  - [x] Bilderbuch-Erinnerungsphase als große Mino-Erinnerungswelt statt schlichter Standard-Antwortfläche
 - [x] Feste natürliche DE/TR-Stimme für die 332 vorhandenen Sprachbausteine lokal bereitstellen
 - [ ] Feste natürliche MINIK-Stimme, kontrollierten Voice-4-Notfallpfad und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
 
