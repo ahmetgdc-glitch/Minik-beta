@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Volume2 } from "lucide-react";
 import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
 import { itemsForWorld } from "../data/content.js";
@@ -16,13 +16,15 @@ export default function SoundsGame({
   onSolve,
 }) {
   const { target, options } = useSelection(itemsForWorld("sounds"), difficulty),
-    [playing, setPlaying] = useState(false);
+    [playing, setPlaying] = useState(false),
+    replayRun = useRef(0);
   const controlsDisabled = paused || interactionBlocked();
   async function repeat() {
     if (controlsDisabled) return;
+    const run = ++replayRun.current;
     stopSpeech();
     const context = await prepareSoundPlayback();
-    if (!context || paused || interactionBlocked()) {
+    if (run !== replayRun.current || !context || paused || interactionBlocked()) {
       setPlaying(false);
       return;
     }
@@ -53,11 +55,13 @@ export default function SoundsGame({
   useLesson(onReady, text, playLesson, [target.id], help);
   useEffect(() => {
     if (controlsDisabled) {
+      replayRun.current += 1;
       stopSounds();
       setPlaying(false);
     }
   }, [controlsDisabled]);
   useEffect(() => () => {
+    replayRun.current += 1;
     stopSounds();
     setPlaying(false);
   }, []);
