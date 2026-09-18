@@ -12,6 +12,18 @@ test("memory renders inside the immersive playground shell", () => {
   assert.match(game, /memory-grid/);
 });
 
+test("memory brings Mino into the board when assisted help starts", () => {
+  assert.match(game, /Visual, \{ Art, MinoAvatar \}/);
+  assert.match(game, /progress,/);
+  assert.match(game, /hint >= 2 && helpPair/);
+  assert.match(game, /className="memory-mino-guide"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\}/);
+  assert.match(game, /Bu çifti birlikte bulalım!/);
+  assert.match(css, /\.memory-mino-guide\s*\{/);
+  assert.match(css, /\.memory-mino-guide \.mino-avatar\s*\{/);
+  assert.match(css, /@keyframes memory-mino-arrive/);
+});
+
 test("memory keeps the visible card linked to its spoken word", () => {
   assert.match(game, /const \[speakingCardId, setSpeakingCardId\] = useState\(null\)/);
   assert.match(game, /async function speakCard\(card\)/);
@@ -42,6 +54,7 @@ test("memory playground keeps large touch targets and responsive layouts", () =>
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /@media \(max-width: 700px\)/);
   assert.match(css, /prefers-reduced-motion/);
+  assert.match(css, /prefers-reduced-motion:[\s\S]*?memory-mino-guide/);
   assert.match(css, /prefers-reduced-motion:[\s\S]*?memory-card\.speaking \.item-visual/);
 });
 
