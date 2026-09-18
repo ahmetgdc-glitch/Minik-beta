@@ -17,7 +17,8 @@ test("every number from one through twenty has natural speech in both languages"
 });
 
 test("counting game speaks canonical number labels and scales its number range by difficulty", () => {
-  assert.match(countGame, /itemsForWorld\("numbers"\)\[countedRef\.current\.length\]\.labels\[lang\]/);
+  assert.match(countGame, /const numberItem = itemsForWorld\("numbers"\)\[countedRef\.current\.length\]/);
+  assert.match(countGame, /await speak\(numberItem\.labels\[lang\], lang, settings\)/);
   assert.match(countGame, /const profile = difficultyProfile\(difficulty\)/);
   assert.match(countGame, /const maximum = profile\.countMax/);
   assert.deepEqual(
