@@ -16,7 +16,8 @@ test("SoundsGame waits for running audio and keeps its learning cue independent 
   const sounds = read("src/games/SoundsGame.jsx");
   assert.match(sounds, /prepareSoundPlayback/);
   assert.match(sounds, /const context = await prepareSoundPlayback\(\)/);
-  assert.match(sounds, /if \(run !== replayRun\.current\) return/);\n  assert.match(sounds, /if \(!context \|\| paused \|\| interactionBlocked\(\)\)/);
+  assert.match(sounds, /if \(run !== replayRun\.current\) return/);
+  assert.match(sounds, /if \(!context \|\| paused \|\| interactionBlocked\(\)\)/);
   const readyIndex = sounds.indexOf("const context = await prepareSoundPlayback()");
   const playIndex = sounds.indexOf("const duration = playSound(target.sound");
   assert.ok(readyIndex >= 0 && playIndex > readyIndex, "learning sound must start only after WebAudio is running");
