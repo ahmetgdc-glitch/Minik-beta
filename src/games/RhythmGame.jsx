@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Play, Music2, Sparkles } from "lucide-react";
 import { playNote, stopSounds, prepareSoundPlayback } from "../audio/sounds.js";
 import { speak, stopSpeech } from "../audio/voice.js";
@@ -29,6 +29,7 @@ export default function RhythmGame({
     [input, setInput] = useState([]),
     [lit, setLit] = useState(-1);
   const controlsDisabled = paused || interactionBlocked();
+  const tapRun = useRef(0);
 
   async function repeat() {
     if (paused || playing || interactionBlocked()) return;
@@ -96,6 +97,7 @@ export default function RhythmGame({
 
   useEffect(() => {
     if (!controlsDisabled) return;
+    tapRun.current += 1;
     setPlaying(false);
     setLit(-1);
     setCursor(-1);
@@ -104,8 +106,9 @@ export default function RhythmGame({
 
   async function tap(i) {
     if (playing || paused || interactionBlocked()) return;
+    const run = ++tapRun.current;
     const played = await playNote(i);
-    if (paused || interactionBlocked()) return;
+    if (run !== tapRun.current || paused || interactionBlocked()) return;
     if (!played) return;
     if (i !== sequence[input.length]) {
       onWrong(["sounds.piano"]);

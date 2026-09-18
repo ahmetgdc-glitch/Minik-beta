@@ -37,6 +37,12 @@ test("rhythm async audio rechecks lifecycle state before mutating progress", () 
   assert.match(game, /setTimeout\(\(\) => \{[\s\S]*if \(paused \|\| interactionBlocked\(\)\)/);
 });
 
+test("rhythm ignores an older async pad tap after a newer tap starts", () => {
+  assert.match(game, /const tapRun = useRef\\(0\\)/);
+  assert.match(game, /const run = \\+\\+tapRun\\.current;[\\s\\S]*await playNote\\(i\\);[\\s\\S]*run !== tapRun\\.current/);
+  assert.match(game, /if \\(!controlsDisabled\\) return;[\\s\\S]*tapRun\\.current \\+= 1/);
+});
+
 test("rhythm playground stays large and adapts to phones", () => {
   assert.match(css, /min-height:min\(68vh,760px\)|min-height: min\(68vh, 760px\)/);
   assert.match(css, /grid-template-columns:repeat\(4|minmax/);
