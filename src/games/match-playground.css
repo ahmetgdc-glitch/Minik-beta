@@ -12,6 +12,38 @@
   align-content: center;
 }
 
+.match-mino-guide {
+  position: relative;
+  width: clamp(72px, 9vw, 98px);
+  height: clamp(72px, 9vw, 98px);
+  display: grid;
+  place-items: end center;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 60%, rgba(255,255,255,.96) 0 39%, rgba(157,229,243,.58) 40% 67%, transparent 68%);
+  filter: drop-shadow(0 10px 10px rgba(46,88,101,.15));
+  animation: matchMinoFloat 3.6s ease-in-out infinite;
+}
+
+.match-mino-guide .mino-avatar {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.match-mino-guide .mino {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes matchMinoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
 .match-stage-header {
   display: grid;
   justify-items: center;
@@ -363,6 +395,11 @@
     gap: 6px;
   }
 
+  .match-mino-guide {
+    width: 58px;
+    height: 58px;
+  }
+
   .match-progress i {
     width: 18px;
     height: 18px;
@@ -416,6 +453,7 @@
 @media (prefers-reduced-motion: reduce) {
   .match-source,
   .match-slot,
+  .match-mino-guide,
   .match-playground .hint-target {
     transition: none;
     animation: none;

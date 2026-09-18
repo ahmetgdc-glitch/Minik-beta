@@ -14,6 +14,18 @@ test("matching uses a large twin playground with progress", () => {
   assert.match(game, /Finde die Zwillinge/);
 });
 
+test("matching keeps Mino visible as an outfit-wearing helper", () => {
+  assert.match(game, /import Visual, \{ MinoAvatar \} from "\.\.\/components\/Visual\.jsx";/);
+  assert.match(game, /progress,/);
+  assert.match(game, /className="match-mino-guide"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(game, /progress\?\.minoOutfit/);
+  assert.match(css, /\.match-mino-guide \{/);
+  assert.match(css, /\.match-mino-guide \.mino-avatar \{/);
+  assert.match(css, /@keyframes matchMinoFloat/);
+  assert.match(css, /prefers-reduced-motion: reduce\)[\s\S]*?\.match-mino-guide,[\s\S]*?animation: none;/);
+});
+
 test("matching preserves safe drag and tap placement", () => {
   assert.match(game, /useDragPlacement/);
   assert.match(game, /placePair/);

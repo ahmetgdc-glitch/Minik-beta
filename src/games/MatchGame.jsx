@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { sample, shuffle } from "../utils/random.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
 import { useDragPlacement } from "./useDragPlacement.js";
@@ -8,6 +8,7 @@ import { placePair } from "./dragSession.js";
 import DragPreview from "./DragPreview.jsx";
 export default function MatchGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -100,6 +101,9 @@ export default function MatchGame({
   return (
     <section className="match-playground" aria-label={text} aria-disabled={controlsDisabled || undefined}>
       <header className="match-stage-header">
+        <div className="match-mino-guide" aria-hidden="true">
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
         <span className="match-stage-badge">{lang === "tr" ? "İkizleri bul" : "Finde die Zwillinge"}</span>
         <div className="match-progress" role="status" aria-label={progressLabel}>
           {chosen.map((item) => <i key={item.id} className={matched.includes(item.id) ? "done" : ""} />)}
