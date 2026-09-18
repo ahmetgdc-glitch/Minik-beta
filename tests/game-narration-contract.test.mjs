@@ -54,8 +54,9 @@ test("initial-letter and speaking replay the exact learning word", () => {
   mustContain(initialLetter, [
     "`${target.labels.tr} hangi harfle başlıyor?`",
     "`Mit welchem Buchstaben beginnt ${target.labels.de}?`",
-    "() => speak(prompt, lang, settings)",
-    "speak(target.labels[lang], lang, settings)",
+    "return speakLocked(prompt)",
+    "return speakLocked(target.labels[lang])",
+    "await speak(spokenText, lang, settings)",
   ], "initialletter");
   mustContain(speakGame, [
     "`Benimle söyle: ${expected}`",

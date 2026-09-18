@@ -30,7 +30,8 @@ test("initial-letter keeps the answer hidden until Mino gives demonstration help
   assert.match(game, /const displayPrompt =/);
   assert.match(game, /"Bu kelime hangi harfle başlıyor\?"/);
   assert.match(game, /"Mit welchem Buchstaben beginnt das Wort\?"/);
-  assert.match(game, /useLesson\(\s*onReady,\s*displayPrompt,\s*\(\) => speak\(prompt, lang, settings\)/);
+  assert.match(game, /function playPrompt\(\) \{[\s\S]*?return speakLocked\(prompt\)/);
+  assert.match(game, /useLesson\(\s*onReady,\s*displayPrompt,\s*playPrompt/);
   assert.match(game, /hint >= 3 && <strong className="initial-letter-word-hint">\{target\.labels\[lang\]\}<\/strong>/);
   assert.doesNotMatch(game, /hint >= 2 && <strong className="initial-letter-word-hint"/);
   assert.doesNotMatch(game, /<strong>\{target\.labels\[lang\]\}<\/strong>/);
@@ -39,7 +40,7 @@ test("initial-letter keeps the answer hidden until Mino gives demonstration help
 test("initial-letter target always replays the exact spoken learning word", () => {
   assert.match(
     game,
-    /function hearTarget\(\)\s*\{[\s\S]*?if \(blocked\(\)\) return;[\s\S]*?speak\(target\.labels\[lang\], lang, settings\);[\s\S]*?\}/,
+    /function hearTarget\(\)\s*\{[\s\S]*?if \(controlsDisabled \|\| hearingTarget\) return;[\s\S]*?return speakLocked\(target\.labels\[lang\]\);[\s\S]*?\}/,
   );
   assert.match(game, /`\$\{target\.labels\.tr\} hangi harfle başlıyor\?`/);
   assert.match(game, /`Mit welchem Buchstaben beginnt \$\{target\.labels\.de\}\?`/);
@@ -49,14 +50,23 @@ test("initial-letter target always replays the exact spoken learning word", () =
   assert.match(game, /aria-label=\{replayLabel\}/);
 });
 
-test("initial-letter replay and letter choices respect paused and stale interaction guards", () => {
+test("initial-letter replay and letter choices respect lifecycle and active narration locks", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(game, /const answersDisabled = controlsDisabled \|\| hearingTarget/);
   assert.match(game, /function blocked\(\)/);
   assert.match(game, /return paused \|\| interactionBlocked\(\)/);
-  assert.match(game, /if \(blocked\(\)\) return/);
-  assert.match(game, /tabIndex=\{controlsDisabled \? -1 : 0\}/);
-  assert.match(game, /aria-disabled=\{controlsDisabled \|\| undefined\}/);
-  assert.match(game, /disabled=\{controlsDisabled\}/);
+  assert.match(game, /if \(answersDisabled\) return/);
+  assert.match(game, /tabIndex=\{controlsDisabled \|\| hearingTarget \? -1 : 0\}/);
+  assert.match(game, /aria-disabled=\{controlsDisabled \|\| hearingTarget \|\| undefined\}/);
+  assert.match(game, /disabled=\{answersDisabled\}/);
+  assert.match(game, /if \(!controlsDisabled\) return;[\s\S]*?voiceRun\.current \+= 1;[\s\S]*?setHearingTarget\(false\)/);
+});
+
+test("initial-letter waits for the concrete spoken target before accepting an answer", () => {
+  assert.match(game, /const \[hearingTarget, setHearingTarget\] = useState\(false\)/);
+  assert.match(game, /const run = \+\+voiceRun\.current;[\s\S]*?setHearingTarget\(true\);[\s\S]*?await speak\(spokenText, lang, settings\)/);
+  assert.match(game, /if \(run === voiceRun\.current\) setHearingTarget\(false\)/);
+  assert.match(game, /disabled=\{answersDisabled\}/);
 });
 
 test("initial-letter playground adapts to narrow phones", () => {

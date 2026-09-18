@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
 import Visual, { MinoAvatar } from "../components/Visual.jsx";
@@ -37,6 +37,8 @@ export default function InitialLetterGame({
 }) {
   const profile = difficultyProfile(difficulty);
   const [target] = useState(() => sample(items.filter((i) => i.labels?.[lang]), 1)[0]);
+  const [hearingTarget, setHearingTarget] = useState(false);
+  const voiceRun = useRef(0);
   const targetLetter = initialLetter(target?.labels?.[lang], lang);
   const optionCount = profile.options;
   const options = useMemo(
@@ -55,24 +57,47 @@ export default function InitialLetterGame({
       ? "Bu kelime hangi harfle başlıyor?"
       : "Mit welchem Buchstaben beginnt das Wort?";
 
-  useLesson(
-    onReady,
-    displayPrompt,
-    () => speak(prompt, lang, settings),
-    [target.id],
-    prompt,
-  );
   const controlsDisabled = paused || interactionBlocked();
+  const answersDisabled = controlsDisabled || hearingTarget;
 
   function blocked() {
     return paused || interactionBlocked();
   }
 
+  async function speakLocked(spokenText) {
+    if (controlsDisabled) return;
+    const run = ++voiceRun.current;
+    setHearingTarget(true);
+    try {
+      await speak(spokenText, lang, settings);
+    } finally {
+      if (run === voiceRun.current) setHearingTarget(false);
+    }
+  }
+
+  function playPrompt() {
+    return speakLocked(prompt);
+  }
+
+  useLesson(
+    onReady,
+    displayPrompt,
+    playPrompt,
+    [target.id],
+    prompt,
+  );
+
+  useEffect(() => {
+    if (!controlsDisabled) return;
+    voiceRun.current += 1;
+    setHearingTarget(false);
+  }, [controlsDisabled]);
+
   function hearTarget() {
-    if (blocked()) return;
+    if (controlsDisabled || hearingTarget) return;
     // The replay affordance names the learning target itself. Missing fixed
     // recordings are handled centrally by voice.js with exact-text Voice 4.
-    speak(target.labels[lang], lang, settings);
+    return speakLocked(target.labels[lang]);
   }
 
   function handleTargetKeyDown(event) {
@@ -82,7 +107,7 @@ export default function InitialLetterGame({
   }
 
   function pick(letter) {
-    if (blocked()) return;
+    if (answersDisabled) return;
     letter === targetLetter ? onSolve([target.id]) : onWrong([target.id]);
   }
 
@@ -95,9 +120,9 @@ export default function InitialLetterGame({
       <div
         className="initial-letter-target"
         role="button"
-        tabIndex={controlsDisabled ? -1 : 0}
+        tabIndex={controlsDisabled || hearingTarget ? -1 : 0}
         aria-label={replayLabel}
-        aria-disabled={controlsDisabled || undefined}
+        aria-disabled={controlsDisabled || hearingTarget || undefined}
         onClick={hearTarget}
         onKeyDown={handleTargetKeyDown}
       >
@@ -114,7 +139,7 @@ export default function InitialLetterGame({
             key={letter}
             className={`letter-choice ${hint >= 2 && letter === targetLetter ? "hint-target" : ""}`}
             onClick={() => pick(letter)}
-            disabled={controlsDisabled}
+            disabled={answersDisabled}
             aria-label={letter}
           >
             {letter}
