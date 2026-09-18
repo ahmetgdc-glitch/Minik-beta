@@ -3,7 +3,7 @@ import { Eraser, RotateCcw, Trash2, Check, Palette, Image as ImageIcon, Sparkles
 import Visual, { assetUrl } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
-import { isMeaningfulStroke, MIN_STROKE_DISTANCE, pushDrawingHistory } from "./drawing.js";
+import { drawingHistoryEntry, drawingHistoryState, isMeaningfulStroke, MIN_STROKE_DISTANCE, pushDrawingHistory } from "./drawing.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
 const COLORS = ["#203750", "#ef5b5b", "#ff9d42", "#ffd43b", "#4bb978", "#3b92c9", "#855fd1", "#ef7eb2"];
@@ -160,8 +160,8 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
       try { return c.toDataURL(); } catch { return null; }
     }
   }
-  function save(value = snapshot()) {
-    history.current = pushDrawingHistory(history.current, value);
+  function save(value = snapshot(), count = strokes) {
+    history.current = pushDrawingHistory(history.current, drawingHistoryEntry(value, count));
   }
   function resetCanvas() {
     const c = canvasRef.current, ctx = c?.getContext("2d");
@@ -322,7 +322,7 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
     }
     const meaningful = isMeaningfulStroke(strokeDistance.current);
     if (meaningful) {
-      save(pendingSnapshot.current);
+      save(pendingSnapshot.current, strokes);
       setStrokes(s => s + 1);
     } else {
       const src = pendingSnapshot.current;
@@ -344,7 +344,7 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
   }
   function clearNow() {
     if (blocked()) return;
-    save();
+    save(snapshot(), strokes);
     const c = canvasRef.current, ctx = c?.getContext("2d");
     if (!c || !ctx) return;
     ctx.clearRect(0, 0, c.width, c.height);
@@ -361,14 +361,15 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
   }
   function undo() {
     if (blocked()) return;
-    const src = history.current.pop();
-    if (!src) return;
+    const entry = history.current.pop();
+    const state = drawingHistoryState(entry);
+    if (!state?.snapshot) return;
     const c = canvasRef.current, ctx = c.getContext("2d"), r = c.getBoundingClientRect();
     ctx.clearRect(0, 0, c.width, c.height);
     const img = new Image();
     img.onload = () => ctx.drawImage(img, 0, 0, r.width, r.height);
-    img.src = src;
-    setStrokes(s => Math.max(0, s - 1));
+    img.src = state.snapshot;
+    setStrokes(state.strokes);
   }
 
   const controlsDisabled = paused || interactionBlocked();
