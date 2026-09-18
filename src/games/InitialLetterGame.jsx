@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
+import { Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { sample, shuffle } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 import { difficultyProfile } from "./difficulty.js";
@@ -23,6 +24,7 @@ function choices(targetLetter, items, lang, count) {
 
 export default function InitialLetterGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -100,7 +102,11 @@ export default function InitialLetterGame({
         onKeyDown={handleTargetKeyDown}
       >
         <Visual item={target} lang={lang} photos={settings.photos} />
-        {hint >= 3 && <strong className="initial-letter-word-hint">{target.labels[lang]}</strong>}
+        <div className="initial-letter-mino-guide" aria-hidden="true">
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          <span className="initial-letter-hear-cue"><Volume2 size={24} /></span>
+        </div>
+        {hint >= 3 && <strong className="initial-letter-word-hint">{target.labels[lang]}</strong>
       </div>
       <div className={`letter-choice-grid options-${options.length}`}>
         {options.map((letter) => (

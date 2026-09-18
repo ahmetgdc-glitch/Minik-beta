@@ -15,6 +15,17 @@ test("initial-letter game keeps a large visual target and toy-like letter choice
   assert.match(css, /font:900 clamp\(2\.8rem,9vw,5\.4rem\)/);
 });
 
+test("Mino and a visible listening cue show children that the large target can replay", () => {
+  assert.match(game, /import \{ Volume2 \} from "lucide-react"/);
+  assert.match(game, /import Visual, \{ MinoAvatar \}/);
+  assert.match(game, /progress,/);
+  assert.match(game, /className="initial-letter-mino-guide" aria-hidden="true"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(game, /className="initial-letter-hear-cue"><Volume2 size=\{24\} \/>/);
+  assert.match(css, /\.initial-letter-mino-guide\{[^}]*pointer-events:none/);
+  assert.match(css, /@keyframes letterHearPulse/);
+});
+
 test("initial-letter keeps the answer hidden until Mino gives demonstration help", () => {
   assert.match(game, /const displayPrompt =/);
   assert.match(game, /"Bu kelime hangi harfle başlıyor\?"/);
@@ -50,6 +61,7 @@ test("initial-letter replay and letter choices respect paused and stale interact
 
 test("initial-letter playground adapts to narrow phones", () => {
   assert.match(css, /@media\(max-width:700px\)/);
+  assert.match(css, /\.initial-letter-mino-guide\{width:72px;height:84px/);
   assert.match(css, /\.initial-letter-target \.item-visual\{width:min\(62vw,250px\);height:min\(62vw,250px\)\}/);
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /min-height:112px/);
