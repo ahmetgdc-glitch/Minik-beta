@@ -14,6 +14,15 @@ test("daily order uses an immersive routine scene instead of the legacy answer c
   assert.doesNotMatch(game, /answer-card/);
 });
 
+test("Mino stays visible on the routine path without becoming a child control", () => {
+  assert.match(game, /import Visual, \{ MinoAvatar \}/);
+  assert.match(game, /progress,/);
+  assert.match(game, /className="routine-mino-guide" aria-hidden="true"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(css, /\.routine-mino-guide \{[\s\S]*?pointer-events: none/);
+  assert.match(css, /@keyframes routine-guide-bob/);
+});
+
 test("routine prompt can replay the current step without bypassing lifecycle guards", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
   assert.match(game, /function replayPrompt\(\)/);
@@ -29,6 +38,7 @@ test("routine journey keeps large child-first scenes with phone adaptation", () 
   assert.match(css, /width:\s*min\(52vw, 320px\)/);
   assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /@media \(max-width: 430px\)/);
+  assert.match(css, /\.routine-mino-guide \{[\s\S]*?width: 68px;[\s\S]*?height: 80px/);
   assert.match(css, /prefers-reduced-motion/);
 });
 

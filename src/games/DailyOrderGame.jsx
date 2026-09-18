@@ -1,13 +1,14 @@
 import React, { useMemo } from "react";
 import { speak } from "../audio/voice.js";
 import { choicesFor, sample } from "../utils/random.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { orderPairs } from "./dailyOrder.js";
 import { difficultyProfile } from "./difficulty.js";
 
 export default function DailyOrderGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -59,6 +60,10 @@ export default function DailyOrderGame({
           <Visual item={prompt} lang={lang} photos={settings.photos} />
           <b>{prompt.labels[lang]}</b>
         </button>
+        <div className="routine-mino-guide" aria-hidden="true">
+          <span className="routine-mino-step">1</span>
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
         <span className="routine-path-arrow" aria-hidden="true">→</span>
       </section>
 

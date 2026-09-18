@@ -95,6 +95,40 @@
   box-shadow: 0 10px 22px rgba(41,68,81,.12);
 }
 
+.routine-mino-guide {
+  position: absolute;
+  z-index: 3;
+  left: clamp(18px, 4vw, 46px);
+  bottom: clamp(12px, 3vw, 30px);
+  width: clamp(110px, 15vw, 175px);
+  height: clamp(125px, 18vw, 205px);
+  display: grid;
+  place-items: end center;
+  pointer-events: none;
+  filter: drop-shadow(0 13px 14px rgba(41,68,81,.17));
+}
+.routine-mino-guide .mino-avatar,
+.routine-mino-guide .mino {
+  width: 100%;
+  height: 100%;
+}
+.routine-mino-step {
+  position: absolute;
+  z-index: 4;
+  right: -5%;
+  top: 4%;
+  width: clamp(38px, 5vw, 54px);
+  height: clamp(38px, 5vw, 54px);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #5f7d4c;
+  font-weight: 950;
+  box-shadow: 0 8px 18px rgba(41,68,81,.14);
+  animation: routine-guide-bob 2.2s ease-in-out infinite;
+}
+
 .routine-path-arrow {
   position: absolute;
   z-index: 3;
@@ -166,6 +200,10 @@
   animation: routine-hint 1.05s ease-in-out infinite;
 }
 
+@keyframes routine-guide-bob {
+  50% { transform: translateY(-7px) rotate(4deg) scale(1.04); }
+}
+
 @keyframes routine-float {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
   50% { transform: translateY(-9px) rotate(1deg); }
@@ -178,6 +216,8 @@
 
 @media (max-width: 620px) {
   .routine-journey-stage { min-height: 390px; border-radius: 28px; }
+  .routine-mino-guide { width: 82px; height: 96px; left: 10px; bottom: 8px; }
+  .routine-mino-step { width: 30px; height: 30px; right: -6px; }
   .routine-now-scene .item-visual { width: min(68vw, 290px); height: min(68vw, 290px); }
   .routine-next-scenes { grid-template-columns: 1fr 1fr; }
   .routine-next-scene { min-height: 180px; border-radius: 24px; }
@@ -188,6 +228,13 @@
   .routine-journey-stage {
     min-height: 350px;
     padding: 16px;
+  }
+
+  .routine-mino-guide {
+    width: 68px;
+    height: 80px;
+    left: 7px;
+    bottom: 7px;
   }
 
   .routine-now-scene {
@@ -233,7 +280,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .routine-now-scene .item-visual,
-  .routine-next-scene.hint-target { animation: none; }
+  .routine-next-scene.hint-target,
+  .routine-mino-step { animation: none; }
   .routine-now-scene,
   .routine-next-scene { transition: none; }
 }
