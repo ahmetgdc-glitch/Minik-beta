@@ -18,6 +18,7 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
 - [x] Lokale Sprachclips parallel zum Decoder vorpuffern, damit der Ton schneller beginnt
 - [x] Gespeicherte Sprachclips über Media-Teilanfragen offline abspielen und gestreamte Aufnahmen ohne Warteblockade vollständig nachspeichern
 - [x] Wartende Lernklänge nach Navigation, Pause, Mino-Sprache, Hintergrundwechsel oder neuer Wiederholung zuverlässig abbrechen
+- [x] Letztes Memory-Lernwort vor dem Rundenabschluss vollständig aussprechen lassen
 - [x] Drei gemeinsame Schwierigkeitsstufen auf Kernmechaniken und Minos Hilfe in allen 23 Spielen anwenden
 - [ ] Feste Wortaufnahmen ergänzen: 376 DE- und 375 TR-Items haben noch keinen passenden festen Sprachplan (siehe `VOICE_COVERAGE.md`)
 - [ ] Visuelle/akustische Abnahme auf iPhone und iPad; der Browserzugriff des aktuellen Work-Laufs ist blockiert
@@ -31,6 +32,8 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
   - [x] Entdecker-Kulissen reagieren bei 1, 3 und 6 Funden sichtbar auf den Lernfortschritt, ohne zusätzliche Touch-Ziele zu erzeugen
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
+  - [x] Mino als sichtbarer Musiker auf der Rhythmusbühne, inklusive ruhiger Reduced-Motion-Variante
+  - [x] Mino als Denkbegleiter beim unbekannten dritten Schritt der sozialen Sicherheitsfolge
   - [x] Bilderbuch-Erinnerungsphase als große Mino-Erinnerungswelt statt schlichter Standard-Antwortfläche
   - [x] Geräuschspiel als große Hörszene mit Mino und reagierender Hörumgebung
   - [x] Gegensätze-Spiel mit Mino als sichtbarem Denkpartner auf der zweiten Bühnenhälfte
