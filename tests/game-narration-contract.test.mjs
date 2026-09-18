@@ -28,8 +28,9 @@ test("listen and review always speak the requested learning word", () => {
   mustContain(listen, [
     "`${target.labels.tr} nerede?`",
     "`Finde: ${target.labels.de}.`",
-    "() => speak(text, lang, settings)",
-    "speak(target.labels[lang], lang, settings)",
+    "return hearTarget(text)",
+    "return hearTarget(target.labels[lang])",
+    "await speak(spokenText, lang, settings)",
   ], "listen");
   mustContain(review, [
     "`${target.labels.tr} nerede? Bir kez daha hatırlayalım.`",
