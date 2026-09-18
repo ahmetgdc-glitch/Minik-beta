@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { sample, shuffle } from "../utils/random.js";
 import Visual from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
@@ -21,8 +21,11 @@ export default function MatchGame({
   const [chosen] = useState(() => sample(items, difficulty === 6 ? 4 : difficulty === 4 ? 3 : 2)),
     [slots] = useState(() => shuffle(chosen));
   const [matched, setMatched] = useState([]),
-    [selected, setSelected] = useState(null);
+    [selected, setSelected] = useState(null),
+    [speakingSourceId, setSpeakingSourceId] = useState(null),
+    [pendingSolve, setPendingSolve] = useState(null);
   const matchedRef = useRef([]);
+  const speechRun = useRef(0);
   const text = lang === "tr" ? "Resmi eşine götür." : "Bring das Bild zu seinem Zwilling.";
   useLesson(
     onReady,
@@ -33,11 +36,29 @@ export default function MatchGame({
   );
   const controlsDisabled = paused || interactionBlocked();
 
-  function selectSource(id) {
+  useEffect(() => {
+    if (!pendingSolve || speakingSourceId !== null || paused || interactionBlocked()) return;
+    const solvedIds = pendingSolve;
+    setPendingSolve(null);
+    onSolve(solvedIds);
+  }, [pendingSolve, speakingSourceId, paused, interactionBlocked, onSolve]);
+
+  async function selectSource(id) {
+    if (id == null) {
+      setSelected(null);
+      return;
+    }
     if (paused || interactionBlocked() || matchedRef.current.includes(id)) return;
     setSelected(id);
     const item = chosen.find((entry) => entry.id === id);
-    if (item) speak(item.labels[lang], lang, settings);
+    if (!item) return;
+    const run = ++speechRun.current;
+    setSpeakingSourceId(id);
+    try {
+      await speak(item.labels[lang], lang, settings);
+    } finally {
+      if (run === speechRun.current) setSpeakingSourceId(null);
+    }
   }
 
   function drop(source, target) {
@@ -47,7 +68,11 @@ export default function MatchGame({
       matchedRef.current = result.matched;
       setMatched(result.matched);
       setSelected(null);
-      if (result.matched.length === chosen.length) onSolve(chosen.map(x => x.id));
+      if (result.matched.length === chosen.length) {
+        const solvedIds = chosen.map((x) => x.id);
+        if (speakingSourceId !== null) setPendingSolve(solvedIds);
+        else onSolve(solvedIds);
+      }
     } else if (result.outcome === "retry") {
       setSelected(null);
       onWrong([source]);

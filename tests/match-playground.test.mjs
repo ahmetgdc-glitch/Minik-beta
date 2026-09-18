@@ -27,8 +27,16 @@ test("matching preserves safe drag and tap placement", () => {
 test("matching speaks the exact visible learning label when a source is tapped", () => {
   assert.match(game, /function selectSource\(id\)/);
   assert.match(game, /const item = chosen\.find\(\(entry\) => entry\.id === id\)/);
-  assert.match(game, /speak\(item\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /await speak\(item\.labels\[lang\], lang, settings\)/);
   assert.match(game, /onSelect: selectSource/);
+});
+
+test("matching lets the final tapped source word finish before solving", () => {
+  assert.match(game, /const \[matched, setMatched\] = useState\(\[\]\),[\s\S]*?\[speakingSourceId, setSpeakingSourceId\] = useState\(null\),[\s\S]*?\[pendingSolve, setPendingSolve\] = useState\(null\)/);
+  assert.match(game, /const run = \+\+speechRun\.current;[\s\S]*?setSpeakingSourceId\(id\);[\s\S]*?await speak\(item\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /if \(result\.matched\.length === chosen\.length\) \{[\s\S]*?if \(speakingSourceId !== null\) setPendingSolve\(solvedIds\);[\s\S]*?else onSolve\(solvedIds\)/);
+  assert.match(game, /if \(!pendingSolve \|\| speakingSourceId !== null \|\| paused \|\| interactionBlocked\(\)\) return/);
+  assert.match(game, /setPendingSolve\(null\);[\s\S]*?onSolve\(solvedIds\)/);
 });
 
 test("matching lets a child hear an unselected target without replacing its exact word", () => {
