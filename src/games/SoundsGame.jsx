@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Volume2 } from "lucide-react";
 import { useSelection, useLesson, OptionGrid } from "./shared.jsx";
+import { MinoAvatar } from "../components/Visual.jsx";
 import { itemsForWorld } from "../data/content.js";
 import { prepareSoundPlayback, playSound, stopSounds } from "../audio/sounds.js";
 import { speak, stopSpeech } from "../audio/voice.js";
 export default function SoundsGame({
+  progress,
   difficulty,
   lang,
   settings,
@@ -81,21 +83,30 @@ export default function SoundsGame({
 
   return (
     <div className="sounds-playground" aria-disabled={controlsDisabled || undefined}>
-      <button
-        className={`sound-orb ${playing ? "playing" : ""}`}
-        onClick={repeat}
-        disabled={controlsDisabled}
-        aria-label={lang === "tr" ? "Sesi tekrar dinle" : "Geräusch noch einmal hören"}
-      >
-        <Volume2 size={48} />
-        <span className="sound-bars">
-          <i />
-          <i />
-          <i />
-          <i />
-          <i />
-        </span>
-      </button>
+      <section className={`sound-stage-scene ${playing ? "is-listening" : ""}`} aria-label={text}>
+        <div className="sound-mino-guide" aria-hidden="true">
+          <span className="sound-mino-wave wave-one" />
+          <span className="sound-mino-wave wave-two" />
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
+        <button
+          className={`sound-orb ${playing ? "playing" : ""}`}
+          onClick={repeat}
+          disabled={controlsDisabled}
+          aria-label={lang === "tr" ? "Sesi tekrar dinle" : "Geräusch noch einmal hören"}
+        >
+          <Volume2 size={48} />
+          <span className="sound-bars">
+            <i />
+            <i />
+            <i />
+            <i />
+            <i />
+          </span>
+        </button>
+        <span className="sound-stage-spark spark-one" aria-hidden="true">♪</span>
+        <span className="sound-stage-spark spark-two" aria-hidden="true">♫</span>
+      </section>
       <OptionGrid
         {...{ options, target, hint, lang, settings }}
         hiddenLabels={hint < 3}
