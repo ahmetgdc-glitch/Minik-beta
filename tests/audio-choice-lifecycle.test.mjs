@@ -21,6 +21,7 @@ test("SoundsGame also stops replay when the shared session becomes locked", () =
 test("SoundsGame ignores a stale async replay after pause, lock or unmount", () => {
   const source = readFileSync(new URL("../src/games/SoundsGame.jsx", import.meta.url), "utf8");
   assert.match(source, /const run = \+\+replayRun\.current;[\s\S]*await prepareSoundPlayback\(\);[\s\S]*run !== replayRun\.current/);
+  assert.match(source, /if \(run !== replayRun\.current\) return;[\s\S]*if \(!context \|\| paused \|\| interactionBlocked\(\)\) \{[\s\S]*setPlaying\(false\)/);
   assert.match(source, /if \(controlsDisabled\) \{[\s\S]*replayRun\.current \+= 1[\s\S]*stopSounds\(\)/);
   assert.match(source, /useEffect\(\(\) => \(\) => \{[\s\S]*replayRun\.current \+= 1[\s\S]*stopSounds\(\)/);
 });

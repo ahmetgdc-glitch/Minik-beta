@@ -24,7 +24,10 @@ export default function SoundsGame({
     const run = ++replayRun.current;
     stopSpeech();
     const context = await prepareSoundPlayback();
-    if (run !== replayRun.current || !context || paused || interactionBlocked()) {
+    // A newer replay owns the UI now. An older async resume must not turn off
+    // the newer sound's playing indicator when it eventually resolves.
+    if (run !== replayRun.current) return;
+    if (!context || paused || interactionBlocked()) {
       setPlaying(false);
       return;
     }
