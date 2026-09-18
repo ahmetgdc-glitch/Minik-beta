@@ -61,6 +61,12 @@ export default function MemoryGame({
     const b = cards.find((c) => c.id === open[1]);
     if (!a || !b) { lockedRef.current = false; setOpen([]); return; }
     const ok = a.item.id === b.item.id;
+    const completingGame =
+      ok && matchedRef.current.length + 1 === chosen.length;
+    // Keep the final matched pair on screen until the second card's real word
+    // playback has ended. Otherwise GameSession can navigate away after 400 ms
+    // and cut off the last learning word.
+    if (completingGame && speakingCardId !== null) return;
     const timer = setTimeout(() => {
       if (interactionBlocked()) {
         openRef.current = [];
@@ -81,7 +87,7 @@ export default function MemoryGame({
       lockedRef.current = false;
     }, ok ? 400 : profile.wrongRevealMs);
     return () => clearTimeout(timer);
-  }, [open, paused, cards, chosen, onSolve, onWrong, interactionBlocked, profile.wrongRevealMs]);
+  }, [open, paused, cards, chosen, speakingCardId, onSolve, onWrong, interactionBlocked, profile.wrongRevealMs]);
 
   async function speakCard(card) {
     const run = ++speechRun.current;

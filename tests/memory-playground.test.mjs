@@ -24,6 +24,19 @@ test("memory keeps the visible card linked to its spoken word", () => {
   assert.match(css, /@keyframes memory-speaking/);
 });
 
+test("memory lets the final learning word finish before the session solves", () => {
+  assert.match(game, /const completingGame =\s*ok && matchedRef\.current\.length \+ 1 === chosen\.length/);
+  assert.match(game, /if \(completingGame && speakingCardId !== null\) return/);
+  assert.match(
+    game,
+    /\[open, paused, cards, chosen, speakingCardId, onSolve, onWrong, interactionBlocked, profile\.wrongRevealMs\]/,
+  );
+  assert.match(
+    game,
+    /if \(next\.length === chosen\.length\) onSolve\(chosen\.map\(\(i\) => i\.id\)\)/,
+  );
+});
+
 test("memory playground keeps large touch targets and responsive layouts", () => {
   assert.match(css, /min-height:\s*clamp\(170px, 24vw, 280px\)/);
   assert.match(css, /touch-action:\s*manipulation/);
