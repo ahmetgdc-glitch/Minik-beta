@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { choicesFor, sample } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 import { buildSocialSafetyRounds } from "./socialSteps.js";
@@ -9,6 +9,7 @@ import { difficultyProfile } from "./difficulty.js";
 
 export default function SocialStepsGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -99,7 +100,10 @@ export default function SocialStepsGame({
         ))}
         <div className="social-step-card question" aria-hidden="true">
           <span className="social-step-number">3</span>
-          <strong>?</strong>
+          <div className="social-mino-question">
+            <span className="social-thought-mark">?</span>
+            <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          </div>
         </div>
       </div>
 

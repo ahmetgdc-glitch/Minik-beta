@@ -13,6 +13,16 @@ test("social steps use a large visual journey", () => {
   assert.match(css, /grid-template-columns: 1fr auto 1fr auto 1fr/);
 });
 
+test("Mino visibly helps the child think about the unknown safety step", () => {
+  assert.match(game, /import Visual, \{ MinoAvatar \}/);
+  assert.match(game, /progress,/);
+  assert.match(game, /className="social-mino-question"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(css, /\.social-mino-question \{/);
+  assert.match(css, /@keyframes socialMinoThink/);
+  assert.match(css, /prefers-reduced-motion:[\s\S]*?\.social-thought-mark \{ animation: none; \}/);
+});
+
 test("completed social steps can replay their spoken labels safely", () => {
   assert.match(game, /function hearStep\(item\)/);
   assert.match(game, /if \(blocked\(\)\) return/);
