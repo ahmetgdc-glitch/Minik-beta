@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Eraser, RotateCcw, Trash2, Check, Palette, Image as ImageIcon, Sparkles } from "lucide-react";
-import Visual, { assetUrl } from "../components/Visual.jsx";
+import Visual, { assetUrl, MinoAvatar } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
 import { drawingHistoryEntry, drawingHistoryState, isMeaningfulStroke, MIN_STROKE_DISTANCE, pushDrawingHistory } from "./drawing.js";
@@ -34,7 +34,7 @@ function paletteFrom(source) {
     });
 }
 
-export default function DrawGame({ items = [], lang, hint, paused, interactionBlocked = () => false, onReady, onSolve, settings = {} }) {
+export default function DrawGame({ items = [], lang, hint, paused, progress, interactionBlocked = () => false, onReady, onSolve, settings = {} }) {
   const canvasRef = useRef(null);
   const wrapRef = useRef(null);
   const guideRef = useRef(null);
@@ -377,6 +377,10 @@ export default function DrawGame({ items = [], lang, hint, paused, interactionBl
 
   return <div className="draw-stage">
     <div className="draw-template-strip" aria-label={lang === "tr" ? "Boyama resimleri" : "Malvorlagen"}>
+      <div className="draw-mino-guide" aria-hidden="true">
+        <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        <span className="draw-mino-spark"><Sparkles size={15} /></span>
+      </div>
       {templates.map((item) => <button key={item?.id || "free"} disabled={controlsDisabled} className={(item?.id || null) === templateId ? "active" : ""} onClick={() => selectTemplate(item)}>
         {item ? <Visual item={item} lang={lang} photos={false}/> : <><Sparkles size={28}/><b>{lang === "tr" ? "Serbest" : "Frei"}</b></>}
       </button>)}
