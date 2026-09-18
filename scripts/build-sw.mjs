@@ -11,7 +11,7 @@ async function walk(dir) {
   for (const e of await fs.readdir(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) out.push(...(await walk(p)));
-    else out.push(path.relative(root, p));
+    else out.push(path.relative(root, p).split(path.sep).join("/"));
   }
   return out;
 }

@@ -116,8 +116,9 @@ const syntaxFiles = [
   ...walkFiles(path.join(root, "scripts"), (file) => /\.(?:js|mjs)$/.test(file)),
 ];
 const tsc = spawnSync(
-  process.platform === "win32" ? "tsc.cmd" : "tsc",
+  process.execPath,
   [
+    path.join(root, "node_modules", "typescript", "bin", "tsc"),
     "--noEmit",
     "--allowJs",
     "--checkJs",
