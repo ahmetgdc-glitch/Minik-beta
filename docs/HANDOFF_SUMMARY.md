@@ -69,6 +69,18 @@ Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### Work-Lauf 18./19. September 2026 · Windows-Verifikation, Audio-Gate und Mino-Paarbegleiter
+
+- Ausgangspunkt war `ba2ed5e` (Beta 78) plus dem lokalen Commit `c0083bf`; beides per Rebase als `4403fdf` auf `main` gebracht.
+- Die Windows-lokale Verifikation schlug zwei Mal fehl, obwohl CI grün war:
+  - `scripts/release-preflight.mjs` rief `tsc.cmd` per `spawnSync` auf; außerhalb einer Shell liefert `spawnSync('tsc.cmd')` auf Windows `EINVAL` (status null), daher schlug der Preflight lokal mit „TypeScript source syntax parse failed“ fehl. Der Preflight startet das Projekt-`tsc` jetzt direkt über den Node-Prozess (`process.execPath` mit `node_modules/typescript/bin/tsc`). Commit `129d84b`.
+  - `scripts/build-sw.mjs` normalisierte Walk-Pfade nicht: `path.relative` liefert auf Windows Backslash-Pfade, die der `CORE`-Filter `/assets\/.*\.(js|css|woff2)$/` nicht traf. Der erzeugte Worker enthielt lokal nur 4 Bootdateien; `verify:build` meldete „Offline boot cache must include code chunk: CountGame-aeGtPtYT.js“. Walk-Ergebnisse werden jetzt mit `.split(path.sep).join("/")` auf Schrägstriche normalisiert; lokal sind wieder 69 leichte Bootdateien im Kern und die Offline-Kontrakte unter `/`, `/Minik-beta/` und `/Minik-2.0-/` grün. Commit `129d84b`, Actions-Run `35406025758` komplett grün.
+- Das Rhythmusspiel respektiert den Master-Audio-Schalter jetzt auch ohne Endergebnisansage: `playNote` wird bei `settings.audio === false` weder vorgespielt noch beim Antippen bewertet, und der Status zeigt bilingal „Ton aus“/„Ses kapalı“. Damit ist der Audio-Toggle konsistent mit `speak()` (`src/audio/voice.js`) und dem Geräuschspiel. Drei neue Verhaltenstests (+`rhythm-audio-gate.test.mjs`), Commit `1e927f9`, Actions-Run `35406236654` grün.
+- Das Malen-Spiel stellt beim Undo nach „Löschen“ neben dem Bild auch den echten Strokes-Stand wieder her: `save`/`clearNow`/`undo` nutzen jetzt die vorhandenen `drawingHistoryEntry`/`drawingHistoryState`-Helfer aus `src/games/drawing.js`, sodass jeder History-Eintrag seinen eigenen Strichzähler trägt und der Abschluss-Button nach Undo nicht mehr fälschlich gesperrt bleibt. Neue Tests `tests/draw-undo-count.test.mjs`, Commit `067fc54`, Actions-Run `35406370426` grün.
+- Das Zuordnen-Spiel zeigt Mino jetzt sichtbar als Paarbegleiter in der Bühnenkopfzeile, mit dem gewählten Outfit. Die Float-Bewegung ist über `prefers-reduced-motion` abschaltbar und auf kleinen Telefonen verkleinert; die beiden Ziehhälften bleiben unverändert. Commit `4364394`; der zugehörige Test (`match-playground.test.mjs`) prüft den neuen Kontrakt.
+- **Stand bei Redaktionsschluss:** 713/713 Tests, Preflight, Produktionsbuild und Offline-Verifikation lokal grün; `main` ist mit `origin/main` identisch. Die Läufe für `4364394` liefen bei Redaktionsschluss noch.
+- Weiterhin extern offen: physische iPhone-/iPad-Abnahme von Tonstart, Touch und Background/Resume sowie die noch fehlenden festen Wortaufnahmen mit dem ursprünglichen Sprecherprofil. Diese externen Punkte dürfen die weitere softwareseitige P1-/P2-Arbeit nicht blockieren.
+
 ### Work-Lauf 18. September 2026 · CI, Entdeckerwelt und Audio-Races
 
 - Ausgangspunkt war `1f00f046`. Der eigentliche Workflow **Build, test and publish MINIK** war rot, obwohl der parallele Legacy-Pages-Lauf grün war. Ursache war kein App-Fehler, sondern eine ungültig doppelt escapte RegExp in `tests/audio-choice-lifecycle.test.mjs`. Commit `cb0677b2` repariert den Regressionstest; Tests, Preflight, Build und Produktionsprüfung waren danach wieder grün.
