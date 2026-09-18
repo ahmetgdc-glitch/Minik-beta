@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **14. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -68,6 +68,16 @@ Stand: **14. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Work-Lauf 18. September 2026 · CI, Entdeckerwelt und Audio-Races
+
+- Ausgangspunkt war `1f00f046`. Der eigentliche Workflow **Build, test and publish MINIK** war rot, obwohl der parallele Legacy-Pages-Lauf grün war. Ursache war kein App-Fehler, sondern eine ungültig doppelt escapte RegExp in `tests/audio-choice-lifecycle.test.mjs`. Commit `cb0677b2` repariert den Regressionstest; Tests, Preflight, Build und Produktionsprüfung waren danach wieder grün.
+- `WorldScenery` nutzt den bereits übergebenen Entdeckungsfortschritt nun wirklich: bei 1, 3 und 6 gefundenen Objekten wachen die drei weltspezifischen Landmarken stufenweise auf. Die Kulisse bleibt rein dekorativ und erzeugt keine zusätzlichen Touch-Ziele; `prefers-reduced-motion` deaktiviert die Übergänge. Commit `5d4528fe`.
+- Im Entdeckerspiel konnte der Abschluss-Timer bisher schon 350 ms nach dem letzten Fund auslösen, während die feste MINIK-Stimme das letzte Lernwort noch sprach. Der Abschluss wartet jetzt auf das echte Ende der Wortwiedergabe und bleibt weiterhin gegen Pause/Lifecycle-Wechsel geschützt. Commit `f147ce48`.
+- Im Geräuschspiel durfte ein veralteter asynchroner Replay-Auftrag nach einem neueren Replay noch `playing=false` setzen. Alte Replay-Läufe steigen jetzt ohne State-Mutation aus; nur der aktuelle Auftrag darf den sichtbaren Wiedergabestatus ändern. Commit `13e686bc`; `c51643c6` korrigiert ausschließlich einen Syntaxfehler im zugehörigen Regressionstest.
+- **Letzter vollständig verifizierter Stand dieses Laufs: `c51643c6`.** GitHub Actions: npm-Test-Suite, Preflight, Produktionsbuild, Build-Verifikation, Pages-Deploy und veröffentlichter HTTP-Smoke-Test erfolgreich.
+- Weiterhin extern offen: physische iPhone-/iPad-Abnahme von Tonstart, Touch und Background/Resume sowie die noch fehlenden festen Wortaufnahmen mit dem ursprünglichen Sprecherprofil. Diese externen Punkte dürfen die weitere softwareseitige P1-/P2-Arbeit nicht blockieren.
+
 
 ### CI-Hotfix nach Beta 78 · öffentliche Pages-Umschaltung
 
