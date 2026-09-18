@@ -49,7 +49,7 @@ test("ShadowGame cave stones preserve the full session lock", () => {
 });
 
 test("counting answers are unfocusable and unclickable until every object is counted", () => {
-  assert.match(count, /disabled=\{!allCounted \|\| controlsDisabled\}/);
-  assert.match(count, /aria-disabled=\{!allCounted \|\| controlsDisabled \|\| undefined\}/);
+  assert.match(count, /disabled=\{!answersReady \|\| controlsDisabled\}/);
+  assert.match(count, /aria-disabled=\{!answersReady \|\| controlsDisabled \|\| undefined\}/);
   assert.match(count, /disabled=\{controlsDisabled\}/);
 });

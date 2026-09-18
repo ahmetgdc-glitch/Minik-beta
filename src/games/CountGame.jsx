@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Sparkles } from "lucide-react";
 import { sample, choicesFor } from "../utils/random.js";
 import { itemsForWorld } from "../data/content.js";
@@ -27,7 +27,9 @@ export default function CountGame({
   const target = itemsForWorld("numbers")[n - 1];
   const [options] = useState(() => choicesFor(target, itemsForWorld("numbers").slice(0, maximum), profile.options));
   const [counted, setCounted] = useState([]);
+  const [countingSpeech, setCountingSpeech] = useState(false);
   const countedRef = useRef([]);
+  const countSpeechRun = useRef(0);
   const text = lang === "tr" ? "Kaç tane var?" : "Wie viele sind es?";
 
   useLesson(onReady, text, () => speak(text, lang, settings), [target.id], lang === "tr" ? "Her resme bir kez dokun ve say." : "Tippe jedes Bild einmal an und zähle mit.");
@@ -35,6 +37,28 @@ export default function CountGame({
   const countProgress = `${counted.length} / ${n}`;
   const allCounted = counted.length === n;
   const controlsDisabled = paused || interactionBlocked();
+  const answersReady = allCounted && !countingSpeech;
+
+  useEffect(() => {
+    if (!controlsDisabled) return;
+    countSpeechRun.current += 1;
+    setCountingSpeech(false);
+  }, [controlsDisabled]);
+
+  async function countObject(i) {
+    if (controlsDisabled || countedRef.current.includes(i)) return;
+    const numberItem = itemsForWorld("numbers")[countedRef.current.length];
+    countedRef.current = [...countedRef.current, i];
+    setCounted(countedRef.current);
+
+    const run = ++countSpeechRun.current;
+    setCountingSpeech(true);
+    try {
+      await speak(numberItem.labels[lang], lang, settings);
+    } finally {
+      if (run === countSpeechRun.current) setCountingSpeech(false);
+    }
+  }
 
   return (
     <section className="count-playground count-meadow" data-difficulty={profile.id} aria-label={text} aria-disabled={controlsDisabled || undefined}>
@@ -55,14 +79,7 @@ export default function CountGame({
           const isCounted = counted.includes(i);
           const shownNumber = hint >= 2 ? i + 1 : counted.indexOf(i) + 1;
           return (
-            <button key={i} className={`count-object ${isCounted ? "counted" : ""}`} aria-label={`${object.labels[lang]} ${i + 1}`} disabled={controlsDisabled} onClick={() => {
-              if (controlsDisabled) return;
-              if (!countedRef.current.includes(i)) {
-                speak(itemsForWorld("numbers")[countedRef.current.length].labels[lang], lang, settings);
-                countedRef.current = [...countedRef.current, i];
-                setCounted(countedRef.current);
-              }
-            }}>
+            <button key={i} className={`count-object ${isCounted ? "counted" : ""}`} aria-label={`${object.labels[lang]} ${i + 1}`} disabled={controlsDisabled} onClick={() => countObject(i)}>
               <span className="count-object-glow" aria-hidden="true" />
               <Visual item={object} lang={lang} photos={false} />
               {(isCounted || hint >= 2) && <span className="count-number-bubble">{shownNumber}</span>}
@@ -71,14 +88,14 @@ export default function CountGame({
         })}
       </div>
 
-      <div className={`count-answer-stage ${allCounted ? "ready" : "locked"}`} aria-disabled={!allCounted || controlsDisabled || undefined}>
+      <div className={`count-answer-stage ${answersReady ? "ready" : "locked"}`} aria-disabled={!answersReady || controlsDisabled || undefined}>
         <div className="count-answer-title">
           <strong>{lang === "tr" ? "Kaç tane?" : "Wie viele?"}</strong>
-          <span>{allCounted ? (lang === "tr" ? "Doğru sayı adasına dokun" : "Tippe auf die richtige Zahleninsel") : (lang === "tr" ? "Önce tüm resimlere dokun ve say" : "Zähle zuerst alle Bilder")}</span>
+          <span>{answersReady ? (lang === "tr" ? "Doğru sayı adasına dokun" : "Tippe auf die richtige Zahleninsel") : allCounted ? (lang === "tr" ? "Son sayıyı dinle" : "Hör die letzte Zahl zu Ende") : (lang === "tr" ? "Önce tüm resimlere dokun ve say" : "Zähle zuerst alle Bilder")}</span>
         </div>
         <div className="number-options">
-          <OptionGrid {...{ options, target, hint, lang, settings }} hiddenLabels disabled={!allCounted || controlsDisabled} onPick={(item) => {
-            if (!allCounted || controlsDisabled) return;
+          <OptionGrid {...{ options, target, hint, lang, settings }} hiddenLabels disabled={!answersReady || controlsDisabled} onPick={(item) => {
+            if (!answersReady || controlsDisabled) return;
             item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
           }} />
         </div>

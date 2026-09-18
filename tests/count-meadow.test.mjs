@@ -24,23 +24,32 @@ test("Mino is visibly present in the counting world without stealing touches", (
 
 test("counting keeps one-tap-per-object progression and natural number speech", () => {
   assert.match(game, /countedRef\.current\.includes\(i\)/);
-  assert.match(game, /itemsForWorld\("numbers"\)\[countedRef\.current\.length\]\.labels\[lang\]/);
+  assert.match(game, /const numberItem = itemsForWorld\("numbers"\)\[countedRef\.current\.length\]/);
   assert.match(game, /countedRef\.current = \[\.\.\.countedRef\.current, i\]/);
+  assert.match(game, /await speak\(numberItem\.labels\[lang\], lang, settings\)/);
 });
 
-test("counting blocks answers until every object has been counted", () => {
-  assert.match(game, /count-answer-stage \$\{allCounted \? "ready" : "locked"\}/);
-  assert.match(game, /aria-disabled=\{!allCounted \|\| controlsDisabled \|\| undefined\}/);
-  assert.match(game, /disabled=\{!allCounted \|\| controlsDisabled\}/);
-  assert.match(game, /if \(!allCounted \|\| controlsDisabled\) return/);
+test("counting keeps answers locked until the final spoken number has finished", () => {
+  assert.match(game, /const \[countingSpeech, setCountingSpeech\] = useState\(false\)/);
+  assert.match(game, /const answersReady = allCounted && !countingSpeech/);
+  assert.match(game, /const run = \+\+countSpeechRun\.current;[\s\S]*?setCountingSpeech\(true\);[\s\S]*?await speak\(numberItem\.labels\[lang\]/);
+  assert.match(game, /if \(run === countSpeechRun\.current\) setCountingSpeech\(false\)/);
+});
+
+test("counting blocks answers until every object is counted and its final number is heard", () => {
+  assert.match(game, /count-answer-stage \$\{answersReady \? "ready" : "locked"\}/);
+  assert.match(game, /aria-disabled=\{!answersReady \|\| controlsDisabled \|\| undefined\}/);
+  assert.match(game, /disabled=\{!answersReady \|\| controlsDisabled\}/);
+  assert.match(game, /if \(!answersReady \|\| controlsDisabled\) return/);
   assert.match(css, /\.count-answer-stage\.locked \.number-options \{ pointer-events:none/);
 });
 
 test("counting blocks object and answer interactions while paused or lifecycle-blocked", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
   assert.match(game, /disabled=\{controlsDisabled\}/);
-  assert.match(game, /if \(controlsDisabled\) return/);
-  assert.match(game, /onPick=\{\(item\) => \{[\s\S]*if \(!allCounted \|\| controlsDisabled\) return/);
+  assert.match(game, /if \(controlsDisabled \|\| countedRef\.current\.includes\(i\)\) return/);
+  assert.match(game, /onPick=\{\(item\) => \{[\s\S]*if \(!answersReady \|\| controlsDisabled\) return/);
+  assert.match(game, /if \(!controlsDisabled\) return;[\s\S]*countSpeechRun\.current \+= 1;[\s\S]*setCountingSpeech\(false\)/);
 });
 
 test("count meadow keeps large responsive touch targets", () => {
