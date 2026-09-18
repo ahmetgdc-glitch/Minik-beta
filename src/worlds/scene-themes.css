@@ -61,6 +61,43 @@
   opacity: 0.42;
   transform: rotate(-4deg);
 }
+
+/* Discovery progress now changes the place itself: the first, second and third
+   landmarks wake as a child finds more objects. The world remains decorative
+   and never adds another touch target. */
+.world-scenery .scene-landmark {
+  transition:
+    opacity 0.38s ease,
+    filter 0.38s ease,
+    scale 0.38s ease;
+}
+.world-scenery.discovery-level-0 .scene-landmark {
+  opacity: 0.24;
+  filter: saturate(0.5) grayscale(0.16) drop-shadow(0 10px 7px #244e5d20);
+  scale: 0.95;
+}
+.world-scenery.discovery-level-1 .scene-landmark,
+.world-scenery.discovery-level-2 .scene-landmark {
+  opacity: 0.3;
+  filter: saturate(0.64) grayscale(0.08) drop-shadow(0 11px 7px #244e5d24);
+  scale: 0.98;
+}
+.world-scenery.discovery-level-1 .landmark-1,
+.world-scenery.discovery-level-2 .landmark-1,
+.world-scenery.discovery-level-2 .landmark-2 {
+  opacity: 0.68;
+  filter: saturate(1.06) drop-shadow(0 14px 8px #244e5d32);
+  scale: 1.025;
+}
+.world-scenery.discovery-level-3 .scene-landmark {
+  opacity: 0.72;
+  filter: saturate(1.12) drop-shadow(0 15px 9px #244e5d36);
+  scale: 1.04;
+}
+.world-scenery.discovery-level-3 .landmark-3 {
+  opacity: 0.62;
+}
+
 .world-scenery.is-listening .landmark-1 {
   animation: landmarkWakeLeft 0.72s ease-in-out infinite alternate;
 }
@@ -432,6 +469,9 @@
     transform: scale(1.03);
   }
   .discovery-stage .discovery-word {
+    transition: none;
+  }
+  .world-scenery .scene-landmark {
     transition: none;
   }
   .world-scenery.is-listening .scene-landmark,

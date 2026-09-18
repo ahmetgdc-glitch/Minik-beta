@@ -127,6 +127,28 @@ test("world landmarks wake only while the matching object is speaking", () => {
   );
 });
 
+
+test("world scenery wakes landmarks progressively as children discover objects", () => {
+  assert.match(scenery, /discovered = 0/);
+  assert.match(scenery, /const discoveryCount = Number\.isFinite\(discovered\)/);
+  assert.match(scenery, /discoveryCount >= 6 \? 3/);
+  assert.match(scenery, /discovery-level-\$\{level\}/);
+  assert.match(scenery, /data-discovered=\{discoveryCount\}/);
+  for (const selector of [
+    ".world-scenery.discovery-level-0 .scene-landmark",
+    ".world-scenery.discovery-level-1 .landmark-1",
+    ".world-scenery.discovery-level-2 .landmark-2",
+    ".world-scenery.discovery-level-3 .scene-landmark",
+  ]) {
+    assert.ok(css.includes(selector), `${selector} should encode visible discovery progress`);
+  }
+  assert.match(css, /transition:[\s\S]*?opacity 0\.38s ease/);
+  assert.match(
+    css,
+    /prefers-reduced-motion:[\s\S]*?\.world-scenery \.scene-landmark \{[\s\S]*?transition: none/,
+  );
+});
+
 test("spoken discovery words keep the matching object highlighted for the real speech lifetime", () => {
   assert.match(
     exploreGame,
