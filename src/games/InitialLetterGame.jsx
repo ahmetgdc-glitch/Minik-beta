@@ -106,7 +106,7 @@ export default function InitialLetterGame({
           <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
           <span className="initial-letter-hear-cue"><Volume2 size={24} /></span>
         </div>
-        {hint >= 3 && <strong className="initial-letter-word-hint">{target.labels[lang]}</strong>
+        {hint >= 3 && <strong className="initial-letter-word-hint">{target.labels[lang]}</strong>}
       </div>
       <div className={`letter-choice-grid options-${options.length}`}>
         {options.map((letter) => (
