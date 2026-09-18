@@ -191,4 +191,11 @@ Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Die Sprachabdeckung ist für alle 503 Items erhoben: 127 DE- und 128 TR-Items haben derzeit einen festen Wort-Sprachplan. Alle übrigen benötigen entsprechende feste Aufnahmen oder einen verfügbaren Voice-4-Notfallpfad; siehe `VOICE_COVERAGE.md`.
 - Visuelle Live-Prüfung in dieser Umgebung blockiert: lokale Vorschau nicht erreichbar, öffentlicher Pages-Aufruf lief in ein Verbindungs-Timeout. Die Veröffentlichung selbst wurde durch den GitHub-Actions-Smoke-Test bestätigt. Keine neuen physischen iOS-Prüfungen behaupten.
 
+### Work-Lauf 19. September: Mino-Parität für alle verbleibenden Spiele
+
+- Sortieren zeigt Mino jetzt als sichtbaren Werkstattmeister in der Kopfzeile der Sortierwerkstatt (gegebenes Outfit, kleiner Funken-Akzent); CSS in `sort-workshop.css` mit kleineren Maßen für schmale Phones. (`92a15c2`)
+- Nachfahren zeigt Mino als Ziel-Coach mit großer Zielblase (aufgegebene Ziffer bzw. Buchstabe) neben dem Schreibbrett; schwebende Reduced-Motion-freie Animation, auf Phones über dem Brett. (`92a15c2`)
+- Malen zeigt Mino als Begleiter am Anfang der Vorlagenleiste; `Learn`/`Track`-Fläche bleibt frei, keine neuen Touch-/ARIA-Flächen. (`13f7e7c`)
+- Damit besitzt jedes Spiel außer Puzzle (dort ist der Zeiger bewusst Mino) einen sichtbaren Mino mit gewähltem Outfit. 716/716 Tests, Preflight, Build und Offline-Verifikation grün; Commits `92a15c2`, `13f7e7c` auf `main` gepusht.
+
 Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der feste natürliche Erzähler dürfen nicht verloren gehen. Die feste DE/TR-MINIK-Stimme bleibt primär, Voice 4 ist nur der kontrollierte Notfallpfad. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.

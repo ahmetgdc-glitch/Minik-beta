@@ -42,6 +42,10 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
   - [x] Anfangsbuchstaben-Spiel mit sichtbarem Mino-/Hörhinweis für Wortwiederholung
   - [x] Zuordnen-Spiel mit sichtbarem Mino als Paarbegleiter in der Bühnenkopfzeile
   - [x] Malen stellt beim Undo nach „Löschen“ Bild und echten Strichstand gemeinsam wieder her
+  - [x] Sortier-Spiel mit sichtbarem Mino als Werkstattmeister in der Kopfzeile
+  - [x] Nachfahr-Spiel mit Mino als Ziel-Coach (Ziffer/Buchstabe) direkt neben dem Schreibbrett
+  - [x] Malen mit sichtbarem Mino-Begleiter in der Vorlagenleiste
+  - [x] Puzzle verzichtet bewusst auf eine eigene Figur, weil der Zeiger dort Mino ist
 - [x] Feste natürliche DE/TR-Stimme für die 332 vorhandenen Sprachbausteine lokal bereitstellen
 - [ ] Feste natürliche MINIK-Stimme, kontrollierten Voice-4-Notfallpfad und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
 
