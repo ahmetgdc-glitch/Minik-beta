@@ -36,6 +36,19 @@ test("sorting shows explicit drag feedback and reduced motion support", () => {
   assert.match(css, /prefers-reduced-motion:reduce|prefers-reduced-motion: reduce/);
 });
 
+test("sorting shows Mino as visible workshop master wearing the chosen outfit", () => {
+  assert.match(game, /import Visual, \{ Art, MinoAvatar \} from "\.\.\/components\/Visual\.jsx";/);
+  assert.match(game, /progress,/);
+  assert.match(game, /className="sort-mino-guide"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(game, /progress\?\.minoOutfit/);
+  assert.match(css, /\.sort-mino-guide \{/);
+  assert.match(css, /\.sort-mino-guide \.mino-avatar \{/);
+  assert.match(css, /\.sort-mino-guide \.mino \{/);
+  assert.match(css, /\.sort-mino-spark \{/);
+  assert.match(css, /prefers-reduced-motion:\s?reduce\)[\s\S]*?\.sort-mino-spark \{[\s\S]*?animation:\s?none;/);
+});
+
 test("sorting workshop stylesheet is loaded in production", () => {
   assert.match(main, /sort-workshop\.css/);
 });

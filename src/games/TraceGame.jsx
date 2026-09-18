@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useLesson } from "./shared.jsx";
 import { speak } from "../audio/voice.js";
+import { MinoAvatar } from "../components/Visual.jsx";
 import { difficultyProfile } from "./difficulty.js";
 export const tracePaths = {
   1: [[125, 90], [200, 35], [200, 300]],
@@ -31,6 +32,7 @@ export default function TraceGame({
   settings,
   hint,
   paused,
+  progress,
   interactionBlocked = () => false,
   onReady,
   onSolve,
@@ -87,12 +89,18 @@ export default function TraceGame({
 
   return (
     <div className="trace-wrap" data-difficulty={profile.id} aria-disabled={controlsDisabled || undefined}>
+      <div className="trace-court">
+        <aside className="trace-mino-guide" aria-hidden="true">
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          <span className="trace-target-bubble">{target}</span>
+        </aside>
       <svg className="trace-board" viewBox="0 0 340 340" role="img" aria-label={text} aria-disabled={controlsDisabled || undefined} style={{ pointerEvents: controlsDisabled ? "none" : undefined }} onPointerDown={start} onPointerMove={follow} onPointerUp={() => (down.current = false)} onPointerCancel={() => (down.current = false)} onLostPointerCapture={() => (down.current = false)}>
         <polyline points={sourcePath.map((p) => p.join(",")).join(" ")} fill="none" stroke="#d9e7ed" strokeWidth={guideWidth} strokeLinejoin="round" strokeLinecap="round" />
         <polyline points={sourcePath.map((p) => p.join(",")).join(" ")} fill="none" stroke="#8bafc4" strokeWidth="3" strokeDasharray="3 12" strokeLinecap="round" />
         {stroke.length > 1 && <polyline points={stroke.map((p) => p.join(",")).join(" ")} fill="none" stroke="#40bda1" strokeWidth={Math.max(28, guideWidth - 13)} strokeLinejoin="round" strokeLinecap="round" />}
         {index < points.length && <circle cx={points[index][0]} cy={points[index][1]} r={hint >= 2 ? 20 : profile.id === "easy" ? 18 : profile.id === "medium" ? 15 : 12} fill="#169d74" stroke="white" strokeWidth="4" />}
       </svg>
+      </div>
       <div className="trace-progress"><span style={{ width: `${(index / points.length) * 100}%` }} /></div>
       <button className="secondary" onClick={reset} disabled={controlsDisabled}>{lang === "tr" ? "Baştan başla" : "Noch einmal beginnen"}</button>
     </div>

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Move, Sparkles } from "lucide-react";
 import { worlds } from "../data/content.js";
 import { sample, shuffle } from "../utils/random.js";
-import Visual, { Art } from "../components/Visual.jsx";
+import Visual, { Art, MinoAvatar } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
 import { useDragPlacement } from "./useDragPlacement.js";
@@ -24,6 +24,7 @@ export default function SortGame({
   settings,
   hint,
   paused,
+  progress,
   interactionBlocked = () => false,
   onReady,
   onWrong,
@@ -79,8 +80,11 @@ export default function SortGame({
       </div>
 
       <header className="sort-workshop-header">
-        <span className="sort-workshop-badge" aria-hidden="true"><Sparkles size={25} /></span>
-        <div>
+        <div className="sort-mino-guide" aria-hidden="true">
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          <span className="sort-mino-spark"><Sparkles size={20} /></span>
+        </div>
+        <div className="sort-workshop-copy">
           <strong>{lang === "tr" ? "Mino'nun ayırma atölyesi" : "Minos Sortierwerkstatt"}</strong>
           <span>{lang === "tr" ? "Resmi doğru yere götür" : "Bring das Bild an den richtigen Platz"}</span>
         </div>

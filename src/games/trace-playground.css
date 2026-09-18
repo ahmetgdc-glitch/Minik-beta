@@ -7,6 +7,52 @@
   padding: clamp(8px, 2vw, 18px);
 }
 
+.trace-court {
+  width: min(100%, 920px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 2vw, 24px);
+}
+
+.trace-mino-guide {
+  position: relative;
+  width: clamp(96px, 14vw, 150px);
+  aspect-ratio: .86;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: end center;
+  filter: drop-shadow(0 12px 16px rgba(6, 21, 29, .18));
+  animation: traceMinoFloat 3.6s ease-in-out infinite;
+}
+.trace-mino-guide .mino-avatar {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.trace-mino-guide .mino { width: 100%; max-height: 100%; object-fit: contain; }
+.trace-target-bubble {
+  position: absolute;
+  top: -4%;
+  right: -2%;
+  z-index: 3;
+  min-width: clamp(32px, 5vw, 44px);
+  height: clamp(32px, 5vw, 44px);
+  padding-inline: 8px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #238f75;
+  font-weight: 950;
+  font-size: clamp(18px, 2.6vw, 25px);
+  box-shadow: 0 8px 18px rgba(6, 21, 29, .22);
+}
+
+@keyframes traceMinoFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+
 .trace-board {
   width: min(78vw, 620px);
   max-height: min(70svh, 620px);
@@ -51,6 +97,8 @@
     gap: 12px;
     padding: 2px 0 8px;
   }
+  .trace-court { flex-direction: column; gap: 8px; }
+  .trace-mino-guide { width: clamp(84px, 22vw, 120px); }
   .trace-board {
     width: min(94vw, 560px);
     max-height: 64svh;
@@ -64,6 +112,7 @@
 }
 
 @media (max-width: 430px) {
+  .trace-mino-guide { width: clamp(72px, 20vw, 96px); }
   .trace-board {
     width: 96vw;
     border-radius: 26px;
@@ -75,5 +124,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .trace-mino-guide { animation: none; }
   .trace-progress span { transition: none; }
 }

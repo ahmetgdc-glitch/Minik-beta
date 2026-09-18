@@ -36,9 +36,35 @@
   box-shadow:0 12px 32px rgba(56,91,125,.1);
   backdrop-filter:blur(8px);
 }
-.sort-workshop-badge { width:58px; height:58px; border-radius:20px; display:grid; place-items:center; background:linear-gradient(145deg,#ffe981,#ffbe69); color:#704114; flex:0 0 auto; }
+.sort-mino-guide {
+  position:relative;
+  width:62px;
+  height:62px;
+  overflow:hidden;
+  border-radius:20px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(145deg,#ffe981,#ffbe69);
+  flex:0 0 auto;
+}
+.sort-mino-guide .mino-avatar { position:relative; z-index:1; display:block; width:100%; height:100%; }
+.sort-mino-guide .mino { width:100%; height:100%; object-fit:contain; }
+.sort-mino-spark {
+  position:absolute;
+  top:-1px;
+  right:-1px;
+  z-index:2;
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#fff;
+  color:#ff9e3d;
+  box-shadow:0 2px 7px rgba(112,65,20,.28);
+}
 .sort-workshop-header strong { display:block; font-size:clamp(20px,3vw,32px); line-height:1.05; color:#203750; }
-.sort-workshop-header span:not(.sort-workshop-badge) { display:block; margin-top:4px; color:#62798e; font-size:clamp(14px,1.8vw,18px); font-weight:800; }
+.sort-workshop-header .sort-workshop-copy > span { display:block; margin-top:4px; color:#62798e; font-size:clamp(14px,1.8vw,18px); font-weight:800; }
 
 .sort-object-stage {
   position:relative;
@@ -108,7 +134,7 @@
 @media (max-width:700px) {
   .sort-workshop { min-height:68vh; border-radius:28px; padding:15px 11px 20px; gap:15px; }
   .sort-workshop-header { width:100%; border-radius:22px; }
-  .sort-workshop-badge { width:50px; height:50px; border-radius:17px; }
+  .sort-mino-guide { width:54px; height:54px; border-radius:17px; }
   .sort-object-stage { min-height:clamp(225px,35vh,330px); }
   .sort-workshop .sort-object { width:min(72vw,300px); }
   .sort-workshop .sort-object .item-visual { height:clamp(195px,29svh,285px); }
@@ -129,4 +155,5 @@
 @media (prefers-reduced-motion:reduce) {
   .sort-workshop .sort-object,.sort-workshop .sort-basket { transition:none; }
   .sort-workshop .sort-basket.hint-target { animation:none; outline:7px solid rgba(255,255,255,.72); }
+  .sort-mino-spark { animation:none; }
 }

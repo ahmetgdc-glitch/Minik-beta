@@ -26,6 +26,20 @@ test("tracing expands for phones", () => {
   assert.match(css, /@media \(max-width: 430px\)/);
 });
 
+test("tracing shows Mino as a visible target coach with the picked outfit", () => {
+  assert.match(game, /import \{ MinoAvatar \} from "\.\.\/components\/Visual\.jsx";/);
+  assert.match(game, /progress,/);
+  assert.match(game, /className="trace-mino-guide"/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(game, /progress\?\.minoOutfit/);
+  assert.match(game, /className="trace-target-bubble">\{target\}<\/span>/);
+  assert.match(css, /\.trace-mino-guide \{/);
+  assert.match(css, /\.trace-mino-guide \.mino-avatar \{/);
+  assert.match(css, /\.trace-target-bubble \{/);
+  assert.match(css, /@keyframes traceMinoFloat/);
+  assert.match(css, /prefers-reduced-motion: reduce\)[\s\S]*?\.trace-mino-guide \{[\s\S]*?animation: none;/);
+});
+
 test("tracing playground stylesheet is loaded", () => {
   assert.match(entry, /\.\/games\/trace-playground\.css/);
 });
