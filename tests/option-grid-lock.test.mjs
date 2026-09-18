@@ -24,11 +24,12 @@ test("choice games wire the shared lock state into OptionGrid", () => {
   }
 });
 
-test("ListenGame custom visual islands preserve the full session lock", () => {
+test("ListenGame custom visual islands preserve the full session and narration lock", () => {
   assert.match(listen, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(listen, /const answersDisabled = controlsDisabled \|\| hearingTarget;/);
   assert.match(listen, /className=\{`listen-choice listen-choice-/);
-  assert.match(listen, /disabled=\{controlsDisabled\}/);
-  assert.match(listen, /function pick\(item\) \{\s*if \(controlsDisabled\) return;/s);
+  assert.match(listen, /disabled=\{answersDisabled\}/);
+  assert.match(listen, /function pick\(item\) \{\s*if \(answersDisabled\) return;/s);
   assert.doesNotMatch(listen, /<OptionGrid/);
 });
 

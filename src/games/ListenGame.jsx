@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Headphones, Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
 import Visual, { MinoAvatar } from "../components/Visual.jsx";
@@ -18,6 +18,8 @@ export default function ListenGame({
   onSolve,
 }) {
   const { target, options } = useSelection(items, difficulty);
+  const [hearingTarget, setHearingTarget] = useState(false);
+  const voiceRun = useRef(0);
   const text =
     lang === "tr"
       ? `${target.labels.tr} nerede?`
@@ -28,27 +30,50 @@ export default function ListenGame({
   const displayText = lang === "tr"
     ? "İyi dinle ve doğru resmi bul."
     : "Hör genau hin und finde das passende Bild.";
+  const controlsDisabled = paused || interactionBlocked();
+  const answersDisabled = controlsDisabled || hearingTarget;
+  const quietOption = options.find((item) => item.id !== target.id);
+
+  async function hearTarget(spokenText) {
+    if (controlsDisabled) return;
+    const run = ++voiceRun.current;
+    setHearingTarget(true);
+    try {
+      await speak(spokenText, lang, settings);
+    } finally {
+      if (run === voiceRun.current) setHearingTarget(false);
+    }
+  }
+
+  function playPrompt() {
+    return hearTarget(text);
+  }
+
   useLesson(
     onReady,
     displayText,
-    () => speak(text, lang, settings),
+    playPrompt,
     [target.id],
     text,
   );
-  const controlsDisabled = paused || interactionBlocked();
-  const quietOption = options.find((item) => item.id !== target.id);
+
+  useEffect(() => {
+    if (!controlsDisabled) return;
+    voiceRun.current += 1;
+    setHearingTarget(false);
+  }, [controlsDisabled]);
 
   function pick(item) {
-    if (controlsDisabled) return;
+    if (answersDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   function repeatWord() {
-    if (controlsDisabled) return;
+    if (controlsDisabled || hearingTarget) return;
     // Replay means replay the learning word itself. If that exact word has no
     // fixed MINIK recording yet, voice.js uses the approved exact-text Voice 4
     // fallback instead of substituting or expanding the child's request.
-    speak(target.labels[lang], lang, settings);
+    return hearTarget(target.labels[lang]);
   }
 
   return (
@@ -64,7 +89,7 @@ export default function ListenGame({
           <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
           <Headphones className="listen-mino-headphones" size={58} />
         </div>
-        <button className="listen-orb" type="button" onClick={repeatWord} disabled={controlsDisabled} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
+        <button className={`listen-orb ${hearingTarget ? "playing" : ""}`} type="button" onClick={repeatWord} disabled={controlsDisabled || hearingTarget} aria-label={lang === "tr" ? "Kelimeyi tekrar dinle" : "Wort noch einmal hören"}>
           <span className="listen-wave wave-one" aria-hidden="true" />
           <span className="listen-wave wave-two" aria-hidden="true" />
           <span className="listen-wave wave-three" aria-hidden="true" />
@@ -73,7 +98,7 @@ export default function ListenGame({
         </button>
       </div>
       <div className="listen-choice-label">{lang === "tr" ? "Hangi resim?" : "Welches Bild passt?"}</div>
-      <div className={`listen-choice-field choices-${options.length}`} aria-disabled={controlsDisabled || undefined}>
+      <div className={`listen-choice-field choices-${options.length}`} aria-disabled={answersDisabled || undefined}>
         {options.map((item, index) => {
           const isTarget = item.id === target.id;
           const hinted = hint >= 2 && isTarget;
@@ -84,7 +109,7 @@ export default function ListenGame({
               type="button"
               className={`listen-choice listen-choice-${(index % 4) + 1} ${hinted ? "hint-target" : ""} ${quiet ? "quiet-option" : ""}`}
               onClick={() => pick(item)}
-              disabled={controlsDisabled}
+              disabled={answersDisabled}
               aria-label={item.labels[lang]}
             >
               <span className="listen-choice-glow" aria-hidden="true" />

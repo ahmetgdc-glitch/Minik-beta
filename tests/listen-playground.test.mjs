@@ -31,14 +31,16 @@ test("listening keeps the visible Mino guide generic while narration names the t
   assert.match(game, /const displayText = lang === "tr"/);
   assert.match(game, /"İyi dinle ve doğru resmi bul\."/);
   assert.match(game, /"Hör genau hin und finde das passende Bild\."/);
-  assert.match(game, /useLesson\(\s*onReady,\s*displayText,\s*\(\) => speak\(text, lang, settings\),\s*\[target\.id\],\s*text,/);
+  assert.match(game, /function playPrompt\(\) \{[\s\S]*?return hearTarget\(text\)/);
+  assert.match(game, /useLesson\(\s*onReady,\s*displayText,\s*playPrompt,\s*\[target\.id\],\s*text,/);
   assert.match(game, /<small>\{displayText\}<\/small>/);
 });
 
 test("listening choices preserve lifecycle locks and Mino hint emphasis", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
-  assert.match(game, /if \(controlsDisabled\) return/);
-  assert.match(game, /disabled=\{controlsDisabled\}/);
+  assert.match(game, /const answersDisabled = controlsDisabled \|\| hearingTarget/);
+  assert.match(game, /if \(answersDisabled\) return/);
+  assert.match(game, /disabled=\{answersDisabled\}/);
   assert.match(game, /hint >= 2 && isTarget/);
   assert.match(game, /hint-target/);
   assert.match(game, /quiet-option/);
@@ -53,10 +55,19 @@ test("listening keeps written answer labels hidden until demonstration help", ()
 test("listening replay always speaks only the exact target word", () => {
   assert.match(
     game,
-    /function repeatWord\(\)\s*\{[\s\S]*?if \(controlsDisabled\) return;[\s\S]*?speak\(target\.labels\[lang\], lang, settings\);[\s\S]*?\}/,
+    /function repeatWord\(\)\s*\{[\s\S]*?if \(controlsDisabled \|\| hearingTarget\) return;[\s\S]*?return hearTarget\(target\.labels\[lang\]\);[\s\S]*?\}/,
   );
   assert.doesNotMatch(game, /fixedNaturalVoicePlan/);
   assert.match(game, /onClick=\{repeatWord\}/);
+});
+
+test("listening keeps answers locked for the real lifetime of target speech", () => {
+  assert.match(game, /const \[hearingTarget, setHearingTarget\] = useState\(false\)/);
+  assert.match(game, /const run = \+\+voiceRun\.current;[\s\S]*?setHearingTarget\(true\);[\s\S]*?await speak\(spokenText, lang, settings\)/);
+  assert.match(game, /if \(run === voiceRun\.current\) setHearingTarget\(false\)/);
+  assert.match(game, /disabled=\{controlsDisabled \|\| hearingTarget\}/);
+  assert.match(game, /aria-disabled=\{answersDisabled \|\| undefined\}/);
+  assert.match(game, /if \(!controlsDisabled\) return;[\s\S]*?voiceRun\.current \+= 1;[\s\S]*?setHearingTarget\(false\)/);
 });
 
 test("listening playground keeps large choices on phones", () => {
