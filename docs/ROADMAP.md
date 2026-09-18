@@ -19,6 +19,7 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
 - [x] Gespeicherte Sprachclips über Media-Teilanfragen offline abspielen und gestreamte Aufnahmen ohne Warteblockade vollständig nachspeichern
 - [x] Wartende Lernklänge nach Navigation, Pause, Mino-Sprache, Hintergrundwechsel oder neuer Wiederholung zuverlässig abbrechen
 - [x] Letztes Memory-Lernwort vor dem Rundenabschluss vollständig aussprechen lassen
+- [x] Letztes Quellwort beim Zuordnen per Tap vor dem Rundenabschluss vollständig aussprechen lassen
 - [x] Drei gemeinsame Schwierigkeitsstufen auf Kernmechaniken und Minos Hilfe in allen 23 Spielen anwenden
 - [ ] Feste Wortaufnahmen ergänzen: 376 DE- und 375 TR-Items haben noch keinen passenden festen Sprachplan (siehe `VOICE_COVERAGE.md`)
 - [ ] Visuelle/akustische Abnahme auf iPhone und iPad; der Browserzugriff des aktuellen Work-Laufs ist blockiert

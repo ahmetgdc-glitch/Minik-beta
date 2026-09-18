@@ -83,7 +83,8 @@ Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Das Rhythmusspiel zeigt Mino jetzt tatsächlich auf seiner Musikbühne. Das gewählte Outfit bleibt erhalten; Mino bewegt sich nur während der vorgespielten Melodie und respektiert `prefers-reduced-motion`. Die bestehende Audio-, Timing- und Scoring-Logik bleibt unverändert. Commit `349e39ba`.
 - Memory wartet beim letzten richtigen Paar jetzt auf das echte Ende der Wortwiedergabe, bevor `onSolve` die Runde beendet. Damit kann die Session-Navigation das zweite Wort des letzten Paars nicht mehr nach 400 ms abschneiden. Commit `22606295`.
 - In den sozialen Sicherheitsfolgen begleitet Mino jetzt sichtbar den unbekannten dritten Schritt und „denkt“ mit dem Kind mit. Der bestehende kompakte iPhone-Vertrag bleibt erhalten; `2d77dea8` stellt nach dem visuellen Ausbau die 98-px-Mindesthöhe der Fragekarte wieder her. Ausgangscommit `0d124400`.
-- **Letzter vollständig verifizierter Stand dieses Laufs: `2d77dea8`.** 696/696 Tests, Release-Preflight, Produktionsbuild, Build-Verifikation, Pages-Deploy und veröffentlichter HTTP-Smoke-Test erfolgreich.
+- Beim Zuordnen per Antippen wartet der letzte erfolgreiche Treffer jetzt auf das Ende des gesprochenen Quellworts. Drag-&-Drop bleibt unverändert sofort abschließbar; nur der Tap-Fallback hält einen Abschluss kurz zurück, wenn Mino noch das letzte Wort spricht. Commit `8c557969`.
+- **Letzter vollständig verifizierter Stand dieses Laufs: `8c557969`.** 697/697 Tests, Release-Preflight, Produktionsbuild, Build-Verifikation, Pages-Deploy und veröffentlichter HTTP-Smoke-Test erfolgreich.
 - Weiterhin extern offen: physische iPhone-/iPad-Abnahme von Tonstart, Touch und Background/Resume sowie die noch fehlenden festen Wortaufnahmen mit dem ursprünglichen Sprecherprofil. Diese externen Punkte dürfen die weitere softwareseitige P1-/P2-Arbeit nicht blockieren.
 
 
