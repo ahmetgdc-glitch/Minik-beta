@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { sample, shuffle } from "../utils/random.js";
-import Visual, { Art } from "../components/Visual.jsx";
+import Visual, { Art, MinoAvatar } from "../components/Visual.jsx";
 import { speak } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
 import { difficultyProfile } from "./difficulty.js";
@@ -10,6 +10,7 @@ export default function MemoryGame({
   difficulty,
   lang,
   settings,
+  progress,
   hint,
   paused,
   interactionBlocked = () => false,
@@ -114,6 +115,12 @@ export default function MemoryGame({
   return (
     <section className="memory-playground" data-difficulty={profile.id} aria-label={lang === "tr" ? "Hafıza oyun alanı" : "Memory-Spielwiese"} aria-disabled={controlsDisabled || undefined}>
       <div className="memory-playground-status">{matched.length} / {chosen.length} {lang === "tr" ? "çift" : "Paare"}</div>
+      {hint >= 2 && helpPair && (
+        <div className="memory-mino-guide" aria-hidden="true">
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          <span>{lang === "tr" ? "Bu çifti birlikte bulalım!" : "Dieses Paar finden wir zusammen!"}</span>
+        </div>
+      )}
       <div className={`memory-grid cards-${cards.length}`}>
         {cards.map((card, index) => {
           const found = matched.includes(card.item.id);
