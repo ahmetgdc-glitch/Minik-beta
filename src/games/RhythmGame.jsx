@@ -3,11 +3,13 @@ import { Play, Music2, Sparkles } from "lucide-react";
 import { playNote, stopSounds, prepareSoundPlayback } from "../audio/sounds.js";
 import { speak, stopSpeech } from "../audio/voice.js";
 import { useLesson } from "./shared.jsx";
+import { MinoAvatar } from "../components/Visual.jsx";
 
 const colors = ["#ee8470", "#eac856", "#71b5de", "#a193d9"];
 const symbols = ["●", "▲", "■", "★"];
 
 export default function RhythmGame({
+  progress,
   difficulty,
   lang,
   settings,
@@ -143,10 +145,14 @@ export default function RhythmGame({
       </div>
 
       <div className="rhythm-hero">
+        <div className={`rhythm-mino-performer ${playing ? "playing" : ""}`} aria-hidden="true">
+          <span className="rhythm-mino-note"><Music2 size={24} /></span>
+          <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+        </div>
         <div className="rhythm-hero-badge" aria-hidden="true">
           <Sparkles size={28} />
         </div>
-        <div>
+        <div className="rhythm-hero-copy">
           <strong>{lang === "tr" ? "Mino'nun müzik sahnesi" : "Minos Musikbühne"}</strong>
           <span aria-live="polite">{status}</span>
         </div>

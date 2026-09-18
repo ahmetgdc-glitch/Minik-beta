@@ -14,6 +14,16 @@ test("rhythm uses an immersive Mino music stage", () => {
   assert.match(game, /Mino'nun müzik sahnesi|Minos Musikbühne/);
 });
 
+test("Mino is visibly present and performs only while the melody is playing", () => {
+  assert.match(game, /import \{ MinoAvatar \} from "\.\.\/components\/Visual\.jsx"/);
+  assert.match(game, /progress,/);
+  assert.match(game, /rhythm-mino-performer \$\{playing \? "playing" : ""\}/);
+  assert.match(game, /<MinoAvatar outfit=\{progress\?\.minoOutfit \|\| "classic"\} \/>/);
+  assert.match(css, /\.rhythm-mino-performer \{/);
+  assert.match(css, /\.rhythm-mino-performer\.playing \{[\s\S]*animation:rhythmMinoPerform/);
+  assert.match(css, /@keyframes rhythmMinoPerform/);
+});
+
 test("rhythm stage keeps a visible sequence progress path", () => {
   assert.match(game, /sequence\.map/);
   assert.match(game, /rhythm-step/);
@@ -53,5 +63,6 @@ test("rhythm playground stays large and adapts to phones", () => {
 
 test("rhythm playground respects reduced motion and is loaded in production", () => {
   assert.match(css, /prefers-reduced-motion:reduce|prefers-reduced-motion: reduce/);
+  assert.match(css, /rhythm-mino-performer\.playing[\s\S]*animation:none|rhythm-mino-performer\.playing[\s\S]*animation: none/);
   assert.match(main, /rhythm-playground\.css/);
 });
