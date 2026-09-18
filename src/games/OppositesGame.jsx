@@ -1,13 +1,14 @@
 import React, { useMemo } from "react";
 import { speak } from "../audio/voice.js";
 import { choicesFor, sample } from "../utils/random.js";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { useLesson } from "./shared.jsx";
 import { pairsForWorld } from "./opposites.js";
 import { difficultyProfile } from "./difficulty.js";
 
 export default function OppositesGame({
   items,
+  progress,
   difficulty,
   lang,
   settings,
@@ -64,6 +65,10 @@ export default function OppositesGame({
         </button>
         <span className="opposites-stage-arrow" aria-hidden="true">↔</span>
         <div className="opposites-stage-prompt">
+          <div className="opposites-mino-guide" aria-hidden="true">
+            <span className="opposites-thought-mark">?</span>
+            <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          </div>
           <span>{lang === "tr" ? "Bunun zıttı hangisi?" : "Was ist das Gegenteil?"}</span>
         </div>
       </section>
