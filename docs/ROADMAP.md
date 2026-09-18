@@ -32,6 +32,10 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
   - [x] Bilderbuch-Erinnerungsphase als große Mino-Erinnerungswelt statt schlichter Standard-Antwortfläche
+  - [x] Geräuschspiel als große Hörszene mit Mino und reagierender Hörumgebung
+  - [x] Gegensätze-Spiel mit Mino als sichtbarem Denkpartner auf der zweiten Bühnenhälfte
+  - [x] Tagesablauf mit Mino als sichtbarem Begleiter auf dem Routineweg
+  - [x] Anfangsbuchstaben-Spiel mit sichtbarem Mino-/Hörhinweis für Wortwiederholung
 - [x] Feste natürliche DE/TR-Stimme für die 332 vorhandenen Sprachbausteine lokal bereitstellen
 - [ ] Feste natürliche MINIK-Stimme, kontrollierten Voice-4-Notfallpfad und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
 
