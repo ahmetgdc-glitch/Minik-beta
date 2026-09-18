@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Sparkles, Volume2 } from "lucide-react";
 import { speak } from "../audio/voice.js";
 import Visual, { MinoAvatar } from "../components/Visual.jsx";
@@ -44,22 +44,47 @@ export default function ReviewGame({
       ? (lang === "tr" ? "Öğreniyorum" : "Lerne ich")
       : (lang === "tr" ? "Tekrar turu" : "Wiederholungsrunde");
 
-  useLesson(onReady, displayText, () => speak(text, lang, settings), [target.id], help);
+  const [hearingTarget, setHearingTarget] = useState(false);
+  const voiceRun = useRef(0);
   const controlsDisabled = paused || interactionBlocked();
+  const answersDisabled = controlsDisabled || hearingTarget;
   const quietOption = options.find((item) => item.id !== target.id);
 
-  function replayTarget() {
+  async function speakLocked(spokenText) {
     if (controlsDisabled) return;
-    speak(target.labels[lang], lang, settings);
+    const run = ++voiceRun.current;
+    setHearingTarget(true);
+    try {
+      await speak(spokenText, lang, settings);
+    } finally {
+      if (run === voiceRun.current) setHearingTarget(false);
+    }
+  }
+
+  function playPrompt() {
+    return speakLocked(text);
+  }
+
+  useLesson(onReady, displayText, playPrompt, [target.id], help);
+
+  useEffect(() => {
+    if (!controlsDisabled) return;
+    voiceRun.current += 1;
+    setHearingTarget(false);
+  }, [controlsDisabled]);
+
+  function replayTarget() {
+    if (controlsDisabled || hearingTarget) return;
+    return speakLocked(target.labels[lang]);
   }
 
   function pick(item) {
-    if (controlsDisabled) return;
+    if (answersDisabled) return;
     item.id === target.id ? onSolve([target.id]) : onWrong([target.id]);
   }
 
   return (
-    <div className={`review-game review-island review-${state.level}`} aria-disabled={controlsDisabled || undefined}>
+    <div className={`review-game review-island review-${state.level}`} aria-disabled={answersDisabled || undefined}>
       <section className="review-island__stage" aria-label={badge}>
         <div className="review-island__focus">
           <div className="review-island__badge"><Sparkles size={18} aria-hidden="true" /> {badge}</div>
@@ -67,7 +92,7 @@ export default function ReviewGame({
             type="button"
             className="review-island__orb review-island__listen"
             onClick={replayTarget}
-            disabled={controlsDisabled}
+            disabled={answersDisabled}
             aria-label={lang === "tr" ? `${target.labels.tr} kelimesini tekrar dinle` : `${target.labels.de} noch einmal anhören`}
           >
             <Volume2 size={64} aria-hidden="true" />
@@ -83,7 +108,7 @@ export default function ReviewGame({
         </div>
       </section>
       <div className="review-island__choice-label">{lang === "tr" ? "Doğru resmi bul" : "Finde das richtige Bild"}</div>
-      <div className={`review-island__choices choices-${options.length}`} aria-disabled={controlsDisabled || undefined}>
+      <div className={`review-island__choices choices-${options.length}`} aria-disabled={answersDisabled || undefined}>
         {options.map((item, index) => {
           const isTarget = item.id === target.id;
           const hinted = hint >= 2 && isTarget;
@@ -94,7 +119,7 @@ export default function ReviewGame({
               type="button"
               className={`review-island__choice review-choice-${(index % 4) + 1} ${hinted ? "hint-target" : ""} ${quiet ? "quiet-option" : ""}`}
               onClick={() => pick(item)}
-              disabled={controlsDisabled}
+              disabled={answersDisabled}
               aria-label={item.labels[lang]}
             >
               <span className="review-island__choice-glow" aria-hidden="true" />

@@ -19,9 +19,10 @@ test("review rounds use an immersive Mino training island without revealing the 
 
 test("review target can be replayed as speech without leaking visual answer", () => {
   assert.match(game, /const controlsDisabled = paused \|\| interactionBlocked\(\)/);
+  assert.match(game, /const answersDisabled = controlsDisabled \|\| hearingTarget/);
   assert.match(game, /function replayTarget\(\)/);
-  assert.match(game, /if \(controlsDisabled\) return/);
-  assert.match(game, /speak\(target\.labels\[lang\], lang, settings\)/);
+  assert.match(game, /if \(controlsDisabled \|\| hearingTarget\) return/);
+  assert.match(game, /return speakLocked\(target\.labels\[lang\]\)/);
   assert.match(game, /onClick=\{replayTarget\}/);
   assert.match(game, /kelimesini tekrar dinle|noch einmal anhören/);
 });
@@ -30,7 +31,8 @@ test("review keeps the visible Mino guide generic while narration names the targ
   assert.match(game, /const displayText = lang === "tr"/);
   assert.match(game, /"Kelimeyi dinle ve doğru resmi bul\."/);
   assert.match(game, /"Hör das Wort und finde das richtige Bild\."/);
-  assert.match(game, /useLesson\(onReady, displayText, \(\) => speak\(text, lang, settings\), \[target\.id\], help\)/);
+  assert.match(game, /function playPrompt\(\) \{\s*return speakLocked\(text\);\s*\}/s);
+  assert.match(game, /useLesson\(onReady, displayText, playPrompt, \[target\.id\], help\)/);
   assert.match(game, /<p className="review-island__subtitle">\{displayText\}<\/p>/);
 });
 
@@ -50,9 +52,12 @@ test("review answers stay visually label-free until demonstration help", () => {
   assert.match(game, /aria-label=\{item\.labels\[lang\]\}/);
 });
 
-test("review choices preserve lifecycle locks and Mino hint emphasis", () => {
-  assert.match(game, /disabled=\{controlsDisabled\}/);
-  assert.match(game, /function pick\(item\) \{\s*if \(controlsDisabled\) return;/s);
+test("review choices preserve lifecycle and active narration locks with Mino hint emphasis", () => {
+  assert.match(game, /const \[hearingTarget, setHearingTarget\] = useState\(false\)/);
+  assert.match(game, /const answersDisabled = controlsDisabled \|\| hearingTarget/);
+  assert.match(game, /disabled=\{answersDisabled\}/);
+  assert.match(game, /function pick\(item\) \{\s*if \(answersDisabled\) return;/s);
+  assert.match(game, /if \(!controlsDisabled\) return;[\s\S]*?voiceRun\.current \+= 1;[\s\S]*?setHearingTarget\(false\)/);
   assert.match(game, /hint >= 2 && isTarget/);
   assert.match(game, /hint-target/);
   assert.match(game, /quiet-option/);

@@ -33,11 +33,12 @@ test("ListenGame custom visual islands preserve the full session and narration l
   assert.doesNotMatch(listen, /<OptionGrid/);
 });
 
-test("ReviewGame training islands preserve the full session lock", () => {
+test("ReviewGame training islands preserve the full session and narration lock", () => {
   assert.match(review, /const controlsDisabled = paused \|\| interactionBlocked\(\);/);
+  assert.match(review, /const answersDisabled = controlsDisabled \|\| hearingTarget;/);
   assert.match(review, /className=\{`review-island__choice review-choice-/);
-  assert.match(review, /disabled=\{controlsDisabled\}/);
-  assert.match(review, /function pick\(item\) \{\s*if \(controlsDisabled\) return;/s);
+  assert.match(review, /disabled=\{answersDisabled\}/);
+  assert.match(review, /function pick\(item\) \{\s*if \(answersDisabled\) return;/s);
   assert.doesNotMatch(review, /<OptionGrid/);
 });
 
