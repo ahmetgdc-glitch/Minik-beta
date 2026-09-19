@@ -3,6 +3,9 @@ import GameSession from "./GameSession.jsx";
 import { useProgress } from "../progress/store.js";
 import { uniqueVisuals, worldById } from "../data/content.js";
 import { fixedNaturalVoicePlan } from "../audio/fixedNaturalVoicePlans.js";
+import { naturalPhraseTexts } from "../audio/naturalVoicePlans.js";
+import { helpVoiceTexts } from "../audio/helpVoiceClips.js";
+import { preloadVoiceClip, preloadedVoiceReady, unlockVoiceAudio } from "../audio/voice.js";
 import { gameStyles } from "../gameStyles.js";
 import { Mino } from "../components/Visual.jsx";
 import { sceneForWorld } from "../worlds/scenes.js";
@@ -88,25 +91,37 @@ function fixedVoiceUrls(texts, lang) {
   return [...urls];
 }
 
+function sessionTexts({ gameId, items, lang }) {
+  const texts = new Set(sessionPhrases(lang));
+  const intro = introText[gameId]?.[lang];
+  if (intro) texts.add(intro);
+  for (const item of items) {
+    const label = item?.labels?.[lang];
+    if (label) texts.add(label);
+  }
+  // Dynamic sentences are composed at runtime from a learning word plus a
+  // streamed instruction connector ("Finde dieses Bild.", "Bu resmi bul.", …).
+  // Warm every connector and help hint of the session language as well so the
+  // first spoken sentence needs neither a network round trip nor a decode.
+  for (const phrase of naturalPhraseTexts(lang)) texts.add(phrase);
+  for (const phrase of helpVoiceTexts(lang)) texts.add(phrase);
+  return [...texts];
+}
+
 function worldAssetTasks({ gameId, worldId, items, lang, photos }) {
   const images = new Set([
     baseAssetUrl("assets/mascot/mino.webp"),
     baseAssetUrl(`assets/scenes/${sceneForWorld(worldId)}.webp`),
   ]);
-  const texts = new Set(sessionPhrases(lang));
-  const intro = introText[gameId]?.[lang];
-  if (intro) texts.add(intro);
 
   for (const item of items) {
-    const label = item?.labels?.[lang];
-    if (label) texts.add(label);
     if (item?.asset) images.add(baseAssetUrl(`assets/illustrations/${item.asset}.svg`));
     if (photos && item?.variants?.photo) images.add(baseAssetUrl(item.variants.photo));
   }
 
   return [
     ...[...images].map((url) => ({ url, type: "image" })),
-    ...fixedVoiceUrls([...texts], lang).map((url) => ({ url, type: "voice" })),
+    ...fixedVoiceUrls(sessionTexts({ gameId, items, lang }), lang).map((url) => ({ url, type: "voice" })),
   ];
 }
 
@@ -169,9 +184,12 @@ async function preloadTasks(tasks, onProgress) {
     while (cursor < pending.length) {
       const index = cursor++;
       const task = pending[index];
+      // Speech must be genuinely playback-ready (decoded into the narrator's
+      // shared cache or buffered by the media player) before the session may
+      // start. A plain HTTP warm fetch is not enough for that guarantee.
       const ok = task.type === "image"
         ? await preloadImage(task.url)
-        : await preloadRequest(task.url);
+        : await preloadVoiceClip(task.url);
       if (!ok) failed += 1;
       complete += 1;
       onProgress?.(complete / pending.length);
@@ -256,6 +274,11 @@ export default function PreparedGameSession(props) {
 
     const prepare = async () => {
       try {
+        // The tap that opened this session also primed useAudioPrime, but an
+        // explicit unlock here arms WebAudio immediately so the preload decode
+        // reuses the narrator's gesture-resumed context instead of creating a
+        // second suspended one.
+        void unlockVoiceAudio().catch(() => false);
         await Promise.all([
           preloadGameBundle(gameId),
           preloadTasks(tasks, (value) => {
@@ -267,6 +290,14 @@ export default function PreparedGameSession(props) {
             }
           }),
         ]);
+        // 100 % must never be a lie: only show a ready session when every
+        // required voice clip sits in the narrator's shared playback cache or
+        // was buffered by the media player. Otherwise treat it as an audio
+        // failure and keep the child on the loading card behind the retry.
+        const voiceUrls = tasks.filter((task) => task.type === "voice").map((task) => task.url);
+        if (!voiceUrls.every((url) => preloadedVoiceReady(url))) {
+          throw new Error("session speech is not playback-ready");
+        }
         const remaining = Math.max(0, MIN_LOADING_MS - (Date.now() - started));
         if (remaining) await sleep(remaining);
         if (cancelled) return;

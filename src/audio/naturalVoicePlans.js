@@ -79,6 +79,10 @@ export function naturalPhraseClip(text, lang = "de") {
   return PHRASES[lang]?.[normalize(text)] || "";
 }
 
+export function naturalPhraseTexts(lang = "de") {
+  return Object.keys(PHRASES[lang] || {});
+}
+
 function recordedClip(text, lang) {
   return personalVoiceClip(text, lang) ||
     naturalPhraseClip(text, lang) ||

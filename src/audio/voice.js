@@ -26,6 +26,15 @@ const VOICE_START_TIMEOUT_MS = 4000;
 // Decoding is an optional fast path, not a reason to keep a child waiting.
 // The media player can stream the same recording without decoding it in JS.
 const VOICE_DECODE_BUDGET_MS = 500;
+// Session preload has no per-clip decode budget: it runs behind the progress
+// bar and must prove a clip is truly playback-ready before the game starts.
+const VOICE_PRELOAD_TIMEOUT_MS = 9000;
+// A game must never start while its speech is still downloading. These track
+// the same clips the shared narrator uses later, so preload and playback share
+// one cache and no duplicate download or decode ever runs.
+const preloadJobs = new Map();
+const primedVoiceClips = new Set();
+const mediaPrimedClips = new Set();
 const VOICE_PLAYBACK_LIMIT_MS = 45000;
 const VOICE_BUFFER_LIMIT_BYTES = 16 * 1024 * 1024;
 const VOICE_BUFFER_LIMIT_COUNT = 32;
@@ -215,7 +224,7 @@ function localizedGameClip(url) {
     if (/^assets\/personal-voice\//u.test(url)) {
       return new URL(url, document.baseURI).href;
     }
-    const filename = new URL(url).pathname.split("/").pop();
+    const filename = new URL(url, document.baseURI).pathname.split("/").pop();
     if (!/\.(?:mp3|wav)$/iu.test(filename || "")) return "";
     return new URL(`assets/voice/${filename}`, document.baseURI).href;
   } catch {
@@ -404,6 +413,105 @@ async function speakMediaClip(url, token) {
   } catch {
     return false;
   }
+}
+
+async function decodePreloadedClip(url) {
+  if (voiceBufferCache.has(url)) return true;
+  const context = ensureVoiceContext();
+  if (!context || typeof fetch === "undefined") return false;
+  try {
+    if (context.state === "suspended") {
+      try {
+        await Promise.resolve(context.resume());
+      } catch {}
+    }
+    const response = await fetch(url, {
+      cache: "force-cache",
+      credentials: "same-origin",
+    });
+    if (!response.ok) return false;
+    const bytes = await response.arrayBuffer();
+    if (!bytes || bytes.byteLength < 64) return false;
+    const buffer = await context.decodeAudioData(bytes.slice(0));
+    if (!buffer || !Number.isFinite(buffer.duration) || buffer.duration <= 0) return false;
+    cacheVoiceBuffer(url, buffer);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function primeMediaClip(url) {
+  const player = naturalPlayer();
+  if (!player) return false;
+  return new Promise((resolve) => {
+    let done = false;
+    let timer;
+    const stillOurs = () => player.src === url;
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      player.removeEventListener("loadeddata", onData);
+      player.removeEventListener("canplay", onData);
+      player.removeEventListener("error", onError);
+      if (ok) mediaPrimedClips.add(url);
+      resolve(Boolean(ok && stillOurs()));
+    };
+    const onData = () => {
+      if (stillOurs() && player.readyState >= 2) finish(true);
+    };
+    const onError = () => finish(false);
+    timer = setTimeout(() => finish(stillOurs() && player.readyState >= 2), VOICE_PRELOAD_TIMEOUT_MS);
+    player.addEventListener("loadeddata", onData);
+    player.addEventListener("canplay", onData);
+    player.addEventListener("error", onError);
+    try {
+      prepareMediaClip(url);
+      if (player.readyState >= 2 && stillOurs()) finish(true);
+    } catch {
+      finish(false);
+    }
+  });
+}
+
+/**
+ * Prove a bundled MINIK clip is playback-ready before a game session starts.
+ *
+ * The decoded AudioBuffer lands in the same `voiceBufferCache` that the later
+ * `speakGameClip` fast path consumes, so the first real spoken word needs no
+ * network round trip and no second decode. On platforms or page states where
+ * WebAudio decoding is unavailable, the shared HTMLAudio player warms the same
+ * clip instead. In-flight duplicates share one job (no double downloads) and a
+ * failed clip is left outside `primedVoiceClips` so a retry can run again.
+ */
+export async function preloadVoiceClip(input) {
+  const url = localizedGameClip(input ? String(input) : "");
+  if (!url) return Promise.resolve(false);
+  if (primedVoiceClips.has(url) || voiceBufferCache.has(url) || mediaPrimedClips.has(url)) {
+    return Promise.resolve(true);
+  }
+  const existing = preloadJobs.get(url);
+  if (existing) return existing;
+  const job = (async () => {
+    const decoded = await decodePreloadedClip(url);
+    const mediaReady = await primeMediaClip(url);
+    const ready = decoded || mediaReady;
+    if (ready) primedVoiceClips.add(url);
+    return ready;
+  })();
+  preloadJobs.set(url, job);
+  try {
+    return await job;
+  } finally {
+    if (preloadJobs.get(url) === job) preloadJobs.delete(url);
+  }
+}
+
+export function preloadedVoiceReady(input) {
+  const url = localizedGameClip(input ? String(input) : "");
+  if (!url) return false;
+  return primedVoiceClips.has(url) || voiceBufferCache.has(url) || mediaPrimedClips.has(url);
 }
 
 async function speakGameClip(url, token) {

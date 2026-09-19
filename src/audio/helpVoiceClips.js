@@ -33,5 +33,9 @@ export function helpVoiceClip(text, lang = "de") {
   return helpVoiceEntries[lang]?.[normalize(text)] || "";
 }
 
+export function helpVoiceTexts(lang = "de") {
+  return Object.keys(helpVoiceEntries[lang] || {});
+}
+
 export const helpVoiceClipCount = Object.values(helpVoiceEntries)
   .reduce((sum, group) => sum + Object.keys(group).length, 0);
