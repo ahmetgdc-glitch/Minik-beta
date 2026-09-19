@@ -1,6 +1,6 @@
 # MINIK — aktueller Entwicklungsstand
 
-Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
+Stand: **19. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag steht in `MASTER_PROMPT_FOR_WORK.md`.
 
 ## Aktueller Umfang
 
@@ -27,6 +27,8 @@ Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Ein fehlgeschlagener stiller iOS-Media-Unlock darf nicht als erfolgreich gelten; die Gesture-Listener bleiben bis zu einer echten Audiofreigabe aktiv.
 - Nach Background/Resume werden WebAudio und Voice-Media-Unlock beide neu bewaffnet.
 - Regressionstests sichern feste Erzählpriorität, Voice-4-Notfallpfad, Audio-Unlock, Background/Resume und Sprachgrenzen ab.
+- **Playback-Ready-Gate:** Ein Spiel startet erst, wenn jeder feste Session-Sprachclip dekodiert in Minos WebAudio-Speicher liegt oder vom geteilten HTMLAudioplayer gepuffert ist. Reine HTTP-Warmer ohne Decode/Media-Puffer zählen nicht; 100 % auf dem Vorbereitungsbildschirm ist ein Wiedergabe-Beweis. Nicht abspielbereite Clips halten das Kind sicher hinter „Noch einmal versuchen“.
+- Die Runde-0-Anweisung jedes Spiels ist statisch deklariert (`introText`) und liegt wie die Wort-Labels hinter demselben Gate; sie wird zuletzt warm gemacht, damit der erste gesprochene Satz auf iOS die bereits gepufferte Aufnahme vorfindet. Wiederaufnahme („Weiter!“) und Wiederholung (`/replay/…`) laufen nachweislich nur durch `PreparedGameSession`.
 
 ## Neue Entdeckerwelt — Beta 67
 
@@ -68,6 +70,15 @@ Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Work-Lauf 19. September 2026 · Preload-Gate, hörbare Sprachführung und Abschlussfeier
+
+- **Preload-Gate (`12010b9`, 727/727 Tests):** Die frühere Sprachmodule-Flake-Quelle ist gefunden – `withGlobals` in den Tests war nicht `async`, daher räumten die `finally`-Blöcke die globalen Fakes auf, bevor die asynchronen Microtasks (Decode/Cache/Media-Prime) liefen, und `localizedGameClip` lieferte `""`. Die Harness wartet jetzt mit `await run()`. `src/audio/voice.js` bekommt `preloadVoiceClip`, `preloadedVoiceReady`, `decodePreloadedClip`, `primeMediaClip` und den basis-Toleranten `localizedGameClip`-Lookup. `PreparedGameSession` lädt `sessionTexts` (Session-Phrasen, Intro, Labels, `naturalPhraseTexts`, `helpVoiceTexts`) mit Bild-/Bundle-Load parallel, wirft „session speech is not playback-ready“, wenn nicht jeder Clip `preloadedVoiceReady` ist, und hält das Kind sonst sicher hinter „Noch einmal versuchen“. Neu: `tests/game-audio-preload.test.mjs`.
+- **Sprachführung in der freien Welt (`0d4410a`):** Nach 11 Sekunden ruhiger Entdeckerwelt spricht Mino die feste Entdeckungs-Aufforderung vor („Tippe auf das große Bild. Wische weiter!“ / „Büyük resme dokun. Sonra kaydır!“), einmalig und ohne Auto-Wiederholung. Jede echte Aktivität (Tap, Tastatur, Entdecken, Ansichtswechsel) setzt die Wartezeit zurück; `document.hidden` und `settings.autoHelp && settings.audio` werden geprüft. `tests/world-screen-speech.test.mjs` ergänzt den hörbaren Hinweis und die Clip-Auflösung.
+- **Gate-Härtung (`cebb129`, 735/735 Tests):** `introText` in `PreparedGameSession` entspricht jetzt exakt den statisch gesprochenen Runde-0-Anweisungen aller Spiele – inklusive explore, different, pattern, story, initialletter und draw; die veraltete Puzzle-Zeile („Tippe zwei Teile an…“) und nicht tatsächlich gesprochene Einträge (speak, trace, lettertrace) sind entfernt. Kein Spiel darf mehr eine ungesprochene Phrase hinter dem Gate vorladen. Der Eröffnungsclip wird nach dem vollen Vorladen als Letztes warm gemacht (`preloadVoiceClip` re-warmt den geteilten Media-Player), sodass der erste Satz auf iOS die gepufferte Aufnahme vorfindet. Neue Regressionstests: Resume-/Replay-Route läuft ausschließlich durch `PreparedGameSession`, `GameSession` bleibt nur dort importierbar, und `tests/round-zero-gate.test.mjs` verlangt zweisprachig auflösbare Runde-0-Clips.
+- **Mino-Abschlussfeier (`219fed2`, `0e360f4`, 738/738 Tests):** Der fertige Session-Bildschirm feiert mit genau einer fest aufgenommenen Mino-Zeile (`completionCelebration`), die die zuletzt gespielte Lob-Zeile überspringt, sodass kein Satz doppelt erklingt. Die frühere feste „Super gemacht!“/„Harika!“-`finishText`-Ansage wird zu dieser einen, konsolidierten Feier zusammengeführt. `game-finish-voice.test.mjs` (angepasst) und `session-finish-celebration.test.mjs` decken Route, Einmaligkeit, Reihenfolge nach `stopSpeech()` und die feste Aufnahme in beiden Sprachen ab.
+- **Stand bei Redaktionsschluss:** 738/738 Tests, Produktionsbuild und Preflight lokal grün; `main` ist mit `origin/main` identisch (`0e360f4`).
+- Weiterhin extern offen: physische iPhone-/iPad-Abnahme von Tonstart, Touch und Background/Resume sowie die noch fehlenden festen Wortaufnahmen mit dem ursprünglichen Sprecherprofil. Diese externen Punkte dürfen die weitere softwareseitige Arbeit nicht blockieren.
 
 ### Work-Lauf 18./19. September 2026 · Windows-Verifikation, Audio-Gate und Mino-Paarbegleiter
 

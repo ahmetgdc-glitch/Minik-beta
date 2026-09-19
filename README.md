@@ -31,6 +31,8 @@ Der veröffentlichte Pages-Smoke-Test berücksichtigt jetzt eine kurze Umschaltz
 
 Wartende Lernklänge im Geräusche- und Rhythmusspiel besitzen nun denselben Abbruchschutz wie einzelne Rhythmusnoten. Verlässt das Kind die Runde, beginnt Mino zu sprechen, wird die App verborgen oder folgt ein neuer Tap, kann ein alter Auftrag nach der iPhone-Audiofreigabe nicht mehr verspätet erklingen. Bei schneller Wiederholung gilt nur der jüngste Auftrag.
 
+Ein Spiel öffnet sich erst, wenn alle festen Session-Aufnahmen nachweislich abspielbereit sind: Die Clips liegen dekodiert in Minos geteiltem WebAudio-Speicher oder sind vom HTML-Audioplayer gepuffert. 100 % auf dem Vorbereitungsbildschirm ist damit ein echter Tonstart-Beweis – bei unvollständigem Audio bleibt das Kind sicher hinter „Noch einmal versuchen“. Nach längerer Inaktivität bietet Mino in der freien Welt die feste Entdeckungs-Aufforderung hörbar an, und jeder fertige Durchgang feiert mit genau einer fest aufgenommenen Lob-Zeile, ohne die letzte Ansage zu wiederholen.
+
 Der Audio-Hotfix vom 14. September schützt auch Rhythmusnoten, die noch auf die Audiofreigabe warten: Pause, neue Taps oder Mino-Sprache verwerfen den alten Auftrag. Abgebrochene Taps zählen nicht als Antwort. Die feste DE/TR-Stimme und die drei Hintergrundmusik-Stimmungen bleiben erhalten.
 
 Beta 78 repariert Teilanfragen an gespeicherte Sprachaufnahmen: Der Audioplayer kann passende Tonabschnitte auch offline abrufen. Bei einer neuen gestreamten Aufnahme wird die vollständige Datei im Hintergrund gespeichert, ohne den Tonstart auf diesen Zusatzdownload warten zu lassen. Die feste türkische/deutsche Stimme und der kleine PWA-Startkern bleiben erhalten. Echte Tonstartzeiten auf iPhone/iPad müssen weiterhin am Gerät gemessen werden.

@@ -1,5 +1,15 @@
 # Changelog
 
+## 19. September 2026 · Audio-Gate, Sprachführung und Mino-Abschlussfeier
+
+- **Preload-Gate (P0):** Ein Spiel startet erst, wenn jeder feste Session-Sprachclip wirklich abspielbereit ist – dekodiert in Minos gemeinsamen WebAudio-Speicher oder vom HTML-Audioplayer gepuffert. 100 % auf dem Vorbereitungsbildschirm ist deshalb keine Schätzung mehr, sondern ein echter Wiedergabe-Beweis. Ein nicht abspielbereiter Clip hält das Kind sicher hinter dem Ladebildschirm mit „Noch einmal versuchen“.
+- Die Spurungs-Fehlerquelle der früheren wohlbekannten Sprachmodule ist gefunden: `withGlobals` in den Tests war nicht `async`, sodass die globalen Fakes entfernt wurden, bevor die asynchronen Decode-/Cache-Jobs liefen. Ein `await` macht die Test-Harness jetzt korrekt seriell.
+- **Sprachführung in der freien Welt:** Nach 11 Sekunden ruhiger Welt spricht Mino die feste Entdeckungs-Aufforderung vor („Tippe auf das große Bild. Wische weiter!“ / „Büyük resme dokun. Sonra kaydır!“). Jede echte Aktivität setzt die Wartezeit zurück; versteckte Seiten verhindern die Ansage.
+- **Gate-Härtung:** Die Runde-0-Anweisung jedes Spiels ist jetzt statisch deklariert und liegt wie die Wort-Labels hinter demselben Playback-Gate. Der Eröffnungsclip wird als Letztes warm gemacht, damit der erste gesprochene Satz auf iOS die bereits gepufferte Aufnahme vorfindet.
+- **Resume-/Replay-Pfad:** Wiederaufnahme und Wiederholung laufen nachweislich nur über `PreparedGameSession` – kein direkter `GameSession`-Start neben dem Gate. Neue Vertragstests sichern Route, Mounting und die einzige Import-Kette.
+- **Mino-Abschlussfeier:** Der fertige Session-Bildschirm feiert mit genau einer fest aufgenommenen Mino-Zeile, die die zuletzt gespielte Lob-Zeile überspringt. Die alte feste „Super gemacht!“/„Harika!“-Ansage entfällt, sodass kein doppeltes Lob mehr entsteht.
+- **Stand:** 738/738 Tests, Produktionsbuild und Preflight lokal grün, Änderungen auf `main` gepusht.
+
 ## CI-Hotfix nach Beta 78 · Pages-Propagation
 
 - Der öffentliche Smoke-Test wartet jetzt begrenzt auf den Produktions-Einstieg, wenn GitHub Pages direkt nach erfolgreichem Deployment noch kurz die gültige alte Quellseite ausliefert.

@@ -21,6 +21,11 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
 - [x] Letztes Memory-Lernwort vor dem Rundenabschluss vollständig aussprechen lassen
 - [x] Letztes Quellwort beim Zuordnen per Tap vor dem Rundenabschluss vollständig aussprechen lassen
 - [x] Drei gemeinsame Schwierigkeitsstufen auf Kernmechaniken und Minos Hilfe in allen 23 Spielen anwenden
+- [x] Spielstart erst nach abgeschlossenem Playback-Ready-Vorladen aller festen Session-Sprachclips (Preload-Gate; 100 % = Wiedergabe-Beweis)
+- [x] Runde-0-Anweisung je Spiel statisch deklarieren und als Eröffnungsclip zuletzt warm machen (erster Satz auf iOS aus dem Puffer)
+- [x] Wiederaufnahme und Wiederholung ausschließlich durch dasselbe Vorlade-Gate (kein direkter `GameSession`-Start neben dem Gate)
+- [x] Freie Welt bietet nach längerer Inaktivität die feste Entdeckungs-Aufforderung hörbar an (Mino, ohne Auto-Wiederholung)
+- [x] Session-Abschluss feiert mit genau einer fest aufgenommenen Mino-Zeile, die die letzte Lob-Zeile überspringt (kein Doppel-Lob)
 - [ ] Feste Wortaufnahmen ergänzen: 376 DE- und 375 TR-Items haben noch keinen passenden festen Sprachplan (siehe `VOICE_COVERAGE.md`)
 - [ ] Visuelle/akustische Abnahme auf iPhone und iPad; der Browserzugriff des aktuellen Work-Laufs ist blockiert
 

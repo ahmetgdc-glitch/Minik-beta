@@ -1,6 +1,6 @@
 # Feste Wortaufnahmen — MINIK 1.75.0 Beta 78
 
-Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-16. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label einen **exakten festen Wortclip** in der bestehenden Sprachbibliothek besitzt. Kurze Aufgaben-Fallbacks, zusammengesetzte Hilfesätze und Voice 4 werden nicht als Wortaufnahmen gezählt. Bei dynamischen Aufgaben darf ein fehlender Wortclip nicht mehr dazu führen, dass nur ein allgemeiner Satzbaustein ohne das eigentliche Lernziel abgespielt wird; die Zählung der exakten Wortaufnahmen bleibt dadurch unverändert.
+Stand der Wortabdeckung: 2026-09-13. Laufzeit-Härtung aktualisiert: 2026-09-16. Fester Lade-/Abspielnachweis aktualisiert: 2026-09-19. Geprüft wird für jedes vorhandene Lernobjekt, ob sein DE/TR-Label einen **exakten festen Wortclip** in der bestehenden Sprachbibliothek besitzt. Kurze Aufgaben-Fallbacks, zusammengesetzte Hilfesätze und Voice 4 werden nicht als Wortaufnahmen gezählt. Bei dynamischen Aufgaben darf ein fehlender Wortclip nicht mehr dazu führen, dass nur ein allgemeiner Satzbaustein ohne das eigentliche Lernziel abgespielt wird; die Zählung der exakten Wortaufnahmen bleibt dadurch unverändert.
 
 | Lernwelt | Items | DE mit festem Plan | TR mit festem Plan |
 | --- | ---: | ---: | ---: |
@@ -42,6 +42,12 @@ Damit kann zum Beispiel `Oyuncak ayı nerede?` nicht mehr zu lediglich `Bu resmi
 Rein allgemeine Spielanweisungen ohne konkretes verborgenes Lernziel bleiben weiterhin feste MINIK-Aufnahmen, wenn das pädagogisch korrekt ist. Dazu gehören zum Beispiel Memory, Puzzle, Schatten, Geräusche oder andere Aufgaben, bei denen das Aussprechen der Lösung die Antwort verraten würde. Die Sprachlogik unterscheidet damit zwischen einer absichtlich allgemeinen Spielanweisung und einer dynamischen Ansage, deren Zielbegriff erhalten bleiben muss.
 
 `tests/partial-natural-narration.test.mjs` schützt die verlustfreie Alles-oder-nichts-Regel für dynamische Zielansagen. `tests/turkish-game-voice-smoke.test.mjs` deckt alle 23 registrierten Spielfamilien ab und trennt bewusst zwischen zielhaltigen Ansagen, die bei fehlender Aufnahme vollständig an Voice 4 gehen müssen, und allgemeinen festen Spielanweisungen. Zusätzliche Tests sichern exakte Wiederholungen in Hören, Anfangsbuchstaben und Nachsprechen.
+
+## Lade-/Abspielnachweis 2026-09-19 · kein Start vor echtem Playback-Ready
+
+Seit dem 19. September öffnet sich kein Spiel, bevor jeder **feste** Session-Sprachclip nachweislich abspielbereit ist: Der Clip liegt entweder dekodiert in Minos gemeinsamen WebAudio-Speicher oder wurde vom geteilten HTML-Audioplayer gepuffert (siehe `PreparedGameSession`/`preloadVoiceClip` in `voice.js`). Ein reiner HTTP-Warmabruf zählt nicht als Beweis; 100 % auf dem Vorbereitungsbildschirm ist damit eine echte Wiedergabe-Garantie. Nicht abspielbereite Clips halten das Kind hinter „Noch einmal versuchen“, statt halb aufgeladen zu starten.
+
+Die statische Runde-0-Anweisung jedes Spiels wird explizit deklariert und liegt – wie die Wort-Labels – hinter demselben Gate. Das Gate ersetzt keine fehlenden Wortaufnahmen: Ein nicht aufgenommener vollständiger Satz bleibt in der dynamischen Ansage stumm beziehungsweise geht nur kontrolliert an Voice 4; MINIK ersetzt ihn niemals durch einen kürzeren oder anderen Kindersatz.
 
 ## Nächster P1-Schritt
 
