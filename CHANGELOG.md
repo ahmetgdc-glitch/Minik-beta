@@ -1,5 +1,12 @@
 # Changelog
 
+## 19. September 2026 · Stummer Rhythmus, Mal-Race und abgeschlossene Pages-Abnahme
+
+- **Stummer Rhythmus bleibt lösbar:** Bei ausgeschaltetem Master-Ton war die Runde zuvor nicht mehr spielbar, weil weder vorgespielt noch bewertet wurde. Jetzt spielt Mino die Melodie visuell vor (die Tasten leuchten), Taps zählen ohne Ton, und der Status zeigt zweisprachig „Ton aus · visuell spielen“ / „Ses kapalı · görsel oyna“. `b41cfcf` ersetzt damit die hart abbrechende Logik aus `1e927f9`.
+- **Malen ohne Nachzieh-Race:** Ein verworfener Mikro-Strich (unter der Mindestlänge) konnte seinen asynchronen Undo-Schnappschuss nach einem neueren Strich zurückmalen. Ein `restoreRun`-Zähler bricht jeden veralteten `img.onload`-Restore ab, sodass immer der neueste Strich gewinnt (`a8001c9`).
+- **Pages-Abnahme abgeschlossen:** Die veröffentlichte GitHub-Pages-URL (`https://ahmetgdc-glitch.github.io/Minik-beta/`) wurde aufgerufen und alle Kernpfade geprüft. Der aktive Build ist `assets/index-Bsr3IsDU.js` (346,97 kB, identischer Inhaltshash des lokalen HEAD-Builds), dazu `assets/index-CaKVZTPo.css`, `manifest.webmanifest`, `sw.js`, Icons, Szenen- und Stimm-Assets. Die kurzzeitige Rückkehr auf einen älteren Build war GitHub-Pages-Propagation zwischen zwei Deployments und ist abgeschlossen.
+- **Stand:** 739/739 Tests, Produktionsbuild und Preflight lokal grün, Änderungen auf `main` gepusht.
+
 ## 19. September 2026 · Audio-Gate, Sprachführung und Mino-Abschlussfeier
 
 - **Preload-Gate (P0):** Ein Spiel startet erst, wenn jeder feste Session-Sprachclip wirklich abspielbereit ist – dekodiert in Minos gemeinsamen WebAudio-Speicher oder vom HTML-Audioplayer gepuffert. 100 % auf dem Vorbereitungsbildschirm ist deshalb keine Schätzung mehr, sondern ein echter Wiedergabe-Beweis. Ein nicht abspielbereiter Clip hält das Kind sicher hinter dem Ladebildschirm mit „Noch einmal versuchen“.

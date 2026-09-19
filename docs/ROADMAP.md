@@ -1,6 +1,6 @@
 # MINIK Roadmap
 
-Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
+Stand **1.75.0 Beta 78 · 2026-09-19**. Beta 66 bleibt das technische Fundament. Priorität hat eine große, lebendige Kinderwelt mit wenig Text, großen Lernobjekten und direkter Interaktion.
 
 ## Immersive Kinderwelt
 
@@ -99,13 +99,15 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
 - [x] Crash-Recovery DE/TR
 - [x] GitHub-Pages-Workflow mit Node 22, Tests, Preflight, Build und Verifikation
 - [x] Öffentlichen Pages-Smoke-Test gegen kurzzeitig alte HTML-Antworten nach erfolgreichem Deployment härten
+- [x] Stummer Rhythmus bleibt lösbar: Melodie rein visuell, Taps ohne Ton statt unlösbarer Runde (`b41cfcf`)
+- [x] Malen: ein verworfener Mikro-Strich übermalt keinen neueren Strich mehr (veralteter Undo-Restore abgebrochen, `a8001c9`)
 - [x] Fertiger Produktionsbuild wird im Workflow zusätzlich als `minik-production-build` archiviert
 - [x] Release-Preflight verhindert veraltete Versionen/Dokumentation/Deployment-Metadaten
 
 ## Vor MINIK 1.0 noch zwingend
 
 - [x] Produktionsbuild im tatsächlichen GitHub-Repository erfolgreich ausführen
-- [ ] Veröffentlichte GitHub-Pages-URL aufrufen und Kernpfade durchspielen
+- [x] Veröffentlichte GitHub-Pages-URL aufrufen und Kernpfade durchspielen — aktiver Build `index-Bsr3IsDU.js` + `index-CaKVZTPo.css` (identisch zum lokalen HEAD-Build), `manifest.webmanifest`, `sw.js`, Icons, Szenen- und Stimm-Assets liefern 200
 - [ ] Physisches iPhone: Safari + Home-Screen-PWA + Hoch/Querformat + Hintergrund/Wiederaufnahme
 - [ ] Physisches iPad: Touchflächen, Layout, Scrollen und längere Spielsitzung
 - [ ] Einmal online laden, vollständig schließen und im Flugmodus erneut starten

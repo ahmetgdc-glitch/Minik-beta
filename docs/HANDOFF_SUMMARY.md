@@ -29,6 +29,7 @@ Stand: **19. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Regressionstests sichern feste Erzählpriorität, Voice-4-Notfallpfad, Audio-Unlock, Background/Resume und Sprachgrenzen ab.
 - **Playback-Ready-Gate:** Ein Spiel startet erst, wenn jeder feste Session-Sprachclip dekodiert in Minos WebAudio-Speicher liegt oder vom geteilten HTMLAudioplayer gepuffert ist. Reine HTTP-Warmer ohne Decode/Media-Puffer zählen nicht; 100 % auf dem Vorbereitungsbildschirm ist ein Wiedergabe-Beweis. Nicht abspielbereite Clips halten das Kind sicher hinter „Noch einmal versuchen“.
 - Die Runde-0-Anweisung jedes Spiels ist statisch deklariert (`introText`) und liegt wie die Wort-Labels hinter demselben Gate; sie wird zuletzt warm gemacht, damit der erste gesprochene Satz auf iOS die bereits gepufferte Aufnahme vorfindet. Wiederaufnahme („Weiter!“) und Wiederholung (`/replay/…`) laufen nachweislich nur durch `PreparedGameSession`.
+- **Stummer Rhythmus bleibt spielbar:** Bei `settings.audio === false` wird die Melodie rein visuell vorgespielt und jeder Tap gewertet, nur ohne Ton; ein Master-Ton-Aus darf nie zu einer unlösbaren Runde führen. Status: „Ton aus · visuell spielen“ / „Ses kapalı · görsel oyna“.
 
 ## Neue Entdeckerwelt — Beta 67
 
@@ -70,6 +71,14 @@ Stand: **19. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Das empfohlene Spiel wird nicht erneut in der Favoritenliste dupliziert; alle übrigen altersgerechten Spiele bleiben erreichbar.
 
 ## Weiterarbeit
+
+### Work-Lauf 19. September 2026 · Stummer Rhythmus, Mal-Race und Pages-Abnahme
+
+- **Stummer Rhythmus (`b41cfcf`, 738/738 Tests):** Die frühere Härtung aus `1e927f9` machte bei `settings.audio === false` sowohl das Vorspielen als auch die Bewertung eines Taps unmöglich – die Runde war damit eine Sackgasse. `repeat()` schützt jetzt nur noch echtes Laden/Vorspielen mit `if (!audioDisabled)`, die visuelle Vorschau leuchtet die Tasten immer vor, und `tap()` nimmt Eingaben immer an (`const sounded = audioDisabled ? false : await playNote(i)`) mit zusätzlichem Leuchtblitz über `flashRun`. `tests/rhythm-audio-gate.test.mjs` wurde als neuer Vertrag neu geschrieben, `tests/rhythm-playground.test.mjs` an den asynchronen Recheck angepasst.
+- **Malen ohne Nachzieh-Race (`a8001c9`, 739/739 Tests):** Ein verworfener Mikro-Strich (unter der Mindestlänge) konnte seinen asynchronen Undo-Schnappschuss nach einem neueren Strich zurückmalen. Ein `restoreRun`-`useRef`-Zähler wird in `start()` und im blockierten `end()`-Zweig erhöht; der Restore merkt sich `const run = ++restoreRun.current` und bricht ab, wenn `run !== restoreRun.current`. Neuer Regressionstest in `tests/draw-lifecycle-safety.test.mjs`.
+- **Memory-Audit:** `MemoryGame`, `shared`, `GameSession`, `inputGuard` und `random` geprüft – die vorhandene Härtung (completingGame-Sprechgate, `lockedRef`, `wrongRevealMs`, Hilfe-/Tipp-Pfade, `shouldAcceptWrongTap`) deckt die bekannten Risiken ab; keine Änderung nötig. Auch die Szenenprüfung zeigte, dass alle 25 Welten lokale Landmarken-Kombinationen und eigene Entdeckungsmomente besitzen.
+- **Pages-Abnahme:** Der aktive Live-Build ist `assets/index-Bsr3IsDU.js` (346,97 kB) und `assets/index-CaKVZTPo.css` – identisch zum lokalen HEAD-Build; `manifest.webmanifest`, `sw.js`, Icons, Szenen- und Stimm-Assets liefern 200. Die kurzzeitige Rückkehr eines älteren Builds (`index-CNoLfv_S.js`) war Pages-Propagation zwischen den Deployments `7a79c93` → `b41cfcf` → `a8001c9` und ist abgeschlossen. Der Pages-API-Endpunkt `repos/.../pages` ist für dieses Setup nicht verfügbar (404).
+- **Stand:** 739/739 Tests, Produktionsbuild und Preflight lokal grün; `main` mit `origin/main` identisch.
 
 ### Work-Lauf 19. September 2026 · Preload-Gate, hörbare Sprachführung und Abschlussfeier
 
