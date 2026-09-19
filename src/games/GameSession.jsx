@@ -78,6 +78,16 @@ const praise = {
   tr: ["Harika!", "Çok güzel yaptın!"],
 };
 
+// The finish screen celebrates with a recorded clip of its own. The line that
+// just concluded the last round is skipped so Mino never repeats the same
+// sentence twice in a row.
+function completionCelebration(lang, lastPraise) {
+  const lines = lang === "tr"
+    ? ["Çok güzel yaptın!", "Harika!"]
+    : ["Das hast du toll gemacht!", "Super gemacht!", "Wunderbar!"];
+  return lines.find((text) => text !== lastPraise) || lines[0];
+}
+
 export default function GameSession({ gameId, worldId, onNavigate }) {
   const progress = useProgress(),
     settings = progress.settings,
@@ -116,6 +126,8 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   const pausedRef = useRef(false);
   const phaseRef = useRef(checkpoint?.phase || "active");
   const roundRef = useRef(Math.min(checkpoint?.round || 0, Math.max(0, totalRounds - 1)));
+  const lastPraiseRef = useRef("");
+  const finishSpokeRef = useRef(false);
 
   useModalSafety(paused, () => {
     manualPauseRef.current = false;
@@ -429,6 +441,7 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
       phaseRef.current = "success";
       setPhase("success");
       const text = praise[lang][round % praise[lang].length];
+      lastPraiseRef.current = text;
       setMessage(text);
       playSound("success", settings);
       speak(text, lang, settings);
@@ -466,6 +479,14 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     );
     return () => clearTimeout(t);
   }, [phase, paused, round, totalRounds, saveSession, removeCheckpoint]);
+
+  useEffect(() => {
+    if (phase !== "done" || paused || settings.audio === false) return;
+    if (finishSpokeRef.current) return;
+    finishSpokeRef.current = true;
+    const celebration = completionCelebration(lang, lastPraiseRef.current);
+    speak(celebration, lang, settings);
+  }, [phase, paused, lang, settings]);
 
   function help() {
     if (interactionBlocked()) return;
