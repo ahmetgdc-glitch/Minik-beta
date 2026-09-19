@@ -42,7 +42,7 @@ test("rhythm controls are blocked while paused, stale or during playback", () =>
 });
 
 test("rhythm async audio rechecks lifecycle state before mutating progress", () => {
-  assert.match(game, /const context = await prepareSoundPlayback\(\);[\s\S]*if \(!context \|\| paused \|\| interactionBlocked\(\)(?:\s*\|\| audioDisabled)?\) return/);
+  assert.match(game, /if \(!audioDisabled\) await prepareSoundPlayback\(\)[\s\S]*if \(paused \|\| interactionBlocked\(\)\) return/);
   assert.match(game, /await playNote\(i\);[\s\S]*if \(run !== tapRun\.current \|\| paused \|\| interactionBlocked\(\)\) return/);
   assert.match(game, /setTimeout\(\(\) => \{[\s\S]*if \(paused \|\| interactionBlocked\(\)\)/);
 });

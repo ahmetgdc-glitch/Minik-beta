@@ -36,12 +36,16 @@ export default function RhythmGame({
   // the global sound off must never be surprised by silent pads or by notes.
   const audioDisabled = settings?.audio === false;
   const tapRun = useRef(0);
+  const flashRun = useRef(0);
 
   async function repeat() {
     if (paused || playing || interactionBlocked()) return;
     stopSpeech();
-    const context = await prepareSoundPlayback();
-    if (!context || paused || interactionBlocked() || audioDisabled) return;
+    // The melody is this game's learning content. A family that muted the
+    // master audio still gets a visual preview (pads light up) and can play
+    // along; only the tone itself stays silent.
+    if (!audioDisabled) await prepareSoundPlayback().catch(() => {});
+    if (paused || interactionBlocked()) return;
     setInput([]);
     setCursor(0);
     setPlaying(true);
@@ -82,7 +86,9 @@ export default function RhythmGame({
       stopSounds();
       return;
     }
-    playNote(sequence[cursor]);
+    // Always light the pad, so a muted family still sees the melody. The tone
+    // itself is only produced when the main audio switch allows it.
+    if (!audioDisabled) playNote(sequence[cursor]);
     setLit(sequence[cursor]);
     const off = setTimeout(() => setLit(-1), 340),
       next = setTimeout(() => {
@@ -111,11 +117,20 @@ export default function RhythmGame({
   }, [controlsDisabled]);
 
   async function tap(i) {
-    if (playing || paused || interactionBlocked() || audioDisabled) return;
+    if (playing || paused || interactionBlocked()) return;
     const run = ++tapRun.current;
-    const played = await playNote(i);
+    // With the master audio off, or whenever the engine is busy with
+    // narration, the tap still counts: the pad flashes visually instead and
+    // the melody can be played along silently.
+    const sounded = audioDisabled ? false : await playNote(i);
+    if (!sounded) {
+      const flash = ++flashRun.current;
+      setLit(i);
+      setTimeout(() => {
+        if (flash === flashRun.current && tapRun.current === run) setLit(-1);
+      }, 240);
+    }
     if (run !== tapRun.current || paused || interactionBlocked()) return;
-    if (!played) return;
     if (i !== sequence[input.length]) {
       onWrong(["sounds.piano"]);
       setInput([]);
@@ -129,8 +144,8 @@ export default function RhythmGame({
   const heardCount = playing ? Math.max(0, Math.min(sequence.length, cursor)) : 0;
   const status = audioDisabled
     ? lang === "tr"
-      ? "Ses kapalı"
-      : "Ton aus"
+      ? "Ses kapalı · görsel oyna"
+      : "Ton aus · visuell spielen"
     : playing
     ? lang === "tr"
       ? "Mino çalıyor…"

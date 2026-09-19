@@ -10,21 +10,25 @@ test("rhythm derives its audio gate from the parent master audio switch", () => 
   assert.match(game, /const audioDisabled = settings\?\.audio === false/);
 });
 
-test("rhythm never starts a silent melody preview when master audio is off", () => {
-  assert.match(
-    game,
-    /if \(!context \|\| paused \|\| interactionBlocked\(\) \|\| audioDisabled\) return/,
-  );
+test("a muted family never produces a tone, not during preview and not on taps", () => {
+  assert.match(game, /if \(!audioDisabled\) await prepareSoundPlayback\(\)/);
+  assert.match(game, /if \(!audioDisabled\) playNote\(sequence\[cursor\]\)/);
+  assert.match(game, /const sounded = audioDisabled \? false : await playNote\(i\)/);
 });
 
-test("rhythm pads never accept melody input while master audio is off", () => {
-  assert.match(game, /if \(playing \|\| paused \|\| interactionBlocked\(\) \|\| audioDisabled\) return/);
+test("the silent melody stays playable so a muted round is never a dead end", () => {
+  assert.doesNotMatch(game, /if \(!context \|\| paused \|\| interactionBlocked\(\) \|\| audioDisabled\) return/);
+  assert.match(game, /if \(!sounded\) \{[\s\S]*setLit\(i\)[\s\S]*setLit\(-1\)/);
+  assert.match(game, /if \(i !== sequence\[input\.length\]\) \{/);
+  assert.match(game, /next\.length === sequence\.length && !interactionBlocked\(\)\) onSolve/);
+  assert.match(game, /disabled=\{playing \|\| controlsDisabled\}/);
+  assert.doesNotMatch(game, /disabled=\{playing \|\| controlsDisabled \|\| audioDisabled\}/);
 });
 
 test("rhythm shows a clear bilingual tone-off status instead of a misleading prompt", () => {
   assert.match(game, /const status = audioDisabled/);
-  assert.match(game, /"Ses kapalı"/);
-  assert.match(game, /"Ton aus"/);
+  assert.match(game, /"Ses kapalı/);
+  assert.match(game, /"Ton aus/);
 });
 
 test("rhythm notes remain a learning cue, not a reward effect, consistent with the sounds game", () => {
