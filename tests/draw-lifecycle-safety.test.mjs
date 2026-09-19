@@ -34,3 +34,10 @@ test("pausing cancels an in-progress drawing gesture and closes clear confirmati
   assert.match(game, /setConfirmClear\(false\)/);
   assert.match(game, /open=\{confirmClear && !controlsDisabled\}/);
 });
+
+test("a discarded micro-stroke restore never repaints over a newer stroke", () => {
+  assert.match(game, /const restoreRun = useRef\(0\)/);
+  assert.match(game, /function start\(e\) \{[\s\S]*restoreRun\.current \+= 1;[\s\S]*pendingSnapshot\.current = snapshot\(\)/);
+  assert.match(game, /const run = \+\+restoreRun\.current;[\s\S]*img\.onload = \(\) => \{[\s\S]*if \(run !== restoreRun\.current\) return;/);
+  assert.match(game, /if \(blocked\(\)\) \{[\s\S]*restoreRun\.current \+= 1;/);
+});

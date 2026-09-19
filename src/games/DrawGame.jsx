@@ -43,6 +43,7 @@ export default function DrawGame({ items = [], lang, hint, paused, progress, int
   const last = useRef(null);
   const strokeDistance = useRef(0);
   const pendingSnapshot = useRef(null);
+  const restoreRun = useRef(0);
   const history = useRef([]);
   const [color, setColor] = useState(COLORS[1]);
   const [size, setSize] = useState(SIZES[1]);
@@ -270,6 +271,9 @@ export default function DrawGame({ items = [], lang, hint, paused, progress, int
     const p = point(e);
     if (smartColor && template && !eraser && !guidedColorAt(p)) return;
     e.currentTarget.setPointerCapture?.(e.pointerId);
+    // A fresh stroke supersedes any pending snapshot restore, so a discarded
+    // micro-tap can never repaint over strokes the child already added.
+    restoreRun.current += 1;
     pendingSnapshot.current = snapshot();
     strokeDistance.current = 0;
     drawing.current = true;
@@ -314,6 +318,7 @@ export default function DrawGame({ items = [], lang, hint, paused, progress, int
   function end(e) {
     if (!drawing.current) return;
     if (blocked()) {
+      restoreRun.current += 1;
       drawing.current = false;
       strokeDistance.current = 0;
       pendingSnapshot.current = null;
@@ -326,12 +331,16 @@ export default function DrawGame({ items = [], lang, hint, paused, progress, int
       setStrokes(s => s + 1);
     } else {
       const src = pendingSnapshot.current;
+      const run = ++restoreRun.current;
       if (src) {
         const c = canvasRef.current, ctx = c?.getContext("2d"), r = c?.getBoundingClientRect();
         if (c && ctx && r) {
           ctx.clearRect(0, 0, c.width, c.height);
           const img = new Image();
-          img.onload = () => ctx.drawImage(img, 0, 0, r.width, r.height);
+          img.onload = () => {
+            if (run !== restoreRun.current) return;
+            ctx.drawImage(img, 0, 0, r.width, r.height);
+          };
           img.src = src;
         }
       }
