@@ -37,18 +37,30 @@ const gameModules = {
   rhythm: () => import("./RhythmGame.jsx"),
 };
 
+// The round-0 instruction Mino speaks right after the loading card, per game
+// family — exactly the strings the games pass to useLesson. Every here-static
+// instruction is recorded as a fixed voiced clip (or, for puzzle, will be the
+// moment a recording lands), so the first spoken words sit behind the same
+// "playback-ready" preload gate as the word labels. Games that assemble their
+// opening sentence at runtime from the target word or letter (speak, trace,
+// lettertrace, dailyorder, opposites, review, listen, socialsteps and the story
+// narrative) are intentionally absent — the sentence is built when the round
+// starts, respecting the recorded Split-STEM principle.
 const introText = {
-  speak: { de: "Schau mal! Tippe auf das Bild.", tr: "Bak bakalım! Resme dokun." },
+  explore: { de: "Schau mal! Tippe auf das Bild.", tr: "Bak bakalım! Resme dokun." },
+  different: { de: "Drei Bilder sind gleich. Finde das andere.", tr: "Üç resim aynı. Farklı olanı bul." },
   memory: { de: "Finde zwei gleiche Bilder.", tr: "Aynı iki resmi bul." },
   match: { de: "Bring das Bild zu seinem Zwilling.", tr: "Resmi eşine götür." },
   sort: { de: "In welchen Korb gehört das?", tr: "Hangi sepete ait?" },
   count: { de: "Wie viele sind es?", tr: "Kaç tane var?" },
   sounds: { de: "Hör genau hin. Was klingt so?", tr: "Dinle. Bu ne sesi?" },
-  puzzle: { de: "Tippe zwei Teile an und tausche sie.", tr: "İki parçaya dokun, yerlerini değiştir." },
+  puzzle: { de: "Ziehe die Puzzleteile an die richtige Stelle.", tr: "Puzzle parçalarını doğru yere sürükle." },
   shadow: { de: "Zu welchem Bild gehört der Schatten?", tr: "Bu gölge hangi resme ait?" },
   missing: { de: "Welches Bild ist verschwunden?", tr: "Hangi resim kayboldu?" },
-  trace: { de: "Folge dem grünen Punkt.", tr: "Yeşil noktayı takip et." },
-  lettertrace: { de: "Folge dem grünen Punkt.", tr: "Yeşil noktayı takip et." },
+  pattern: { de: "Welches Bild kommt als Nächstes?", tr: "Sırada hangi resim var?" },
+  story: { de: "Was sieht Mino zum Schluss?", tr: "Mino en son ne görüyor?" },
+  initialletter: { de: "Mit welchem Buchstaben beginnt das Wort?", tr: "Bu kelime hangi harfle başlıyor?" },
+  draw: { de: "Male, zeichne und erfinde etwas auf der großen Fläche.", tr: "Büyük tuvalde boya, çiz ve hayal et." },
   rhythm: { de: "Hör zu und spiele die Melodie nach.", tr: "Dinle ve aynı melodiyi çal." },
 };
 
@@ -290,6 +302,15 @@ export default function PreparedGameSession(props) {
             }
           }),
         ]);
+        // The shared media player buffers exactly one clip. Warm the round-0
+        // instruction last, because it is what Mino speaks first after the
+        // loading card and on iOS the media player is the only playback path.
+        // The opener re-warm keeps the "100 % = voice ready" promise honest
+        // for the very first utterance while every other session text stays
+        // durably decoded in the narrator's shared cache.
+        const openerText = introText[gameId]?.[lang];
+        const openerUrls = openerText ? fixedVoiceUrls([openerText], lang) : [];
+        if (openerUrls[0]) await preloadVoiceClip(openerUrls[0]);
         // 100 % must never be a lie: only show a ready session when every
         // required voice clip sits in the narrator's shared playback cache or
         // was buffered by the media player. Otherwise treat it as an audio

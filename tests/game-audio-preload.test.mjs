@@ -247,6 +247,28 @@ test("a clip that only warms the media player still satisfies the playback gate"
   });
 });
 
+test("a repeated preload re-warms the shared player to the requested clip", async () => {
+  // The shared media player buffers only one clip. A session that warms its
+  // whole phrase set then re-warms the round-0 opener last must end with that
+  // opener bound to the player, otherwise the first spoken words on iOS would
+  // start a brand-new media load behind the "ready" loading card.
+  const mrp = mediaReadyPlayer({ autoReady: true });
+  const { ctx } = fakeContext();
+  const fetchTrack = fetchCounter(true);
+  const window = { AudioContext: class { constructor() { return ctx; } }, webkitAudioContext: undefined, ...eventSource() };
+  const { document } = baseGlobals();
+
+  await withGlobals(window, document, fetchTrack.impl, async () => {
+    const api = buildHarness({ Audio: mrp.Player, fixedNaturalVoicePlan: () => [FIXED_CLIP] });
+    assert.equal(await api.preloadVoiceClip(LOCAL_CLIP), true);
+    assert.equal(await api.preloadVoiceClip(LOCAL_CLIP), true, "the opener re-warm must stay ready");
+    const player = mrp.player;
+    const absolute = new URL(LOCAL_CLIP, "https://example.org/Minik-beta/index.html").href;
+    assert.equal(player.src, absolute, "the repeat preload must bind the shared player back to this clip");
+    assert.equal(fetchTrack.count(), 1, "the re-warm must never download the clip again");
+  });
+});
+
 test("PreparedGameSession routes speech through the playback-ready preload gate", () => {
   const wrapper = fs.readFileSync("src/games/PreparedGameSession.jsx", "utf8");
   assert.match(wrapper, /import \{ preloadVoiceClip, preloadedVoiceReady, unlockVoiceAudio \} from "\.\.\/audio\/voice\.js"/);

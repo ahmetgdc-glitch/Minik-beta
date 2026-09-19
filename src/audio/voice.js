@@ -489,6 +489,11 @@ export async function preloadVoiceClip(input) {
   const url = localizedGameClip(input ? String(input) : "");
   if (!url) return Promise.resolve(false);
   if (primedVoiceClips.has(url) || voiceBufferCache.has(url) || mediaPrimedClips.has(url)) {
+    // The shared media player buffers only the clip it currently holds. When
+    // another clip was primed in the meantime, this re-warm binds the player
+    // back to the requested clip so an already-primed session text is what a
+    // freshly started session will play first on iOS too.
+    void primeMediaClip(url).catch(() => false);
     return Promise.resolve(true);
   }
   const existing = preloadJobs.get(url);
