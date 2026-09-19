@@ -72,6 +72,13 @@ Stand: **19. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 
 ## Weiterarbeit
 
+### Work-Lauf 19. September 2026 · Schnelles konfliktfreies Sprach-Vorladen
+
+- **Preload-Konkurrenz behoben:** Die sechs parallelen Session-Worker konnten bisher denselben geteilten HTML-Audioplayer auf verschiedene Clips umschalten. Verdrängte Aufträge warteten dadurch trotz bereits erfolgreichem Decode bis zum 9-Sekunden-Timeout. Session-Clips landen jetzt direkt im dauerhaften WebAudio-Decode-Cache; nur bei fehlendem Decode nutzt der geordnete Media-Fallback den geteilten Player.
+- **Erster Satz wirklich bereit:** Der Runde-0-Eröffnungsclip wird weiterhin zuletzt in den iOS-Mediaplayer gelegt, aber jetzt mit `{ primeMedia: true }` bis zum echten `loadeddata`/`canplay`-Nachweis abgewartet. Der Ladebildschirm kann somit nicht mehr vor einer noch laufenden Fire-and-forget-Warmphase verschwinden.
+- **Regressionstest:** Sechs unterschiedliche parallele Media-Fallbacks werden mit verzögerter Medienbereitschaft ausgeführt. Alle sechs müssen ohne verdrängten Quellen-Timeout fertig werden; Einzelclip-, Retry-, Cache- und Erstwiedergabetests bleiben erhalten.
+- **Stand vor Veröffentlichung:** 740/740 Tests, Preflight, Produktionsbuild und Offline-Verifikation unter `/`, `/Minik-beta/` und `/Minik-2.0-/` lokal grün. Physische iPhone-/iPad-Tonstartmessung bleibt extern offen.
+
 ### Work-Lauf 19. September 2026 · Stummer Rhythmus, Mal-Race und Pages-Abnahme
 
 - **Stummer Rhythmus (`b41cfcf`, 738/738 Tests):** Die frühere Härtung aus `1e927f9` machte bei `settings.audio === false` sowohl das Vorspielen als auch die Bewertung eines Taps unmöglich – die Runde war damit eine Sackgasse. `repeat()` schützt jetzt nur noch echtes Laden/Vorspielen mit `if (!audioDisabled)`, die visuelle Vorschau leuchtet die Tasten immer vor, und `tap()` nimmt Eingaben immer an (`const sounded = audioDisabled ? false : await playNote(i)`) mit zusätzlichem Leuchtblitz über `flashRun`. `tests/rhythm-audio-gate.test.mjs` wurde als neuer Vertrag neu geschrieben, `tests/rhythm-playground.test.mjs` an den asynchronen Recheck angepasst.

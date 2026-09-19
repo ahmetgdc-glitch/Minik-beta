@@ -35,6 +35,7 @@ const VOICE_PRELOAD_TIMEOUT_MS = 9000;
 const preloadJobs = new Map();
 const primedVoiceClips = new Set();
 const mediaPrimedClips = new Set();
+let mediaPrimeQueue = Promise.resolve();
 const VOICE_PLAYBACK_LIMIT_MS = 45000;
 const VOICE_BUFFER_LIMIT_BYTES = 16 * 1024 * 1024;
 const VOICE_BUFFER_LIMIT_COUNT = 32;
@@ -441,7 +442,7 @@ async function decodePreloadedClip(url) {
   }
 }
 
-function primeMediaClip(url) {
+function primeMediaClipNow(url) {
   const player = naturalPlayer();
   if (!player) return false;
   return new Promise((resolve) => {
@@ -475,6 +476,18 @@ function primeMediaClip(url) {
   });
 }
 
+function primeMediaClip(url) {
+  // One shared HTMLAudio element can only own one source at a time. Queue
+  // media fallbacks and the final opener warm-up so parallel session workers
+  // cannot replace each other's source and wait for the full timeout.
+  const job = mediaPrimeQueue.then(
+    () => primeMediaClipNow(url),
+    () => primeMediaClipNow(url),
+  );
+  mediaPrimeQueue = job.then(() => undefined, () => undefined);
+  return job;
+}
+
 /**
  * Prove a bundled MINIK clip is playback-ready before a game session starts.
  *
@@ -485,31 +498,36 @@ function primeMediaClip(url) {
  * clip instead. In-flight duplicates share one job (no double downloads) and a
  * failed clip is left outside `primedVoiceClips` so a retry can run again.
  */
-export async function preloadVoiceClip(input) {
+export async function preloadVoiceClip(input, { primeMedia = false } = {}) {
   const url = localizedGameClip(input ? String(input) : "");
   if (!url) return Promise.resolve(false);
   if (primedVoiceClips.has(url) || voiceBufferCache.has(url) || mediaPrimedClips.has(url)) {
-    // The shared media player buffers only the clip it currently holds. When
-    // another clip was primed in the meantime, this re-warm binds the player
-    // back to the requested clip so an already-primed session text is what a
-    // freshly started session will play first on iOS too.
-    void primeMediaClip(url).catch(() => false);
-    return Promise.resolve(true);
+    if (!primeMedia) return true;
+    // The opener is the only clip that must be bound to the shared iOS player.
+    // Await its real media-ready event instead of showing a ready game while a
+    // fire-and-forget re-warm is still pending.
+    const mediaReady = await primeMediaClip(url).catch(() => false);
+    return mediaReady || (!isIOSVoiceEnvironment() && voiceBufferCache.has(url));
   }
   const existing = preloadJobs.get(url);
-  if (existing) return existing;
-  const job = (async () => {
+  const job = existing || (async () => {
     const decoded = await decodePreloadedClip(url);
-    const mediaReady = await primeMediaClip(url);
+    // A decoded AudioBuffer is the durable playback-ready representation used
+    // by the narrator. Only fall back to the shared media player when decoding
+    // is unavailable; the opener receives an explicit media warm-up below.
+    const mediaReady = decoded ? false : await primeMediaClip(url);
     const ready = decoded || mediaReady;
     if (ready) primedVoiceClips.add(url);
     return ready;
   })();
-  preloadJobs.set(url, job);
+  if (!existing) preloadJobs.set(url, job);
   try {
-    return await job;
+    const ready = await job;
+    if (!ready || !primeMedia) return ready;
+    const mediaReady = await primeMediaClip(url).catch(() => false);
+    return mediaReady || (!isIOSVoiceEnvironment() && voiceBufferCache.has(url));
   } finally {
-    if (preloadJobs.get(url) === job) preloadJobs.delete(url);
+    if (!existing && preloadJobs.get(url) === job) preloadJobs.delete(url);
   }
 }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 19. September 2026 · Konfliktfreies Sprach-Vorladen
+
+- Parallele Session-Clips verdrängen sich nicht mehr am einzigen HTML-Audioplayer und warten dadurch nicht länger unnötig bis zum 9-Sekunden-Timeout.
+- Erfolgreich dekodierte Clips bleiben vollständig im gemeinsamen Erzähler-Cache; nur der Media-Fallback wird geordnet ausgeführt.
+- Der erste tatsächlich gesprochene Spielsatz wird zuletzt und nachweislich bis `loadeddata`/`canplay` in den iPhone-Audioplayer geladen.
+- Ein neuer Verhaltenstest simuliert sechs verschiedene parallele Clips mit verzögerter Medienbereitschaft. 740/740 Tests, Preflight, Produktionsbuild und Offline-Verifikation sind lokal grün.
+
 ## 19. September 2026 · Stummer Rhythmus, Mal-Race und abgeschlossene Pages-Abnahme
 
 - **Stummer Rhythmus bleibt lösbar:** Bei ausgeschaltetem Master-Ton war die Runde zuvor nicht mehr spielbar, weil weder vorgespielt noch bewertet wurde. Jetzt spielt Mino die Melodie visuell vor (die Tasten leuchten), Taps zählen ohne Ton, und der Status zeigt zweisprachig „Ton aus · visuell spielen“ / „Ses kapalı · görsel oyna“. `b41cfcf` ersetzt damit die hart abbrechende Logik aus `1e927f9`.

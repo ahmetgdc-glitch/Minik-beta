@@ -23,6 +23,7 @@ Stand **1.75.0 Beta 78 · 2026-09-19**. Beta 66 bleibt das technische Fundament.
 - [x] Drei gemeinsame Schwierigkeitsstufen auf Kernmechaniken und Minos Hilfe in allen 23 Spielen anwenden
 - [x] Spielstart erst nach abgeschlossenem Playback-Ready-Vorladen aller festen Session-Sprachclips (Preload-Gate; 100 % = Wiedergabe-Beweis)
 - [x] Runde-0-Anweisung je Spiel statisch deklarieren und als Eröffnungsclip zuletzt warm machen (erster Satz auf iOS aus dem Puffer)
+- [x] Parallele Session-Decodes vom einzelnen HTML-Audioplayer entkoppeln, Media-Fallbacks serialisieren und den Eröffnungsclip bis zur echten Medienbereitschaft abwarten
 - [x] Wiederaufnahme und Wiederholung ausschließlich durch dasselbe Vorlade-Gate (kein direkter `GameSession`-Start neben dem Gate)
 - [x] Freie Welt bietet nach längerer Inaktivität die feste Entdeckungs-Aufforderung hörbar an (Mino, ohne Auto-Wiederholung)
 - [x] Session-Abschluss feiert mit genau einer fest aufgenommenen Mino-Zeile, die die letzte Lob-Zeile überspringt (kein Doppel-Lob)

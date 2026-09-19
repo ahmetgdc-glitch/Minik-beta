@@ -88,7 +88,7 @@ test("the round-0 opener is re-warmed last so its first utterance is media-ready
   const gate = wrapper.indexOf("voiceUrls.every((url) => preloadedVoiceReady(url))");
   assert.ok(rePrime >= 0, "the opener re-warm step must exist");
   assert.match(wrapper, /const openerUrls = openerText \? fixedVoiceUrls\(\[openerText\], lang\) : \[\];/);
-  assert.match(wrapper, /if \(openerUrls\[0\]\) await preloadVoiceClip\(openerUrls\[0\]\);/);
+  assert.match(wrapper, /if \(openerUrls\[0\]\) await preloadVoiceClip\(openerUrls\[0\], \{ primeMedia: true \}\);/);
   assert.ok(
     rePrime < gate,
     "the opener must be warmed before the playback-ready verdict is read",

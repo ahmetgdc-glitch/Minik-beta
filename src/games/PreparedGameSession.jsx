@@ -310,7 +310,7 @@ export default function PreparedGameSession(props) {
         // durably decoded in the narrator's shared cache.
         const openerText = introText[gameId]?.[lang];
         const openerUrls = openerText ? fixedVoiceUrls([openerText], lang) : [];
-        if (openerUrls[0]) await preloadVoiceClip(openerUrls[0]);
+        if (openerUrls[0]) await preloadVoiceClip(openerUrls[0], { primeMedia: true });
         // 100 % must never be a lie: only show a ready session when every
         // required voice clip sits in the narrator's shared playback cache or
         // was buffered by the media player. Otherwise treat it as an audio
