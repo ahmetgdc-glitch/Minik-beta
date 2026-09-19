@@ -301,14 +301,19 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
   }, [paused, phase]);
 
   useEffect(() => {
-    if (phase !== "done" || !settings.audio) return;
-    const finishText = lang === "tr" ? "Harika!" : "Super gemacht!";
+    if (phase !== "done" || paused || settings.audio === false) return;
+    if (finishSpokeRef.current) return;
+    finishSpokeRef.current = true;
+    // Settle briefly so the finish card is visible, then celebrate Mino's
+    // session completion aloud with a recorded clip. The line that just
+    // concluded the last round is skipped so the praise never repeats twice.
+    const celebration = completionCelebration(lang, lastPraiseRef.current);
     const t = setTimeout(() => {
       if (phaseRef.current !== "done" || document.hidden) return;
-      speak(finishText, lang, settings);
+      speak(celebration, lang, settings);
     }, 120);
     return () => clearTimeout(t);
-  }, [phase, lang, settings]);
+  }, [phase, paused, lang, settings]);
 
   useEffect(() => {
     if (phase === "done") return;
@@ -479,14 +484,6 @@ export default function GameSession({ gameId, worldId, onNavigate }) {
     );
     return () => clearTimeout(t);
   }, [phase, paused, round, totalRounds, saveSession, removeCheckpoint]);
-
-  useEffect(() => {
-    if (phase !== "done" || paused || settings.audio === false) return;
-    if (finishSpokeRef.current) return;
-    finishSpokeRef.current = true;
-    const celebration = completionCelebration(lang, lastPraiseRef.current);
-    speak(celebration, lang, settings);
-  }, [phase, paused, lang, settings]);
 
   function help() {
     if (interactionBlocked()) return;

@@ -12,15 +12,15 @@ test("the finish screen celebrates Mino's session completion aloud", () => {
   assert.match(session, /if \(phase !== "done" \|\| paused \|\| settings\.audio === false\) return;/);
   assert.match(session, /if \(finishSpokeRef\.current\) return;/);
   assert.match(session, /finishSpokeRef\.current = true;/);
-  // The celebration must run only after the done transition has stopped the
-  // final round's praise, otherwise it would double up.
-  const doneStart = session.indexOf("if (round + 1 >= totalRounds)");
-  const transitionStop = session.indexOf("stopSpeech();", doneStart);
-  const celebration = session.indexOf("speak(celebration, lang, settings);");
-  assert.ok(
-    transitionStop >= 0 && transitionStop < celebration,
-    "the done transition must stop the last round's speech before the celebration",
-  );
+  // Exactly one celebration line must exist: the skip-aware finish clip. The
+  // earlier fixed "Super gemacht!"/Harika! effect would double the praise.
+  assert.doesNotMatch(session, /finishText = lang === "tr" \? "Harika!" : "Super gemacht!"/);
+  assert.equal(session.split("completionCelebration(lang, lastPraiseRef.current)").length - 1, 1);
+  // The celebration settles briefly after the done transition (which already
+  // stopped the final round's praise) and only speaks in the foreground.
+  assert.match(session, /setTimeout\(\(\) => \{/);
+  assert.match(session, /phaseRef\.current !== "done" \|\| document\.hidden/);
+  assert.match(session, /if \(round \+ 1 >= totalRounds\) \{[\s\S]*?stopSpeech\(\);/);
 });
 
 test("the celebration skips the praise that just concluded the last round", () => {
