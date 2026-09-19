@@ -15,12 +15,20 @@ import { worldMastery } from "../learning/mastery.js";
 import { gamesForAge } from "../learning/age.js";
 import SceneExplorer from "./SceneExplorer.jsx";
 
+// Keep the free world as gentle as the in-game Mino help system: when a child
+// simply looks at the discovery scene without tapping, Mino offers the recorded
+// guidance aloud (10 s sits between the in-game hint and help delays).
+const FREE_WORLD_HELP_DELAY_MS = 11000;
+
 export default function WorldScreen({ world, progress, onNavigate }) {
   const { lang } = progress.settings;
+  const settings = progress.settings;
   const [view, setView] = useState("adventure");
   const [discovered, setDiscovered] = useState([]);
   const [speakingId, setSpeakingId] = useState(null);
+  const [activity, setActivity] = useState(0);
   const speechRun = useRef(0);
+  const screenRef = useRef(null);
   const t = (de, tr) => (lang === "tr" ? tr : de);
   const mastery = worldMastery(progress, world, lang);
   const visibleGames = gamesForAge(
@@ -43,6 +51,7 @@ export default function WorldScreen({ world, progress, onNavigate }) {
   function discover(item) {
     playSound("tap", progress.settings);
     setDiscovered((old) => (old.includes(item.id) ? old : [...old, item.id]));
+    setActivity((a) => a + 1);
     speakItem(item);
   }
   function selectView(next) {
@@ -50,6 +59,7 @@ export default function WorldScreen({ world, progress, onNavigate }) {
     speechRun.current += 1;
     setSpeakingId(null);
     stopSpeech();
+    setActivity((a) => a + 1);
     setView(next);
   }
   useEffect(
@@ -59,13 +69,48 @@ export default function WorldScreen({ world, progress, onNavigate }) {
     },
     [lang],
   );
+
+  // Any touch, mouse or keyboard interaction in the destination restarts the
+  // inactive Mino guidance timer; moving between or inside views does too.
+  useEffect(() => {
+    const root = screenRef.current;
+    if (!root) return;
+    const bump = () => setActivity((a) => a + 1);
+    root.addEventListener("pointerdown", bump, { passive: true });
+    root.addEventListener("keydown", bump);
+    return () => {
+      root.removeEventListener("pointerdown", bump);
+      root.removeEventListener("keydown", bump);
+    };
+  }, []);
+
+  // A quiet free world should stay audible: after a while without interaction
+  // Mino speaks the recorded discovery guidance, exactly like the in-game help
+  // system. The phrase is part of the fixed narrator library in both languages.
+  useEffect(() => {
+    if (view === "games" || !settings.autoHelp || !settings.audio) return;
+    if (typeof document !== "undefined" && document.hidden) return;
+    const timer = setTimeout(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (speakingId !== null) return;
+      if (!settings.autoHelp || !settings.audio) return;
+      speak(
+        lang === "tr"
+          ? "Büyük resme dokun. Sonra kaydır!"
+          : "Tippe auf das große Bild. Wische weiter!",
+        lang,
+        settings,
+      );
+    }, FREE_WORLD_HELP_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [view, lang, activity, speakingId, settings.autoHelp, settings.audio]);
   const modes = [
     ["adventure", Sparkles, t("Entdecken", "Keşfet")],
     ["games", Gamepad2, t("Spielen", "Oyna")],
     ["words", BookOpen, t("Wörter", "Kelimeler")],
   ];
   return (
-    <div className="world-destination">
+    <div className="world-destination" ref={screenRef}>
       <header className="destination-header">
         <button
           className="scene-round-button"
