@@ -481,4 +481,8 @@
     rotate: none;
     scale: none;
   }
+  .discovery-progress.all-found,
+  .discovery-progress.all-found i.done {
+    animation: none;
+  }
 }

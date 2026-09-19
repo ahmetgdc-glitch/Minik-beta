@@ -50,7 +50,8 @@ test("320px bottom navigation keeps Turkish tab labels on one line", () => {
 
 test("hard discovery progress fits beside Mino on 320px phones", () => {
   assert.match(scene, /className="discovery-footer"/);
-  assert.match(explore, /className="discovery-progress"/);
+  assert.match(explore, /discovery-progress/);
+  assert.match(explore, /targetCount \? "all-found" : ""/);
   assert.match(explore, /explorationSize\(difficulty\)/);
   assert.match(guards, /@media \(max-width: 340px\)[\s\S]*?\.child-world-shell \.discovery-footer[\s\S]*?left: 8px[\s\S]*?right: 8px[\s\S]*?gap: 4px/);
   assert.match(guards, /\.child-world-shell \.scene-mino[\s\S]*?width: 72px[\s\S]*?min-width: 72px[\s\S]*?height: 72px/);

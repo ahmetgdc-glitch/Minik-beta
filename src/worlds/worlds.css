@@ -96,6 +96,10 @@
 .discovery-progress { display:flex; gap:9px; padding:14px; border-radius:30px; background:#fff8; }
 .discovery-progress i { display:block; width:17px; height:17px; border:3px solid #fff; border-radius:50%; background:#478994; }
 .discovery-progress i.done { background:#ffbe35; box-shadow:0 0 0 2px #bf861b; }
+.discovery-progress.all-found { animation:discoveryAllFound .8s ease-in-out 2; background:#fff6d6; }
+.discovery-progress.all-found i.done { animation:discoveryDotPop .5s ease-out 2; }
+@keyframes discoveryAllFound { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+@keyframes discoveryDotPop { 0% { transform:scale(1); } 45% { transform:scale(1.55); } 100% { transform:scale(1); } }
 .game-explore { max-width:none; }
 .game-explore .game-area { max-width:none; padding:0; }
 .game-explore .discovery-stage { width:100%; border-radius:30px; height:max(420px,calc(100svh - 310px)); }

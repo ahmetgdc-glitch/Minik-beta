@@ -67,7 +67,7 @@ export default function ExploreGame({ items, world, progress, difficulty, lang, 
       setSpeakingId(null);
       speak(help, lang, settings);
     }}
-    footer={<div className="discovery-progress" role="status" aria-label={`${found.length} / ${targetCount}`}>
+    footer={<div className={`discovery-progress ${found.length >= targetCount ? "all-found" : ""}`} role="status" aria-label={`${found.length} / ${targetCount}`}>
       {Array.from({length: targetCount}, (_, i) => <i key={i} className={i < found.length ? "done" : ""}/>) }
     </div>} />;
 }
