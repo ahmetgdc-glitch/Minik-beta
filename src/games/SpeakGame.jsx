@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Mic, MicOff, Volume2, Check } from "lucide-react";
-import Visual from "../components/Visual.jsx";
+import Visual, { MinoAvatar } from "../components/Visual.jsx";
 import { speak, stopSpeech } from "../audio/voice.js";
 import { sample } from "../utils/random.js";
 import { useLesson } from "./shared.jsx";
 import { recognitionIssue, speechMatches, speechRecognitionCtor } from "./pronunciation.js";
 
-export default function SpeakGame({ items, lang, settings, paused, hint, interactionBlocked = () => false, onReady, onWrong, onSolve }) {
+export default function SpeakGame({ items, lang, settings, paused, hint, progress, interactionBlocked = () => false, onReady, onWrong, onSolve }) {
   const [target] = useState(() => sample(items.filter((i) => i.labels?.[lang]), 1)[0]);
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState("");
@@ -123,6 +123,9 @@ export default function SpeakGame({ items, lang, settings, paused, hint, interac
       </div>
       {available ? (
         <>
+          <div className="speak-mino-guide" aria-hidden="true">
+            <MinoAvatar outfit={progress?.minoOutfit || "classic"} />
+          </div>
           <button className={`mic-button ${listening ? "listening" : ""}`} onClick={startListening} disabled={listening || paused || blocked}>
             {listening ? <MicOff size={38} /> : <Mic size={38} />}
             <span>{listening ? (lang === "tr" ? "Dinliyorum…" : "Ich höre…") : (lang === "tr" ? "Söyle" : "Nachsprechen")}</span>

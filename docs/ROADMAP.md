@@ -31,6 +31,7 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
 - [x] Sichtbare Wortwiedergabe und reagierende Umgebung auch in der freien Weltansicht
 - [ ] Eigenständige Szenen und Entdeckungsmomente für weitere Themenwelten
   - [x] Entdecker-Kulissen reagieren bei 1, 3 und 6 Funden sichtbar auf den Lernfortschritt, ohne zusätzliche Touch-Ziele zu erzeugen
+  - [x] Entdecker-Szene feiert mit einem leisen Fundpunkt-Puls, wenn das letzte Bild gefunden ist (`prefers-reduced-motion` schaltet ihn ab)
 - [x] Sortieren und Zuordnen mit robustem Drag & Drop und Tippalternative
 - [ ] Weitere Spiele mit großen Objekten, räumlicher Wirkung und präsenterem Mino
   - [x] Mino als sichtbarer Musiker auf der Rhythmusbühne, inklusive ruhiger Reduced-Motion-Variante
@@ -46,6 +47,7 @@ Stand **1.75.0 Beta 78 · 2026-09-18**. Beta 66 bleibt das technische Fundament.
   - [x] Nachfahr-Spiel mit Mino als Ziel-Coach (Ziffer/Buchstabe) direkt neben dem Schreibbrett
   - [x] Malen mit sichtbarem Mino-Begleiter in der Vorlagenleiste
   - [x] Puzzle verzichtet bewusst auf eine eigene Figur, weil der Zeiger dort Mino ist
+  - [x] „Sprich mit Mino“ mit Mino als schwebendem Begleiter an der Mikrofonfläche
 - [x] Feste natürliche DE/TR-Stimme für die 332 vorhandenen Sprachbausteine lokal bereitstellen
 - [ ] Feste natürliche MINIK-Stimme, kontrollierten Voice-4-Notfallpfad und reale iPhone-/iPad-Interaktion akustisch auf Geräten prüfen
 

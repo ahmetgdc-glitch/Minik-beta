@@ -197,5 +197,8 @@ Stand: **18. September 2026 · 1.75.0 Beta 78**. Der langfristige Nutzerauftrag 
 - Nachfahren zeigt Mino als Ziel-Coach mit großer Zielblase (aufgegebene Ziffer bzw. Buchstabe) neben dem Schreibbrett; schwebende Reduced-Motion-freie Animation, auf Phones über dem Brett. (`92a15c2`)
 - Malen zeigt Mino als Begleiter am Anfang der Vorlagenleiste; `Learn`/`Track`-Fläche bleibt frei, keine neuen Touch-/ARIA-Flächen. (`13f7e7c`)
 - Damit besitzt jedes Spiel außer Puzzle (dort ist der Zeiger bewusst Mino) einen sichtbaren Mino mit gewähltem Outfit. 716/716 Tests, Preflight, Build und Offline-Verifikation grün; Commits `92a15c2`, `13f7e7c` auf `main` gepusht.
+- Die Entdecker-Szene feiert jetzt mit einem leisen, wiederholten Puls der Fundpunkte, wenn das letzte Bild gefunden ist; `prefers-reduced-motion` schaltet ihn ab. (`8e568ae`)
+- Neue Mobil-Layout-Verträge sichern Mino/Punktgrößen und die Türkisch-zuerst-Kopfzeilen von Sortieren, Nachfahren und Entdecken auf schmalen Phones ab. (`8e568ae`)
+- „Sprich mit Mino“ zeigt Mino als schwebenden Begleiter an der Mikrofonfläche; schmale Phones behalten große Touchziele, Reduced-Motion bleibt ruhig. 720/720 Tests, Preflight, Build und Offline-Verifikation grün.
 
 Als Nächstes Sprachführung und thematisch passende Szenen weiter verbessern. Die visuelle Gesamtwirkung bleibt Priorität; technische Schutzmechanismen aus Beta 66 und der feste natürliche Erzähler dürfen nicht verloren gehen. Die feste DE/TR-MINIK-Stimme bleibt primär, Voice 4 ist nur der kontrollierte Notfallpfad. Weitere Welten sollen eigene Orte werden, statt nur ein anderes Symbol über demselben Hintergrund zu zeigen.
